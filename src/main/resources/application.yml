@@ -23,3 +23,23 @@ spring:
       hibernate:
         show_sql: false
         format_sql: false
+
+springdoc:
+  api-docs:
+    groups:
+      enabled: false
+  swagger-ui:
+    enabled: true
+    groups-order: ASC
+    tags-sorter: alpha
+    operations-sorter: alpha
+    display-request-duration: true
+    doc-expansion: none
+  cache:
+    disabled: true
+  model-and-view-allowed: true
+
+api:
+  the-bible:
+    url: http://localhost:8080
+    api-key: TEST_API_KEY

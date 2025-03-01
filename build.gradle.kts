@@ -19,6 +19,7 @@ repositories {
     mavenCentral()
 }
 
+val springDocVersion = "2.8.5"
 val kotlinLogging = "3.0.5"
 
 dependencies {
@@ -32,6 +33,9 @@ dependencies {
     //
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+    // SpringDoc
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:${springDocVersion}")
 
     // DB
     runtimeOnly("com.h2database:h2")

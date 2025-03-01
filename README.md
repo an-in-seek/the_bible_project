@@ -8,7 +8,7 @@ Spring Boot 기반으로 설계되었으며, DDD 원칙을 적용하여 모듈�
 ## 📌 기술 스택
 
 - **Backend**: Spring Boot 3.x, Kotlin, JPA (Hibernate)
-- **Database**: H2 (개발), MySQL or PostgreSQL (운영)
+- **Database**: H2
 - **Build**: Gradle
 - **Caching**: Redis (선택사항)
 - **API 문서화**: SpringDoc OpenAPI (Swagger)
