@@ -31,97 +31,36 @@ BibleChapter (1) ───> (N) BibleVerse
 
 ## 📌 API 엔드포인트
 
-### 1️⃣ **책과 해당 장 목록 조회**
+### ✅ 번역본 리스트 조회
 
-- **URL**: `GET /bibles/{translation}/books/{book}`
-- **설명**: 특정 번역본에서 책을 가져오고, 해당 책의 모든 장을 조회합니다.
-
-📌 **Request Example**
-
-```http
-GET /bibles/KJV/books/Genesis
+```
+GET /bibles/translations
 ```
 
-📌 **Response Example**
+### ✅ 특정 번역본에 해당하는 책 리스트 조회
 
-```json
-{
-  "bookId": 1,
-  "bookName": "Genesis",
-  "abbreviation": "Gen",
-  "testament": "OLD",
-  "chapters": [
-    {
-      "chapterId": 1,
-      "chapterNumber": 1
-    },
-    {
-      "chapterId": 2,
-      "chapterNumber": 2
-    }
-  ]
-}
+```
+GET /bibles/translations/{translationId}/books
 ```
 
----
+### ✅ 특정 책에 해당하는 장 리스트 조회
 
-### 2️⃣ **특정 장과 해당 절 목록 조회**
-
-- **URL**: `GET /bibles/books/{bookId}/chapters/{chapterNumber}`
-- **설명**: 특정 책에서 특정 장과 해당 절 목록을 조회합니다.
-
-📌 **Request Example**
-
-```http
-GET /bibles/books/1/chapters/1
+```
+GET /bibles/translations/{translationId}/books/{bookId}/chapters
 ```
 
-📌 **Response Example**
+### ✅ 특정 장에 해당하는 절 리스트 조회
 
-```json
-{
-  "chapterId": 1,
-  "chapterNumber": 1,
-  "verses": [
-    {
-      "verseId": 1,
-      "verseNumber": 1,
-      "text": "태초에 하나님이 천지를 창조하시니라."
-    }
-  ]
-}
+```
+GET /bibles/translations/{translationId}/books/{bookId}/chapters/{chapterId}/verses
 ```
 
----
+### ✅ 성경 구절 검색 (키워드 포함)
 
-### 3️⃣ **특정 성경 구절 조회**
-
-- **URL**: `GET /bibles/{translation}/books/{book}/chapters/{chapter}/verses/{verse}`
-- **설명**: 특정 번역본에서 특정 구절을 조회합니다.
-
-📌 **Request Example**
-
-```http
-GET /bibles/KJV/books/Genesis/chapters/1/verses/1
+```
+GET /bibles/search?keyword=
 ```
 
-📌 **Response Example**
-
-```json
-{
-  "translation": "KJV",
-  "bookName": "Genesis",
-  "chapterNumber": 1,
-  "verseNumber": 1,
-  "text": "In the beginning God created the heaven and the earth."
-}
-```
-
----
-
-### 4️⃣ **성경 구절 검색**
-
-- **URL**: `GET /bibles/search?keyword=`
 - **설명**: 입력한 키워드가 포함된 성경 구절을 검색합니다.
 
 📌 **Request Example**

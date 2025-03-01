@@ -2,10 +2,8 @@ package com.seek.thebible.presentation.bible
 
 import com.seek.thebible.application.bible.BibleFacade
 import com.seek.thebible.domain.bible.model.BibleTranslationType
-import com.seek.thebible.presentation.bible.dto.BibleVerseResponse
-import com.seek.thebible.presentation.bible.dto.BookWithChaptersResponse
-import com.seek.thebible.presentation.bible.dto.ChapterWithVersesResponse
-import com.seek.thebible.presentation.bible.dto.SearchVerseResponse
+import com.seek.thebible.presentation.bible.dto.*
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -15,54 +13,56 @@ class BibleController(
 ) {
 
     /**
-     * 📌 특정 번역본에서 책과 해당 장 목록 조회
-     * GET /bibles/{translation}/books/{book}
+     * 📌 번역본(Translation) 리스트 조회
      */
-    @GetMapping("/{translation}/books/{book}")
-    fun getBookWithChapters(
-        @PathVariable translation: BibleTranslationType,
-        @PathVariable book: String
-    ): BookWithChaptersResponse {
-        return BookWithChaptersResponse.from(
-            bibleFacade.getBookWithChapters(translation, book)
-        )
+    @GetMapping("/translations")
+    fun getTranslations(): ResponseEntity<List<TranslationResponse>> {
+        val response = bibleFacade.getTranslations().map(TranslationResponse::from)
+        return ResponseEntity.ok().body(response)
+    }
+    
+    /**
+     * 📌 특정 번역본(Translation)에 해당하는 책(Book) 리스트 조회
+     */
+    @GetMapping("/translations/{translationId}/books")
+    fun getBooks(
+        @PathVariable translationId: BibleTranslationType
+    ): ResponseEntity<List<BookResponse>> {
+        val response = bibleFacade.getBooks(translationId).map(BookResponse::from)
+        return ResponseEntity.ok().body(response)
     }
 
     /**
-     * 📌 특정 책의 특정 장과 해당 절 목록 조회
-     * GET /bibles/books/{bookId}/chapters/{chapterNumber}
+     * 📌 특정 책(Book)에 해당하는 장(Chapter) 리스트 조회
      */
-    @GetMapping("/books/{bookId}/chapters/{chapterNumber}")
-    fun getChapterWithVerses(
+    @GetMapping("/translations/{translationId}/books/{bookId}/chapters")
+    fun getChapters(
+        @PathVariable translationId: BibleTranslationType,
+        @PathVariable bookId: Long
+    ): ResponseEntity<List<ChapterResponse>> {
+        val response = bibleFacade.getChapters(translationId, bookId).map(ChapterResponse::from)
+        return ResponseEntity.ok().body(response)
+    }
+
+    /**
+     * 📌 특정 장(Chapter)에 해당하는 절(Verse) 리스트 조회
+     */
+    @GetMapping("/translations/{translationId}/books/{bookId}/chapters/{chapterId}/verses")
+    fun getVerses(
+        @PathVariable translationId: BibleTranslationType,
         @PathVariable bookId: Long,
-        @PathVariable chapterNumber: Int
-    ): ChapterWithVersesResponse {
-        return ChapterWithVersesResponse.from(
-            bibleFacade.getChapterWithVerses(bookId, chapterNumber)
-        )
-    }
-
-    /**
-     * 📌 특정 번역본에서 특정 구절 조회
-     * GET /bibles/{translation}/books/{book}/chapters/{chapter}/verses/{verse}
-     */
-    @GetMapping("/{translation}/books/{book}/chapters/{chapter}/verses/{verse}")
-    fun getBibleVerse(
-        @PathVariable translation: BibleTranslationType,
-        @PathVariable book: String,
-        @PathVariable chapter: Int,
-        @PathVariable verse: Int
-    ): BibleVerseResponse {
-        val text = bibleFacade.getBibleVerse(translation, book, chapter, verse)
-        return BibleVerseResponse(translation.name, book, chapter, verse, text)
+        @PathVariable chapterId: Long
+    ): ResponseEntity<List<VerseResponse>> {
+        val response = bibleFacade.getVerses(translationId, bookId, chapterId).map(VerseResponse::from)
+        return ResponseEntity.ok().body(response)
     }
 
     /**
      * 📌 성경 구절 검색 (키워드 포함)
-     * GET /bibles/search?keyword=
      */
     @GetMapping("/search")
-    fun searchBibleVerses(@RequestParam keyword: String): List<SearchVerseResponse> {
-        return bibleFacade.searchBibleVerses(keyword).map { SearchVerseResponse.from(it) }
+    fun searchBible(@RequestParam keyword: String): ResponseEntity<List<SearchVerseResponse>> {
+        val response = bibleFacade.searchBibleVerses(keyword).map(SearchVerseResponse::from)
+        return ResponseEntity.ok(response)
     }
 }

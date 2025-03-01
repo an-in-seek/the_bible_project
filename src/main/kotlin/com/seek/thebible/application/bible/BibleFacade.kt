@@ -2,50 +2,47 @@ package com.seek.thebible.application.bible
 
 import com.seek.thebible.application.bible.dto.*
 import com.seek.thebible.domain.bible.model.BibleTranslationType
-import com.seek.thebible.domain.bible.service.BibleService
+import com.seek.thebible.domain.bible.service.BibleReader
 import org.springframework.stereotype.Service
 
 @Service
 class BibleFacade(
-    private val bibleService: BibleService
+    private val bibleReader: BibleReader
 ) {
 
     /**
-     * 📌 특정 번역본에서 책을 가져오고, 해당 책의 모든 장을 함께 조회
+     * 📌 번역본 리스트 조회
      */
-    fun getBookWithChapters(translationType: BibleTranslationType, bookName: String): BookWithChaptersResult {
-        val book = bibleService.getBookByTranslationAndName(translationType, bookName)
-        val chapters = bibleService.getChaptersByBook(book.id!!)
-
-        return BookWithChaptersResult(
-            bookId = book.id!!,
-            bookName = book.name,
-            abbreviation = book.abbreviation,
-            testament = book.testament,
-            chapters = chapters.map { ChapterSummary(it.id!!, it.chapterNumber) }
-        )
+    fun getTranslations(): List<TranslationResult> {
+        return bibleReader.getTranslations()
     }
 
     /**
-     * 📌 특정 장을 가져오고, 해당 장의 모든 절을 함께 조회
+     * 📌 특정 번역본에 해당하는 책 리스트 조회
      */
-    fun getChapterWithVerses(bookId: Long, chapterNumber: Int): ChapterWithVersesResult {
-        val chapter = bibleService.getChapterByBookAndNumber(bookId, chapterNumber)
-        val verses = bibleService.getVersesByChapter(chapter.id!!)
+    fun getBooks(translationId: BibleTranslationType): List<BookResult> {
+        return bibleReader.getBooks(translationId)
+    }
 
-        return ChapterWithVersesResult(
-            chapterId = chapter.id!!,
-            chapterNumber = chapter.chapterNumber,
-            verses = verses.map { VerseSummary(it.id!!, it.verseNumber, it.text) }
-        )
+    /**
+     * 📌 특정 책에 해당하는 장 리스트 조회
+     */
+    fun getChapters(translationId: BibleTranslationType, bookId: Long): List<ChapterResult> {
+        return bibleReader.getChapters(translationId, bookId)
+    }
+
+    /**
+     * 📌 특정 장에 해당하는 절 리스트 조회
+     */
+    fun getVerses(translationId: BibleTranslationType, bookId: Long, chapterId: Long): List<VerseResult> {
+        return bibleReader.getVerses(translationId, bookId, chapterId)
     }
 
     /**
      * 📌 성경 구절 검색 (키워드 포함) - 다중 번역본에서 검색
      */
     fun searchBibleVerses(keyword: String): List<SearchVerseResult> {
-        val verses = bibleService.searchBibleVerses(keyword)
-
+        val verses = bibleReader.searchBibleVerses(keyword)
         return verses.map { verse ->
             SearchVerseResult(
                 verseId = verse.id!!,
@@ -55,12 +52,5 @@ class BibleFacade(
                 text = verse.text
             )
         }
-    }
-
-    /**
-     * 📌 특정 성경 구절 조회
-     */
-    fun getBibleVerse(translationType: BibleTranslationType, bookName: String, chapterNumber: Int, verseNumber: Int): String {
-        return bibleService.getBibleVerse(translationType, bookName, chapterNumber, verseNumber)
     }
 }

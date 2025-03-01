@@ -1,38 +1,68 @@
 package com.seek.thebible.presentation.bible.dto
 
 import com.seek.thebible.application.bible.dto.*
+import com.seek.thebible.domain.bible.model.BibleTestament
+import com.seek.thebible.domain.bible.model.BibleTranslationType
 
-data class BookWithChaptersResponse(
-    val bookId: Long,
-    val bookName: String,
-    val abbreviation: String,
-    val testament: String,
-    val chapters: List<ChapterSummary>
+data class TranslationResponse(
+    val translationId: Long,
+    val translationType: BibleTranslationType,
+    val displayName: String
 ) {
     companion object {
-        fun from(result: BookWithChaptersResult): BookWithChaptersResponse {
-            return BookWithChaptersResponse(
-                bookId = result.bookId,
-                bookName = result.bookName,
-                abbreviation = result.abbreviation,
-                testament = result.testament.name,
-                chapters = result.chapters
+        fun from(result: TranslationResult): TranslationResponse {
+            return TranslationResponse(
+                translationId = result.translationId,
+                translationType = result.translationType,
+                displayName = result.displayName
             )
         }
     }
 }
 
-data class ChapterWithVersesResponse(
-    val chapterId: Long,
-    val chapterNumber: Int,
-    val verses: List<VerseSummary>
+data class BookResponse(
+    val bookId: Long,
+    val bookName: String,
+    val abbreviation: String,
+    val testament: BibleTestament
 ) {
     companion object {
-        fun from(result: ChapterWithVersesResult): ChapterWithVersesResponse {
-            return ChapterWithVersesResponse(
+        fun from(result: BookResult): BookResponse {
+            return BookResponse(
+                bookId = result.bookId,
+                bookName = result.bookName,
+                abbreviation = result.abbreviation,
+                testament = result.testament
+            )
+        }
+    }
+}
+
+data class ChapterResponse(
+    val chapterId: Long,
+    val chapterNumber: Int
+) {
+    companion object {
+        fun from(result: ChapterResult): ChapterResponse {
+            return ChapterResponse(
                 chapterId = result.chapterId,
-                chapterNumber = result.chapterNumber,
-                verses = result.verses
+                chapterNumber = result.chapterNumber
+            )
+        }
+    }
+}
+
+data class VerseResponse(
+    val verseId: Long,
+    val verseNumber: Int,
+    val text: String
+) {
+    companion object {
+        fun from(result: VerseResult): VerseResponse {
+            return VerseResponse(
+                verseId = result.verseId,
+                verseNumber = result.verseNumber,
+                text = result.text
             )
         }
     }
@@ -57,12 +87,3 @@ data class SearchVerseResponse(
         }
     }
 }
-
-data class BibleVerseResponse(
-    val translation: String,
-    val bookName: String,
-    val chapterNumber: Int,
-    val verseNumber: Int,
-    val text: String
-)
-

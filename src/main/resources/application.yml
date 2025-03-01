@@ -16,13 +16,18 @@ spring:
     username: sa
     password:
   jpa:
-    hibernate:
-      ddl-auto: create
+    database-platform: org.hibernate.dialect.H2Dialect
     open-in-view: false
+    hibernate:
+      ddl-auto: create  # ✅ JPA가 테이블을 먼저 생성
     properties:
       hibernate:
         show_sql: false
         format_sql: false
+    defer-datasource-initialization: true  # ✅ JPA 실행 후 data.sql 실행
+  sql:
+    init:
+      mode: always # ✅ 항상 SQL 스크립트 실행
 
 springdoc:
   api-docs:

@@ -8,8 +8,6 @@ import org.springframework.stereotype.Repository
 @Repository
 interface BibleVerseRepository : JpaRepository<BibleVerse, Long> {
 
-    fun findByChapterAndVerseNumber(chapter: BibleChapter, verseNumber: Int): BibleVerse?
-
     fun findByChapter(chapter: BibleChapter): List<BibleVerse>
 
     fun findByTextContaining(keyword: String): List<BibleVerse>

@@ -8,7 +8,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface BibleChapterRepository : JpaRepository<BibleChapter, Long> {
 
-    fun findByBookAndChapterNumber(book: BibleBook, chapterNumber: Int): BibleChapter?
-
     fun findByBook(book: BibleBook): List<BibleChapter>
 }

@@ -1,27 +1,27 @@
 package com.seek.thebible.application.bible.dto
 
 import com.seek.thebible.domain.bible.model.BibleTestament
+import com.seek.thebible.domain.bible.model.BibleTranslationType
 
-data class BookWithChaptersResult(
+data class TranslationResult(
+    val translationId: Long,
+    val translationType: BibleTranslationType,
+    val displayName: String
+)
+
+data class BookResult(
     val bookId: Long,
     val bookName: String,
     val abbreviation: String,
-    val testament: BibleTestament,
-    val chapters: List<ChapterSummary>
+    val testament: BibleTestament
 )
 
-data class ChapterSummary(
+data class ChapterResult(
     val chapterId: Long,
     val chapterNumber: Int
 )
 
-data class ChapterWithVersesResult(
-    val chapterId: Long,
-    val chapterNumber: Int,
-    val verses: List<VerseSummary>
-)
-
-data class VerseSummary(
+data class VerseResult(
     val verseId: Long,
     val verseNumber: Int,
     val text: String

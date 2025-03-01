@@ -8,6 +8,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface BibleTranslationRepository : JpaRepository<BibleTranslation, Long> {
 
-    fun findByAbbreviation(abbreviation: String): BibleTranslation?
     fun findByType(type: BibleTranslationType): BibleTranslation?
 }
