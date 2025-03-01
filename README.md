@@ -193,6 +193,3 @@ CREATE TABLE bible_book
 # 프로젝트 빌드 및 실행
 ./gradlew bootRun
 ```
-
-**✅ 이제 API를 사용하여 성경 데이터를 조회하고 검색할 수 있습니다! 🚀**
-
