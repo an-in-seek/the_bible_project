@@ -1,6 +1,6 @@
 package com.seek.thebible.application.bible.dto
 
-import com.seek.thebible.domain.bible.model.BibleTestament
+import com.seek.thebible.domain.bible.model.BibleTestamentType
 import com.seek.thebible.domain.bible.model.BibleTranslationType
 
 data class TranslationResult(
@@ -13,7 +13,7 @@ data class BookResult(
     val bookId: Long,
     val bookName: String,
     val abbreviation: String,
-    val testament: BibleTestament
+    val testamentType: BibleTestamentType
 )
 
 data class ChapterResult(

@@ -3,7 +3,7 @@ INSERT INTO bible_translation (id, type, name)
 VALUES (1, 'KRV', '개역한글');
 
 -- 📌 창세기(Book) 데이터 삽입
-INSERT INTO bible_book (id, translation_id, name, abbreviation, testament, book_order)
+INSERT INTO bible_book (id, translation_id, name, abbreviation, testament_type, book_order)
 VALUES (1, 1, '창세기', '창', 'OLD', 1);
 
 -- 📌 창세기 1장(Chapter) 삽입

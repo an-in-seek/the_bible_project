@@ -41,7 +41,7 @@ class BibleReader(
             ?: throw BibleServiceException(ErrorType.BIBLE_NOT_FOUND, "translationType=$translationType")
 
         return bibleBookRepository.findByTranslation(translation).map {
-            BookResult(it.id!!, it.name, it.abbreviation, it.testament)
+            BookResult(it.id!!, it.name, it.abbreviation, it.testamentType)
         }
     }
 

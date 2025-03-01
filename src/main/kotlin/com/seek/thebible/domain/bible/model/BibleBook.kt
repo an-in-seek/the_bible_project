@@ -25,7 +25,7 @@ class BibleBook(
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    val testament: BibleTestament, // 구약/신약 구분 (예: OLD, NEW)
+    val testamentType: BibleTestamentType, // 구약/신약 구분 (예: OLD, NEW)
 
     @Column(nullable = false)
     val bookOrder: Int // 성경 내 순서 (예: 창세기 = 1, 마태복음 = 40)

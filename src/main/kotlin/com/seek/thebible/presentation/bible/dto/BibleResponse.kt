@@ -1,7 +1,7 @@
 package com.seek.thebible.presentation.bible.dto
 
 import com.seek.thebible.application.bible.dto.*
-import com.seek.thebible.domain.bible.model.BibleTestament
+import com.seek.thebible.domain.bible.model.BibleTestamentType
 import com.seek.thebible.domain.bible.model.BibleTranslationType
 
 data class TranslationResponse(
@@ -24,7 +24,7 @@ data class BookResponse(
     val bookId: Long,
     val bookName: String,
     val abbreviation: String,
-    val testament: BibleTestament
+    val testamentType: BibleTestamentType
 ) {
     companion object {
         fun from(result: BookResult): BookResponse {
@@ -32,7 +32,7 @@ data class BookResponse(
                 bookId = result.bookId,
                 bookName = result.bookName,
                 abbreviation = result.abbreviation,
-                testament = result.testament
+                testamentType = result.testamentType
             )
         }
     }
