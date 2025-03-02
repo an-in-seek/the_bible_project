@@ -92,6 +92,40 @@ GET /bibles/search?keyword=Jesus
 
 ---
 
+## ✅ **Thymeleaf 기반 성경 탐색 웹 UI 추가**
+
+이번 변경으로 **웹 인터페이스를 통해 성경 데이터를 탐색**할 수 있는 기능이 추가되었습니다. 🎉
+
+### 📌 추가된 웹 UI 기능
+
+- **번역본 목록**  
+  → `/web/bibles/translations`  
+  → 성경 번역본 리스트 조회
+
+- **책 목록**  
+  → `/web/bibles/translations/{translationId}/books`  
+  → 선택한 번역본의 책 목록 조회
+
+- **장 목록**  
+  → `/web/bibles/translations/{translationId}/books/{bookId}/chapters`  
+  → 선택한 책의 장 목록 조회
+
+- **절 목록**  
+  → `/web/bibles/translations/{translationId}/books/{bookId}/chapters/{chapterId}/verses`  
+  → 선택한 장의 절 목록 조회
+
+- **성경 구절 검색**  
+  → `/web/bibles/search`  
+  → 키워드가 포함된 성경 구절 검색
+
+### 📌 적용 기술
+
+- **Thymeleaf**: 서버 사이드 렌더링을 위한 템플릿 엔진
+- **Bootstrap**: UI 스타일링 적용
+- **jQuery**: 동적인 UI 기능 처리
+
+---
+
 ## 📌 데이터베이스 (H2 개발 환경)
 
 ### **H2 설정 (`application.yml`)**
