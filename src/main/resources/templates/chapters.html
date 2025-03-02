@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>장 목록</title>
+  <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <!-- 뒤로 가기 버튼 (상단 왼쪽) -->
+  <a class="btn btn-secondary mt-3 mb-3"
+     th:href="@{/web/bibles/translations/{translationId}/books(translationId=${translationId})}">
+    책 선택하기
+  </a>
+
+  <h1 class="mt-2">장 목록</h1>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>장</th>
+      <th>절 목록</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="chapter : ${chapters}">
+      <td th:text="${chapter.chapterId}"></td>
+      <td th:text="${chapter.chapterNumber}"></td>
+      <td>
+        <a class="btn btn-primary btn-sm"
+           th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters/{chapterId}/verses(
+                    translationId=${translationId}, bookId=${bookId}, chapterId=${chapter.chapterId})}">보기</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

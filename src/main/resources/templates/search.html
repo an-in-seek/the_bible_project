@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>성경 구절 검색</title>
+  <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <h1 class="mt-4">성경 구절 검색</h1>
+  <form action="/web/bibles/search" class="mb-3" method="get">
+    <input class="form-control" name="keyword" placeholder="검색어 입력" type="text">
+    <button class="btn btn-primary mt-2" type="submit">검색</button>
+  </form>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>책</th>
+      <th>장</th>
+      <th>절</th>
+      <th>내용</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="verse : ${verses}">
+      <td th:text="${verse.bookName}"></td>
+      <td th:text="${verse.chapterNumber}"></td>
+      <td th:text="${verse.verseNumber}"></td>
+      <td th:text="${verse.text}"></td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

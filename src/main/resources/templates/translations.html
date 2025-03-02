@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>성경 번역본 목록</title>
+  <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+  <h1 class="mt-4">성경 번역본</h1>
+  <table class="table table-striped">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>번역 타입</th>
+      <th>이름</th>
+      <th>책 목록</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="translation : ${translations}">
+      <td th:text="${translation.translationId}"></td>
+      <td th:text="${translation.translationType}"></td>
+      <td th:text="${translation.displayName}"></td>
+      <td>
+        <a class="btn btn-primary btn-sm"
+           th:href="@{/web/bibles/translations/{id}/books(id=${translation.translationId})}">보기</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+<script src="/webjars/jquery/jquery.min.js"></script>
+<script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
