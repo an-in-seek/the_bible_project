@@ -1,6 +1,28 @@
--- 📌 개역한글(KRV) 번역본 삽입
+-- 📌 성경 번역본(Translation) 데이터 삽입
 INSERT INTO bible_translation (id, translation_type, name)
-VALUES (1, 'KRV', '개역한글');
+VALUES (1, 'KRV', '개역한글'),
+       (2, 'KNB', '개역개정'),
+       (3, 'NIV', 'New International Version'),
+       (4, 'ESV', 'English Standard Version'),
+       (5, 'KJV', 'King James Version'),
+       (6, 'NASB', 'New American Standard Bible'),
+       (7, 'NLT', 'New Living Translation'),
+       (8, 'CSB', 'Christian Standard Bible'),
+       (9, 'GNT', 'Good News Translation'),
+       (10, 'CEV', 'Contemporary English Version'),
+       (11, 'MSG', 'The Message'),
+       (12, 'NRSV', 'New Revised Standard Version'),
+       (13, 'AMP', 'Amplified Bible'),
+       (14, 'HCSB', 'Holman Christian Standard Bible'),
+       (15, 'WEB', 'World English Bible'),
+       (16, 'ASV', 'American Standard Version'),
+       (17, 'DBY', 'Darby Bible'),
+       (18, 'BBE', 'Bible in Basic English'),
+       (19, 'YLT', 'Youngs Literal Translation'),
+       (20, 'LBLA', 'La Biblia de las Américas'),
+       (21, 'RVR1960', 'Reina-Valera 1960'),
+       (22, 'LUTH1545', 'Luther Bible 1545'),
+       (23, 'VUL', 'Biblia Sacra Vulgata');
 
 -- 📌 구약 성경(Book) 데이터 삽입
 INSERT INTO bible_book (id, translation_id, name, abbreviation, testament_type, book_order)
