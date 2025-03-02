@@ -1,7 +1,6 @@
 package com.seek.thebible.application.bible
 
 import com.seek.thebible.application.bible.dto.*
-import com.seek.thebible.domain.bible.model.BibleTranslationType
 import com.seek.thebible.domain.bible.service.BibleReader
 import org.springframework.stereotype.Service
 
@@ -20,21 +19,21 @@ class BibleFacade(
     /**
      * 📌 특정 번역본에 해당하는 책 리스트 조회
      */
-    fun getBooks(translationId: BibleTranslationType): List<BookResult> {
+    fun getBooks(translationId: Long): List<BookResult> {
         return bibleReader.getBooks(translationId)
     }
 
     /**
      * 📌 특정 책에 해당하는 장 리스트 조회
      */
-    fun getChapters(translationId: BibleTranslationType, bookId: Long): List<ChapterResult> {
+    fun getChapters(translationId: Long, bookId: Long): List<ChapterResult> {
         return bibleReader.getChapters(translationId, bookId)
     }
 
     /**
      * 📌 특정 장에 해당하는 절 리스트 조회
      */
-    fun getVerses(translationId: BibleTranslationType, bookId: Long, chapterId: Long): List<VerseResult> {
+    fun getVerses(translationId: Long, bookId: Long, chapterId: Long): List<VerseResult> {
         return bibleReader.getVerses(translationId, bookId, chapterId)
     }
 

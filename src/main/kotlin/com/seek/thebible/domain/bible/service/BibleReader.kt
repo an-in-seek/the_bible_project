@@ -6,12 +6,12 @@ import com.seek.thebible.application.bible.dto.TranslationResult
 import com.seek.thebible.application.bible.dto.VerseResult
 import com.seek.thebible.application.exception.BibleServiceException
 import com.seek.thebible.application.exception.ErrorType
-import com.seek.thebible.domain.bible.model.BibleTranslationType
 import com.seek.thebible.domain.bible.model.BibleVerse
 import com.seek.thebible.domain.bible.repository.BibleBookRepository
 import com.seek.thebible.domain.bible.repository.BibleChapterRepository
 import com.seek.thebible.domain.bible.repository.BibleTranslationRepository
 import com.seek.thebible.domain.bible.repository.BibleVerseRepository
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -36,10 +36,9 @@ class BibleReader(
     /**
      * 📌 특정 번역본에 해당하는 책 리스트 조회
      */
-    fun getBooks(translationType: BibleTranslationType): List<BookResult> {
-        val translation = bibleTranslationRepository.findByTranslationType(translationType)
-            ?: throw BibleServiceException(ErrorType.BIBLE_NOT_FOUND, "translationType=$translationType")
-
+    fun getBooks(translationId: Long): List<BookResult> {
+        val translation = bibleTranslationRepository.findByIdOrNull(translationId)
+            ?: throw BibleServiceException(ErrorType.BIBLE_NOT_FOUND, "translationId=$translationId")
         return bibleBookRepository.findByTranslation(translation).map {
             BookResult(it.id!!, it.name, it.abbreviation, it.testamentType)
         }
@@ -48,10 +47,9 @@ class BibleReader(
     /**
      * 📌 특정 책에 해당하는 장 리스트 조회
      */
-    fun getChapters(translationType: BibleTranslationType, bookId: Long): List<ChapterResult> {
+    fun getChapters(translationId: Long, bookId: Long): List<ChapterResult> {
         val book = bibleBookRepository.findById(bookId)
             .orElseThrow { BibleServiceException(ErrorType.BIBLE_NOT_FOUND, "bookId=$bookId") }
-
         return bibleChapterRepository.findByBook(book).map {
             ChapterResult(it.id!!, it.chapterNumber)
         }
@@ -60,10 +58,9 @@ class BibleReader(
     /**
      * 📌 특정 장에 해당하는 절 리스트 조회
      */
-    fun getVerses(translationType: BibleTranslationType, bookId: Long, chapterId: Long): List<VerseResult> {
+    fun getVerses(translationId: Long, bookId: Long, chapterId: Long): List<VerseResult> {
         val chapter = bibleChapterRepository.findById(chapterId)
             .orElseThrow { BibleServiceException(ErrorType.BIBLE_NOT_FOUND, "chapterId=$chapterId") }
-
         return bibleVerseRepository.findByChapter(chapter).map {
             VerseResult(it.id!!, it.verseNumber, it.text)
         }
