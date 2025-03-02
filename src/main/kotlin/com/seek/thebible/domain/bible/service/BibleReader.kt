@@ -29,7 +29,7 @@ class BibleReader(
      */
     fun getTranslations(): List<TranslationResult> {
         return bibleTranslationRepository.findAll().map {
-            TranslationResult(it.id!!, it.type, it.type.displayName)
+            TranslationResult(it.id!!, it.translationType, it.translationType.displayName)
         }
     }
 
@@ -37,7 +37,7 @@ class BibleReader(
      * 📌 특정 번역본에 해당하는 책 리스트 조회
      */
     fun getBooks(translationType: BibleTranslationType): List<BookResult> {
-        val translation = bibleTranslationRepository.findByType(translationType)
+        val translation = bibleTranslationRepository.findByTranslationType(translationType)
             ?: throw BibleServiceException(ErrorType.BIBLE_NOT_FOUND, "translationType=$translationType")
 
         return bibleBookRepository.findByTranslation(translation).map {
