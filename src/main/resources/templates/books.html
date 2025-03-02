@@ -16,7 +16,6 @@
   <table class="table table-striped table-hover">
     <thead>
     <tr>
-      <th>ID</th>
       <th>책 이름</th>
       <th>약어</th>
       <th>구약/신약</th>
@@ -27,7 +26,6 @@
         th:data-book-id="${book.bookId}"
         th:data-translation-id="${translationId}"
         th:each="book : ${books}">
-      <td th:text="${book.bookId}"></td>
       <td th:text="${book.bookName}"></td>
       <td th:text="${book.abbreviation}"></td>
       <td th:text="${book.testamentType}"></td>

@@ -19,7 +19,6 @@
   <table class="table table-striped table-hover">
     <thead>
     <tr>
-      <th>ID</th>
       <th>장</th>
     </tr>
     </thead>
@@ -29,7 +28,6 @@
         th:data-chapter-id="${chapter.chapterId}"
         th:data-translation-id="${translationId}"
         th:each="chapter : ${chapters}">
-      <td th:text="${chapter.chapterId}"></td>
       <td th:text="${chapter.chapterNumber}"></td>
     </tr>
     </tbody>

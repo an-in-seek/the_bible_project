@@ -15,7 +15,6 @@
   <table class="table table-striped table-hover">
     <thead>
     <tr>
-      <th>ID</th>
       <th>번역 타입</th>
       <th>이름</th>
     </tr>
@@ -24,7 +23,6 @@
     <tr class="clickable-row"
         th:data-translation-id="${translation.translationId}"
         th:each="translation : ${translations}">
-      <td th:text="${translation.translationId}"></td>
       <td th:text="${translation.translationType}"></td>
       <td th:text="${translation.displayName}"></td>
     </tr>
