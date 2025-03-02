@@ -27,8 +27,13 @@ dependencies {
     implementation("io.github.microutils:kotlin-logging:${kotlinLogging}")
 
     // Spring Boot Framework
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+
+    // Web UI/UX
+    implementation("org.webjars:bootstrap:5.3.0")
+    implementation("org.webjars:jquery:3.6.0")
 
     //
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
