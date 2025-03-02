@@ -6,12 +6,10 @@
 </head>
 <body>
 <div class="container">
-  <!-- 뒤로 가기 버튼 (상단 왼쪽) -->
   <a class="btn btn-secondary mt-3 mb-3"
      th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters(translationId=${translationId}, bookId=${bookId})}">
     장 선택하기
   </a>
-
   <h1 class="mt-2">절 목록</h1>
   <table class="table table-striped">
     <thead>
