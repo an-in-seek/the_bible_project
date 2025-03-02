@@ -128,7 +128,7 @@ spring:
 | translation_id | BIGINT (FK)  | 번역본 ID (bible_translation 연결) |
 | name           | VARCHAR(255) | 책 이름 (예: 창세기, 마태복음)           |
 | abbreviation   | VARCHAR(50)  | 책 약어 (예: 창, 마)                |
-| testament      | VARCHAR(10)  | 구약/신약 구분 (OLD, NEW)           |
+| testament_type | VARCHAR(10)  | 구약/신약 구분 (OLD, NEW)           |
 | book_order     | INT          | 성경 내 정렬 순서                    |
 
 ### **bible_chapter (성경 장 테이블)**
