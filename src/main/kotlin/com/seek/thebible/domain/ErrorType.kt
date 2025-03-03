@@ -1,4 +1,4 @@
-package com.seek.thebible.application.exception
+package com.seek.thebible.domain
 
 import org.springframework.boot.logging.LogLevel
 import org.springframework.http.HttpStatus

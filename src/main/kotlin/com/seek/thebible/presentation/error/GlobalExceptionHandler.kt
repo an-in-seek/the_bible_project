@@ -1,6 +1,6 @@
 package com.seek.thebible.presentation.error
 
-import com.seek.thebible.application.exception.BibleServiceException
+import com.seek.thebible.domain.BibleServiceException
 import mu.KotlinLogging
 import org.springframework.boot.logging.LogLevel
 import org.springframework.http.ResponseEntity
