@@ -1,0 +1,37 @@
+/* 클릭 가능한 테이블 행 스타일 */
+.clickable-row:hover {
+  cursor: pointer;
+}
+
+/* 하단 버튼 고정 스타일 */
+.fixed-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background-color: #fff;
+  padding: 10px 0;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+}
+
+/* 하단 네비게이션 내부 컨테이너 */
+.nav-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+/* 네비게이션 버튼 스타일 */
+.nav-container a {
+  flex: 1;
+  text-align: center;
+  margin: 0 5px;
+}
+
+/* 리스트가 네비게이션 영역과 겹치지 않도록 여백 추가 */
+.content-wrapper {
+  padding-bottom: 80px; /* 네비게이션 높이만큼 추가 여백 확보 */
+}

@@ -3,40 +3,10 @@
 <head>
   <title>책 목록</title>
   <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .clickable-row:hover {
-      cursor: pointer;
-    }
-
-    /* 하단 버튼 고정 스타일 */
-    .fixed-bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      background-color: #fff;
-      padding: 10px 0;
-      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-      z-index: 1000;
-    }
-
-    .nav-container {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      max-width: 900px;
-      margin: 0 auto;
-    }
-
-    .nav-container a {
-      flex: 1;
-      text-align: center;
-      margin: 0 5px;
-    }
-  </style>
+  <link href="/css/common.css" rel="stylesheet">
 </head>
 <body>
-<div class="container">
+<div class="container content-wrapper">
   <h1 class="mt-2">책 목록</h1>
   <table class="table table-striped table-hover">
     <thead>
