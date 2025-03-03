@@ -1,4 +1,4 @@
-package com.seek.thebible.domain.bible.repository
+package com.seek.thebible.infrastructure.persistence.bible
 
 import com.seek.thebible.domain.bible.model.BibleBook
 import com.seek.thebible.domain.bible.model.BibleTranslation
