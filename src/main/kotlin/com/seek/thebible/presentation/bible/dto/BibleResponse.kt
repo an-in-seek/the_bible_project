@@ -1,20 +1,20 @@
 package com.seek.thebible.presentation.bible.dto
 
-import com.seek.thebible.application.bible.dto.*
+import com.seek.thebible.domain.bible.dto.*
 import com.seek.thebible.domain.bible.model.BibleTestamentType
 import com.seek.thebible.domain.bible.model.BibleTranslationType
 
 data class TranslationResponse(
     val translationId: Long,
     val translationType: BibleTranslationType,
-    val displayName: String
+    val translationName: String
 ) {
     companion object {
         fun from(result: TranslationResult): TranslationResponse {
             return TranslationResponse(
                 translationId = result.translationId,
                 translationType = result.translationType,
-                displayName = result.displayName
+                translationName = result.translationName
             )
         }
     }
@@ -45,23 +45,21 @@ data class ChaptersResponse(
     companion object {
         fun from(result: ChaptersResult) = with(result) {
             ChaptersResponse(
-                book = book,
+                book = chapters.first().book,
                 chapters = chapters
             )
         }
     }
 }
 
-data class VersesResponse(
-    val chapter: ChapterResult,
-    val verses: List<VerseResult>,
+data class VersesViewResponse(
+    val chapter: ChapterDetailResult,
     val totalChapterCount: Int
 ) {
     companion object {
-        fun from(result: VersesResult) = with(result) {
-            VersesResponse(
+        fun from(result: VersesView) = with(result) {
+            VersesViewResponse(
                 chapter = chapter,
-                verses = verses,
                 totalChapterCount = totalChapterCount
             )
         }
@@ -70,8 +68,6 @@ data class VersesResponse(
 
 data class SearchVerseResponse(
     val verseId: Long,
-    val bookName: String,
-    val chapterNumber: Int,
     val verseNumber: Int,
     val text: String
 ) {
@@ -79,8 +75,6 @@ data class SearchVerseResponse(
         fun from(result: SearchVerseResult): SearchVerseResponse {
             return SearchVerseResponse(
                 verseId = result.verseId,
-                bookName = result.bookName,
-                chapterNumber = result.chapterNumber,
                 verseNumber = result.verseNumber,
                 text = result.text
             )
