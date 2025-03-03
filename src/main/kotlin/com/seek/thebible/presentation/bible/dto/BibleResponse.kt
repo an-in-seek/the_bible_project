@@ -38,31 +38,31 @@ data class BookResponse(
     }
 }
 
-data class ChapterResponse(
-    val chapterId: Long,
-    val chapterNumber: Int
+data class ChaptersResponse(
+    val book: BookResult,
+    val chapters: List<ChapterResult>
 ) {
     companion object {
-        fun from(result: ChapterResult): ChapterResponse {
-            return ChapterResponse(
-                chapterId = result.chapterId,
-                chapterNumber = result.chapterNumber
+        fun from(result: ChaptersResult) = with(result) {
+            ChaptersResponse(
+                book = book,
+                chapters = chapters
             )
         }
     }
 }
 
-data class VerseResponse(
-    val verseId: Long,
-    val verseNumber: Int,
-    val text: String
+data class VersesResponse(
+    val chapter: ChapterResult,
+    val verses: List<VerseResult>,
+    val totalChapterCount: Int
 ) {
     companion object {
-        fun from(result: VerseResult): VerseResponse {
-            return VerseResponse(
-                verseId = result.verseId,
-                verseNumber = result.verseNumber,
-                text = result.text
+        fun from(result: VersesResult) = with(result) {
+            VersesResponse(
+                chapter = chapter,
+                verses = verses,
+                totalChapterCount = totalChapterCount
             )
         }
     }
