@@ -46,7 +46,7 @@
     </thead>
     <tbody>
     <tr class="clickable-row"
-        th:each="chapter : ${response.chapters}"
+        th:each="chapter : ${response.book.chapters}"
         th:data-translation-id="${translationId}"
         th:data-book-id="${bookId}"
         th:data-chapter-id="${chapter.chapterId}">
