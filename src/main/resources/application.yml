@@ -23,10 +23,14 @@ spring:
       hibernate:
         show_sql: false
         format_sql: false
-    defer-datasource-initialization: true  # ✅ JPA 실행 후 data.sql 실행
+    defer-datasource-initialization: true  # ✅ JPA 실행 후 sql 실행
   sql:
     init:
       mode: always # ✅ 항상 SQL 스크립트 실행
+      data-locations:
+        - classpath:bible_translation.sql
+        - classpath:bible_book.sql
+        - classpath:bible_genesis.sql
 
 springdoc:
   api-docs:
