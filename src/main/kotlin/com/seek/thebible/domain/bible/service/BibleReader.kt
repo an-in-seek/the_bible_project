@@ -1,11 +1,11 @@
 package com.seek.thebible.domain.bible.service
 
-import com.seek.thebible.application.bible.dto.BookResult
 import com.seek.thebible.application.bible.dto.ChapterResult
 import com.seek.thebible.application.bible.dto.TranslationResult
-import com.seek.thebible.application.bible.dto.VerseResult
 import com.seek.thebible.application.exception.BibleServiceException
 import com.seek.thebible.application.exception.ErrorType
+import com.seek.thebible.domain.bible.model.BibleBook
+import com.seek.thebible.domain.bible.model.BibleChapter
 import com.seek.thebible.domain.bible.model.BibleVerse
 import com.seek.thebible.domain.bible.repository.BibleBookRepository
 import com.seek.thebible.domain.bible.repository.BibleChapterRepository
@@ -24,59 +24,50 @@ class BibleReader(
     private val bibleVerseRepository: BibleVerseRepository
 ) {
 
-    /**
-     * 📌 번역본 리스트 조회
-     */
     fun getTranslations(): List<TranslationResult> {
         return bibleTranslationRepository.findAll().map {
             TranslationResult(it.id!!, it.translationType, it.translationType.displayName)
         }
     }
 
-    /**
-     * 📌 특정 번역본에 해당하는 책 리스트 조회
-     */
-    fun getBooks(translationId: Long): List<BookResult> {
+    fun getBook(bookId: Long): BibleBook {
+        return bibleBookRepository.findByIdOrNull(bookId)
+            ?: throw BibleServiceException(ErrorType.BOOK_NOT_FOUND, "bookId=$bookId")
+    }
+
+    fun getBooks(translationId: Long): List<BibleBook> {
         val translation = bibleTranslationRepository.findByIdOrNull(translationId)
-            ?: throw BibleServiceException(ErrorType.BIBLE_NOT_FOUND, "translationId=$translationId")
-        return bibleBookRepository.findByTranslation(translation).map {
-            BookResult(it.id!!, it.name, it.abbreviation, it.testamentType)
-        }
+            ?: throw BibleServiceException(ErrorType.TRANSLATION_NOT_FOUND, "translationId=$translationId")
+        return bibleBookRepository.findByTranslation(translation)
     }
 
-    /**
-     * 📌 특정 책에 해당하는 장 리스트 조회
-     */
-    fun getChapters(translationId: Long, bookId: Long): List<ChapterResult> {
-        val book = bibleBookRepository.findById(bookId)
-            .orElseThrow { BibleServiceException(ErrorType.BIBLE_NOT_FOUND, "bookId=$bookId") }
-        return bibleChapterRepository.findByBook(book).map {
-            ChapterResult(it.id!!, it.chapterNumber)
-        }
+    fun getChapter(chapterId: Long): ChapterResult {
+        return bibleChapterRepository.findByIdOrNull(chapterId)
+            ?.let(ChapterResult::from)
+            ?: throw BibleServiceException(ErrorType.CHAPTER_NOT_FOUND, "chapterId=$chapterId")
     }
 
-    /**
-     * 📌 특정 장에 해당하는 절 리스트 조회
-     */
-    fun getVerses(translationId: Long, bookId: Long, chapterId: Long): List<VerseResult> {
-        val chapter = bibleChapterRepository.findById(chapterId)
-            .orElseThrow { BibleServiceException(ErrorType.BIBLE_NOT_FOUND, "chapterId=$chapterId") }
-        return bibleVerseRepository.findByChapter(chapter).map {
-            VerseResult(it.id!!, it.verseNumber, it.text)
-        }
+    fun getChapters(bookId: Long): List<BibleChapter> {
+        val book = bibleBookRepository.findByIdOrNull(bookId)
+            ?: throw BibleServiceException(ErrorType.BOOK_NOT_FOUND, "bookId=$bookId")
+        return bibleChapterRepository.findByBook(book)
     }
 
-    /**
-     * 📌 성경 구절 검색 (키워드 포함)
-     */
+    fun getChapterCount(bookId: Long): Int = bibleChapterRepository.countByBookId(bookId)
+
+    fun getVerses(chapterId: Long): List<BibleVerse> {
+        val chapter = bibleChapterRepository.findByIdOrNull(chapterId)
+            ?: throw BibleServiceException(ErrorType.CHAPTER_NOT_FOUND, "chapterId=$chapterId")
+        return bibleVerseRepository.findByChapter(chapter)
+    }
+
     fun searchBibleVerses(keyword: String): List<BibleVerse> {
-        if (keyword.isBlank()) {
-            throw BibleServiceException(ErrorType.INVALID_PARAMETER, "keyword is blank")
-        }
+        if (keyword.isBlank()) throw BibleServiceException(ErrorType.INVALID_PARAMETER, "keyword is blank")
         return try {
             bibleVerseRepository.findByTextContaining(keyword)
         } catch (e: Exception) {
             throw BibleServiceException(ErrorType.SEARCH_ERROR, "keyword=$keyword", e.message ?: "Unknown error")
         }
     }
+
 }

@@ -38,8 +38,8 @@ class BibleController(
     fun getChapters(
         @PathVariable translationId: Long,
         @PathVariable bookId: Long
-    ): ResponseEntity<List<ChapterResponse>> {
-        val response = bibleFacade.getChapters(translationId, bookId).map(ChapterResponse::from)
+    ): ResponseEntity<ChaptersResponse> {
+        val response = bibleFacade.getChapters(bookId).let(ChaptersResponse::from)
         return ResponseEntity.ok().body(response)
     }
 
@@ -51,8 +51,9 @@ class BibleController(
         @PathVariable translationId: Long,
         @PathVariable bookId: Long,
         @PathVariable chapterId: Long
-    ): ResponseEntity<List<VerseResponse>> {
-        val response = bibleFacade.getVerses(translationId, bookId, chapterId).map(VerseResponse::from)
+    ): ResponseEntity<VersesResponse> {
+        val result = bibleFacade.getVerses(bookId, chapterId)
+        val response = VersesResponse.from(result)
         return ResponseEntity.ok().body(response)
     }
 

@@ -38,8 +38,8 @@ class BibleWebController(
         @PathVariable bookId: Long,
         model: Model
     ): String {
-        val chapters = bibleFacade.getChapters(translationId, bookId).map(ChapterResponse::from)
-        model.addAttribute("chapters", chapters)
+        val response = bibleFacade.getChapters(bookId).let(ChaptersResponse::from)
+        model.addAttribute("response", response)
         return "chapters"
     }
 
@@ -50,8 +50,8 @@ class BibleWebController(
         @PathVariable chapterId: Long,
         model: Model
     ): String {
-        val verses = bibleFacade.getVerses(translationId, bookId, chapterId).map(VerseResponse::from)
-        model.addAttribute("verses", verses)
+        val response = bibleFacade.getVerses(bookId, chapterId).let(VersesResponse::from)
+        model.addAttribute("response", response)
         return "verses"
     }
 

@@ -12,29 +12,32 @@ class BibleFacade(
     /**
      * 📌 번역본 리스트 조회
      */
-    fun getTranslations(): List<TranslationResult> {
-        return bibleReader.getTranslations()
-    }
+    fun getTranslations(): List<TranslationResult> =
+        bibleReader.getTranslations()
 
     /**
      * 📌 특정 번역본에 해당하는 책 리스트 조회
      */
-    fun getBooks(translationId: Long): List<BookResult> {
-        return bibleReader.getBooks(translationId)
-    }
+    fun getBooks(translationId: Long): List<BookResult> =
+        bibleReader.getBooks(translationId).map(BookResult::from)
 
     /**
      * 📌 특정 책에 해당하는 장 리스트 조회
      */
-    fun getChapters(translationId: Long, bookId: Long): List<ChapterResult> {
-        return bibleReader.getChapters(translationId, bookId)
+    fun getChapters(bookId: Long): ChaptersResult {
+        val book = bibleReader.getBook(bookId)
+        val chapters = bibleReader.getChapters(bookId)
+        return ChaptersResult.from(book, chapters)
     }
 
     /**
      * 📌 특정 장에 해당하는 절 리스트 조회
      */
-    fun getVerses(translationId: Long, bookId: Long, chapterId: Long): List<VerseResult> {
-        return bibleReader.getVerses(translationId, bookId, chapterId)
+    fun getVerses(bookId: Long, chapterId: Long): VersesResult {
+        val chapter = bibleReader.getChapter(chapterId)
+        val verses = bibleReader.getVerses(chapterId)
+        val totalChapterCount = bibleReader.getChapterCount(bookId)
+        return VersesResult.from(chapter, verses, totalChapterCount)
     }
 
     /**

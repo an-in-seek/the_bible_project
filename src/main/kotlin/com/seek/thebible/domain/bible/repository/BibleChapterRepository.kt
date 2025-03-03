@@ -9,4 +9,5 @@ import org.springframework.stereotype.Repository
 interface BibleChapterRepository : JpaRepository<BibleChapter, Long> {
 
     fun findByBook(book: BibleBook): List<BibleChapter>
+    fun countByBookId(bookId: Long): Int
 }
