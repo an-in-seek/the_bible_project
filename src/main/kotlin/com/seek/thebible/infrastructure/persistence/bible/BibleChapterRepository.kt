@@ -2,11 +2,21 @@ package com.seek.thebible.infrastructure.persistence.bible
 
 import com.seek.thebible.domain.bible.model.BibleChapter
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 
 @Repository
 interface BibleChapterRepository : JpaRepository<BibleChapter, Long> {
 
-    fun findByBookId(bookId: Long): List<BibleChapter>
     fun countByBookId(bookId: Long): Int
+
+    @Query(
+        """
+            SELECT c 
+            FROM BibleChapter c
+            LEFT JOIN FETCH c.verses
+            WHERE c.id = :chapterId
+        """
+    )
+    fun findByIdWithVerses(chapterId: Long): BibleChapter?
 }
