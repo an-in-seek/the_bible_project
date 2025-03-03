@@ -15,8 +15,11 @@ class BibleChapter(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
-    val book: BibleBook, // 어떤 책에 속하는지
+    val book: BibleBook,
 
     @Column(nullable = false)
-    val chapterNumber: Int // 장 번호 (예: 1, 2, 3장)
+    val chapterNumber: Int,
+
+    @OneToMany(fetch = FetchType.EAGER, mappedBy = "chapterId")
+    val verses: MutableList<BibleVerse> = mutableListOf()
 )

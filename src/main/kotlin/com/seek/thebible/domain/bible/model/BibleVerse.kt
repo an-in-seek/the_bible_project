@@ -13,9 +13,8 @@ class BibleVerse(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chapter_id", nullable = false)
-    val chapter: BibleChapter, // 어떤 장에 속하는지
+    val chapterId: Long, // 어떤 장에 속하는지
 
     @Column(nullable = false)
     val verseNumber: Int, // 절 번호 (예: 1, 2, 3절)
