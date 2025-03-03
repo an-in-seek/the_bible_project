@@ -24,12 +24,12 @@ class BibleFacade(
     /**
      * 📌 특정 책에 해당하는 장 리스트 조회
      */
-    fun getChapters(bookId: Long): ChaptersView = bibleReader.getChaptersView(bookId)
+    fun getChapters(bookId: Long): ChapterView = bibleReader.getChapterView(bookId)
 
     /**
      * 📌 특정 장에 해당하는 절 리스트 조회
      */
-    fun getVerses(bookId: Long, chapterId: Long): VersesView = bibleReader.getVersesView(bookId, chapterId)
+    fun getVerses(bookId: Long, chapterId: Long): VerseView = bibleReader.getVerseView(bookId, chapterId)
 
     /**
      * 📌 성경 구절 검색 (키워드 포함) - 다중 번역본에서 검색

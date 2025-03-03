@@ -3,9 +3,9 @@ package com.seek.thebible.domain.bible.service
 import com.seek.thebible.domain.BibleServiceException
 import com.seek.thebible.domain.ErrorType
 import com.seek.thebible.domain.bible.dto.BookResult
-import com.seek.thebible.domain.bible.dto.ChaptersView
+import com.seek.thebible.domain.bible.dto.ChapterView
 import com.seek.thebible.domain.bible.dto.TranslationResult
-import com.seek.thebible.domain.bible.dto.VersesView
+import com.seek.thebible.domain.bible.dto.VerseView
 import com.seek.thebible.domain.bible.model.BibleVerse
 import com.seek.thebible.infrastructure.persistence.bible.BibleBookRepository
 import com.seek.thebible.infrastructure.persistence.bible.BibleChapterRepository
@@ -31,17 +31,17 @@ class BibleReader(
         return bibleBookRepository.findByTranslation(translation).map(BookResult::from)
     }
 
-    fun getChaptersView(bookId: Long): ChaptersView {
+    fun getChapterView(bookId: Long): ChapterView {
         val book = bibleBookRepository.findByIdWithChapters(bookId)
             ?: throw BibleServiceException(ErrorType.BOOK_NOT_FOUND, "bookId=$bookId")
-        return ChaptersView.from(book)
+        return ChapterView.from(book)
     }
 
-    fun getVersesView(bookId: Long, chapterId: Long): VersesView {
+    fun getVerseView(bookId: Long, chapterId: Long): VerseView {
         val chapter = bibleChapterRepository.findByIdWithVerses(chapterId)
             ?: throw BibleServiceException(ErrorType.CHAPTER_NOT_FOUND, "chapterId=$chapterId")
         val totalChapterCount = bibleChapterRepository.countByBookId(bookId)
-        return VersesView.of(chapter, totalChapterCount)
+        return VerseView.of(chapter, totalChapterCount)
     }
 
     fun searchBibleVerses(keyword: String): List<BibleVerse> {

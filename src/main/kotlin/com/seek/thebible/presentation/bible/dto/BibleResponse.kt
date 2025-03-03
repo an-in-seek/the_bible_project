@@ -36,22 +36,22 @@ data class BookResponse(
     }
 }
 
-data class ChaptersViewResponse(
+data class ChapterViewResponse(
     val book: BookDetailResult
 ) {
     companion object {
-        fun from(result: ChaptersView) =
-            ChaptersViewResponse(book = result.book)
+        fun from(result: ChapterView) =
+            ChapterViewResponse(book = result.book)
     }
 }
 
-data class VersesViewResponse(
+data class VerseViewResponse(
     val chapter: ChapterDetailResult,
     val totalChapterCount: Int
 ) {
     companion object {
-        fun from(result: VersesView) =
-            VersesViewResponse(chapter = result.chapter, totalChapterCount = result.totalChapterCount)
+        fun from(result: VerseView) =
+            VerseViewResponse(chapter = result.chapter, totalChapterCount = result.totalChapterCount)
     }
 }
 

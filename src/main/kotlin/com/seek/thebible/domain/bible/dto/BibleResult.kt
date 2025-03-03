@@ -36,12 +36,12 @@ data class BookResult(
     }
 }
 
-data class ChaptersView(
+data class ChapterView(
     val book: BookDetailResult,
 ) {
     companion object {
         fun from(book: BibleBook) =
-            ChaptersView(
+            ChapterView(
                 book = book.let(BookDetailResult::from)
             )
     }
@@ -80,13 +80,13 @@ data class ChapterResult(
 }
 
 
-data class VersesView(
+data class VerseView(
     val chapter: ChapterDetailResult,
     val totalChapterCount: Int
 ) {
     companion object {
         fun of(chapter: BibleChapter, totalChapterCount: Int) =
-            VersesView(
+            VerseView(
                 chapter = chapter.let(ChapterDetailResult::from),
                 totalChapterCount = totalChapterCount
             )
