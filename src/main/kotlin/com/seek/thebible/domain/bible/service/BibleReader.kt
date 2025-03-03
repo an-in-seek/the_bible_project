@@ -24,7 +24,7 @@ class BibleReader(
     fun getTranslations(): List<TranslationResult> =
         bibleTranslationRepository.findAll().map(TranslationResult::from)
 
-    fun getBookView(translationId: Long): List<BookResult> =
+    fun getBooks(translationId: Long): List<BookResult> =
         bibleBookRepository.findByTranslationId(translationId).map(BookResult::from)
 
     fun getChapterView(bookId: Long): ChapterView =
