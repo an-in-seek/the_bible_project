@@ -1,4 +1,4 @@
-package com.seek.thebible.application.exception
+package com.seek.thebible.domain
 
 class BibleServiceException(
     val errorType: ErrorType,
