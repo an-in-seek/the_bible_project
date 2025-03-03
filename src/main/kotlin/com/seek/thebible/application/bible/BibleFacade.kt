@@ -19,7 +19,7 @@ class BibleFacade(
     /**
      * 📌 특정 번역본에 해당하는 책 리스트 조회
      */
-    fun getBooks(translationId: Long): List<BookResult> = bibleReader.getBooks(translationId)
+    fun getBooks(translationId: Long): List<BookResult> = bibleReader.getBookView(translationId)
 
     /**
      * 📌 특정 책에 해당하는 장 리스트 조회

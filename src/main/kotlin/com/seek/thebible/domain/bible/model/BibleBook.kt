@@ -13,9 +13,8 @@ class BibleBook(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "translation_id", nullable = false)
-    val translation: BibleTranslation, // 어떤 번역본에 속하는지
+    val translationId: Long,
 
     @Column(nullable = false)
     val name: String, // 책 이름 (예: 창세기)

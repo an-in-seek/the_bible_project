@@ -11,7 +11,6 @@ import com.seek.thebible.infrastructure.persistence.bible.BibleBookRepository
 import com.seek.thebible.infrastructure.persistence.bible.BibleChapterRepository
 import com.seek.thebible.infrastructure.persistence.bible.BibleTranslationRepository
 import com.seek.thebible.infrastructure.persistence.bible.BibleVerseRepository
-import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 
 @Service
@@ -25,17 +24,13 @@ class BibleReader(
     fun getTranslations(): List<TranslationResult> =
         bibleTranslationRepository.findAll().map(TranslationResult::from)
 
-    fun getBooks(translationId: Long): List<BookResult> {
-        val translation = bibleTranslationRepository.findByIdOrNull(translationId)
-            ?: throw BibleServiceException(ErrorType.TRANSLATION_NOT_FOUND, "translationId=$translationId")
-        return bibleBookRepository.findByTranslation(translation).map(BookResult::from)
-    }
+    fun getBookView(translationId: Long): List<BookResult> =
+        bibleBookRepository.findByTranslationId(translationId).map(BookResult::from)
 
-    fun getChapterView(bookId: Long): ChapterView {
-        val book = bibleBookRepository.findByIdWithChapters(bookId)
+    fun getChapterView(bookId: Long): ChapterView =
+        bibleBookRepository.findByIdWithChapters(bookId)
+            ?.let(ChapterView::from)
             ?: throw BibleServiceException(ErrorType.BOOK_NOT_FOUND, "bookId=$bookId")
-        return ChapterView.from(book)
-    }
 
     fun getVerseView(bookId: Long, chapterId: Long): VerseView {
         val chapter = bibleChapterRepository.findByIdWithVerses(chapterId)
