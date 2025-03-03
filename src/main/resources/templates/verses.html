@@ -1,16 +1,39 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
   <title>절 목록</title>
   <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    /* 하단 버튼 고정 스타일 */
+    .fixed-bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      background-color: #fff;
+      padding: 10px 0;
+      box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .nav-container a {
+      flex: 1;
+      text-align: center;
+      margin: 0 5px;
+    }
+  </style>
 </head>
 <body>
 <div class="container">
-  <a class="btn btn-secondary mt-3 mb-3"
-     th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters(translationId=${translationId}, bookId=${bookId})}">
-    장 선택하기
-  </a>
-  <h1 class="mt-2">절 목록</h1>
+  <h1 class="mt-2" th:text="${response.chapter.chapterNumber}"></h1>
   <table class="table table-striped">
     <thead>
     <tr>
@@ -19,13 +42,36 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="verse : ${verses}">
+    <tr th:each="verse : ${response.verses}">
       <td th:text="${verse.verseNumber}"></td>
       <td th:text="${verse.text}"></td>
     </tr>
     </tbody>
   </table>
 </div>
+
+<div class="fixed-bottom-nav">
+  <div class="nav-container">
+    <a class="btn btn-outline-primary"
+       th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters/{prevChapterId}/verses(
+                 translationId=${translationId}, bookId=${bookId}, prevChapterId=${chapterId - 1})}"
+       th:if="${chapterId > 1}">
+      ⬅ 이전 장
+    </a>
+    <a class="btn btn-secondary"
+       th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters(
+                 translationId=${translationId}, bookId=${bookId})}">
+      장 선택하기
+    </a>
+    <a class="btn btn-outline-primary"
+       th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters/{nextChapterId}/verses(
+                 translationId=${translationId}, bookId=${bookId}, nextChapterId=${chapterId + 1})}"
+       th:if="${chapterId < response.totalChapterCount}">
+      다음 장 ➡
+    </a>
+  </div>
+</div>
+
 <script src="/webjars/jquery/jquery.min.js"></script>
 <script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
 </body>
