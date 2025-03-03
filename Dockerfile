@@ -1,4 +1,4 @@
-FROM gradle:8.4-jdk17-alpine as builder
+FROM gradle:8.4-jdk21-alpine as builder
 
 # Copy local code to the container image.
 WORKDIR /app
@@ -11,7 +11,7 @@ COPY ./ ./
 RUN gradle clean build -x test --no-daemon
 
 # https://hub.docker.com/_/eclipse-temurin
-FROM eclipse-temurin:17.0.9_9-jdk-alpine
+FROM eclipse-temurin:21.0.1_12-jdk-alpine
 
 # 빌더 이미지에서 jar 파일만 복사
 COPY --from=builder /app/build/libs/the_bible-1.0.0.jar /app.jar
