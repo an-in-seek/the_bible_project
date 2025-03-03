@@ -42,7 +42,7 @@
     </tr>
     </thead>
     <tbody>
-    <tr th:each="verse : ${response.verses}">
+    <tr th:each="verse : ${response.chapter.verses}">
       <td th:text="${verse.verseNumber}"></td>
       <td th:text="${verse.text}"></td>
     </tr>
