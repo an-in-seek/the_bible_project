@@ -28,5 +28,8 @@ class BibleBook(
     val testamentType: BibleTestamentType, // 구약/신약 구분 (예: OLD, NEW)
 
     @Column(nullable = false)
-    val bookOrder: Int // 성경 내 순서 (예: 창세기 = 1, 마태복음 = 40)
+    val bookOrder: Int,
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "bookId")
+    val chapters: MutableList<BibleChapter> = mutableListOf()
 )

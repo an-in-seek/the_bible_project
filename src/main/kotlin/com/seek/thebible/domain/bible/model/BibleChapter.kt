@@ -13,13 +13,12 @@ class BibleChapter(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
-    val book: BibleBook,
+    val bookId: Long,
 
     @Column(nullable = false)
     val chapterNumber: Int,
 
-    @OneToMany(fetch = FetchType.EAGER, mappedBy = "chapterId")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "chapterId")
     val verses: MutableList<BibleVerse> = mutableListOf()
 )
