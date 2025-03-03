@@ -38,7 +38,7 @@ class BibleWebController(
         @PathVariable bookId: Long,
         model: Model
     ): String {
-        val response = bibleFacade.getChapters(bookId).let(ChaptersResponse::from)
+        val response = bibleFacade.getChapters(bookId).let(ChaptersViewResponse::from)
         model.addAttribute("response", response)
         return "chapters"
     }

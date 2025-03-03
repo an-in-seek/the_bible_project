@@ -10,13 +10,12 @@ data class TranslationResponse(
     val translationName: String
 ) {
     companion object {
-        fun from(result: TranslationResult): TranslationResponse {
-            return TranslationResponse(
+        fun from(result: TranslationResult) =
+            TranslationResponse(
                 translationId = result.translationId,
                 translationType = result.translationType,
                 translationName = result.translationName
             )
-        }
     }
 }
 
@@ -27,28 +26,22 @@ data class BookResponse(
     val testamentType: BibleTestamentType
 ) {
     companion object {
-        fun from(result: BookResult): BookResponse {
-            return BookResponse(
+        fun from(result: BookResult) =
+            BookResponse(
                 bookId = result.bookId,
                 bookName = result.bookName,
                 abbreviation = result.abbreviation,
                 testamentType = result.testamentType
             )
-        }
     }
 }
 
-data class ChaptersResponse(
-    val book: BookResult,
-    val chapters: List<ChapterResult>
+data class ChaptersViewResponse(
+    val book: BookDetailResult
 ) {
     companion object {
-        fun from(result: ChaptersResult) = with(result) {
-            ChaptersResponse(
-                book = chapters.first().book,
-                chapters = chapters
-            )
-        }
+        fun from(result: ChaptersView) =
+            ChaptersViewResponse(book = result.book)
     }
 }
 
@@ -57,12 +50,8 @@ data class VersesViewResponse(
     val totalChapterCount: Int
 ) {
     companion object {
-        fun from(result: VersesView) = with(result) {
-            VersesViewResponse(
-                chapter = chapter,
-                totalChapterCount = totalChapterCount
-            )
-        }
+        fun from(result: VersesView) =
+            VersesViewResponse(chapter = result.chapter, totalChapterCount = result.totalChapterCount)
     }
 }
 
@@ -72,12 +61,11 @@ data class SearchVerseResponse(
     val text: String
 ) {
     companion object {
-        fun from(result: SearchVerseResult): SearchVerseResponse {
-            return SearchVerseResponse(
+        fun from(result: SearchVerseResult) =
+            SearchVerseResponse(
                 verseId = result.verseId,
                 verseNumber = result.verseNumber,
                 text = result.text
             )
-        }
     }
 }
