@@ -36,15 +36,42 @@ data class BookResult(
     }
 }
 
+data class ChaptersView(
+    val book: BookDetailResult,
+) {
+    companion object {
+        fun from(book: BibleBook) =
+            ChaptersView(
+                book = book.let(BookDetailResult::from)
+            )
+    }
+}
+
+data class BookDetailResult(
+    val bookId: Long,
+    val bookName: String,
+    val abbreviation: String,
+    val chapters: List<ChapterResult>
+) {
+    companion object {
+        fun from(book: BibleBook) = with(book) {
+            BookDetailResult(
+                bookId = id!!,
+                bookName = name,
+                abbreviation = abbreviation,
+                chapters = book.chapters.map(ChapterResult::from)
+            )
+        }
+    }
+}
+
 data class ChapterResult(
-    val book: BookResult,
     val chapterId: Long,
     val chapterNumber: Int
 ) {
     companion object {
         fun from(chapter: BibleChapter) = with(chapter) {
             ChapterResult(
-                book = chapter.book.let(BookResult::from),
                 chapterId = id!!,
                 chapterNumber = chapterNumber
             )
@@ -52,16 +79,6 @@ data class ChapterResult(
     }
 }
 
-data class ChaptersResult(
-    val chapters: List<ChapterResult>
-) {
-    companion object {
-        fun from(chapters: List<BibleChapter>) =
-            ChaptersResult(
-                chapters = chapters.map(ChapterResult::from)
-            )
-    }
-}
 
 data class VersesView(
     val chapter: ChapterDetailResult,

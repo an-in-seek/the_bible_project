@@ -24,7 +24,7 @@ class BibleFacade(
     /**
      * 📌 특정 책에 해당하는 장 리스트 조회
      */
-    fun getChapters(bookId: Long): ChaptersResult = bibleReader.getChapters(bookId)
+    fun getChapters(bookId: Long): ChaptersView = bibleReader.getChaptersView(bookId)
 
     /**
      * 📌 특정 장에 해당하는 절 리스트 조회
