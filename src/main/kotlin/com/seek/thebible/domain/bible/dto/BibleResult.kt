@@ -1,12 +1,22 @@
-package com.seek.thebible.application.bible.dto
+package com.seek.thebible.domain.bible.dto
 
 import com.seek.thebible.domain.bible.model.*
 
 data class TranslationResult(
     val translationId: Long,
     val translationType: BibleTranslationType,
-    val displayName: String
-)
+    val translationName: String
+) {
+    companion object {
+        fun from(translation: BibleTranslation) = with(translation) {
+            TranslationResult(
+                translationId = id!!,
+                translationType = translationType,
+                translationName = name
+            )
+        }
+    }
+}
 
 data class BookResult(
     val bookId: Long,
@@ -27,12 +37,14 @@ data class BookResult(
 }
 
 data class ChapterResult(
+    val book: BookResult,
     val chapterId: Long,
     val chapterNumber: Int
 ) {
     companion object {
         fun from(chapter: BibleChapter) = with(chapter) {
             ChapterResult(
+                book = chapter.book.let(BookResult::from),
                 chapterId = id!!,
                 chapterNumber = chapterNumber
             )
@@ -41,15 +53,42 @@ data class ChapterResult(
 }
 
 data class ChaptersResult(
-    val book: BookResult,
     val chapters: List<ChapterResult>
 ) {
     companion object {
-        fun from(book: BibleBook, chapters: List<BibleChapter>) =
+        fun from(chapters: List<BibleChapter>) =
             ChaptersResult(
-                book = BookResult.from(book),
                 chapters = chapters.map(ChapterResult::from)
             )
+    }
+}
+
+data class VersesView(
+    val chapter: ChapterDetailResult,
+    val totalChapterCount: Int
+) {
+    companion object {
+        fun of(chapter: BibleChapter, totalChapterCount: Int) =
+            VersesView(
+                chapter = chapter.let(ChapterDetailResult::from),
+                totalChapterCount = totalChapterCount
+            )
+    }
+}
+
+data class ChapterDetailResult(
+    val chapterId: Long,
+    val chapterNumber: Int,
+    val verses: List<VerseResult>
+) {
+    companion object {
+        fun from(chapter: BibleChapter) = with(chapter) {
+            ChapterDetailResult(
+                chapterId = id!!,
+                chapterNumber = chapterNumber,
+                verses = verses.map(VerseResult::from)
+            )
+        }
     }
 }
 
@@ -69,29 +108,8 @@ data class VerseResult(
     }
 }
 
-data class VersesResult(
-    val chapter: ChapterResult,
-    val verses: List<VerseResult>,
-    val totalChapterCount: Int
-) {
-    companion object {
-        fun from(
-            chapter: ChapterResult,
-            verses: List<BibleVerse>,
-            totalChapterCount: Int
-        ) = VersesResult(
-            chapter = chapter,
-            verses = verses.map(VerseResult::from),
-            totalChapterCount = totalChapterCount
-        )
-    }
-}
-
-
 data class SearchVerseResult(
     val verseId: Long,
-    val bookName: String,
-    val chapterNumber: Int,
     val verseNumber: Int,
     val text: String
 )
