@@ -30,7 +30,8 @@ spring:
       data-locations:
         - classpath:bible_translation.sql
         - classpath:bible_book.sql
-        - classpath:bible_genesis.sql
+        - classpath:bible_krv_01_genesis.sql
+        - classpath:bible_krv_02_exodus.sql
 
 springdoc:
   api-docs:
