@@ -29,8 +29,11 @@
 
 <div class="fixed-bottom-nav">
   <div class="nav-container">
-    <a class="btn btn-secondary" th:href="@{/web/bibles/translations/{translationId}/books(translationId=${translationId})}">
-      책 선택하기
+    <a class="btn btn-lg btn-primary"
+       th:href="@{/web/bibles/translations/{translationId}/books(translationId=${translationId})}"
+       aria-label="책 선택">
+      <span aria-hidden="true">📖</span>
+      <span class="ms-2">책 선택</span>
     </a>
   </div>
 </div>

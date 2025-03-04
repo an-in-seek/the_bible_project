@@ -32,7 +32,12 @@
 
 <div class="fixed-bottom-nav">
   <div class="nav-container">
-    <a class="btn btn-secondary" th:href="@{/web/bibles/translations}">번역본 선택하기</a>
+    <a class="btn btn-lg btn-primary"
+       th:href="@{/web/bibles/translations}"
+       aria-label="번역본 선택">
+      <span aria-hidden="true">📖</span>
+      <span class="ms-2">번역본 선택</span>
+    </a>
   </div>
 </div>
 

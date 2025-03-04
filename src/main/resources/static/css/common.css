@@ -3,35 +3,74 @@
   cursor: pointer;
 }
 
-/* 하단 버튼 고정 스타일 */
+/* 리스트가 네비게이션 영역과 겹치지 않도록 여백 추가 */
+.content-wrapper {
+  padding-bottom: 80px; /* 네비게이션 높이만큼 추가 여백 확보 */
+}
+
+
+/* 고정 하단 네비게이션 박스 */
 .fixed-bottom-nav {
+  /* position:fixed, bottom:0, width:100% 역할을
+     Bootstrap의 'fixed-bottom'으로 대체 가능하나
+     여기서는 기존 구조를 유지하며 개선합니다. */
   position: fixed;
   bottom: 0;
   left: 0;
   width: 100%;
-  background-color: #fff;
-  padding: 10px 0;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  background-color: #f8f9fa; /* 약간 밝은 배경으로 콘텐츠와 구분 */
+  border-top: 1px solid #dee2e6; /* 상단 경계 라인 */
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1); /* 위쪽 음영 */
   z-index: 1000;
+
+  /* iPhone 등 노치 있는 기기에서 안전 영역 확보 */
+  padding-top: 10px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom));
 }
 
-/* 하단 네비게이션 내부 컨테이너 */
+/* 내부 컨테이너: 중앙정렬 + 최대 폭 제한 */
 .nav-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
   max-width: 900px;
   margin: 0 auto;
+  gap: 8px; /* 버튼 간격 */
+  padding: 0 12px; /* 좌우 여백 */
 }
 
-/* 네비게이션 버튼 스타일 */
-.nav-container a {
-  flex: 1;
-  text-align: center;
-  margin: 0 5px;
+/* 공통 버튼 스타일(부트스트랩 btn-lg 사용) 커스터마이징 */
+.nav-container .btn {
+  flex: 1; /* 버튼 넓이 균등 분배 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  white-space: nowrap; /* 텍스트 줄바꿈 방지 */
+  position: relative; /* focus 링 등 위치 고정 */
+  transition: background-color 0.2s ease-in-out;
 }
 
-/* 리스트가 네비게이션 영역과 겹치지 않도록 여백 추가 */
-.content-wrapper {
-  padding-bottom: 80px; /* 네비게이션 높이만큼 추가 여백 확보 */
+/* 버튼 포커스(접근성) 시각 효과 */
+.nav-container .btn:focus {
+  outline: none; /* 기본 포커스 제거 */
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* 파란색 포커스 링 */
+}
+
+/* 아이콘(이모지)와 텍스트 간격 */
+.nav-container .btn span[aria-hidden="true"] {
+  font-size: 18px;
+}
+
+/* disabled 상태를 좀 더 명확히 표시 */
+.nav-container .btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 반응형: 작은 화면에서는 "이전 장"과 "다음 장" 텍스트만 숨김 */
+@media (max-width: 576px) {
+  .nav-container .btn.prev-next span.d-none.d-md-inline {
+    display: none !important;
+  }
 }

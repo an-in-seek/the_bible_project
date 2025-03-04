@@ -8,7 +8,7 @@
 </head>
 <body>
 <div class="container content-wrapper">
-  <h1 class="mt-2" th:text="${response.chapter.chapterNumber}"></h1>
+  <h1 class="mt-2" id="chapterTitle" th:text="${response.chapter.chapterNumber}"></h1>
   <table class="table table-striped">
     <thead>
     <tr>
@@ -16,7 +16,7 @@
       <th>내용</th>
     </tr>
     </thead>
-    <tbody>
+    <tbody id="verseTableBody">
     <tr th:each="verse : ${response.chapter.verses}">
       <td th:text="${verse.verseNumber}"></td>
       <td th:text="${verse.text}"></td>
@@ -25,29 +25,104 @@
   </table>
 </div>
 
+<!-- 하단 네비게이션 -->
 <div class="fixed-bottom-nav">
   <div class="nav-container">
-    <a class="btn btn-outline-primary"
-       th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters/{prevChapterId}/verses(
-                 translationId=${translationId}, bookId=${bookId}, prevChapterId=${chapterNumber - 1})}"
-       th:if="${chapterNumber > 1}">
-      ⬅ 이전 장
-    </a>
-    <a class="btn btn-secondary"
+    <!-- 이전 장 버튼 -->
+    <button id="prevChapterBtn"
+            class="btn btn-lg btn-outline-primary prev-next"
+            type="button"
+            disabled
+            aria-label="이전 장으로 이동">
+      <!-- 이모지는 스크린리더에서 읽히지 않도록 aria-hidden 사용 -->
+      <span aria-hidden="true">⬅</span>
+      <span class="d-none d-md-inline ms-2">이전 장</span>
+    </button>
+
+    <!-- 장 선택 (페이지 이동) -->
+    <a class="btn btn-lg btn-primary"
        th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters(
-                 translationId=${translationId}, bookId=${bookId})}">
-      장 선택하기
+           translationId=${translationId}, bookId=${bookId})}"
+       aria-label="장 선택">
+      <span aria-hidden="true">📖</span>
+      <span class="ms-2">장 선택</span>
     </a>
-    <a class="btn btn-outline-primary"
-       th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters/{nextChapterId}/verses(
-                 translationId=${translationId}, bookId=${bookId}, nextChapterId=${chapterNumber + 1})}"
-       th:if="${chapterNumber < response.totalChapterCount}">
-      다음 장 ➡
-    </a>
+
+    <!-- 다음 장 버튼 -->
+    <button id="nextChapterBtn"
+            class="btn btn-lg btn-outline-primary prev-next"
+            type="button"
+            disabled
+            aria-label="다음 장으로 이동">
+      <span class="d-none d-md-inline me-2">다음 장</span>
+      <span aria-hidden="true">➡</span>
+    </button>
   </div>
 </div>
 
-<script src="/webjars/jquery/jquery.min.js"></script>
-<script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const translationId = "[[${translationId}]]";
+        const bookId = "[[${bookId}]]";
+        let chapterNumber = parseInt("[[${response.chapter.chapterNumber}]]");
+        const totalChapterCount = parseInt("[[${response.totalChapterCount}]]");
+
+        const prevButton = document.getElementById("prevChapterBtn");
+        const nextButton = document.getElementById("nextChapterBtn");
+        const chapterTitle = document.getElementById("chapterTitle");
+        const verseTableBody = document.getElementById("verseTableBody");
+
+        function updateButtons() {
+            prevButton.disabled = chapterNumber <= 1;
+            nextButton.disabled = chapterNumber >= totalChapterCount;
+        }
+
+        async function loadChapter(newChapter) {
+            try {
+                prevButton.disabled = true;
+                nextButton.disabled = true;
+
+                const response = await fetch(`/api/bibles/translations/${translationId}/books/${bookId}/chapters/${newChapter}/verses`);
+                if (!response.ok) {
+                    throw new Error("데이터를 불러오는 중 오류가 발생했습니다.");
+                }
+                const data = await response.json();
+
+                chapterTitle.textContent = data.chapter.chapterNumber;
+                verseTableBody.innerHTML = ""; // Clear previous content
+                data.chapter.verses.forEach(verse => {
+                    const row = document.createElement("tr");
+                    const verseNumberCell = document.createElement("td");
+                    verseNumberCell.textContent = verse.verseNumber;
+                    const verseTextCell = document.createElement("td");
+                    verseTextCell.textContent = verse.text;
+                    row.appendChild(verseNumberCell);
+                    row.appendChild(verseTextCell);
+                    verseTableBody.appendChild(row);
+                });
+                chapterNumber = data.chapter.chapterNumber;
+            } catch (error) {
+                alert(error.message);
+            } finally {
+                updateButtons();
+            }
+        }
+
+        prevButton.addEventListener("click", () => {
+            if (chapterNumber > 1) {
+                loadChapter(chapterNumber - 1);
+            }
+        });
+
+        nextButton.addEventListener("click", () => {
+            if (chapterNumber < totalChapterCount) {
+                loadChapter(chapterNumber + 1);
+            }
+        });
+
+        updateButtons();
+    });
+</script>
 </body>
 </html>
