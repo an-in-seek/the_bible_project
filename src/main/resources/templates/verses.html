@@ -29,8 +29,8 @@
   <div class="nav-container">
     <a class="btn btn-outline-primary"
        th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters/{prevChapterId}/verses(
-                 translationId=${translationId}, bookId=${bookId}, prevChapterId=${chapterId - 1})}"
-       th:if="${chapterId > 1}">
+                 translationId=${translationId}, bookId=${bookId}, prevChapterId=${chapterNumber - 1})}"
+       th:if="${chapterNumber > 1}">
       ⬅ 이전 장
     </a>
     <a class="btn btn-secondary"
@@ -40,8 +40,8 @@
     </a>
     <a class="btn btn-outline-primary"
        th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters/{nextChapterId}/verses(
-                 translationId=${translationId}, bookId=${bookId}, nextChapterId=${chapterId + 1})}"
-       th:if="${chapterId < response.totalChapterCount}">
+                 translationId=${translationId}, bookId=${bookId}, nextChapterId=${chapterNumber + 1})}"
+       th:if="${chapterNumber < response.totalChapterCount}">
       다음 장 ➡
     </a>
   </div>

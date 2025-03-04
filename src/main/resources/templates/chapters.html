@@ -20,7 +20,7 @@
         th:each="chapter : ${response.book.chapters}"
         th:data-translation-id="${translationId}"
         th:data-book-id="${bookId}"
-        th:data-chapter-id="${chapter.chapterId}">
+        th:data-chapter-number="${chapter.chapterNumber}">
       <td th:text="${chapter.chapterNumber}"></td>
     </tr>
     </tbody>
@@ -40,10 +40,10 @@
 <script>
     $(document).ready(function () {
         $(".clickable-row").click(function () {
-            let translationId = $(this).attr("data-translation-id");
-            let bookId = $(this).attr("data-book-id");
-            let chapterId = $(this).attr("data-chapter-id");
-            window.location.href = `/web/bibles/translations/${translationId}/books/${bookId}/chapters/${chapterId}/verses`;
+            const translationId = $(this).attr("data-translation-id");
+            const bookId = $(this).attr("data-book-id");
+            const chapterNumber = $(this).attr("data-chapter-number");
+            window.location.href = `/web/bibles/translations/${translationId}/books/${bookId}/chapters/${chapterNumber}/verses`;
         });
     });
 </script>

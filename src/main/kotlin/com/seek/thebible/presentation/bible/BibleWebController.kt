@@ -43,14 +43,14 @@ class BibleWebController(
         return "chapters"
     }
 
-    @GetMapping("/translations/{translationId}/books/{bookId}/chapters/{chapterId}/verses")
+    @GetMapping("/translations/{translationId}/books/{bookId}/chapters/{chapterNumber}/verses")
     fun showVerses(
         @PathVariable translationId: Long,
         @PathVariable bookId: Long,
-        @PathVariable chapterId: Long,
+        @PathVariable chapterNumber: Int,
         model: Model
     ): String {
-        val response = bibleFacade.getVerseView(bookId, chapterId).let(VerseViewResponse::from)
+        val response = bibleFacade.getVerseView(bookId, chapterNumber).let(VerseViewResponse::from)
         model.addAttribute("response", response)
         return "verses"
     }

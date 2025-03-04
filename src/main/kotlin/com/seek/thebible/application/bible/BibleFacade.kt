@@ -32,6 +32,11 @@ class BibleFacade(
     fun getVerseView(bookId: Long, chapterId: Long): VerseView = bibleReader.getVerseView(bookId, chapterId)
 
     /**
+     * 📌 특정 장에 해당하는 절 리스트 조회
+     */
+    fun getVerseView(bookId: Long, chapterNumber: Int): VerseView = bibleReader.getVerseView(bookId, chapterNumber)
+
+    /**
      * 📌 성경 구절 검색 (키워드 포함) - 다중 번역본에서 검색
      */
     fun searchBibleVerses(keyword: String): List<SearchVerseResult> =

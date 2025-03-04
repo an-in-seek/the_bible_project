@@ -39,6 +39,13 @@ class BibleReader(
         return VerseView.of(chapter, totalChapterCount)
     }
 
+    fun getVerseView(bookId: Long, chapterNumber: Int): VerseView {
+        val chapter = bibleChapterRepository.findByBookIdAndChapterNumberWithVerses(bookId, chapterNumber)
+            ?: throw BibleServiceException(ErrorType.CHAPTER_NOT_FOUND, "bookId=${bookId}, chapterNumber=${chapterNumber}")
+        val totalChapterCount = bibleChapterRepository.countByBookId(bookId)
+        return VerseView.of(chapter, totalChapterCount)
+    }
+
     fun searchBibleVerses(keyword: String): List<BibleVerse> {
         if (keyword.isBlank()) throw BibleServiceException(ErrorType.INVALID_PARAMETER, "keyword is blank")
         return try {

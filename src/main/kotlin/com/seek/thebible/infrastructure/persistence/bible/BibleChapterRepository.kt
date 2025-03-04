@@ -19,4 +19,16 @@ interface BibleChapterRepository : JpaRepository<BibleChapter, Long> {
         """
     )
     fun findByIdWithVerses(chapterId: Long): BibleChapter?
+
+    @Query(
+        """
+            SELECT c 
+            FROM BibleChapter c
+            LEFT JOIN FETCH c.verses
+            WHERE 1=1 
+            AND c.bookId = :bookId
+            AND c.chapterNumber = :chapterNumber
+        """
+    )
+    fun findByBookIdAndChapterNumberWithVerses(bookId: Long, chapterNumber: Int): BibleChapter?
 }
