@@ -6,7 +6,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
-@RequestMapping("/bibles")
+@RequestMapping("/api/bibles")
 class BibleController(
     private val bibleFacade: BibleFacade
 ) {
@@ -46,13 +46,13 @@ class BibleController(
     /**
      * 📌 특정 장(Chapter)에 해당하는 절(Verse) 리스트 조회
      */
-    @GetMapping("/translations/{translationId}/books/{bookId}/chapters/{chapterId}/verses")
+    @GetMapping("/translations/{translationId}/books/{bookId}/chapters/{chapterNumber}/verses")
     fun getVerses(
         @PathVariable translationId: Long,
         @PathVariable bookId: Long,
-        @PathVariable chapterId: Long
+        @PathVariable chapterNumber: Int
     ): ResponseEntity<VerseViewResponse> {
-        val result = bibleFacade.getVerseView(bookId, chapterId)
+        val result = bibleFacade.getVerseView(bookId, chapterNumber)
         val response = VerseViewResponse.from(result)
         return ResponseEntity.ok().body(response)
     }

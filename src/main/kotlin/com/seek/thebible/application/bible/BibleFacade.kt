@@ -29,11 +29,6 @@ class BibleFacade(
     /**
      * 📌 특정 장에 해당하는 절 리스트 조회
      */
-    fun getVerseView(bookId: Long, chapterId: Long): VerseView = bibleReader.getVerseView(bookId, chapterId)
-
-    /**
-     * 📌 특정 장에 해당하는 절 리스트 조회
-     */
     fun getVerseView(bookId: Long, chapterNumber: Int): VerseView = bibleReader.getVerseView(bookId, chapterNumber)
 
     /**

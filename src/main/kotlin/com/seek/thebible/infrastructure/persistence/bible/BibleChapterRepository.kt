@@ -15,16 +15,6 @@ interface BibleChapterRepository : JpaRepository<BibleChapter, Long> {
             SELECT c 
             FROM BibleChapter c
             LEFT JOIN FETCH c.verses
-            WHERE c.id = :chapterId
-        """
-    )
-    fun findByIdWithVerses(chapterId: Long): BibleChapter?
-
-    @Query(
-        """
-            SELECT c 
-            FROM BibleChapter c
-            LEFT JOIN FETCH c.verses
             WHERE 1=1 
             AND c.bookId = :bookId
             AND c.chapterNumber = :chapterNumber

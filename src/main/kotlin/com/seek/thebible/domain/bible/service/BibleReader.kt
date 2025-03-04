@@ -32,13 +32,6 @@ class BibleReader(
             ?.let(ChapterView::from)
             ?: throw BibleServiceException(ErrorType.BOOK_NOT_FOUND, "bookId=$bookId")
 
-    fun getVerseView(bookId: Long, chapterId: Long): VerseView {
-        val chapter = bibleChapterRepository.findByIdWithVerses(chapterId)
-            ?: throw BibleServiceException(ErrorType.CHAPTER_NOT_FOUND, "chapterId=$chapterId")
-        val totalChapterCount = bibleChapterRepository.countByBookId(bookId)
-        return VerseView.of(chapter, totalChapterCount)
-    }
-
     fun getVerseView(bookId: Long, chapterNumber: Int): VerseView {
         val chapter = bibleChapterRepository.findByBookIdAndChapterNumberWithVerses(bookId, chapterNumber)
             ?: throw BibleServiceException(ErrorType.CHAPTER_NOT_FOUND, "bookId=${bookId}, chapterNumber=${chapterNumber}")
