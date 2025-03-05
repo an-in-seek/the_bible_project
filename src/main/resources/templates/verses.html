@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
   <title>절 목록</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/common.css" rel="stylesheet">
@@ -41,8 +43,7 @@
 
     <!-- 장 선택 (페이지 이동) -->
     <a class="btn btn-lg btn-primary"
-       th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters(
-           translationId=${translationId}, bookId=${bookId})}"
+       th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters(translationId=${translationId}, bookId=${bookId})}"
        aria-label="장 선택">
       <span aria-hidden="true">📖</span>
       <span class="ms-2">장 선택</span>
