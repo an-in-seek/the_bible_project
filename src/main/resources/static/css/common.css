@@ -74,9 +74,3 @@
     display: none !important;
   }
 }
-
-@media (pointer: coarse) {
-  .nav-container .btn:hover {
-    background-color: inherit !important;
-  }
-}
