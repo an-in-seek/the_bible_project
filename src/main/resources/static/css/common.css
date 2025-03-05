@@ -51,12 +51,6 @@
   transition: background-color 0.2s ease-in-out;
 }
 
-/* 버튼 포커스(접근성) 시각 효과 */
-.nav-container .btn:focus {
-  outline: none; /* 기본 포커스 제거 */
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* 파란색 포커스 링 */
-}
-
 /* 아이콘(이모지)와 텍스트 간격 */
 .nav-container .btn span[aria-hidden="true"] {
   font-size: 18px;
@@ -72,13 +66,5 @@
 @media (max-width: 576px) {
   .nav-container .btn.prev-next span.d-none.d-md-inline {
     display: none !important;
-  }
-}
-
-/* 모바일(터치스크린) 환경에서 focus 상태 제거 */
-@media (pointer: coarse) {
-  .nav-container .btn:focus {
-    background-color: inherit !important;
-    box-shadow: none !important;
   }
 }
