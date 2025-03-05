@@ -74,3 +74,11 @@
     display: none !important;
   }
 }
+
+/* 모바일(터치스크린) 환경에서 focus 상태 제거 */
+@media (pointer: coarse) {
+  .nav-container .btn:focus {
+    background-color: inherit !important;
+    box-shadow: none !important;
+  }
+}
