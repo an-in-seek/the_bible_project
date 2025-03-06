@@ -1,36 +1,33 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html lang="ko">
 <head>
   <title>장 목록</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/common.css" rel="stylesheet">
 </head>
 <body>
+
 <div class="container content-wrapper">
-  <h1 class="mt-2" th:text="${response.book.bookName}"></h1>
+  <h1 class="mt-2" id="bookTitle"></h1>
   <table class="table table-striped table-hover">
     <thead>
     <tr>
       <th>장</th>
     </tr>
     </thead>
-    <tbody>
-    <tr class="clickable-row"
-        th:each="chapter : ${response.book.chapters}"
-        th:data-translation-id="${translationId}"
-        th:data-book-id="${bookId}"
-        th:data-chapter-number="${chapter.chapterNumber}">
-      <td th:text="${chapter.chapterNumber}"></td>
-    </tr>
-    </tbody>
+    <tbody id="chapterList"></tbody>
   </table>
 </div>
 
+<!-- 하단 네비게이션 -->
 <div class="fixed-bottom-nav">
   <div class="nav-container">
-    <a class="btn btn-lg btn-primary"
-       th:href="@{/web/bibles/translations/{translationId}/books(translationId=${translationId})}"
+    <a id="bookSelectLink"
+       class="btn btn-lg btn-primary"
+       href="#"
        aria-label="책 선택">
       <span aria-hidden="true">📖</span>
       <span class="ms-2">책 선택</span>
@@ -38,16 +35,70 @@
   </div>
 </div>
 
-<script src="/webjars/jquery/jquery.min.js"></script>
-<script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
-    $(document).ready(function () {
-        $(".clickable-row").click(function () {
-            const translationId = $(this).attr("data-translation-id");
-            const bookId = $(this).attr("data-book-id");
-            const chapterNumber = $(this).attr("data-chapter-number");
-            window.location.href = `/web/bibles/translations/${translationId}/books/${bookId}/chapters/${chapterNumber}/verses`;
-        });
+    document.addEventListener("DOMContentLoaded", async function () {
+        // sessionStorage에서 translationId, bookId 가져오기
+        const translationId = sessionStorage.getItem("translationId") || "1";  // 기본값 1
+        const translationName = sessionStorage.getItem("translationName") || "";
+        const bookId = sessionStorage.getItem("bookId") || "1";  // 기본값 1
+        const bookName = sessionStorage.getItem("bookName") || "";
+
+        const bookTitle = document.getElementById("bookTitle");
+        const chapterList = document.getElementById("chapterList");
+        const bookSelectLink = document.getElementById("bookSelectLink");
+
+        // 📌 sessionStorage에서 데이터 확인 후 즉시 렌더링 (API 요청 최소화)
+        function renderFromSessionStorage() {
+            const storedData = sessionStorage.getItem(`bible_book_${bookId}`);
+            if (storedData) {
+                const data = JSON.parse(storedData);
+                renderChapters(data);
+                return true; // sessionStorage에서 데이터가 있었음
+            }
+            return false; // sessionStorage에 데이터 없음
+        }
+
+        // 📌 화면 업데이트 함수 (sessionStorage & API 호출 공통)
+        function renderChapters(data) {
+            bookTitle.textContent = `${translationName} > ${bookName}`;
+            chapterList.innerHTML = "";
+            data.book.chapters.forEach(chapter => {
+                const row = document.createElement("tr");
+                row.classList.add("clickable-row");
+                row.dataset.chapterNumber = chapter.chapterNumber;
+                row.innerHTML = `<td>${chapter.chapterNumber}</td>`;
+                row.addEventListener("click", () => {
+                    sessionStorage.setItem("chapterNumber", chapter.chapterNumber);
+                    window.location.href = "/web/bibles/verses"; // ✅ 절 목록 화면 URL 변경
+                });
+                chapterList.appendChild(row);
+            });
+
+            // sessionStorage에 데이터 저장 (캐싱)
+            sessionStorage.setItem(`bible_book_${bookId}`, JSON.stringify(data));
+
+            // 책 선택 페이지 링크 업데이트
+            bookSelectLink.href = `/web/bibles/books`;
+        }
+
+        // 📌 API에서 데이터 가져오기 (sessionStorage에 없을 경우)
+        async function fetchChaptersFromAPI() {
+            try {
+                const response = await fetch(`/api/bibles/translations/${translationId}/books/${bookId}/chapters`);
+                if (!response.ok) {
+                    throw new Error("데이터를 불러오는 중 오류가 발생했습니다.");
+                }
+                const data = await response.json();
+                renderChapters(data);
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        // 📌 최초 데이터 로드 (sessionStorage 우선, 없으면 API 호출)
+        if (!renderFromSessionStorage()) {
+            await fetchChaptersFromAPI();
+        }
     });
 </script>
 </body>

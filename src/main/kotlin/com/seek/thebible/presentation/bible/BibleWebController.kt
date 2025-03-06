@@ -1,13 +1,11 @@
 package com.seek.thebible.presentation.bible
 
 import com.seek.thebible.application.bible.BibleFacade
-import com.seek.thebible.presentation.bible.dto.*
+import com.seek.thebible.presentation.bible.dto.TranslationResponse
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
 
 @Controller
 @RequestMapping("/web/bibles")
@@ -22,43 +20,18 @@ class BibleWebController(
         return "translations"
     }
 
-    @GetMapping("/translations/{translationId}/books")
-    fun showBooks(
-        @PathVariable translationId: Long,
-        model: Model
-    ): String {
-        val books = bibleFacade.getBooks(translationId).map(BookResponse::from)
-        model.addAttribute("books", books)
+    @GetMapping("/books")
+    fun showBooks(): String {
         return "books"
     }
 
-    @GetMapping("/translations/{translationId}/books/{bookId}/chapters")
-    fun showChapters(
-        @PathVariable translationId: Long,
-        @PathVariable bookId: Long,
-        model: Model
-    ): String {
-        val response = bibleFacade.getChapterView(bookId).let(ChapterViewResponse::from)
-        model.addAttribute("response", response)
+    @GetMapping("/chapters")
+    fun showChapters(): String {
         return "chapters"
     }
 
-    @GetMapping("/translations/{translationId}/books/{bookId}/chapters/{chapterNumber}/verses")
-    fun showVerses(
-        @PathVariable translationId: Long,
-        @PathVariable bookId: Long,
-        @PathVariable chapterNumber: Int,
-        model: Model
-    ): String {
-        val response = bibleFacade.getVerseView(bookId, chapterNumber).let(VerseViewResponse::from)
-        model.addAttribute("response", response)
+    @GetMapping("/verses")
+    fun showVerses(): String {
         return "verses"
-    }
-
-    @GetMapping("/search")
-    fun searchBible(@RequestParam keyword: String, model: Model): String {
-        val verses = bibleFacade.searchBibleVerses(keyword).map(SearchVerseResponse::from)
-        model.addAttribute("verses", verses)
-        return "search"
     }
 }

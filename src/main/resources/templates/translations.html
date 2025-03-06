@@ -2,6 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head>
   <title>성경 번역본 목록</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/common.css" rel="stylesheet">
@@ -19,6 +21,7 @@
     <tbody>
     <tr class="clickable-row"
         th:data-translation-id="${translation.translationId}"
+        th:data-translation-name="${translation.translationName}"
         th:each="translation : ${translations}">
       <td th:text="${translation.translationType}"></td>
       <td th:text="${translation.translationName}"></td>
@@ -27,15 +30,16 @@
   </table>
 </div>
 
-<script src="/webjars/jquery/jquery.min.js"></script>
-<script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
-    $(document).ready(function () {
-        $(".clickable-row").click(function () {
-            let translationId = $(this).attr("data-translation-id");
-
-            // 책(Book) 목록 페이지로 이동
-            window.location.href = `/web/bibles/translations/${translationId}/books`;
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".clickable-row").forEach(row => {
+            row.addEventListener("click", function () {
+                const translationId = this.getAttribute("data-translation-id");
+                const translationName = this.getAttribute("data-translation-name");
+                sessionStorage.setItem("translationId", translationId);
+                sessionStorage.setItem("translationName", translationName);
+                window.location.href = "/web/bibles/books";
+            });
         });
     });
 </script>

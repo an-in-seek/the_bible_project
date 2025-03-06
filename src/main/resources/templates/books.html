@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html lang="ko">
 <head>
-  <title>책 목록</title>
+  <title>성경 책 목록</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="/css/common.css" rel="stylesheet">
 </head>
 <body>
+
 <div class="container content-wrapper">
-  <h1 class="mt-2">책 목록</h1>
+  <h1 class="mt-2" id="translationTitle"></h1>
   <table class="table table-striped table-hover">
     <thead>
     <tr>
@@ -17,23 +20,14 @@
       <th>구약/신약</th>
     </tr>
     </thead>
-    <tbody>
-    <tr class="clickable-row"
-        th:data-book-id="${book.bookId}"
-        th:data-translation-id="${translationId}"
-        th:each="book : ${books}">
-      <td th:text="${book.bookName}"></td>
-      <td th:text="${book.abbreviation}"></td>
-      <td th:text="${book.testamentType}"></td>
-    </tr>
-    </tbody>
+    <tbody id="bookList"></tbody>
   </table>
 </div>
 
 <div class="fixed-bottom-nav">
   <div class="nav-container">
     <a class="btn btn-lg btn-primary"
-       th:href="@{/web/bibles/translations}"
+       href="/web/bibles/translations"
        aria-label="번역본 선택">
       <span aria-hidden="true">📖</span>
       <span class="ms-2">번역본 선택</span>
@@ -41,15 +35,69 @@
   </div>
 </div>
 
-<script src="/webjars/jquery/jquery.min.js"></script>
-<script src="/webjars/bootstrap/js/bootstrap.bundle.min.js"></script>
 <script>
-    $(document).ready(function () {
-        $(".clickable-row").click(function () {
-            let translationId = $(this).attr("data-translation-id");
-            let bookId = $(this).attr("data-book-id");
-            window.location.href = `/web/bibles/translations/${translationId}/books/${bookId}/chapters`;
-        });
+    document.addEventListener("DOMContentLoaded", async function () {
+        // sessionStorage에서 translationId 가져오기
+        const translationId = sessionStorage.getItem("translationId") || "1";  // 기본값 1
+        const translationName = sessionStorage.getItem("translationName") || "";
+
+        const translationTitle = document.getElementById("translationTitle");
+        const bookList = document.getElementById("bookList");
+
+        // 📌 sessionStorage에서 데이터 확인 후 즉시 렌더링 (API 요청 최소화)
+        function renderFromSessionStorage() {
+            const storedData = sessionStorage.getItem(`bible_translation_${translationId}`);
+            if (storedData) {
+                const books = JSON.parse(storedData);
+                renderBooks(books);
+                return true; // sessionStorage에서 데이터가 있었음
+            }
+            return false; // sessionStorage에 데이터 없음
+        }
+
+        // 📌 화면 업데이트 함수 (sessionStorage & API 호출 공통)
+        function renderBooks(books) {
+            translationTitle.textContent = `${translationName}`;
+            bookList.innerHTML = "";
+            books.forEach(book => {
+                const row = document.createElement("tr");
+                row.classList.add("clickable-row");
+                row.dataset.bookId = book.bookId;
+                row.innerHTML = `
+                    <td>${book.bookName}</td>
+                    <td>${book.abbreviation}</td>
+                    <td>${book.testamentType}</td>
+                `;
+                row.addEventListener("click", () => {
+                    sessionStorage.setItem("bookId", book.bookId);
+                    sessionStorage.setItem("bookName", book.bookName);
+                    window.location.href = "/web/bibles/chapters"; // ✅ 장 목록 화면 URL 변경
+                });
+                bookList.appendChild(row);
+            });
+
+            // sessionStorage에 데이터 저장 (캐싱)
+            sessionStorage.setItem(`bible_translation_${translationId}`, JSON.stringify(books));
+        }
+
+        // 📌 API에서 데이터 가져오기 (sessionStorage에 없을 경우)
+        async function fetchBooksFromAPI() {
+            try {
+                const response = await fetch(`/api/bibles/translations/${translationId}/books`);
+                if (!response.ok) {
+                    throw new Error("데이터를 불러오는 중 오류가 발생했습니다.");
+                }
+                const data = await response.json();
+                renderBooks(data);
+            } catch (error) {
+                alert(error.message);
+            }
+        }
+
+        // 📌 최초 데이터 로드 (sessionStorage 우선, 없으면 API 호출)
+        if (!renderFromSessionStorage()) {
+            await fetchBooksFromAPI();
+        }
     });
 </script>
 </body>

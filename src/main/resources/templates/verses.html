@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<html lang="ko">
 <head>
   <title>절 목록</title>
   <meta charset="utf-8">
@@ -9,8 +9,9 @@
   <link href="/css/common.css" rel="stylesheet">
 </head>
 <body>
+
 <div class="container content-wrapper">
-  <h1 class="mt-2" id="chapterTitle" th:text="${response.chapter.chapterNumber}"></h1>
+  <h1 class="mt-2" id="chapterTitle"></h1>
   <table class="table table-striped">
     <thead>
     <tr>
@@ -18,12 +19,7 @@
       <th>내용</th>
     </tr>
     </thead>
-    <tbody id="verseTableBody">
-    <tr th:each="verse : ${response.chapter.verses}">
-      <td th:text="${verse.verseNumber}"></td>
-      <td th:text="${verse.text}"></td>
-    </tr>
-    </tbody>
+    <tbody id="verseTableBody"></tbody>
   </table>
 </div>
 
@@ -42,8 +38,9 @@
     </button>
 
     <!-- 장 선택 (페이지 이동) -->
-    <a class="btn btn-lg btn-primary"
-       th:href="@{/web/bibles/translations/{translationId}/books/{bookId}/chapters(translationId=${translationId}, bookId=${bookId})}"
+    <a id="chapterSelectLink"
+       class="btn btn-lg btn-primary"
+       href="#"
        aria-label="장 선택">
       <span aria-hidden="true">📖</span>
       <span class="ms-2">장 선택</span>
@@ -61,53 +58,78 @@
   </div>
 </div>
 
-
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const translationId = "[[${translationId}]]";
-        const bookId = "[[${bookId}]]";
-        let chapterNumber = parseInt("[[${response.chapter.chapterNumber}]]");
-        const totalChapterCount = parseInt("[[${response.totalChapterCount}]]");
+    document.addEventListener("DOMContentLoaded", async function () {
+        // sessionStorage에서 translationId, bookId, chapterNumber 가져오기
+        const translationId = sessionStorage.getItem("translationId") || "1";  // 기본값 1
+        const translationName = sessionStorage.getItem("translationName") || "";
+        const bookId = sessionStorage.getItem("bookId") || "1";  // 기본값 1
+        const bookName = sessionStorage.getItem("bookName") || "";
+        let chapterNumber = parseInt(sessionStorage.getItem("chapterNumber") || "1"); // 기본값
 
         const prevButton = document.getElementById("prevChapterBtn");
         const nextButton = document.getElementById("nextChapterBtn");
         const chapterTitle = document.getElementById("chapterTitle");
         const verseTableBody = document.getElementById("verseTableBody");
+        const chapterSelectLink = document.getElementById("chapterSelectLink");
 
-        function updateButtons() {
-            prevButton.disabled = chapterNumber <= 1;
-            nextButton.disabled = chapterNumber >= totalChapterCount;
+        // 📌 sessionStorage에서 데이터 확인 후 즉시 렌더링 (API 호출 최소화)
+        function renderFromSessionStorage(chapter) {
+            const storedData = sessionStorage.getItem(`bible_book_${bookId}_chapter_${chapter}`);
+            if (storedData) {
+                const data = JSON.parse(storedData);
+                renderChapter(data);
+                return true; // sessionStorage에서 데이터가 있었음
+            }
+            return false; // sessionStorage에 데이터 없음
         }
 
-        async function loadChapter(newChapter) {
+        // 📌 화면 업데이트 함수 (sessionStorage & API 호출 공통)
+        function renderChapter(data) {
+            chapterTitle.textContent = `${translationName} > ${bookName} > ${data.chapter.chapterNumber}`;
+            verseTableBody.innerHTML = "";
+            data.chapter.verses.forEach(verse => {
+                const row = document.createElement("tr");
+                row.innerHTML = `<td>${verse.verseNumber}</td><td>${verse.text}</td>`;
+                verseTableBody.appendChild(row);
+            });
+
+            // 현재 장 번호 업데이트 및 sessionStorage에 저장
+            chapterNumber = data.chapter.chapterNumber;
+            sessionStorage.setItem("chapterNumber", chapterNumber);
+            sessionStorage.setItem(`bible_book_${bookId}_chapter_${chapterNumber}`, JSON.stringify(data)); // 캐싱
+
+            // 버튼 업데이트
+            prevButton.disabled = chapterNumber <= 1;
+            nextButton.disabled = chapterNumber >= data.totalChapterCount;
+
+            // 장 선택 페이지 링크 업데이트
+            chapterSelectLink.href = `/web/bibles/chapters`;
+
+            // 스크롤 최상단 이동
+            window.scrollTo({top: 0, behavior: "smooth"});
+        }
+
+        // 📌 API에서 데이터 가져오기 (sessionStorage에 없을 경우)
+        async function fetchChapterFromAPI(newChapter) {
             try {
                 prevButton.disabled = true;
                 nextButton.disabled = true;
-
                 const response = await fetch(`/api/bibles/translations/${translationId}/books/${bookId}/chapters/${newChapter}/verses`);
                 if (!response.ok) {
                     throw new Error("데이터를 불러오는 중 오류가 발생했습니다.");
                 }
                 const data = await response.json();
-
-                chapterTitle.textContent = data.chapter.chapterNumber;
-                verseTableBody.innerHTML = ""; // Clear previous content
-                data.chapter.verses.forEach(verse => {
-                    const row = document.createElement("tr");
-                    const verseNumberCell = document.createElement("td");
-                    verseNumberCell.textContent = verse.verseNumber;
-                    const verseTextCell = document.createElement("td");
-                    verseTextCell.textContent = verse.text;
-                    row.appendChild(verseNumberCell);
-                    row.appendChild(verseTextCell);
-                    verseTableBody.appendChild(row);
-                });
-                chapterNumber = data.chapter.chapterNumber;
-                window.scrollTo(0, 0);
+                renderChapter(data);
             } catch (error) {
                 alert(error.message);
-            } finally {
-                updateButtons();
+            }
+        }
+
+        // 📌 장을 변경할 때 실행
+        async function loadChapter(newChapter) {
+            if (!renderFromSessionStorage(newChapter)) {
+                await fetchChapterFromAPI(newChapter);
             }
         }
 
@@ -118,12 +140,11 @@
         });
 
         nextButton.addEventListener("click", () => {
-            if (chapterNumber < totalChapterCount) {
-                loadChapter(chapterNumber + 1);
-            }
+            loadChapter(chapterNumber + 1);
         });
 
-        updateButtons();
+        // 📌 최초 데이터 로드 (sessionStorage 우선, 없으면 API 호출)
+        await loadChapter(chapterNumber);
     });
 </script>
 </body>
