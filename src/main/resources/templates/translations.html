@@ -36,8 +36,8 @@
             row.addEventListener("click", function () {
                 const translationId = this.getAttribute("data-translation-id");
                 const translationName = this.getAttribute("data-translation-name");
-                sessionStorage.setItem("translationId", translationId);
-                sessionStorage.setItem("translationName", translationName);
+                localStorage.setItem("translationId", translationId);
+                localStorage.setItem("translationName", translationName);
                 window.location.href = "/web/bibles/books";
             });
         });

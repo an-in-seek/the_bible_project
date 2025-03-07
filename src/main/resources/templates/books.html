@@ -38,8 +38,8 @@
 <script>
     document.addEventListener("DOMContentLoaded", async function () {
         // sessionStorage에서 translationId 가져오기
-        const translationId = sessionStorage.getItem("translationId") || "1";  // 기본값 1
-        const translationName = sessionStorage.getItem("translationName") || "";
+        const translationId = localStorage.getItem("translationId") || "1";  // 기본값 1
+        const translationName = localStorage.getItem("translationName") || "";
 
         const translationTitle = document.getElementById("translationTitle");
         const bookList = document.getElementById("bookList");
@@ -69,8 +69,8 @@
                     <td>${book.testamentType}</td>
                 `;
                 row.addEventListener("click", () => {
-                    sessionStorage.setItem("bookId", book.bookId);
-                    sessionStorage.setItem("bookName", book.bookName);
+                    localStorage.setItem("bookId", book.bookId);
+                    localStorage.setItem("bookName", book.bookName);
                     window.location.href = "/web/bibles/chapters"; // ✅ 장 목록 화면 URL 변경
                 });
                 bookList.appendChild(row);
