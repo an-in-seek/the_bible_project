@@ -32,6 +32,7 @@ spring:
         - classpath:bible_book.sql
         - classpath:bible_krv_01_genesis.sql
         - classpath:bible_krv_02_exodus.sql
+        - classpath:bible_krv_03_leviticus.sql
 
 springdoc:
   api-docs:
