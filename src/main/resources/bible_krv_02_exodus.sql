@@ -1134,3 +1134,1340 @@ INSERT INTO bible_verse (chapter_id, verse_number, text)
 VALUES (70, 25, '네가 내게 돌로 단을 쌓거든 다듬은 돌로 쌓지 말라 네가 정으로 그것을 쪼면 부정하게 함이니라');
 INSERT INTO bible_verse (chapter_id, verse_number, text)
 VALUES (70, 26, '너는 층계로 내 단에 오르지 말라 네 하체가 그 위에서 드러날까 함이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 1, '네가 백성 앞에 세울 율례는 이러하니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 2, '네가 히브리 종을 사면 그가 육년 동안 섬길 것이요 제칠년에는 값 없이 나가 자유할 것이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 3, '그가 단신으로 왔으면 단신으로 나갈 것이요 장가 들었으면 그 아내도 그와 함께 나가려니와');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 4, '상전이 그에게 아내를 줌으로 그 아내가 자녀간 낳았으면 그 아내와 그 자식들은 상전에게 속할 것이요 그는 단신으로 나갈 것이로되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 5, '종이 진정으로 말하기를 내가 상전과 내 처자를 사랑하니 나가서 자유하지 않겠노라 하면');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 6, '상전이 그를 데리고 재판장에게로 갈 것이요 또 그를 문이나 문설주 앞으로 데리고 가서 그것에다가 송곳으로 그 귀를 뚫을 것이라 그가 영영히 그 상전을 섬기리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 7, '사람이 그 딸을 여종으로 팔았으면 그는 남종 같이 나오지 못할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 8, '만일 상전이 그를 기뻐 아니하여 상관치 아니하면 그를 속신케 할 것이나 그 여자를 속임이 되었으니 타국인에게 팔지 못할 것이');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 9, '만일 그를 자기 아들에게 주기로 하였으면 그를 딸 같이 대접할 것이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 10, '만일 상전이 달리 장가를 들지라도 그의 의복과 음식과 동침하는 것은 끊지 못할 것이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 11, '이 세가지를 시행하지 아니하면 그는 속전을 내지 않고 거저 나가게 할 것이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 12, '사람을 쳐 죽인 자는 반드시 죽일 것이나');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 13, '만일 사람이 계획한 일이 아니라 나 하나님이 사람을 그 손에 붙임이면 내가 위하여 한 곳을 정하리니 그 사람이 그리로 도망할 것이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 14, '사람이 그 이웃을 짐짓 모살하였으면 너는 그를 내 단에서라도 잡아내려 죽일지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 15, '자기 아비나 어미를 치는 자는 반드시 죽일지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 16, '사람을 후린 자가 그 사람을 팔았든지 자기 수하에 두었든지 그를 반드시 죽일 지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 17, '그 아비나 어미를 저주하는 자는 반드시 죽일 지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 18, '사람이 서로 싸우다가 하나가 돌이나 주먹으로 그 적수를 쳤으나 그가 죽지 않고 자리에 누었다가');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 19, '지팡이를 짚고 기동하면 그를 친 자가 형벌은 면하되 기간 손해를 배상하고 그로 전치되게 할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 20, '사람이 매로 그 남종이나 여종을 쳐서 당장에 죽으면 반드시 형벌을 받으려니와');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 21, '그가 일일이나 이일을 연명하면 형벌을 면하리니 그는 상전의 금전임이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 22, '사람이 서로 싸우다가 아이 밴 여인을 다쳐 낙태케 하였으나 다른 해가 없으면 그 남편의 청구대로 반드시 벌금을 내되 재판장의 판결을 좇아 낼 것이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 23, '그러나 다른 해가 있으면 갚되 생명은 생명으로,');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 24, '눈은 눈으로, 이는 이로, 손은 손으로, 발은 발로,');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 25, '데운 것은 데움으로, 상하게 한 것은 상함으로, 때린 것은 때림으로 갚을지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 26, '사람이 그 남종의 한 눈이나 여종의 한 눈을 쳐서 상하게 하면 그 눈 대신에 그를 놓을 것이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 27, '그 남종의 한 이나 여종의 한 이를 쳐서 빠뜨리면 그 이 대신에 그를 놓을지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 28, '소가 남자나 여자를 받아서 죽이면 그 소는 반드시 돌에 맞아 죽을 것이요 그 고기는 먹지 말 것이며 임자는 형벌을 면하려니와');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 29, '소는 본래 받는 버릇이 있고 그 임자는 그로 인하여 경고를 받았으되 단속하지 아니하므로 남녀 간에 받아 죽이면 그 소는 돌로 쳐 죽일 것이고 임자도 죽일 것이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 30, '만일 그에게 속죄금을 명하면 무릇 그 명한 것을 생명의 속으로 낼 것이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 31, '아들을 받든지 딸을 받든지 이 율례대로 그 임자에게 행할 것이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 32, '소가 만일 남종이나 여종을 받으면 소 임자가 은 삼십 세겔을 그 상전에게 줄 것이요 소는 돌에 맞아 죽을지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 33, '사람이 구덩이를 열어 두거나 구덩이를 파고 덮지 아니함으로 소나 나귀가 거기에 빠지면');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 34, '그 구덩이 주인이 잘 조처하여 짐승의 임자에게 돈을 줄 것이요 죽은 것은 그의 차지가 될지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 35, '이 사람의 소가 저 사람의 소를 받아 죽이면 산 소를 팔아 그 값을 반분하고 죽은 것도 반분하려니와');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (71, 36, '그 소가 본래 받는 버릇이 있는 줄을 알고도 그 임자가 단속하지 아니하였으면 그는 소로 소를 갚을 것이요 죽은 것은 그의 차지가 될지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 1, '사람이 소나 양을 도적질하여 잡거나 팔면 그는 소 하나에 소 다섯으로 갚고 양 하나에 양 넷으로 갚을지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 2, '도적이 뚫고 들어옴을 보고 그를 쳐 죽이면 피 흘린 죄가 없으나');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 3, '해 돋은 후이면 피 흘린 죄가 있으리라 도적은 반드시 배상할 것이나 배상할 것이 없으면 그 몸을 팔아 그 도적질한 것을 배상할 것이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 4, '도적질한 것이 살아 그 손에 있으면 소나 나귀나 양을 무론하고 갑절을 배상할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 5, '사람이 밭에서나 포도원에서 먹이다가 그 짐승을 놓아서 남의 밭에서 먹게 하면 자기 밭의 제일 좋은 것과 자기 포도원의 제일 좋은 것으로 배상할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 6, '불이 나서 가시나무에 미쳐 낟가리나 거두지 못한 곡식이나 전원을 태우면 불 놓은 자가 반드시 배상할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 7, '사람이 돈이나 물품을 이웃에게 맡겨 지키게 하였다가 그 이웃의 집에서 봉적하였는데 그 도적이 잡히면 갑절을 배상할 것이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 8, '도적이 잡히지 아니하면 그 집 주인이 재판장 앞에 가서 자기가 그 이웃의 물품에 손 댄 여부의 조사를 받을 것이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 9, '어떠한 과실에든지 소에든지 나귀에든지 양에든지 의복에든지 또는 아무 잃은 물건에든지 그것에 대하여 혹이 이르기를 이것이 그것이라 하면 두 편이 재판장 앞에 나아갈 것이요 재판장이 죄 있다고 하는 자가 그 상대편에게 갑절을 배상할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 10, '사람이 나귀나 소나 양이나 다른 짐승을 이웃에게 맡겨 지키게 하였다가 죽거나 상하거나 몰려가도 본 사람이 없으면');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 11, '두 사람 사이에 맡은 자가 이웃의 것에 손을 대지 아니하였다고 여호와로 맹세할 것이요 그 임자는 그대로 믿을 것이며 그 사람은 배상하지 아니하려니와');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 12, '만일 자기에게서 봉적하였으면 그 임자에게 배상할 것이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 13, '만일 찢겼으면 그것을 가져다가 증거할 것이요 그 찢긴 것에 대하여 배상하지 않을지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 14, '만일 이웃에게 빌어온 것이 그 임자가 함께 있지 아니할 때에 상하거나 죽으면 반드시 배상하려니와');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 15, '그 임자가 그것과 함께 하였으면 배상하지 않을지며 세 낸 것도 세를 위하여 왔은즉 배상하지 않을지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 16, '사람이 정혼하지 아니한 처녀를 꾀어 동침하였으면 빙폐를 드려 아내로 삼을 것이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 17, '만일 그 아비가 그로 그에게 주기를 거절하면 그는 처녀에게 빙폐하는 일례로 돈을 낼지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 18, '너는 무당을 살려 두지 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 19, '짐승과 행음하는 자는 반드시 죽일지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 20, '여호와 외에 다른 신에게 희생을 드리는 자는 멸할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 21, '너는 이방 나그네를 압제하지 말며 그들을 학대하지 말라 너희도 애굽 땅에서 나그네이었었음이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 22, '너는 과부나 고아를 해롭게 하지 말라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 23, '네가 만일 그들을 해롭게 하므로 그들이 내게 부르짖으면 내가 반드시 그 부르짖음을 들을지라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 24, '나의 노가 맹렬하므로 내가 칼로 너희를 죽이리니 너희 아내는 과부가 되고 너희 자녀는 고아가 되리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 25, '네가 만일 너와 함께한 나의 백성 중 가난한 자에게 돈을 꾸이거든 너는 그에게 채주 같이 하지 말며 변리를 받지 말 것이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 26, '네가 만일 이웃의 옷을 전당잡거든 해가 지기 전에 그에게 돌려보내라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 27, '그 몸을 가릴 것이 이뿐이라 이는 그 살의 옷인즉 그가 무엇을 입고 자겠느냐 그가 내게 부르짖으면 내가 들으리니 나는 자비한 자임이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 28, '너는 재판장을 욕하지 말며 백성의 유사를 저주하지 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 29, '너는 너의 추수한 것과 너의 짜낸 즙을 드리기에 더디게 말지며 너의 처음 난 아들들을 내게 줄지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 30, '너의 소와 양도 그 일례로 하되 칠 일 동안 어미와 함께 있게 하다가 팔일만에 내게 줄지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (72, 31, '너희는 내게 거룩한 사람이 될지니 들에서 짐승에게 찢긴 것의 고기를 먹지 말고 개에게 던질지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 1, '너는 허망한 풍설을 전파하지 말며 악인과 연합하여 무함하는 증인이 되지 말며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 2, '다수를 따라 악을 행하지 말며 송사에 다수를 따라 부정당한 증거를 하지 말며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 3, '가난한 자의 송사라고 편벽되이 두호하지 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 4, '네가 만일 네 원수의 길 잃은 소나 나귀를 만나거든 반드시 그 사람에게로 돌릴지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 5, '네가 만일 너를 미워하는 자의 나귀가 짐을 싣고 엎드러짐을 보거든 삼가 버려두지 말고 그를 도와 그 짐을 부리울지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 6, '너는 가난한 자의 송사라고 공평치 않게 하지 말며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 7, '거짓 일을 멀리하며 무죄한 자와 의로운 자를 죽이지 말라 나는 악인을 의롭다 하지 아니하겠노라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 8, '너는 뇌물을 받지 말라 뇌물은 밝은 자의 눈을 어둡게 하고 의로운 자의 말을 굽게 하느니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 9, '너는 이방 나그네를 압제하지 말라 너희가 애굽 땅에서 나그네 되었었은즉 나그네의 정경을 아느니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 10, '너는 육년 동안은 너의 땅에 파종하여 그 소산을 거두고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 11, '제칠년에는 갈지 말고 묵여 두어서 네 백성의 가난한 자로 먹게 하라 그 남은 것은 들짐승이 먹으리라 너의 포도원과 감람원도 그리할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 12, '너는 육일 동안에 네 일을 하고 제칠일에는 쉬라 네 소와 나귀가 쉴 것이며 네 계집 종의 자식과 나그네가 숨을 돌리리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 13, '내가 네게 이른 모든 일을 삼가 지키고 다른 신들의 이름은 부르지도 말며 네 입에서 들리게도 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 14, '너는 매년 삼차 내게 절기를 지킬지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 15, '너는 무교병의 절기를 지키라 내가 네게 명한 대로 아빕월의 정한 때에 칠 일동안 무교병을 먹을지니 이는 그 달에 네가 애굽에서 나왔음이라 빈 손으로 내게 보이지 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 16, '맥추절을 지키라 이는 네가 수고하여 밭에 뿌린 것의 첫 열매를 거둠이니라 수장절을 지키라 이는 네가 수고하여 이룬 것을 연종에 밭에서부터 거두어 저장함이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 17, '너의 모든 남자는 매년 세번씩 주 여호와께 보일지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 18, '너는 내 희생의 피를 유교병과 함께 드리지 말며 내 절기 희생의 기름을 아침까지 남겨 두지 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 19, '너의 토지에서 처음 익은 열매의 첫것을 가져다가 너의 하나님 여호와의 전에 드릴지니라 너는 염소 새끼를 그 어미의 젖으로 삶지 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 20, '내가 사자를 네 앞서 보내어 길에서 너를 보호하여 너로 내가 예비한 곳에 이르게 하리니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 21, '너희는 삼가 그 목소리를 청종하고 그를 노엽게 하지 말라 그가 너희 허물을 사하지 아니할 것은 내 이름이 그에게 있음이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 22, '네가 그 목소리를 잘 청종하고 나의 모든 말대로 행하면 내가 네 원수에게 원수가 되고 네 대적에게 대적이 될지라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 23, '나의 사자가 네 앞서 가서 너를 아모리 사람과 헷 사람과 브리스 사람과 가나안 사람과 히위 사람과 여부스 사람에게로 인도하고 나는 그들을 끊으리니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 24, '너는 그들의 신을 숭배하지 말며 섬기지 말며 그들의 소위를 본받지 말며 그것들을 다 훼파하며 그 주상을 타파하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 25, '너의 하나님 여호와를 섬기라 그리하면 여호와가 너희의 양식과 물에 복을 내리고 너희 중에 병을 제하리니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 26, '네 나라에 낙태하는 자가 없고 잉태치 못하는 자가 없을 것이라 내가 너의 날 수를 채우리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 27, '내가 내 위엄을 네 앞서 보내어 너의 이를 곳의 모든 백성을 파하고 너의 모든 원수로 너를 등지게 할 것이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 28, '내가 왕벌을 네 앞에 보내리니 그 벌이 히위 족속과 가나안 족속과 헷 족속을 네 앞에서 쫓아내리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 29, '그러나 그 땅이 황무하게 되어 들짐승이 번성하여 너희를 해할까 하여 일년 안에는 그들을 네 앞에서 쫓아내지 아니하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 30, '네가 번성하여 그 땅을 기업으로 얻을 때까지 내가 그들을 네 앞에서 조금씩 쫓아내리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 31, '너의 지경을 홍해에서부터 블레셋 바다까지 광야에서부터 하수까지 정하고 그 땅의 거민을 네 앞에서 쫓아낼지라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 32, '너는 그들과 그들의 신과 언약하지 말라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (73, 33, '그들이 네 땅에 머무르지 못할 것은 그들이 너로 내게 범죄케 할까 두려움이라 네가 그 신을 섬기면 그것이 너의 올무가 되리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 1, '또 모세에게 이르시되 너는 아론과 나답과 아비후와 이스라엘 장로 칠십 인과 함께 여호와에게로 올라와 멀리서 경배하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 2, '너 모세만 여호와에게 가까이 나아오고 그들은 가까이 나아오지 말며 백성은 너와 함께 올라오지 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 3, '모세가 와서 여호와의 모든 말씀과 그 모든 율례를 백성에게 고하매 그들이 한 소리로 응답하여 가로되 여호와의 명하신 모든 말씀을 우리가 준행하리이다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 4, '모세가 여호와의 모든 말씀을 기록하고 이른 아침에 일어나 산 아래 단을 쌓고 이스라엘 십이 지파대로 열두 기둥을 세우고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 5, '이스라엘 자손의 청년들을 보내어 번제와 소로 화목제를 여호와께 드리게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 6, '모세가 피를 취하여 반은 양푼에 담고 반은 단에 뿌리고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 7, '언약서를 가져 백성에게 낭독하여 들리매 그들이 가로되 여호와의 모든 말씀을 우리가 준행하리이다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 8, '모세가 그 피를 취하여 백성에게 뿌려 가로되 이는 여호와께서 이 모든 말씀에 대하여 너희와 세우신 언약의 피니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 9, '모세와 아론과 나답과 아비후와 이스라엘 장로 칠십 인이 올라가서');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 10, '이스라엘 하나님을 보니 그 발 아래에는 청옥을 편듯하고 하늘 같이 청명하더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 11, '하나님이 이스라엘의 존귀한 자들에게 손을 대지 아니하셨고 그들은 하나님을 보고 먹고 마셨더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 12, '여호와께서 모세에게 이르시되 너는 산에 올라 내게로 와서 거기 있으라 너로 그들을 가르치려고 내가 율법과 계명을 친히 기록한 돌판을 네게 주리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 13, '모세가 그 종자 여호수아와 함께 일어나 하나님의 산으로 올라가며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 14, '장로들에게 이르되 너희는 여기서 우리가 너희에게로 돌아오기까지 기다리라 아론과 훌이 너희와 함께하리니 무릇 일이 있는 자는 그들에게로 나아갈지니라 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 15, '모세가 산에 오르매 구름이 산을 가리며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 16, '여호와의 영광이 시내 산 위에 머무르고 구름이 육일 동안 산을 가리더니 제칠일에 여호와께서 구름 가운데 모세를 부르시니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 17, '산 위의 여호와의 영광이 이스라엘 자손의 눈에 맹렬한 불 같이 보였고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (74, 18, '모세는 구름 속으로 들어가서 산 위에 올랐으며 사십 일 사십 야를 산에 있으니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 1, '여호와께서 모세에게 일러 가라사대');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 2, '이스라엘 자손에게 명하여 내게 예물을 가져오라 하고 무릇 즐거운 마음으로 내는 자에게서 내게 드리는 것을 너희는 받을지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 3, '너희가 그들에게서 받을 예물은 이러하니 금과 은과 놋과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 4, '청색 자색 홍색실과 가는 베실과 염소털과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 5, '붉은 물 들인 수양의 가죽과 해달의 가죽과 조각목과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 6, '등유와 관유에 드는 향품과 분향할 향을 만들 향품과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 7, '호마노며 에봇과 흉패에 물릴 보석이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 8, '내가 그들 중에 거할 성소를 그들을 시켜 나를 위하여 짓되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 9, '무릇 내가 네게 보이는 대로 장막의 식양과 그 기구의 식양을 따라 지을지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 10, '그들은 조각목으로 궤를 짓되 장이 이 규빗 반, 광이 일 규빗 반, 고가 일 규빗 반이 되게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 11, '너는 정금으로 그것을 싸되 그 안팎을 싸고 윗가로 돌아가며 금테를 두르고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 12, '금고리 넷을 부어 만들어 그 네 발에 달되 이편에 두 고리요 저편에 두 고리며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 13, '조각목으로 채를 만들고 금으로 싸고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 14, '그 채를 궤 양편 고리에 꿰어서 궤를 메게 하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 15, '채를 궤의 고리에 꿴 대로 두고 빼어내지 말지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 16, '내가 네게 줄 증거판을 궤 속에 둘지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 17, '정금으로 속죄소를 만들되 장이 이 규빗 반, 광이 일 규빗 반이 되게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 18, '금으로 그룹 둘을 속죄소 두 끝에 쳐서 만들되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 19, '한 그룹은 이 끝에, 한 그룹은 저 끝에 곧 속죄소 두 끝에 속죄소와 한 덩이로 연하게 할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 20, '그룹들은 그 날개를 높이 펴서 그 날개로 속죄소를 덮으며 그 얼굴을 서로 대하여 속죄소를 향하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 21, '속죄소를 궤 위에 얹고 내가 네게 줄 증거판을 궤 속에 넣으라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 22, '거기서 내가 너와 만나고 속죄소 위 곧 증거궤 위에 있는 두 그룹 사이에서 내가 이스라엘 자손을 위하여 네게 명할 모든 일을 네게 이르리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 23, '너는 조각목으로 상을 만들되 장이 이 규빗, 광이 일 규빗, 고가 일 규빗 반이 되게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 24, '정금으로 싸고 주위에 금테를 두르고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 25, '그 사면에 손바닥 넓이만한 턱을 만들고 그 턱 주위에 금으로 테를 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 26, '그것을 위하여 금고리 넷을 만들어 네 발위 네 모퉁이에 달되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 27, '턱 곁에 달라 이는 상 멜 채를 꿸 곳이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 28, '또 조각목으로 그 채를 만들고 금으로 싸라 상을 이것으로 멜 것이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 29, '너는 대접과 숟가락과 병과 붓는 잔을 만들되 정금으로 만들지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 30, '상 위에 진설병을 두어 항상 내 앞에 있게 할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 31, '너는 정금으로 등대를 쳐서 만들되 그 밑판과 줄기와 잔과 꽃받침과 꽃을 한 덩이로 연하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 32, '가지 여섯을 등대 곁에서 나오게 하되 그 세 가지는 이편으로 나오고 그 세 가지는 저편으로 나오게 하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 33, '이편 가지에 살구 꽃 형상의 잔 셋과 꽃받침과 꽃이 있게 하고 저편 가지에도 살구꽃 형상의 잔 셋과 꽃받침과 꽃이 있게 하여 등대에서 나온 여섯 가지를 같게 할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 34, '등대 줄기에는 살구꽃 형상의 잔 넷과 꽃받침과 꽃이 있게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 35, '등대에서 나온 여섯 가지를 위하여 꽃받침이 있게 하되 두 가지 아래 한 꽃받침이 있어 줄기와 연하게 하며 또 두 가지 아래 한 꽃받침이 있어 줄기와 연하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 36, '그 꽃받침과 가지를 줄기와 연하게 하여 전부를 정금으로 쳐 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 37, '등잔 일곱을 만들어 그 위에 두어 앞을 비추게 하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 38, '그 불집게와 불똥 그릇도 정금으로 만들지니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 39, '등대와 이 모든 기구를 정금 한 달란트로 만들되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (75, 40, '너는 삼가 이 산에서 네게 보인 식양대로 할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 1, '너는 성막을 만들되 앙장 열 폭을 가늘게 꼰 베실과 청색 자색 홍색실로 그룹을 공교히 수 놓아 만들지니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 2, '매 폭의 장은 이십팔 규빗, 광은 사 규빗으로 각 폭의 장단을 같게하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 3, '그 앙장 다섯 폭을 서로 연하며 다른 다섯 폭도 서로 연하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 4, '그 앙장의 연락할 말폭 가에 청색 고를 만들며 다른 연락할 말폭 가에도 그와 같이 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 5, '앙장 말폭 가에 고 오십을 달며 다른 앙장 말폭 가에도 고 오십을 달고 그 고들을 서로 대하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 6, '금 갈고리 오십을 만들고 그 갈고리로 앙장을 연합하여 한 성막을 이룰지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 7, '그 성막을 덮는 막 곧 앙장을 염소털로 만들되 열한 폭을 만들지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 8, '각 폭의 장은 삼십 규빗, 광은 사 규빗으로 열한 폭의 장단을 같게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 9, '그 앙장 다섯 폭을 서로 연하며 또 여섯 폭을 서로 연하고 그 여섯째 폭 절반은 성막 전면에 접어 드리우고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 10, '앙장을 연락할 말폭 가에 고 오십을 달며 다른 연락할 말폭 가에도 고 오십을 달고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 11, '놋 갈고리 오십을 만들고 그 갈고리로 그 고를 꿰어 연합하여 한막이 되게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 12, '그 막 곧 앙장의 나머지 그 반폭은 성막 뒤에 드리우고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 13, '막 곧 앙장의 길이의 남은 것은 이편에 한 규빗, 저편에 한 규빗씩 성막 좌우 양편에 덮어 드리우고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 14, '붉은 물 들인 수양의 가죽으로 막의 덮개를 만들고 해달의 가죽으로 그 웃덮개를 만들지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 15, '너는 조각목으로 성막을 위하여 널판을 만들어 세우되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 16, '각 판의 장은 십 규빗, 광은 일 규빗 반으로 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 17, '각 판에 두 촉씩 내어 서로 연하게 하되 너는 성막 널판을 다 그와 같이 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 18, '너는 성막을 위하여 널판을 만들되 남편을 위하여 널판 스물을 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 19, '스무 널판 아래 은받침 마흔을 만들지니 이 널판 아래에도 그 두 촉을 위하여 두 받침을 만들고 저 널판 아래에도 그 두 촉을 위하여 두 받침을 만들찌라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 20, '성막 다른 편 곧 그 북편을 위하여도 널판 스물로 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 21, '은받침 마흔을 이 널판 아래에도 두 받침, 저 널판 아래에도 두 받침으로 하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 22, '성막 뒤 곧 그 서편을 위하여는 널판 여섯을 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 23, '성막 뒤 두 모퉁이 편을 위하여는 널판 둘을 만들되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 24, '아래에서부터 위까지 각기 두겹 두께로 하여 윗고리에 이르게 하고 두 모퉁이 편을 다 그리하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 25, '그 여덞 널판에는 은받침이 열여섯이니 이 판 아래에도 두 받침이요 저 판 아래에도 두 받침이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 26, '너는 조각목으로 띠를 만들지니 성막 이편 널판을 위하여 다섯이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 27, '성막 저편 널판을 위하여 다섯이요 성막 뒤 곧 서편 널판을 위하여 다섯이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 28, '널판 가운데 있는 중간 띠는 이 끝에서 저 끝에 미치게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 29, '그 널판들을 금으로 싸고 그 널판들의 띠를 꿸 금고리를 만들고 그 띠를 금으로 싸라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 30, '너는 산에서 보인 식양대로 성막을 세울지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 31, '너는 청색 자색 홍색실과 가늘게 꼰 베실로 짜서 장을 만들고 그 위에 그룹들을 공교히 수 놓아서');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 32, '금 갈고리로 네 기둥 위에 드리우되 그 네 기둥을 조각목으로 만들고 금으로 싸서 네 은받침 위에 둘지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 33, '그 장을 갈고리 아래 드리운 후에 증거궤를 그 장안에 들여 놓으라 그장이 너희를 위하여 성소와 지성소를 구별하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 34, '너는 지성소에 있는 증거궤 위에 속죄소를 두고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 35, '그 장 바깥 북편에 상을 놓고 남편에 등대를 놓아 상과 대하게 할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 36, '청색 자색 홍색실과 가늘게 꼰 베실로 수 놓아 짜서 성막 문을 위하여 장을 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (76, 37, '그 문장을 위하여 기둥 다섯을 조각목으로 만들어 금으로 싸고 그 갈고리도 금으로 만들찌며 또 그 기둥을 위하여 받침 다섯을 놋으로 부어 만들지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 1, '너는 조각목으로 장이 오 규빗, 광이 오 규빗의 단을 만들되 네모 반듯하게하며 고는 삼 규빗으로 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 2, '그 네 모퉁이 위에 뿔을 만들되 그 뿔이 그것에 연하게 하고 그 단을 놋으로 쌀지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 3, '재를 담는 통과 부삽과 대야와 고기 갈고리와 불 옮기는 그릇을 만들되 단의 그릇을 다 놋으로 만들지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 4, '단을 위하여 놋으로 그물을 만들고 그 위 네 모퉁이에 놋고리 넷을 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 5, '그물은 단 사면 가장자리 아래 곧 단 절반에 오르게 할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 6, '또 그 단을 위하여 채를 만들되 조각목으로 만들고 놋으로 쌀지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 7, '단 양편 고리에 그 채를 꿰어 단을 메게 할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 8, '단은 널판으로 비게 만들되 산에서 네게 보인 대로 그들이 만들지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 9, '너는 성막의 뜰을 만들찌니 남을 향하여 뜰 남편에 광이 백 규빗의 세마포장을 쳐서 그 한 편을 당하게 할지니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 10, '그 기둥이 스물이며 그 받침 스물은 놋으로 하고 그 기둥의 갈고리와 가름대는 은으로 할찌며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 11, '그 북편에도 광이 백 규빗의 포장을 치되 그 기둥이 스물이며 그 기둥의 받침 스물은 놋으로 하고 그 기둥의 갈고리와 가름대는 은으로 할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 12, '뜰의 옆 곧 서편에 광 오십 규빗의 포장을 치되 그 기둥이 열이요 받침이 열이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 13, '동을 향하여 뜰 동편의 광도 오십 규빗이 될지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 14, '문 이편을 위하여 포장이 십 오 규빗이며 그 기둥이 셋이요 받침이 셋이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 15, '문 저편을 위하여도 포장이 십오 규빗이며 그 기둥이 셋이요 받침이 셋이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 16, '뜰 문을 위하여는 청색 자색 홍색실과 가늘게 꼰 베실로 수 놓아 짠 이십 규빗의 장이 있게 할찌니 그 기둥이 넷이요 받침이 넷이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 17, '뜰 사면 모든 기둥의 가름대와 갈고리는 은이요 그 받침은 놋이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 18, '뜰의 장은 백 규빗이요 광은 오십 규빗이요 세마포장의 고는 오 규빗이요 그 받침은 놋이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 19, '성막에서 쓰는 모든 기구와 그 말뚝과 뜰의 포장 말뚝을 다 놋으로 할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 20, '너는 또 이스라엘 자손에게 명하여 감람으로 찧어낸 순결한 기름을 등불을 위하여 네게로 가져오게 하고 끊이지 말고 등불을 켜되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (77, 21, '아론과 그 아들들로 회막안 증거 궤 앞 휘장 밖에서 저녁부터 아침까지 항상 여호와 앞에 그 등불을 간검하게 하라 이는 이스라엘 자손의 대대로 영원한 규례니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 1, '너는 이스라엘 자손 중 네 형 아론과 그 아들들 곧 나답과 아비후와 엘르아살과 이다말을 그와 함께 네게로 나아오게 하여 나를 섬기는 제사장 직분을 행하게 하되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 2, '네 형 아론을 위하여 거룩한 옷을 지어서 영화롭고 아름답게 할지니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 3, '너는 무릇 마음에 지혜 있는자 곧 내가 지혜로운 영으로 채운 자들에게 말하여 아론의 옷을 지어 그를 거룩하게하여 내게 제사장 직분을 행하게 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 4, '그들의 지을 옷은 이러하니 곧 흉패와 에봇과 겉옷과 반포 속옷과 관과 띠라 그들이 네 형 아론과 그 아들들을 위하여 거룩한 옷을 지어 아론으로 내게 제사장 직분을 행하게 할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 5, '그들의 쓸 것은 금실과 청색 자색 홍색실과 가늘게 꼰 베실이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 6, '그들이 금실과 청색 자색 홍색실과 가늘게 꼰 베실로 공교히 짜서 에봇을 짓되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 7, '그것에 견대 둘을 달아 그 두 끝을 연하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 8, '에봇 위에 매는 띠는 에봇 짜는 법으로 금실과 청색 자색 홍색실과 가늘게 꼰 베실로 에봇에 공교히 붙여 짤지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 9, '호마노 두개를 취하여 그 위에 이스라엘 아들들의 이름을 새기되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 10, '그들의 연치대로 여섯 이름을 한 보석에 나머지 여섯 이름은 다른 보석에');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 11, '보석을 새기는 자가 인에 새김 같이 너는 이스라엘 아들들의 이름을 그 두 보석에 새겨 금테에 물리고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 12, '그 두 보석을 에봇 두 견대에 붙여 이스라엘 아들들의 기념 보석을 삼되 아론이 여호와 앞에서 그들의 이름을 그 두 어께에 메어서 기념이 되게 할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 13, '너는 금으로 테를 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 14, '정금으로 노끈처럼 두 사슬을 땋고 그 땋은 사슬을 그 테에 달지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 15, '너는 판결 흉패를 에봇 짜는 법으로 금실과 청색 자색 홍색실과 가늘게 꼰 베실로 공교히 짜서 만들되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 16, '장광이 한뼘씩 두 겹으로 네모 반듯하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 17, '그것에 네 줄로 보석을 물리되 첫 줄은 홍보석 황옥 녹주옥이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 18, '둘째 줄은 석류석 남보석 홍마노요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 19, '셋째 줄은 호박 백마노 자수정이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 20, '넷째 줄은 녹보석 호마노 벽옥으로 다 금테에 물릴지니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 21, '이 보석들은 이스라엘 아들들의 이름대로 열둘이라 매 보석에 열두 지파의 한 이름씩 인을 새기는 법으로 새기고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 22, '정금으로 노끈처럼 땋은 사슬을 흉패 위에 붙이고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 23, '또 금고리 둘을 만들어 흉패 위 곧 흉패 두 끝에 그 두 고리를 달고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 24, '땋은 두 금사슬로 흉패 두 끝 두 고리에 꿰어 매고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 25, '두 땋은 사슬의 다른 두 끝을 에봇 앞 두 견대의 금테에 매고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 26, '또 금고리 둘을 만들어 흉패 아래 양편 가 안쪽 곧 에봇에 닿은 곳에 달고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 27, '또 금고리 둘을 만들어 에봇 앞 두 견대 아래 매는 자리 가까운 편 곧 공교히 짠 띠 윗편에 달고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 28, '청색 끈으로 흉패 고리와 에봇 고리에 꿰어 흉패로 공교히 짠 에봇 띠 위에 붙여 떠나지 않게 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 29, '아론이 성소에 들어갈 때에는 이스라엘 아들들의 이름을 기록한 이 판결 흉패를 가슴에 붙여 여호와 앞에 영원한 기념을 삼을 것이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 30, '너는 우림과 둠밈을 판결 흉패 안에 넣어 아론으로 여호와 앞에 들어 갈 때에 그 가슴 위에 있게 하라 아론이 여호와 앞에서 이스라엘 자손의 판결을 항상 그 가슴 위에 둘지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 31, '너는 에봇 받침 겉옷을 전부 청색으로 하되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 32, '두 어깨 사이에 머리 들어갈 구멍을 내고 그 주위에 갑옷 깃 같이 깃을 짜서 찢어지지 않게하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 33, '그 옷 가장자리로 돌아가며 청색 자색 홍색실로 석류를 수놓고 금방울을 간격하여 달되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 34, '그 옷 가장자리로 돌아가며 한 금방울, 한 석류, 한 금방울, 한 석류가 있게 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 35, '아론이 입고 여호와를 섬기러 성소에 들어갈 때와 성소에서 나갈 때에 그 소리가 들릴 것이라 그리하면 그가 죽지 아니하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 36, '너는 또 정금으로 패를 만들어 인을 새기는 법으로 그 위에 새기되 여호와께 성결이라 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 37, '그 패를 청색 끈으로 관 위에 매되 곧 전면에 있게 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 38, '이 패가 아론의 이마에 있어서 그로 이스라엘 자손의 거룩하게 드리는 성물의 죄건을 담당하게 하라 그 패가 아론의 이마에 늘 있으므로 그 성물을 여호와께서 받으시게 되리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 39, '너는 가는 베실로 반포 속옷을 짜고 가는 베실로 관을 만드고 띠를 수 놓아 만들지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 40, '너는 아론의 아들들을 위하여 속옷을 만들며 그들을 위하여 띠를 만들며 그들을 위하여 관을 만들어서 영화롭고 아름답게 하되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 41, '너는 그것들로 네 형 아론과 그와 함께한 그 아들들에게 입히고 그들에게 기름을 부어 위임하고 거룩하게 하여 그들로 제사장 직분을 내게 행하게 할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 42, '또 그들을 위하여 베로 고의를 만들어 허리에서부터 넓적다리까지 이르게 하여 하체를 가리게 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (78, 43, '아론과 그 아들들이 회막에 들어갈 때에나 제단에 가까이 하여 거룩한 곳에서 섬길 때에 그것들을 입어야 죄를 지어서 죽지 아니하리니 그와 후손의 영원히 지킬 규례니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 1, '너는 그들에게 나를 섬길 제사장 직분을 위임하여 그들로 거룩하게 할 일이 이러하니 곧 젊은 수소 하나와 흠 없는 수양 둘을 취하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 2, '무교병과 기름 섞인 무교 과자와 기름 바른 무교 전병을 모두 고운 밀가루로 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 3, '그것들을 한 광주리에 담고 그것을 광주리에 담은 채 그 송아지와 두 양과 함께 가져 오고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 4, '너는 아론과 그 아들들을 회막문으로 데려다가 물로 씻기고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 5, '의복을 가져다가 아론에게 속옷과 에봇 받침 겉옷과 에봇을 입히고 흉패를 달고 에봇에 공교히 짠 띠를 띠우고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 6, '그 머리에 관을 씌우고 그 위에 성패를 더하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 7, '관유를 가져다가 그 머리에 부어 바르고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 8, '그 아들들을 데려다가 그들에게 속옷을 입히고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 9, '아론과 그 아들들에게 띠를 띠우며 관을 씌워서 제사장의 직분을 그들에게 맡겨 영원한 규례가 되게 하라 너는 이같이 아론과 그 아들들에게 위임하여 거룩하게 할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 10, '너는 수송아지를 회막 앞으로 끌어 오고 아론과 그 아들들은 그 송아지 머리에 안수할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 11, '너는 회막문 여호와 앞에서 그 송아지를 잡고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 12, '그 피를 네 손가락으로 단 뿔들에 바르고 그 피 전부를 단 밑에 쏟을지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 13, '내장에 덮인 모든 기름과 간 위에 있는 꺼풀과 두 콩팥과 그 위의 기름을 취하여 단 위에 불사르고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 14, '그 수소의 고기와 가죽과 똥은 진 밖에서 불사르라 이는 속죄제니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 15, '너는 또 수양 하나를 취하고 아론과 그 아들들은 그 수양의 머리 위에 안수할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 16, '너는 그 수양을 잡고 그 피를 취하여 단 위의 주위에 뿌리고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 17, '그 수양의 각을 뜨고 그 장부와 다리는 씻어 각 뜬 고기와 그 머리와 함께 두고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 18, '그 수양의 전부를 단 위에 불사르라 이는 여호와께 드리는 번제요 이는 향기로운 냄새니 여호와께 드리는 화제니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 19, '너는 다른 수양을 취하고 아론과 그 아들들은 그 수양의 머리 위에 안수할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 20, '너는 그 수양을 잡고 그 피를 취하여 아론의 오른 귓부리와 그 아들들의 오른 귓부리에 바르고 그 오른손 엄지와 오른발 엄지에 바르고 그 피를 단 주위에 뿌리고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 21, '단 위의 피와 관유를 취하여 아론과 그 옷과 그 아들들과 그 아들들의 옷에 뿌리라 그와 그 옷과 그 아들들과 그 아들들의 옷이 거룩하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 22, '또 너는 그 수양의 기름과 기름진 꼬리와 그 내장에 덮인 기름과 간 위의 꺼풀과 두 콩팥과 그것들 위의 기름과 우편 넓적다리를 취하라 이는 위임식의 수양이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 23, '또 여호와 앞에 있는 무교병 광주리에서 떡 한 덩이와 기름 바른 과자 하나와 전병 하나를 취하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 24, '그 전부를 아론의 손과 그 아들들의 손에 주고 그것을 흔들어 여호와 앞에 요제를 삼을지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 25, '너는 그것을 그들의 손에서 취하여 단 위에서 번제물을 더하여 불사르라 이는 여호와 앞에 향기로운 냄새니 곧 여호와께 드리는 화제니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 26, '너는 위임식 수양의 가슴을 취하여 여호와 앞에 흔들어 요제를 삼으라 이는 너의 분깃이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 27, '너는 그 흔든 요제물 곧 아론과 그 아들들의 위임식 수양의 가슴과 넓적다리를 거룩하게 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 28, '이는 이스라엘 자손이 아론과 그 자손에게 돌릴 영원한 분깃이요 거제물이니 곧 이스라엘 자손이 화목제의 희생 중에서 취한 거제물로서 여호와께 드리는 거제물이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 29, '아론의 성의는 아론의 후에 그 아들들에게 돌릴지니 그들이 그것을 입고 기름 부음으로 위임을 받을 것이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 30, '그를 이어 제사장이 되는 아들이 회막에 들어가서 성소에서 섬길 때에는 칠 일 동안 그것을 입을지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 31, '너는 위임식 수양을 취하여 거룩한 곳에서 그 고기를 삶고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 32, '아론과 그 아들들이 회막문에서 그 수양의 고기와 광주리에 있는 떡을 먹을지라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 33, '속죄물 곧 그들을 위임하며 그들은 거룩하게 하는데 쓰는 것은 그들은 먹되 타인은 먹지 못할지니 이는 성물이 됨이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 34, '위임식 고기나 떡이 아침까지 남았으면 그것을 불에 사를지니 이는 거룩한즉 먹지 못할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 35, '너는 내가 무릇 네게 명한 대로 아론과 그 아들들에게 그같이 하여 칠 일동안 위임식을 행하되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 36, '매일 수송아지 하나로 속죄하기 위하여 속죄제를 드리며 또 단을 위하여 깨끗케 하고 그것에 기름을 부어 거룩하게 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 37, '네가 칠 일 동안 단을 위하여 속죄하여 거룩하게 하라 그리하면 지극히 거룩한 단이 되리니 무릇 단에 접촉하는 것이 거룩하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 38, '네가 단 위에 드릴 것은 이러하니라 매일 일년 된 어린 양 두 마리니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 39, '한 어린 양은 아침에 드리고 한 어린 양은 저녁 때에 드릴지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 40, '한 어린 양에 고운 밀가루 에바 십분 일과 찧은 기름 힌의 사분 일을 더하고 또 전제로 포도주 힌의 사분 일을 더할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 41, '한 어린 양은 저녁 때에 드리되 아침과 일반으로 소제와 전제를 그것과 함께 드려 향기로운 냄새가 되게 하여 여호와께 화제를 삼을지니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 42, '이는 너희가 대대로 여호와 앞 회막문에서 늘 드릴 번제라 내가 거기서 너희와 만나고 네게 말하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 43, '내가 거기서 이스라엘 자손을 만나리니 내 영광을 인하여 회막이 거룩하게 될지라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 44, '내가 그 회막과 단을 거룩하게 하며 아론과 그 아들들도 거룩하게 하여 내게 제사장 직분을 행하게 하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 45, '내가 이스라엘 자손 중에 거하여 그들의 하나님이 되리니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (79, 46, '그들은 내가 그들의 하나님 여호와로서 그들 중에 거하려고 그들을 애굽 땅에서 인도하여 낸 줄을 알리라 나는 그들의 하나님 여호와니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 1, '너는 분향할 단을 만들지니 곧 조각목으로 만들되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 2, '장이 일 규빗, 광이 일 규빗으로 네모 반듯하게 하고 고는 이 규빗으로 하며 그 뿔을 그것과 연하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 3, '단 상면과 전후 좌우면과 뿔을 정금으로 싸고 주위에 금테를 두를지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 4, '금테 아래 양편에 금고리 둘을 만들되 곧 그 양편에 만들지니 이는 단을 메는 채를 꿸 곳이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 5, '그 채를 조각목으로 만들고 금으로 싸고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 6, '그 단을 증거궤 위 속죄소 맞은편 곧 증거궤 앞에 있는 장 밖에 두라 그 속죄소는 내가 너와 만날 곳이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 7, '아론이 아침마다 그 위에 향기로운 향을 사르되 등불을 정리할 때에 사를지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 8, '또 저녁때 등불을 켤 때에 사를지니 이 향은 너희가 대대로 여호와앞에 끊지 못할지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 9, '너희는 그 위에 다른 향을 사르지 말며 번제나 소제를 드리지 말며 전제의 술을 붓지 말며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 10, '아론이 일년 일차씩 이 향단 뿔을 위하여 속죄하되 속죄제의 피로 일년 일차씩 대대로 속죄할지니라 이 단은 여호와께 지극히 거룩하니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 11, '여호와께서 모세에게 일러 가라사대');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 12, '네가 이스라엘 자손의 수효를 따라 조사할 때에 조사 받은 각 사람은 그 생명의 속전을 여호와께 드릴지니 이는 그 계수할 때에 그들 중에 온역이 없게 하려 함이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 13, '무릇 계수 중에 드는 자마다 성소에 세겔대로 반 세겔을 낼지니 한 세겔은 이십 게라라 그 반 세겔을 여호와께 드릴지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 14, '무릇 계수 중에 드는 자 곧 이십세 이상 된 자가 여호와께 드리되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 15, '너희의 생명을 속하기 위하여 여호와께 드릴 때에 부자라고 반 세겔에서 더 내지 말고 가난한 자라고 덜 내지 말지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 16, '너는 이스라엘 자손에게서 속전을 취하여 회막의 봉사에 쓰라 이것이 여호와 앞에서 이스라엘 자손의 기념이 되어서 너희의 생명을 속하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 17, '여호와께서 모세에게 일러 가라사대');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 18, '너는 물두멍을 놋으로 만들어 씻게 하되 그것을 회막과 단 사이에 두고 그 속에 물을 담으라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 19, '아론과 그 아들들이 그 두멍에서 수족을 씻되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 20, '그들이 회막에 들어갈 때에 물로 씻어 죽기를 면할 것이요 단에 가까이 가서 그 직분을 행하여 화제를 여호와 앞에 사를 때에도 그리 할지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 21, '이와 같이 그들이 그 수족을 씻어 죽기를 면할지니 이는 그와 그 자손이 대대로 영원히 지킬 규례니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 22, '여호와께서 모세에게 또 일러 가라사대');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 23, '너는 상등 향품을 취하되 액체 몰약 오백 세겔과 그 반수의 향기로운 육계 이백오십 세겔과 향기로운 창포 이백오십 세겔과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 24, '계피 오백 세겔을 성소의 세겔대로 하고 감람 기름 한 힌을 취하여');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 25, '그것으로 거룩한 관유를 만들되 향을 제조하는 법대로 향기름을 만들지니 그것이 거룩한 관유가 될지라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 26, '너는 그것으로 회막과 증거궤에 바르고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 27, '상과 그 모든 기구며 등대와 그 기구며 분향단과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 28, '및 번제단과 그 모든 기구와 물두멍과 그 받침에 발라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 29, '그것들을 지성물로 구별하라 무릇 이것에 접촉하는 것이 거룩하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 30, '너는 아론과 그 아들들에게 기름을 발라 그들을 거룩하게 하고 그들로 내게 제사장 직분을 행하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 31, '이스라엘 자손에게 고하여 이르기를 이것은 너희 대대로 내게 거룩한 관유니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 32, '사람의 몸에 붓지 말며 이 방법대로 이와 같은 것을 만들지 말라 이는 거룩하니 너희는 거룩히 여기라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 33, '무릇 이와 같은 것을 만드는 자나 무릇 이것을 타인에게 붓는 자는 그 백성 중에서 끊쳐지리라 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 34, '여호와께서 모세에게 이르시되 너는 소합향과 나감향과 풍자향의 향품을 취하고 그 향품을 유향에 섞되 각기 동일한 중수로 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 35, '그것으로 향을 만들되 향 만드는 법대로 만들고 그것에 소금을 쳐서 성결하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 36, '그 향 얼마를 곱게 찧어 내가 너와 만날 회막 안 증거궤 앞에 두라 이 향은 너희에게 지극히 거룩하니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 37, '네가 만들 향은 여호와를 위하여 거룩한 것이니 그 방법대로 너희를 위하여 만들지 말라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (80, 38, '무릇 맡으려고 이같은 것을 만드는 자는 그 백성 중에서 끊쳐지리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 1, '여호와께서 모세에게 일러 가라사대');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 2, '내가 유다 지파 훌의 손자요 우리의 아들인 브사렐을 지명하여 부르고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 3, '하나님의 신을 그에게 충만하게 하여 지혜와 총명과 지식과 여러가지 재주로');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 4, '공교한 일을 연구하여 금과 은과 놋으로 만들게 하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 5, '보석을 깍아 물리며 나무를 새겨서 여러가지 일을 하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 6, '내가 또 단 지파 아히사막의 아들 오홀리압을 세워 그와 함께 하게 하며 무릇 지혜로운 마음이 있는 자에게 내가 지혜를 주어 그들로 내가 네게 명한 것을 다 만들게 할지니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 7, '곧 회막과 증거궤와 그 위의 속죄소와 회막의 모든 기구와');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 8, '상과 그 기구와 정금 등대와 그 모든 기구와 분향단과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 9, '번제단과 그 모든 기구와 물두멍과 그 받침과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 10, '제사직을 행할 때에 입는 공교히 짠 의복 곧 제사장 아론의 성의와 그 아들들의 옷과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 11, '관유와 성소의 향기로운 향이라 무릇 내가 네게 명한 대로 그들이 만들지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 12, '여호와께서 모세에게 일러 가라사대');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 13, '너는 이스라엘 자손에게 고하여 이르기를 너희는 나의 안식일을 지키라 이는 나와 너희 사이에 너희 대대의 표징이니 나는 너희를 거룩하게 하는 여호와인 줄 너희로 알게 함이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 14, '너희는 안식일을 지킬지니 이는 너희에게 성일이 됨이라 무릇 그날에 일하는 자는 그 백성 중에서 그 생명이 끊쳐지리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 15, '엿새 동안은 일할 것이나 제칠일은 큰 안식일이니 여호와께 거룩한 것이라 무릇 안식일에 일하는 자를 반드시 죽일지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 16, '이같이 이스라엘 자손이 안식일을 지켜서 그것으로 대대로 영원한 언약을 삼을 것이니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 17, '이는 나와 이스라엘 자손 사이에 영원한 표징이며 나 여호와가 엿새 동안에 천지를 창조하고 제칠일에 쉬어 평안하였음이니라 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (81, 18, '여호와께서 시내산 위에서 모세에게 이르시기를 마치신 때에 증거판 둘을 모세에게 주시니 이는 돌판이요 하나님이 친히 쓰신 것이더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 1, '백성이 모세가 산에서 내려옴이 더딤을 보고 모여 아론에게 이르러 가로되 일어나라 우리를 인도할 신을 우리를 위하여 만들라 이 모세 곧 우리를 애굽 땅에서 인도하여 낸 사람은 어찌 되었는지 알지 못함이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 2, '아론이 그들에게 이르되 너희 아내와 자녀의 귀의 금고리를 빼어 내게로 가져 오라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 3, '모든 백성이 그 귀에서 금고리를 빼어 아론에게로 가져 오매');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 4, '아론이 그들의 손에서 그 고리를 받아 부어서 각도로 새겨 송아지 형상을 만드니 그들이 말하되 이스라엘아 이는 너희를 애굽 땅에서 인도하여 낸 너희 신이로다 하는지라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 5, '아론이 보고 그 앞에 단을 쌓고 이에 공포하여 가로되 내일은 여호와의 절일이니라 하니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 6, '이튿날에 그들이 일찍이 일어나 번제를 드리며 화목제를 드리고 앉아서 먹고 마시며 일어나서 뛰놀더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 7, '여호와께서 모세에게 이르시되 너는 내려가라 네가 애굽 땅에서 인도하여 낸 네 백성이 부패하였도다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 8, '그들이 내가 그들에게 명한 길을 속히 떠나 자기를 위하여 송아지를 부어 만들고 그것을 숭배하며 그것에게 희생을 드리며 말하기를 애굽 땅에서 인도하여 낸 너희 신이라 하였도다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 9, '여호와께서 또 모세에게 이르시되 내가 이 백성을 보니 목이 곧은 백성이로다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 10, '그런즉 나대로 하게 하라 내가 그들에게 진노하여 그들을 진멸하고 너로 큰 나라가 되게 하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 11, '모세가 그 하나님 여호와께 구하여 가로되 여호와여 어찌하여 애굽 땅에서 인도하여 내신 주의 백성에게 진노하시나이까');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 12, '어찌하여 애굽 사람으로 이르기를 여호와가 화를 내려 그 백성을 산에서 죽이고 지면에서 진멸하려고 인도하여 내었다 하게 하려 하시나이까 주의 맹렬한 노를 그치시고 뜻을 돌이키사 주의 백성에게 이 화를 내리지 마옵소서');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 13, '주의 종 아브라함과 이삭과 이스라엘을 기억하소서 주께서 주를 가리켜 그들에게 맹세하여 이르시기를 내가 너희 자손을 하늘의 별처럼 많게 하고 나의 허락한 이 온 땅을 너희의 자손에게 주어 영원한 기업이 되게 하리라 하셨나이다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 14, '여호와께서 뜻을 돌이키사 말씀하신 화를 그 백성에게 내리지 아니하시니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 15, '모세가 돌이켜 산에서 내려 오는데 증거의 두 판이 그 손에 있고 그 판의 양면 이편 저편에 글자가 있으니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 16, '그 판은 하나님이 만드신 것이요 글자는 하나님이 쓰셔서 판에 새기신 것이더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 17, '여호수아가 백성의 떠듦을 듣고 모세에게 말하되 진 중에서 싸우는 소리가 나나이다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 18, '모세가 가로되 이는 승전가도 아니요 패하여 부르짖는 소리도 아니라 나의 듣기에는 노래하는 소리로다 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 19, '진에 가까이 이르러 송아지와 그 춤 추는 것을 보고 대노하여 손에서 그 판들을 산 아래로 던져 깨뜨리니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 20, '모세가 그들의 만든 송아지를 가져 불살라 부수어 가루를 만들어 물에 뿌려 이스라엘 자손에게 마시우니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 21, '모세가 아론에게 이르되 이 백성이 네게 어떻게 하였기에 네가 그들로 중죄에 빠지게 하였느뇨');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 22, '아론이 가로되 내 주여 노하지 마소서 이 백성의 악함을 당신이 아나이다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 23, '그들이 내게 말하기를 우리를 위하여 우리를 인도할 신을 만들라 이 모세 곧 우리를 애굽 땅에서 인도하여 낸 사람은 어찌 되었는지 알 수 없노라 하기에');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 24, '내가 그들에게 이르기를 금이 있는 자는 빼어내라 한즉 그들이 그것을 내게로 가져왔기로 내가 불에 던졌더니 이 송아지가 나왔나이다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 25, '모세가 본즉 백성이 방자하니 이는 아론이 그들로 방자하게 하여 원수에게 조롱거리가 되게 하였음이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 26, '이에 모세가 진문에 서서 가로되 누구든지 여호와의 편에 있는 자는 내게로 나아오라 하매 레위 자손이 다 모여 그에게로 오는지라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 27, '모세가 그들에게 이르되 이스라엘의 하나님 여호와께서 이같이 말씀하시기를 너희는 각각 허리에 칼을 차고 진 이 문에서 저 문까지 왕래하며 각 사람이 그 형제를, 각 사람이 그 친구를, 각 사람이 그 이웃을 도륙하라 하셨느니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 28, '레위 자손이 모세의 말대로 행하매 이 날에 백성 중에 삼천 명 가량이 죽인 바 된지라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 29, '모세가 이르되 각 사람이 그 아들과 그 형제를 쳤으니 오늘날 여호와께 헌신하게 되었느니라 그가 오늘날 너희에게 복을 내리시리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 30, '이튿날 모세가 백성에게 이르되 너희가 큰 죄를 범하였도다 내가 이제 여호와께로 올라가노니 혹 너희의 죄를 속할까 하노라 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 31, '여호와께로 다시 나아가 여짜오되 슬프도소이다 이 백성이 자기들을 위하여 금신을 만들었사오니 큰 죄를 범하였나이다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 32, '그러나 합의하시면 이제 그들의 죄를 사하시옵소서 그렇지 않사오면 원컨대 주의 기록하신 책에서 내 이름을 지워버려주옵소서');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 33, '여호와께서 모세에게 이르시되 누구든지 내게 범죄하면 그는 내가 내 책에서 지워버리리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 34, '이제 가서 내가 네게 말한 곳으로 백성을 인도하라 내 사자가 네 앞서 가리라 그러나 내가 보응할 날에는 그들의 죄를 보응하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (82, 35, '여호와께서 백성을 치시니 이는 그들이 아론의 만든 바 그 송아지를 만들었음이더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 1, '여호와께서 모세에게 이르시되 너는 네가 애굽 땅에서 인도하여 낸 백성과 함꼐 여기서 떠나서 내가 아브라함과 이삭과 야곱에게 맹세하기를 네 자손에게 주마 한 그 땅으로 올라가라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 2, '내가 사자를 네 앞서 보내어 가나안 사람과 아모리 사람과 헷 사람과 브리스 사람과 히위 사람과 여부스 사람을 쫓아내고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 3, '너희로 젖과 꿀이 흐르는 땅에 이르게 하려니와 나는 너희와 함께 올라가지 아니하리니 너희는 목이 곧은 백성인즉 내가 중로에서 너희를 진멸할까 염려함이니라 하시니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 4, '백성이 이 황송한 말씀을 듣고 슬퍼하여 한 사람도 그 몸을 단장하지 아니하니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 5, '여호와께서 모세에게 이르시기를 이스라엘 자손에게 이르라 너희는 목이 곧은 백성인즉 내가 순식간이라도 너희 중에 행하면 너희를 진멸하리니 너희 단장품을 제하라 그리하면 내가 너희에게 어떻게 할 일을 알겠노라 하셨음이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 6, '이스라엘 자손이 호렙 산에서부터 그 단장품을 제하니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 7, '모세가 항상 장막을 취하여 진 밖에 쳐서 진과 멀리 떠나게 하고 회막이라 이름하니 여호와를 앙모하는 자는 다 진 바깥 회막으로 나아가며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 8, '모세가 회막으로 나아갈 때에는 백성이 다 일어나 자기 장막문에 서서 모세가 회막에 들어가기까지 바라보며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 9, '모세가 회막에 들어갈 때에 구름 기둥이 내려 회막문에 서며 여호와께서 모세와 말씀하시니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 10, '모든 백성이 회막문에 구름 기둥이 섰음을 보고 다 일어나 각기 장막문에 서서 경배하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 11, '사람이 그 친구와 이야기함 같이 여호와께서는 모세와 대면하여 말씀하시며 모세는 진으로 돌아오나 그 수종자 눈의 아들 청년 여호수아는 회막을 떠나지 아니하니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 12, '모세가 여호와께 고하되 보시옵소서 주께서 나더러 이 백성을 인도하여 올라가라 하시면서 나와 함께 보낼 자를 내게 지시하지 아니하시나이다 주께서 전에 말씀하시기를 나는 이름으로도 너를 알고 너도 내 앞에 은총을 입었다 하셨사온즉');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 13, '내가 참으로 주의 목전에 은총을 입었사오면 원컨대 주의 길을 내게 보이사 내게 주를 알리시고 나로 주의 목전에 은총을 입게 하시며 이 족속을 주의 백성으로 여기소서');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 14, '여호와께서 가라사대 내가 친히 가리라 내가 너로 편케 하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 15, '모세가 여호와께 고하되 주께서 친히 가지 아니하시려거든 우리를 이곳에서 올려 보내지 마옵소서');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 16, '나와 주의 백성이 주의 목전에 은총 입은 줄을 무엇으로 알리이까 주께서 우리와 함께 행하심으로 나와 주의 백성을 천하 만민 중에 구별하심이 아니니이까');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 17, '여호와께서 모세에게 이르시되 너의 말하는 이 일도 내가 하리니 너는 내 목전에 은총을 입었고 내가 이름으로도 너를 앎이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 18, '모세가 가로되 원컨대 주의 영광을 내게 보이소서');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 19, '여호와께서 가라사대 내가 나의 모든 선한 형상을 네 앞으로 지나게 하고 여호와의 이름을 네 앞에 반포하리라 나는 은혜 줄 자에게 은혜를 주고 긍휼히 여길 자에게 긍휼을 베푸느니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 20, '또 가라사대 네가 내 얼굴을 보지 못하리니 나를 보고 살 자가 없음이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 21, '여호와께서 가라사대 보라 내 곁에 한 곳이 있으니 너는 그 반석 위에 섰으라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 22, '내 영광이 지날 때에 내가 너를 반석 틈에 두고 내가 지나도록 내 손으로 너를 덮었다가');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (83, 23, '손을 거두리니 네가 내 등을 볼 것이요 얼굴은 보지 못하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 1, '여호와께서 모세에게 이르시되 너는 돌판 둘을 처음 것과 같이 깍아 만들라 네가 깨뜨린 바 처음 것과 같이 깎아 만들라 네가 깨뜨린 바 처음 판에 있던 말을 내가 그 판에 쓰리니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 2, '아침 전에 예비하고 아침에 시내 산에 올라와 산꼭대기에서 내게 보이되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 3, '아무도 너와 함께 오르지 말며 온 산에 인적을 금하고 양과 소도 산 앞에서 먹지 못하게 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 4, '모세가 돌판 둘을 처음 것과 같이 깎아 만들고 아침에 일찍이 일어나 그 두 돌판을 손에 들고 여호와의 명대로 시내 산에 올라가니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 5, '여호와께서 구름 가운데 강림하사 그와 함께 거기 서서 여호와의 이름을 반포하실새');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 6, '여호와께서 그의 앞으로 지나시며 반포하시되 여호와로라 여호와로라 자비롭고 은혜롭고 노하기를 더디하고 인자와 진실이 많은 하나님이로라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 7, '인자를 천대까지 베풀며 악과 과실과 죄를 용서하나 형벌 받을 자는 결단코 면죄하지 않고 아비의 악을 자녀손 삼사 대까지 보응하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 8, '모세가 급히 땅에 엎드리어 경배하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 9, '가로되 주여 내가 주께 은총을 입었거든 원컨대 주는 우리 중에서 행하옵소서 이는 목이 곧은 백성이니이다 우리의 악과 죄를 사하시고 우리로 주의 기업을 삼으소서');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 10,
+        '여호와께서 가라사대 보라 내가 언약을 세우나니 곧 내가 아직 온 땅 아무 국민에게도 행치 아니한 이적을 너희 전체 백성 앞에 행할 것이라 너의 머무는 나라 백성이 다 여호와의 소위를 보리니 내가 너를 위하여 행할 일이 두려운 것임이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 11, '너는 내가 오늘 네게 명하는 것을 삼가 지키라 보라 내가 네 앞에서 아모리 사람과 가나안 사람과 헷 사람과 브리스 사람과 히위 사람과 여부스 사람을 쫓아내리니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 12, '너는 스스로 삼가 네가 들어가는 땅의 거민과 언약을 세우지 말라 그들이 너희 중에 올무가 될까 하노라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 13, '너희는 도리어 그들의 단들을 헐고 그들의 주상을 깨뜨리고 그들의 아세라 상을 찍을지어다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 14, '너는 다른 신에게 절하지 말라 여호와는 질투라 이름하는 질투의 하나님임이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 15, '너는 삼가 그 땅의 거민과 언약을 세우지 말지니 이는 그들이 모든 신을 음란히 섬기며 그 신들에게 희생을 드리고 너를 청하면 네가 그 희생을 먹을까 함이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 16, '또 네가 그들의 딸들로 네 아들들의 아내를 삼음으로 그들의 딸들이 그 신들을 음란히 섬기며 네 아들로 그들의 신들을 음란히 섬기게 할까 함이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 17, '너는 신상들을 부어 만들지 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 18, '너는 무교절을 지키되 내가 네게 명한 대로 아빕월 그 기한에 칠 일 동안 무교병을 먹으라 이는 네가 아빕월에 애굽에서 나왔음이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 19, '무릇 초태생은 다 내 것이며 무릇 네 가축의 수컷 처음 난 우양도 다 그러하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 20, '나귀의 첫 새끼는 어린 양으로 대속할 것이요 그렇게 아니하려면 그 목을 꺾을 것이며 네 아들 중 장자는 다 대속할지며 빈 손으로 내 얼굴을 보지 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 21, '너는 엿새 동안 일하고 제칠일에는 쉴지니 밭 갈 때에나 거둘 때에도 쉴지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 22, '칠칠절 곧 맥추의 초실절을 지키고 가을에는 수장절을 지키라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 23, '너희 모든 남자는 매년 세번씩 주 여호와 이스라엘의 하나님 앞에 보일지라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 24, '내가 열방을 네 앞에서 쫓아내고 네 지경을 넓히리니 네가 매년 세번씩 여호와 너희 하나님께 보이러 올 때에 아무 사람도 네 땅을 탐내어 엿보지 못하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 25, '너는 내 희생의 피를 유교병과 함께 드리지 말며 유월절 희생을 아침까지 두지 말지며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 26, '너의 토지소산의 처음 익은 것을 가져다가 너의 하나님 여호와의 전에 드릴지며 너는 염소 새끼를 그 어미의 젖으로 삶지 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 27, '여호와께서 모세에게 이르시되 너는 이 말들을 기록하라 내가 이 말들의 뜻대로 너와 이스라엘과 언약을 세웠음이니라 하시니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 28, '모세가 여호와와 함께 사십 일 사십 야를 거기 있으면서 떡도 먹지 아니하였고 물도 마시지 아니하였으며 여호와께서는 언약의 말씀 곧 십계를 그 판들에 기록하셨더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 29, '모세가 그 증거의 두 판을 자기 손에 들고 시내산에서 내려오니 그 산에서 내려올 때에 모세는 자기가 여호와와 말씀하였음을 인하여 얼굴 꺼풀에 광채가 나나 깨닫지 못하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 30, '아론과 온 이스라엘 자손이 모세를 볼 때에 모세의 얼굴 꺼풀에 광채 남을 보고 그에게 가까이 하기를 두려워하더니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 31, '모세가 그들을 부르니 아론과 회중의 모든 어른이 모세에게로 오고 모세가 그들과 말하니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 32, '그 후에야 온 이스라엘 자손이 가까이 오는지라 모세가 여호와께서 시내 산에서 자기에게 이르신 말씀을 다 그들에게 명하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 33, '그들에게 말하기를 마치고 수건으로 자기 얼굴을 가리웠더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 34, '그러나 모세가 여호와 앞에 들어가서 함께 말씀할 때에는 나오기까지 수건을 벗고 있다가 나와서는 그 명하신 일을 이스라엘 자손에게 고하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (84, 35, '이스라엘 자손이 모세의 얼굴의 광채를 보는 고로 모세가 여호와께 말씀하러 들어가기까지 다시 수건으로 자기 얼굴을 가리웠더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 1, '모세가 이스라엘의 온 회중을 모으고 그들에게 이르되 여호와께서 너희에게 명하사 행하게 하신 말씀이 이러하니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 2, '엿새 동안은 일하고 제칠일은 너희에게 성일이니 여호와께 특별한 안식일이라 무릇 이날에 일하는 자를 죽일지니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 3, '안식일에는 너희의 모든 처소에서 불도 피우지 말지니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 4, '모세가 이스라엘 자손의 온 회중에게 고하여 가로되 여호와의 명하신 일이 이러하니라 이르시기를');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 5, '너희의 소유 중에서 너희는 여호와께 드릴 것을 취하되 무릇 마음에 원하는 자는 그것을 가져다가 여호와께 드릴지니 곧 금과 은과 놋과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 6, '청색 자색 홍색실과 가는 베실과 염소털과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 7, '붉은 물 들인 수양의 가죽과 해달의 가죽과 조각목과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 8, '등유와 및 관유에 드는 향품과 분향할 향을 만드는 향품과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 9, '호마노며 에봇과 흉패에 물릴 보석이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 10, '무릇 너희 중 마음이 지혜로운 자는 와서 여호와의 명하신 것을 다 만들지니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 11, '곧 성막과 그 막과 그 덮개와 그 갈고리와 그 널판과 그 띠와 그 기둥과 그 받침과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 12, '증거궤와 그 채와 속죄소와 그 가리는 장과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 13, '상과 그 채와 그 모든 기구와 진설병과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 14, '불 켜는 등대와 그 기구와 그 등잔과 등유와');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 15, '분향단과 그 채와 관유와 분향할 향품과 성막문의 장과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 16, '번제단과 그 놋 그물과 그 채와 그 모든 기구와 물두멍과 그 받침과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 17, '뜰의 포장과 그 기둥과 그 받침과 뜰문의 장과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 18, '장막 말뚝과 뜰의 포장 말뚝과 그 줄과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 19, '성소에서 섬기기 위하여 공교히 만든 옷 곧 제사 직분을 행할 때에 입는 제사장 아론의 거룩한 옷과 그 아들들의 옷이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 20, '이스라엘 자손의 온 회중이 모세 앞에서 물러갔더니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 21, '무릇 마음이 감동된 자와 무릇 자원하는 자가 와서 성막을 짓기 위하여 그 속에서 쓸 모든 것을 위하여, 거룩한 옷을 위하여 예물을 가져 여호와께 드렸으니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 22, '곧 마음에 원하는 남녀가 와서 가슴 핀과 귀고리와 가락지와 목거리와 여러가지 금품을 가져왔으되 사람마다 여호와께 금 예물을 드렸으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 23, '무릇 청색 자색 홍색실과 가는 베실과 염소털과 붉은 물 들인 수양의 가죽과 해달의 가죽이 있는 자도 가져왔으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 24, '무릇 은과 놋으로 예물을 삼는 자는 가져다가 여호와께 드렸으며 무릇 섬기는 일에 소용되는 조각목이 있는 자는 가져왔으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 25, '마음이 슬기로운 모든 여인은 손수 실을 낳고 그 낳은 청색 자색 홍색실과 가는 베실을 가져왔으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 26, '마음에 감동을 받아 슬기로운 모든 여인은 염소털로 실을 낳았으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 27, '모든 족장은 호마노와 및 에봇과 흉패에 물릴 보석을 가져왔으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 28, '등불과 관유와 분향할 향에 소용되는 기름과 향품을 가져왔으니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 29, '마음에 원하는 이스라엘 자손의 남녀마다 여호와께서 모세의 손을 빙자하여 명하신 모든 것을 만들기 위하여 물품을 가져다가 여호와께 즐거이 드림이 이러하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 30, '모세가 이스라엘 자손에게 이르되 볼지어다 여호와께서 유다 지파 훌의 손자요 우리의 아들인 브사렐을 지명하여 부르시고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 31, '하나님의 신을 그에게 충만케 하여 지혜와 총명과 지식으로 여러가지 일을 하게 하시되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 32, '공교한 일을 연구하여 금과 은과 놋으로 일하게 하시며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 33, '보석을 깎아 물리며 나무를 새기는 여러가지 공교한 일을 하게 하셨고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 34, '또 그와 단 지파 아히사막의 아들 오홀리압을 감동시키사 가르치게 하시며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (85, 35, '지혜로운 마음을 그들에게 충만하게 하사 여러가지 일을 하게 하시되 조각하는 일과 공교로운 일과 청색 자색 홍색실과 가는 베실로 수 놓은 일과 짜는 일과 그 외에 여러가지 일을 하게 하시고 공교로운 일을 연구하게 하셨나니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 1, '브사렐과 오홀리압과 및 마음이 지혜로운 사람 곧 여호와께서 지혜와 총명을 부으사 성소에 쓸 모든 일을 할 줄 알게 하심을 입은 자들은 여호와의 무릇 명하신 대로 할 것이니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 2, '모세가 브살렐과 오홀리압과 및 마음이 지혜로운 사람 곧 그 마음에 여호와께로 지혜를 얻고 와서 그 일을 하려고 마음에 원하는 모든 자를 부르매');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 3, '그들이 이스라엘 자손의 성소의 모든 것을 만들기 위하여 가져 온 예물을 모세에게서 받으니라 그러나 백성이 아침마다 자원하는 예물을 연하여 가져 오는 고로');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 4, '성소의 모든 일을 하는 지혜로운 자들이 각기 하는 일을 정지하고 와서');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 5, '모세에게 고하여 가로되 백성이 너무 많이 가져오므로 여호와의 명하신 일에 쓰기에 남음이 있나이다');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 6, '모세가 명을 내리매 그들이 진중에 공포하여 가로되 무론 남녀하고 성소에 드릴 예물을 다시 만들지 말라 하매 백성이 가져오기를 정지하니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 7, '있는 재료가 모든 일을 하기에 넉넉하여 남음이 있었더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 8, '일하는 사람 중에 마음이 지혜로운 모든 사람이 열 폭 앙장으로 성막을 지었으니 곧 가늘게 꼰 베실과 청색 자색 홍색실로 그룹들을 무늬 놓아 짜서 지은 것이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 9, '매폭의 장은 이십팔 규빗, 광은 사 규빗으로 각 폭의 장단을 같게 하여');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 10, '그 다섯 폭을 서로 연하며 또 그 다섯 폭을 서로 연하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 11, '연락할 말폭 가에 청색 고를 만들며 다른 연락할 말폭 가에도 고를 만들되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 12, '그 연락할 한 폭에 고 오십을 달고 다른 연락할 한 폭의 가에도 고 오십을 달아 그 고들이 서로 대하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 13, '금 갈고리 오십을 만들어 그 갈고리로 두 앙장을 연하여 한 막을 이루었더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 14, '그 성막을 덮는 막 곧 앙장을 염소털로 만들되 십일 폭을 만들었으니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 15, '각 폭의 장은 삼십 규빗, 광은 사 규빗으로 십일 폭의 장단을 같게 하여');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 16, '그 앙장 다섯 폭을 서로 연하며 또 여섯 폭을 서로 연하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 17, '앙장을 연락할 말폭 가에도 고 오십을 달며 다른 연락할 말폭 가에도 고 오십을 달고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 18, '놋 갈고리 오십을 만들어 그 앙장을 연합하여 한 막이 되게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 19, '붉은 물 들인 수양의 가죽으로 막의 덮개를 만들고 해달의 가죽으로 그 웃덮개를 만들었더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 20, '그가 또 조각목으로 성막에 세울 널판들을 만들었으니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 21, '각 판의 장은 십 규빗, 광은 일 규빗 반이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 22, '각 판에 두 촉이 있어 서로 연하게 하였으니 성막의 모든 판이 그러하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 23, '성막을 위하여 널판을 만들었으되 남으로는 남편에 널판이 이십이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 24, '그 이십 널판 밑에 은받침 사십을 만들었으되 곧 이 널판 밑에도 두 받침이 그 두 촉을 받게 하였고 저 널판 밑에도 두 받침이 그 두 촉을 받게 하였으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 25, '성막 다른 편 곧 북편을 위하여도 널판 이십을 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 26, '또 은받침 사십을 만들었으니 곧 이 판 밑에도 두 받침이요 저 판 밑에도 두 받침이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 27, '장막 뒤 곧 서편을 위하여는 널판 여섯을 만들었고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 28, '장막 뒤 두 모퉁이 편을 위하여는 널판 둘을 만들되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 29, '아래서부터 위까지 각기 두 겹 두께로 하여 윗고리에 이르게 하고 두 모퉁이 편을 다 그리하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 30, '그 널판은 여덟이요 그 받침은 은받침 열 여섯이라 각 널판 밑에 둘씩이었더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 31, '그가 또 조각목으로 띠를 만들었으니 곧 성막 이편 널판을 위하여 다섯이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 32, '성막 저편 널판을 위하여 다섯이요 성막 뒤 곧 서편 널판을 위하여 다섯이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 33, '그 중간 띠를 만들되 널판 중간 이 끝에서 저 끝에 미치게 하였으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 34, '그 널판들을 금으로 싸고 그 널판에 띠를 꿸 금고리를 만들고 그 띠도 금으로 쌌더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 35, '그가 또 청색 자색 홍색실과 가늘게 꼰 베실로 장을 짜고 그 위에 그룹들을 공교히 수 놓고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 36, '조각목으로 네 기둥을 만들어 금으로 쌌으며 그 갈고리는 금이며 기둥의 네 받침은 은으로 부어 만들었으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 37, '청색 자색 홍색실과 가늘게 꼰 베실로 수 놓아 장막 문을 위하여 장을 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (86, 38, '문장의 기둥 다섯과 그 갈고리를 만들고 기둥머리와 그 가름대를 금으로 쌌으며 그 다섯 받침은 놋이었더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 1, '브사렐이 조각목으로 궤를 만들었으니 장이 이 규빗 반, 광이 일 규빗 반, 고가 일 규빗 반이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 2, '정금으로 안팎을 싸고 윗가로 돌아가며 금테를 만들었으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 3, '금고리 넷을 부어 만들어 네 발에 달았으니 곧 이편에 두 고리요 저편에 두 고리며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 4, '조각목으로 채를 만들어 금으로 싸고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 5, '그 채를 궤 양편 고리에 꿰어 궤를 메게 하였으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 6, '정금으로 속죄소를 만들었으니 장이 이 규빗 반, 광이 일 규빗 반이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 7, '금으로 그룹 둘을 속죄소 양편에 쳐서 만들었으되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 8, '한 그룹은 이편 끝에, 한 그룹은 저편 끝에 곧 속죄소와 한 덩이로 그 양편에 만들었으니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 9, '그룹들이 그 날개를 높이 펴서 그 날개로 속죄소를 덮으며 그 얼굴을 서로 대하여 속죄소를 향하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 10, '그가 또 조각목으로 상을 만들었으니 장이 이 규빗, 광이 일 규빗, 고가 일 규빗 반이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 11, '정금으로 싸고 윗가로 돌아가며 금테를 둘렀으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 12, '그 사면에 손바닥 넓이만한 턱을 만들고 그 턱 주위에 금으로 테를 만들었고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 13, '상을 위하여 금고리 넷을 부어 만들어 네 발 위 네 모퉁이에 달았으니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 14, '그 고리가 턱 곁에 있어서 상을 메는 채를 꿰게 하였으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 15, '또 조각목으로 상 멜 채를 만들어 금으로 쌌으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 16, '상 위의 기구 곧 대접과 숟가락과 잔과 붓는 병을 정금으로 만들었더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 17, '그가 또 정금으로 등대를 만들되 그것을 쳐서 만들었으니 그 밑판과 줄기와 잔과 꽃받침과 꽃이 그것과 한 덩이로 되었고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 18, '여섯 가지가 그 곁에서 나왔으니 곧 등대의 세 가지는 저편으로 나왔고 등대의 세 가지는 이 편으로 나왔으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 19, '이 편 가지에 살구꽃 형상의 잔 셋과 꽃받침과 꽃이 있고 저편 가지에 살구꽃 형상의 잔 셋과 꽃받침과 꽃이 있어 등대에서 나온 여섯 가지가 그러하며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 20, '등대 줄기에는 살구꽃 형상의 잔 넷과 꽃받침과 꽃이 있고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 21, '등대에서 나온 여섯 가지를 위하여는 꽃받침이 있게 하였으되 두가지 아래 한 꽃받침이 있어 줄기와 연하였고 또 두 가지 아래 한 꽃받침이 있어 줄기와 연하게 하였으니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 22, '이 꽃받침과 가지들을 줄기와 연하여 전부를 정금으로 쳐서 만들었으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 23, '등잔 일곱과 그 불집게와 불똥 그릇을 정금으로 만들었으니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 24, '등대와 그 모든 기구는 정금 한 달란트로 만들었더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 25, '그가 또 조각목으로 분향할 단을 만들었으니 장이 일 규빗이요 광이 일 규빗이라 네모 반듯하고 고는 이 규빗이며 그 뿔들이 단과 연하였으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 26, '단 상면과 전후 좌우면과 그 뿔을 정금으로 싸고 주위에 금테를 둘렀고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 27, '그 테 아래 양 편에 금고리 둘을 만들었으되 곧 그 양 편에 만들어 단을 메는 채를 꿰게 하였으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 28, '조각목으로 그 채를 만들어 금으로 쌌으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (87, 29, '거룩한 관유와 향품으로 정결한 향을 만들었으되 향을 만드는 법대로 하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 1, '그가 또 조각목으로 번제단을 만들었으니 장이 오 규빗이요 광이 오 규빗이라 네모 반듯하고 고는 삼 규빗이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 2, '그 네 모퉁이 위에 그 뿔을 만들되 그 뿔을 단과 연하게 하고 단을 놋으로 쌌으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 3, '단의 모든 기구 곧 통과 부삽과 대야와 고기 갈고리와 불 옮기는 그릇을 다 놋으로 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 4, '단을 위하여 놋 그물을 만들어 단 사면 가장자리 아래 두되 단 절반에 오르게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 5, '그 놋 그물 네 모퉁이에 채를 꿸 고리 넷을 부어 만들었으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 6, '채를 조각목으로 만들어 놋으로 싸고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 7, '단 양편 고리에 그 채를 꿰어 메게 하였으며 단은 널판으로 비게 만들었더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 8, '그가 놋으로 물두멍을 만들고 그 받침도 놋으로 하였으니 곧 회막문에서 수종드는 여인들의 거울로 만들었더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 9, '그가 또 뜰을 만들었으니 남으로 뜰의 남편에는 세마포 포장이 백 규빗이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 10, '그 기둥이 스물이며 그 받침이 스물이니 놋이요 기둥의 갈고리와 가름대는 은이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 11, '그 북편에도 백 규빗이라 그 기둥이 스물이며 그 받침이 스물이니 놋이요 기둥의 갈고리와 가름대는 은이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 12, '서편에 포장은 오십 규빗이라 그 기둥이 열이요 받침이 열이며 기둥의 갈고리와 가름대는 은이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 13, '동으로 동편에도 오십 규빗이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 14, '문 이편의 포장이 십오 규빗이요 그 기둥이 셋이요 받침이 셋이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 15, '문 저편도 그와 같으니 뜰문 이편, 저편의 포장이 십오 규빗씩이요 그 기둥이 셋씩, 받침이 셋씩이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 16, '뜰 사면의 포장은 세마포요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 17, '기둥 받침은 놋이요 기둥의 갈고리와 가름대는 은이요 기둥머리 싸개는 은이며 뜰의 모든 기둥에 은 가름대를 꿰었으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 18, '뜰의 문장을 청색 자색 홍색실과 가늘게 꼰 베실로 수 놓아 짰으니 장은 이십 규빗이요 광 곧 고는 뜰의 포장과 같이 오 규빗이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 19, '그 기둥은 넷인데 그 받침 넷은 놋이요 그 갈고리는 은이요 그 머리 싸개와 가름대도 은이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 20, '성막 말뚝과 뜰의 사면 포장 말뚝은 다 놋이더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 21, '성막 곧 증거막을 위하여 레위 사람의 쓴 재료의 물목은 제사장 아론의 아들 이다말이 모세의 명대로 계산하였으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 22, '유다 지파 훌의 손자요 우리의 아들인 브사렐은 여호와께서 모세에게 명하신 모든 것을 만들었고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 23, '단 지파 아히사막의 아들 오홀리압은 그와 함께 하였으니 오홀리압은 재능이 있어서 조각하며 또 청색 자색 홍색실과 가는 베실로 수 놓은 자더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 24, '성소 건축 비용으로 드린 금은 성소의 세겔대로 이십구 달란트와 칠백삼십 세겔이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 25, '조사를 받은 회중의 드린 은은 성소의 세겔대로 일백 달란트와 일천칠백칠십오 세겔이니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 26, '조사를 받은 자가 이십 세 이상으로 육십만 삼천오백오십 명인즉 성소의 세겔대로 매인에게 은 한 베가 곧 반 세겔씩이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 27, '은 일백 달란트로 성소의 판장 받침과 문장 기둥 받침 합 일백을 부어 만들었으니 매 받침에 한 달란트씩 합 일백 달란트요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 28, '일천칠백칠십오 세겔로 기둥 갈고리를 만들고 기둥머리를 싸고 기둥 가름대를 만들었으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 29, '드린 놋은 칠십 달란트와 이천사백 세겔이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 30, '이것으로 회막문 기둥 받침과 놋 단과 놋 그물과 단의 모든 기구를 만들었으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (88, 31, '뜰 사면의 기둥 받침과 그 문장 기둥 받침이며 성막의 모든 말뚝과 뜰 사면의 모든 말뚝을 만들었더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 1, '그들이 여호와꼐서 모세에게 명하신 대로 청색 자색 홍색실로 성소에서 섬기기 위한 정교한 옷을 만들고 또 아론을 위한 거룩한 옷을 만들었더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 2, '그가 또 금실과 청색 자색 홍색실과 가늘게 꼰 베실로 에봇을 만들었으되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 3, '금실을 얇게 쳐서 오려서 실을 만들어 청색 자색 홍색실과 가는 베실에 섞어 공교히 짜고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 4, '에봇을 위하여 견대를 만들어 그 두 끝에 달아 서로 연하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 5, '에봇 위에 에봇을 매는 띠를 에봇과 같은 모양으로 금실과 청색 자색 홍색실과 가늘게 꼰 베실로 에봇에 붙여 짰으니 여호와께서 모세에게 명하신 대로 하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 6, '그들이 또 호마노를 깎아 금테에 물려 인을 새김 같이 이스라엘의 아들들의 이름을 그것에 새겨');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 7, '에봇 견대에 달아 이스라엘 자손의 기념 보석을 삼았으니 여호와께서 모세에게 명하신 대로 하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 8, '그가 또 흉패를 공교히 짜되 에봇과 같은 모양으로 금실과 청색 자색 홍색실과 가늘게 꼰 베실로 하였으니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 9, '그것의 장이 한 뼘, 광이 한 뼘으로 네모 반듯하고 두 겹이며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 10, '그것에 네 줄 보석을 물렸으니 곧 홍보석 황옥 녹주옥이 첫 줄이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 11, '둘째 줄은 석류석 남보석 홍마노요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 12, '셋째 줄은 호박 백마노 자수정이요');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 13, '넷째 줄은 녹보석 호마노 벽옥이라 다 금테에 물렸으니');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 14, '이 보석들은 이스라엘 아들들의 이름 곧 그들의 이름대로 열둘이라 인을 새김 같이 그 열두 지파의 각 이름을 새겼으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 15, '그들이 또 정금으로 사슬을 노끈처럼 땋아 흉패에 붙이고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 16, '또 금테 둘과 금고리 둘을 만들어 그 두 고리를 흉패 두 끝에 달고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 17, '그 두 땋은 금사슬을 흉패 끝 두 고리에 꿰어 매었으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 18, '그 땋은 두 사슬의 다른 두 끝을 에봇 앞 두 견대의 금테에 매고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 19, '또 금고리 둘을 만들어 흉패 두 끝에 달았으니 곧 그 에봇에 대한 안쪽 가에 달았으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 20, '또 금고리 둘을 만들어 에봇 앞 두 견대 아래 매는 자리 가까운 편 곧 공교히 짠 에봇 띠 윗편에 달고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 21, '청색 끈으로 흉패 고리와 에봇 고리에 꿰어 흉패로 공교히 짠 에봇 띠 위에 붙여서 에봇을 떠나지 않게 하였으니 여호와께서 모세에게 명하신 대로 하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 22, '그가 에봇 받침 긴 옷을 전부 청색으로 짜서 만들되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 23, '그 옷의 두 어깨 사이에 구멍을 내고 갑옷 깃 같이 그 구멍 주위에 깃을 짜서 찢어지지 않게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 24, '청색 자색 홍색실과 가는 베실로 그 옷 가장자리에 석류를 수 놓고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 25, '정금으로 방울을 만들어 그 옷 가장자리로 돌아가며 석류 사이 사이에 달되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 26, '방울과 석류를 서로 간격하여 공직하는 그 옷 가장자리로 돌아가며 달았으니 여호와께서 모세에게 명하신 대로 하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 27, '그들이 또 직조한 가는 베로 아론과 그 아들들을 위하여 속옷을 짓고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 28, '세마포로 두건을 짓고 세마포로 빛난 관을 만들고 가는 베실로 짜서 세마포 고의들을 만들고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 29, '가는 베실과 청색 자색 홍색실로 수 놓아 띠를 만들었으니 여호와께서 모세에게 명하신 대로 하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 30, '그들이 또 정금으로 거룩한 패를 만들고 인을 새김 같이 그 위에 여호와께 성결이라 새기고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 31, '그 패를 청색 끈으로 관 전면에 달았으니 여호와께서 모세에게 명하신 대로 하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 32, '이스라엘 자손이 이와 같이 성막 곧 회막의 모든 역사를 준공하여 여호와께서 모세에게 명하신 대로 다 행하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 33, '그들이 성막을 모세에게로 가져왔으니 곧 막과 그 모든 기구와 그 갈고리들과 그 널판들과 그 띠들과 그 기둥들과 그 받침들과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 34, '붉은 물 들인 수양의 가죽 덮개와 해달의 가죽 덮개와 가리우는 장과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 35, '증거궤와 그 채들과 속죄소와');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 36, '상과 그 모든 기구와 진설병과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 37, '정금 등대와 그 잔 곧 벌여놓은 등잔과 그 모든 기구와 등유와');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 38, '금단과 관유와 향기로운 향과 장막 문장과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 39, '놋단과 그 놋 그물과 그 채들과 그 모든 기구와 물두멍과 그 받침과');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 40, '뜰의 포장들과 그 기둥들과 그 받침들과 뜰문의 장과 그 줄들과 그 말뚝들과 회막의 소용 곧 성막의 모든 기구와');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 41, '성소에서 섬기기 위한 정교한 옷 곧 제사 직분을 행할 때에 입는 제사장 아론의 거룩한 옷과 그 아들들의 옷이라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 42, '여호와께서 모세에게 명하신 대로 이스라엘 자손이 모든 역사를 필하매');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (89, 43, '모세가 그 필한 모든 것을 본즉 여호와께서 명하신 대로 되었으므로 그들에게 축복하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 1, '여호와께서 모세에게 일러 가라사대');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 2, '너는 정월 초일일에 성막 곧 회막을 세우고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 3, '또 증거궤를 들여 놓고 또 장으로 그 궤를 가리우고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 4, '또 상을 들여 놓고 그 위에 물품을 진설하고 등대를 들여 놓고 불을 켜고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 5, '또 금 향단을 증거궤 앞에 두고 성막 문에 장을 달고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 6, '또 번제단을 회막의 성막 문 앞에 놓고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 7, '또 물두멍을 회막과 단 사이에 놓고 그 속에 물을 담고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 8, '또 뜰 주위에 포장을 치고 뜰 문에 장을 달고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 9, '또 관유를 취하여 성막과 그 안에 있는 모든 것에 발라 그것과 그 모든 기구를 거룩하게 하라 그것이 거룩하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 10, '너는 또 번제단과 그 모든 기구에 발라 그 안을 거룩하게 하라 그 단이 지극히 거룩하리라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 11, '너는 또 물두멍과 그 받침에 발라 거룩하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 12, '또 아론과 그 아들들을 회막문으로 데려다가 물로 씻기고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 13, '아론에게 거룩한 옷을 입히고 그에게 기름을 부어 거룩하게 하여 그로 내게 제사장의 직분을 행하게 하라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 14, '너는 또 그 아들들을 데려다가 그들에게 겉옷을 입히고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 15, '그 아비에게 기름을 부음 같이 그들에게도 부어서 그들로 내게 제사장 직분을 행하게 하라 그들이 기름 부음을 받았은즉 대대로 영영히 제사장이 되리라 하시매');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 16, '모세가 그같이 행하되 곧 여호와께서 자기에게 명하신 대로 다 행하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 17, '제 이년 정월 곧 그 달 초일일에 성막을 세우니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 18, '모세가 성막을 세우되 그 받침들을 놓고 그 널판들을 세우고 그 띠를 띠우고 그 기둥들을 세우고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 19, '또 성막 위에 막을 펴고 그 위에 덮개를 덮으니 여호와께서 모세에게 명하신 대로 되니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 20, '그가 또 증거판을 궤 속에 넣고 채를 궤에 꿰고 속죄소를 궤 위에 두고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 21, '또 그 궤를 성막에 들여 놓고 장을 드리워서 그 증거궤를 가리우니 여호와께서 모세에게 명하신 대로 되니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 22, '그가 또 회막 안 곧 성막 북편으로 장 밖에 상을 놓고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 23, '또 여호와 앞 그 상 위에 떡을 진설하니 여호와께서 모세에게 명하신 대로 되니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 24, '그가 또 회막 안 곧 성막 남편에 등대를 놓아 상과 대하게 하고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 25, '또 여호와 앞에 등잔에 불을 켜니 여호와께서 모세에게 명하신 대로 되니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 26, '그가 또 금 향단을 회막 안 장 앞에 두고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 27, '그 위에 향기로운 향을 사르니 여호와께서 모세에게 명하신 대로 되니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 28, '그가 또 성막 문에 장을 달고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 29, '또 회막의 성막 문 앞에 번제단을 두고 번제와 소제를 그 위에 드리니 여호와께서 모세에게 명하신 대로 되니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 30, '그가 또 물두멍을 회막과 단 사이에 두고 거기 씻을 물을 담고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 31, '자기와 아론과 그 아들들이 거기서 수족을 씻되');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 32, '그들이 회막에 들어갈 때와 단에 가까이 갈 때에 씻었으니 여호와께서 모세에게 명하신 대로 되니라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 33, '그가 또 성막과 단 사면 뜰에 포장을 치고 뜰문의 장을 다니라 모세가 이같이 역사를 필하였더라');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 34, '그 후에 구름이 회막에 덮이고 여호와의 영광이 성막에 충만하매');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 35, '모세가 회막에 들어갈 수 없었으니 이는 구름이 회막 위에 덮이고 여호와의 영광이 성막에 충만함이었으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 36, '구름이 성막 위에서 떠오를 때에는 이스라엘 자손이 그 모든 행하는 길에 앞으로 발행하였고');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 37, '구름이 떠오르지 않을 때에는 떠오르는 날까지 발행하지 아니하였으며');
+INSERT INTO bible_verse (chapter_id, verse_number, text)
+VALUES (90, 38, '낮에는 여호와의 구름이 성막 위에 있고 밤에는 불이 그 구름 가운데 있음을 이스라엘의 온 족속이 그 모든 행하는 길에서 친히 보았더라');
