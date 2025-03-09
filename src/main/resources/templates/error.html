@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <title>Title</title>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/css/error.css" rel="stylesheet">
+</head>
+<body>
+<div class="error-container">
+  <div class="error-code" th:text="${status}"></div>
+  <p class="error-message" th:text="${message}"></p>
+  <a href="/" class="btn-home">홈으로 돌아가기</a>
+</div>
+</body>
+</html>
