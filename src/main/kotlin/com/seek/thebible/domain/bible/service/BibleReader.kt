@@ -6,6 +6,7 @@ import com.seek.thebible.domain.bible.dto.BookResult
 import com.seek.thebible.domain.bible.dto.ChapterView
 import com.seek.thebible.domain.bible.dto.TranslationResult
 import com.seek.thebible.domain.bible.dto.VerseView
+import com.seek.thebible.domain.bible.model.BibleTranslationType
 import com.seek.thebible.domain.bible.model.BibleVerse
 import com.seek.thebible.infrastructure.persistence.bible.BibleBookRepository
 import com.seek.thebible.infrastructure.persistence.bible.BibleChapterRepository
@@ -22,7 +23,15 @@ class BibleReader(
 ) {
 
     fun getTranslations(): List<TranslationResult> =
-        bibleTranslationRepository.findAll().map(TranslationResult::from)
+        bibleTranslationRepository.findAllByTranslationTypeInOrderByTranslationOrder(
+            setOf(
+                BibleTranslationType.KRV,
+                BibleTranslationType.KNB,
+                BibleTranslationType.NIV,
+                BibleTranslationType.ESV,
+                BibleTranslationType.KJV
+            )
+        ).map(TranslationResult::from)
 
     fun getBooks(translationId: Long): List<BookResult> =
         bibleBookRepository.findByTranslationId(translationId).map(BookResult::from)

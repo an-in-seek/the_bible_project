@@ -15,5 +15,8 @@ class BibleTranslation(
     val translationType: BibleTranslationType, // 번역본을 Enum으로 저장
 
     @Column(nullable = false, unique = true)
-    val name: String // 번역본 이름 (예: 개역개정, NIV)
+    val name: String, // 번역본 이름 (예: 개역개정, NIV)
+
+    @Column(nullable = false)
+    val translationOrder: Int
 )
