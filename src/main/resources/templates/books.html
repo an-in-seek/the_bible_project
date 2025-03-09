@@ -37,9 +37,12 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", async function () {
-        // sessionStorage에서 translationId 가져오기
-        const translationId = localStorage.getItem("translationId") || "1";  // 기본값 1
-        const translationName = localStorage.getItem("translationName") || "";
+        const translationId = localStorage.getItem("translationId");
+        const translationName = localStorage.getItem("translationName");
+        if (!translationId || !translationName) {
+            window.location.href = "/web/bibles/translations";
+            return;
+        }
 
         const translationTitle = document.getElementById("translationTitle");
         const bookList = document.getElementById("bookList");

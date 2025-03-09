@@ -60,12 +60,15 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", async function () {
-        // sessionStorage에서 translationId, bookId, chapterNumber 가져오기
-        const translationId = localStorage.getItem("translationId") || "1";  // 기본값 1
-        const translationName = localStorage.getItem("translationName") || "";
-        const bookId = localStorage.getItem("bookId") || "1";  // 기본값 1
-        const bookName = localStorage.getItem("bookName") || "";
-        let chapterNumber = parseInt(localStorage.getItem("chapterNumber") || "1"); // 기본값
+        const translationId = localStorage.getItem("translationId");
+        const translationName = localStorage.getItem("translationName");
+        const bookId = localStorage.getItem("bookId");
+        const bookName = localStorage.getItem("bookName");
+        let chapterNumber = parseInt(localStorage.getItem("chapterNumber") || '0');
+        if (!translationId || !translationName || !bookId || !bookName || !chapterNumber) {
+            window.location.href = "/web/bibles/translations";
+            return;
+        }
 
         const prevButton = document.getElementById("prevChapterBtn");
         const nextButton = document.getElementById("nextChapterBtn");

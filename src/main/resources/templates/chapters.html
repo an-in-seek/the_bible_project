@@ -37,11 +37,14 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", async function () {
-        // sessionStorage에서 translationId, bookId 가져오기
-        const translationId = localStorage.getItem("translationId") || "1";  // 기본값 1
-        const translationName = localStorage.getItem("translationName") || "";
-        const bookId = localStorage.getItem("bookId") || "1";  // 기본값 1
-        const bookName = localStorage.getItem("bookName") || "";
+        const translationId = localStorage.getItem("translationId");
+        const translationName = localStorage.getItem("translationName");
+        const bookId = localStorage.getItem("bookId");
+        const bookName = localStorage.getItem("bookName");
+        if (!translationId || !translationName || !bookId || !bookName) {
+            window.location.href = "/web/bibles/translations";
+            return;
+        }
 
         const bookTitle = document.getElementById("bookTitle");
         const chapterList = document.getElementById("chapterList");
