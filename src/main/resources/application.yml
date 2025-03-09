@@ -28,12 +28,13 @@ spring:
     init:
       mode: always # ✅ 항상 SQL 스크립트 실행
       data-locations:
-        - classpath:bible_translation.sql
-        - classpath:bible_book.sql
-        - classpath:bible_krv_01_genesis.sql
-        - classpath:bible_krv_02_exodus.sql
-        - classpath:bible_krv_03_leviticus.sql
-        - classpath:bible_krv_04_numbers.sql
+        - classpath:data/bible_translation.sql
+        - classpath:data/bible_book.sql
+        - classpath:data/bible_krv_01_genesis.sql
+        - classpath:data/bible_krv_02_exodus.sql
+        - classpath:data/bible_krv_03_leviticus.sql
+        - classpath:data/bible_krv_04_numbers.sql
+        - classpath:data/bible_krv_05_deuteronomy.sql
 
 springdoc:
   api-docs:
