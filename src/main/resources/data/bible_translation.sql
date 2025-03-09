@@ -1,7 +1,7 @@
 -- 📌 성경 번역본(Translation) 데이터 삽입
 INSERT INTO bible_translation (id, translation_type, name, translation_order)
 VALUES (1, 'KRV', '개역한글', 1),
-       (2, 'KNB', '개역개정', 2),
+       (2, 'NKRV', '개역개정', 2),
        (3, 'NIV', 'New International Version', 3),
        (4, 'ESV', 'English Standard Version', 4),
        (5, 'KJV', 'King James Version', 5),

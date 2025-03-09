@@ -26,7 +26,7 @@ class BibleReader(
         bibleTranslationRepository.findAllByTranslationTypeInOrderByTranslationOrder(
             setOf(
                 BibleTranslationType.KRV,
-                BibleTranslationType.KNB,
+                BibleTranslationType.NKRV,
                 BibleTranslationType.NIV,
                 BibleTranslationType.ESV,
                 BibleTranslationType.KJV

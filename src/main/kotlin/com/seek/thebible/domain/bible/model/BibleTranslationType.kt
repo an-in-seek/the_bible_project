@@ -2,7 +2,7 @@ package com.seek.thebible.domain.bible.model
 
 enum class BibleTranslationType(val abbreviation: String, val displayName: String) {
     KRV("KRV", "개역한글"),
-    KNB("KNB", "개역개정"),
+    NKRV("NKRV", "개역개정"),
     NIV("NIV", "New International Version"),
     ESV("ESV", "English Standard Version"),
     KJV("KJV", "King James Version"),
