@@ -3,7 +3,7 @@
 :root {
     --comm-primary: #4f46e5;
     --comm-primary-hover: #4338ca;
-    --comm-bg-page: var(--color-bg-base);
+    --comm-bg-page: #f7f8fa;
     --comm-bg-card: var(--color-bg-elevated-bright);
     --comm-text-main: var(--color-text-primary);
     --comm-text-sub: var(--color-text-secondary);
@@ -17,6 +17,7 @@
 html[data-theme="dark"] {
     --comm-primary: #a5b4fc;
     --comm-primary-hover: #c7d2fe;
+    --comm-bg-page: var(--color-bg-base);
 }
 
 body {
