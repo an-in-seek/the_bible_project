@@ -23,8 +23,8 @@ val kotlinLogging = "8.0.01"
 val kotestVersion = "5.9.1"
 val kotlinJdslVersion = "3.5.5"
 val springDocVersion = "2.8.14"
-val springCloudVersion = "2025.0.0"
-val springCloudGcpVersion = "7.4.1"
+val springCloudVersion = "2025.0.2"
+val springCloudGcpVersion = "7.4.8"
 
 dependencyManagement {
     imports {
