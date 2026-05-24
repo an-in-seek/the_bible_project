@@ -257,6 +257,16 @@ body.dictionary-list-page .list-group-item-action:focus-visible {
     background-color: var(--color-bg-elevated-strong-hover);
 }
 
+@media (hover: hover) and (pointer: fine) {
+    html[data-theme="dark"] body.dictionary-list-page .list-group-item-action:hover {
+        background-color: var(--color-bg-elevated);
+    }
+}
+
+html[data-theme="dark"] body.dictionary-list-page .list-group-item-action:focus-visible {
+    background-color: var(--color-bg-elevated);
+}
+
 body.dictionary-list-page .badge.bg-light {
     background-color: var(--color-bg-elevated-strong) !important;
     color: var(--color-text-secondary) !important;
