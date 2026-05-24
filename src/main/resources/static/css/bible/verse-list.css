@@ -359,7 +359,9 @@ html[data-theme="dark"] .verse-text.text-body.verse-highlight-green,
 html[data-theme="dark"] .verse-text.text-body.verse-highlight-pink,
 html[data-theme="dark"] .verse-text.text-body.verse-highlight-blue,
 html[data-theme="dark"] .verse-text.text-body.verse-highlight-purple,
-html[data-theme="dark"] .verse-text.text-body.verse-highlight-orange {
+html[data-theme="dark"] .verse-text.text-body.verse-highlight-orange,
+html[data-theme="dark"] .verse-text.verse-spotlight-target,
+html[data-theme="dark"] .verse-text.text-body.verse-spotlight-target {
     color: #1f2933 !important;
 }
 
