@@ -979,7 +979,13 @@ function toggleVerseSelection(verseNum) {
 
 function resetSelectionState() {
     selection.selected.clear();
-    document.querySelectorAll(".verse-text.active").forEach(el => el.classList.remove("active"));
+    document.querySelectorAll(".verse-text.active").forEach(el => {
+        el.classList.remove("active");
+        const verseNum = el.getAttribute("data-verse");
+        if (verseNum) {
+            hideMemo(verseNum);
+        }
+    });
     updateFabVisibility();
     closeFabMenu();
 }
