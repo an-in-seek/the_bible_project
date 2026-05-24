@@ -27,6 +27,11 @@
 - **잔존 옛 수치 정리** — "토글 36×36", "점 24px 시각·터치 타겟 일체화", "gap: 32px" 등 v2 잔재를 모두 v2.1 기준(44px hit / 24px 시각·::before / max-width 320px space-between)으로 일치화
 - **360px viewport 오버플로 해결** — 좁은 폭에서 container padding(24→12px), panel gap(16→8px) 축소 + reset 버튼을 라벨 → 아이콘(`↺`)으로 축약. stepper 220px 는 절대 양보하지 않음. 360px 기준 합계 328px 로 안전
 
+**v2.4 변경 요약** (외부 리뷰 4차 3건 반영)
+- **focus() 호출 순서 버그 수정** — 닫기 분기에서 `fontToggle.focus()` 호출 시점이 `data-expanded="true"` (토글이 `display:none`) 상태였음. silent fail 방지를 위해 상태 플립을 먼저 수행하고, 캐시한 `focusInsidePanel` 플래그/`activeBeforeCollapse` 참조로 분기 후 포커스 적용. 펼침 분기도 동일하게 상태 플립 후 점에 focus
+- **localStorage 오염 방어** — `BibleReaderStore.getFontStep/saveFontStep` 양쪽에 try/catch 추가. `LocalStore.get` 내부의 `JSON.parse` 가 throw 해도 기본값(3)으로 폴백. 추가로 `syncFontStepFromBoot` 도 bootStep 유효 시 store 호출을 단락 평가로 스킵하여 이중 안전망 확보
+- **QA #9 표현 정정** — `.verse-text` 가 `<div>`(non-focusable) 임을 명시. 외부 클릭 시 "포커스는 클릭한 요소로 이동" 이 아니라 "패널 내부 포커스가 `blur()` 처리되고 토글로 강제 복귀하지 않음" 으로 실제 동작과 일치화
+
 **v2.3 변경 요약** (외부 리뷰 3차 4건 반영)
 - **clamp 로직 버그 수정** — `parseInt(step,10) || DEFAULT` 패턴은 0/NaN 을 모두 DEFAULT 로 폴백시켜 "1단계에서 ArrowLeft → 3단계로 튐" 버그를 유발. `Number.isNaN(parsed) ? DEFAULT : Math.max(1, Math.min(5, parsed))` 형태로 교체. 경계값(0, -1, 6)이 정상적으로 1/5로 clamp됨
 - **Esc 중복 처리 제거** — stepper keydown 의 Esc 분기는 `preventDefault`/`stopPropagation` 없이 `toggleFontPanel(false)` 호출 → 전역 `handleFabEscapeKey` 까지 버블링되어 FAB도 동시에 닫히는 부수효과. stepper 의 Esc 처리를 **제거**하고 전역 핸들러 1곳에서만 처리하도록 단일화
@@ -188,13 +193,21 @@ const STORAGE_KEYS = {
 
 export const BibleReaderStore = {
     getFontStep() {
-        const value = parseInt(LocalStore.get(STORAGE_KEYS.BIBLE_READER_FONT_STEP), 10);
-        return (Number.isInteger(value) && value >= 1 && value <= 5) ? value : 3;
+        // LocalStore.get 은 내부에서 JSON.parse 를 호출하므로, localStorage 가
+        // 외부 도구로 깨진 값(JSON 으로 파싱 불가) 으로 오염된 경우 throw 한다.
+        // 호출 측 init 이 중단되지 않도록 여기서 흡수하고 기본값(3) 으로 폴백.
+        try {
+            const value = parseInt(LocalStore.get(STORAGE_KEYS.BIBLE_READER_FONT_STEP), 10);
+            return (Number.isInteger(value) && value >= 1 && value <= 5) ? value : 3;
+        } catch (e) {
+            return 3;
+        }
     },
     saveFontStep(step) {
         const parsed = parseInt(step, 10);
         if (Number.isInteger(parsed) && parsed >= 1 && parsed <= 5) {
-            LocalStore.set(STORAGE_KEYS.BIBLE_READER_FONT_STEP, parsed);
+            try { LocalStore.set(STORAGE_KEYS.BIBLE_READER_FONT_STEP, parsed); }
+            catch (e) { /* storage 차단/할당 실패 환경 무시 */ }
         }
     }
 };
@@ -558,8 +571,19 @@ async function init() {
 
 function syncFontStepFromBoot() {
     const bootStep = parseInt(document.documentElement.getAttribute("data-verse-font-step"), 10);
-    const stored = BibleReaderStore.getFontStep();
-    fontState.step = (bootStep >= 1 && bootStep <= 5) ? bootStep : stored;
+    // bootStep 이 유효하면 store 를 읽지 않는다 (단락 평가).
+    // LocalStore.get() 내부의 JSON.parse 가 깨진 값에 throw 할 경우 init 이 중단되는 것을 방지.
+    let resolved;
+    if (bootStep >= 1 && bootStep <= 5) {
+        resolved = bootStep;
+    } else {
+        try {
+            resolved = BibleReaderStore.getFontStep();
+        } catch (e) {
+            resolved = DEFAULT_FONT_STEP;
+        }
+    }
+    fontState.step = resolved;
     applyFontStep(fontState.step, { persist: false, announce: false, focus: false });
 }
 ```
@@ -637,34 +661,41 @@ function bindFontControlEvents() {
 
 function toggleFontPanel(expand, { returnFocus = true } = {}) {
     const willCollapse = !expand && fontState.expanded;
-    // 닫기 직전: 패널 내부에 포커스가 남아 있으면 a11y 위반 방지를 위해 안전 처리
+
+    // 1) 닫기 직전: 패널 내부에 포커스가 남아 있다면 미리 캐시.
+    //    포커스 이동/제거는 DOM 상태 플립 이후에 수행해야 한다.
+    //    (현재 시점엔 .verse-font-control[data-expanded="true"] .verse-font-toggle { display:none }
+    //     상태라 토글에 .focus() 해도 silent fail 한다.)
+    let focusInsidePanel = false;
+    let activeBeforeCollapse = null;
     if (willCollapse) {
-        const active = document.activeElement;
-        const focusInsidePanel = active && elements.fontPanel?.contains(active);
-        if (focusInsidePanel) {
-            if (returnFocus) {
-                // 명시적 닫기(Esc/×) — 토글로 복귀
-                elements.fontToggle?.focus();
-            } else {
-                // 외부 클릭으로 닫힘 — 클릭 타깃이 focusable 이면 브라우저가 이미 포커스를
-                // 이동시켰을 수 있으므로, 여전히 패널 내부에 머물러 있을 때만 blur() 하여
-                // hidden 요소에 포커스가 남는 상황을 방지한다. (대상 페이지의 .verse-text 는
-                // div 라 native focusable 이 아니므로 이 분기가 실제로 발동된다.)
-                active.blur();
-            }
-        }
+        activeBeforeCollapse = document.activeElement;
+        focusInsidePanel = !!(activeBeforeCollapse && elements.fontPanel?.contains(activeBeforeCollapse));
     }
 
+    // 2) 상태/속성 플립 — 이 시점 이후로 토글이 display:block 으로 복귀
     fontState.expanded = Boolean(expand);
     elements.fontPanel?.classList.toggle("d-none", !fontState.expanded);
     elements.fontPanel?.setAttribute("aria-hidden", String(!fontState.expanded));
     elements.fontToggle?.setAttribute("aria-expanded", String(fontState.expanded));
     elements.fontControl?.setAttribute("data-expanded", String(fontState.expanded));
 
+    // 3) 포커스 처리 — DOM 가시성이 확정된 후에 호출해야 적용된다
     if (fontState.expanded) {
         // 펼치자마자 현재 선택된 점에 포커스
         const checked = elements.fontStepper?.querySelector('[aria-checked="true"]');
         checked?.focus();
+    } else if (focusInsidePanel) {
+        if (returnFocus) {
+            // 명시적 닫기(Esc/×) — 이제 토글이 보이는 상태이므로 focus 적용됨
+            elements.fontToggle?.focus();
+        } else {
+            // 외부 클릭으로 닫힘 — 패널 내부에 남아 있는 active 를 blur 하여
+            // hidden 요소에 포커스가 머무는 a11y 위반 방지.
+            // (대상 페이지의 .verse-text 는 div 라 native focusable 이 아니므로
+            //  외부 클릭 후에도 활성 요소가 여전히 패널 내부에 머무는 분기가 실제 발동된다.)
+            activeBeforeCollapse?.blur();
+        }
     }
 }
 ```
@@ -765,7 +796,7 @@ function handleFabEscapeKey(event) {
 | 6 | 키보드 Home | 1단계 + 포커스 1번째 점 |
 | 7 | 초기화 클릭 | 3단계 복귀 + 초기화 버튼 disabled |
 | 8 | × 클릭 | 패널 접힘, 토글로 포커스 복귀 |
-| 9 | 외부 영역(예: 구절 본문) 클릭 | 패널 접힘, **포커스는 클릭한 요소로 이동** (토글로 강제 복귀 X) |
+| 9 | 외부 영역(예: 구절 본문 `.verse-text` div) 클릭 | 패널 접힘. `.verse-text` 가 non-focusable 이므로 클릭으로 포커스가 거기로 이동하지 않고 패널 내부에 남으나, **`blur()` 처리로 active 가 제거**되고 토글로 **강제 복귀하지 않음** (FAB/메모/타 영역 동작에 간섭 X) |
 | 10 | Esc (패널 열림) | 패널 접힘, 토글로 포커스 복귀 |
 | 11 | Esc (패널 닫힘 + FAB 열림) | FAB만 닫힘 (우선순위) |
 | 12 | 다음 장 이동 | 같은 크기 적용, 깜빡임 없음 |
