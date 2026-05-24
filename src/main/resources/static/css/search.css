@@ -261,3 +261,8 @@ body.dictionary-list-page .badge.bg-light {
     background-color: var(--color-bg-elevated-strong) !important;
     color: var(--color-text-secondary) !important;
 }
+
+html[data-theme="dark"] body.dictionary-list-page .badge.bg-light {
+    background-color: var(--color-bg-elevated-strong-hover) !important;
+    color: var(--color-text-primary) !important;
+}
