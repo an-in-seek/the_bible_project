@@ -42,6 +42,9 @@
 - **변경 이력 순서 정렬** — v2.4 가 v2.3 보다 위에 배치되어 있던 역순 문제 수정. 시간 순(v2 → v2.1 → v2.2 → v2.3 → v2.4 → v2.5) 으로 일관 정렬하여 구현자가 흐름을 순방향으로 따라 읽을 수 있도록 함
 - **외부 클릭 포커스 동작의 브라우저 의존성 명시** — 인터랙션 표(section 2-3) 의 "focusable 이면 브라우저 기본 동작으로 포커스 이동" 항목에 "이는 구현 코드가 강제하는 게 아니라 브라우저의 `mousedown → focus` 기본 동작에 의존한다 — focusable 외부 타깃 클릭 시 click 핸들러 실행 전에 이미 active 가 외부로 이동하므로 `focusInsidePanel === false` 가 되어 코드의 별도 분기 진입이 없음" 을 부연 설명으로 추가
 
+**v2.6 변경 요약** (외부 리뷰 6차 1건 반영)
+- **명시적 닫기 시 포커스 복귀를 `focusInsidePanel` 와 분리** — v2.4 구현은 `else if (focusInsidePanel)` 내부에서 `returnFocus` 분기를 처리하여, 사용자가 Tab 으로 포커스를 패널 밖으로 이동시킨 뒤 Esc 를 누른 시나리오에서 `focusInsidePanel === false` 가 되어 토글 포커스 복귀가 누락되는 사양 불일치(line 102 "Esc → 토글로 포커스 복귀") 발생. 분기 순서를 `returnFocus → focusInsidePanel + !returnFocus` 로 재구성하여 명시적 닫기(Esc/×)는 패널 외부에 포커스가 있어도 항상 토글로 복귀, 외부 클릭은 패널 내부에 포커스가 남았을 때만 `blur()` 처리. QA #10b (Tab 으로 빠진 후 Esc) 시나리오 추가
+
 ---
 
 ## 1. UX 목표 (Why)
@@ -689,17 +692,19 @@ function toggleFontPanel(expand, { returnFocus = true } = {}) {
         // 펼치자마자 현재 선택된 점에 포커스
         const checked = elements.fontStepper?.querySelector('[aria-checked="true"]');
         checked?.focus();
+    } else if (returnFocus) {
+        // 명시적 닫기(Esc/×) — focusInsidePanel 여부와 무관하게 항상 토글로 복귀.
+        // (패널은 포커스 트랩이 아니므로 사용자가 Tab 으로 패널 밖에 나간 뒤 Esc 를 누르는
+        //  시나리오에서도 사양 "Esc → 토글로 포커스 복귀" 가 보장되어야 한다.)
+        elements.fontToggle?.focus();
     } else if (focusInsidePanel) {
-        if (returnFocus) {
-            // 명시적 닫기(Esc/×) — 이제 토글이 보이는 상태이므로 focus 적용됨
-            elements.fontToggle?.focus();
-        } else {
-            // 외부 클릭으로 닫힘 — 패널 내부에 남아 있는 active 를 blur 하여
-            // hidden 요소에 포커스가 머무는 a11y 위반 방지.
-            // (대상 페이지의 .verse-text 는 div 라 native focusable 이 아니므로
-            //  외부 클릭 후에도 활성 요소가 여전히 패널 내부에 머무는 분기가 실제 발동된다.)
-            activeBeforeCollapse?.blur();
-        }
+        // 외부 클릭으로 닫힘 + 패널 내부에 포커스가 남아 있는 경우 — blur 하여
+        // hidden 요소에 포커스가 머무는 a11y 위반 방지.
+        // (대상 페이지의 .verse-text 는 div 라 native focusable 이 아니므로
+        //  외부 클릭 후에도 활성 요소가 여전히 패널 내부에 머무는 분기가 실제 발동된다.
+        //  focusable 외부 타깃인 경우 브라우저 기본 동작으로 이미 외부로 이동했으므로
+        //  focusInsidePanel === false 가 되어 이 분기에 진입하지 않는다.)
+        activeBeforeCollapse?.blur();
     }
 }
 ```
@@ -801,7 +806,8 @@ function handleFabEscapeKey(event) {
 | 7 | 초기화 클릭 | 3단계 복귀 + 초기화 버튼 disabled |
 | 8 | × 클릭 | 패널 접힘, 토글로 포커스 복귀 |
 | 9 | 외부 영역(예: 구절 본문 `.verse-text` div) 클릭 | 패널 접힘. `.verse-text` 가 non-focusable 이므로 클릭으로 포커스가 거기로 이동하지 않고 패널 내부에 남으나, **`blur()` 처리로 active 가 제거**되고 토글로 **강제 복귀하지 않음** (FAB/메모/타 영역 동작에 간섭 X) |
-| 10 | Esc (패널 열림) | 패널 접힘, 토글로 포커스 복귀 |
+| 10 | Esc (패널 열림, 포커스 패널 내부) | 패널 접힘, 토글로 포커스 복귀 |
+| 10b | 패널 열림 → **Tab 으로 포커스를 패널 밖(예: FAB)으로 이동** → Esc | 패널 접힘, **토글로 포커스 복귀** (focusInsidePanel false 여도 returnFocus: true 면 항상 복귀) |
 | 11 | Esc (패널 닫힘 + FAB 열림) | FAB만 닫힘 (우선순위) |
 | 12 | 다음 장 이동 | 같은 크기 적용, 깜빡임 없음 |
 | 13 | 페이지 새로고침 | FOUC 없음 (paint 전 인라인 스크립트 적용) |
