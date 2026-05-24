@@ -9,4 +9,8 @@ class GlobalModelAttribute {
 
     @ModelAttribute("currentPath")
     fun currentPath(request: HttpServletRequest): String = request.requestURI
+
+    @ModelAttribute("useVerseFontBoot")
+    fun useVerseFontBoot(request: HttpServletRequest): Boolean =
+        request.requestURI.startsWith("/web/bible/verse")
 }

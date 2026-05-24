@@ -37,6 +37,61 @@
                        title="본문 검색">
                         🔍
                     </a>
+
+                    <!-- Verse Font Size — verse-list 페이지에서만 노출 (useVerseFontBoot 플래그) -->
+                    <div id="verseFontControl"
+                         class="verse-font-control top-nav-font"
+                         data-expanded="false"
+                         th:if="${useVerseFontBoot}">
+                        <button id="verseFontToggle"
+                                type="button"
+                                class="verse-font-toggle top-nav-btn btn btn-outline-secondary"
+                                aria-expanded="false"
+                                aria-controls="verseFontPanel"
+                                aria-label="글씨 크기 조절 열기"
+                                title="글씨 크기 조절">
+                            <span aria-hidden="true">Aa</span>
+                        </button>
+                        <div id="verseFontPanel"
+                             class="verse-font-panel d-none"
+                             aria-hidden="true"
+                             role="group"
+                             aria-label="구절 글씨 크기 조절">
+                            <div class="verse-font-stepper" role="radiogroup" aria-label="글씨 크기 단계 선택">
+                                <button type="button" class="verse-font-dot" data-step="1" role="radio"
+                                        aria-checked="false" tabindex="-1" aria-label="1단계 (가장 작게)">
+                                    <span class="verse-font-dot-label" aria-hidden="true">Aa</span>
+                                </button>
+                                <button type="button" class="verse-font-dot" data-step="2" role="radio"
+                                        aria-checked="false" tabindex="-1" aria-label="2단계 (작게)">
+                                    <span class="verse-font-dot-label" aria-hidden="true">Aa</span>
+                                </button>
+                                <button type="button" class="verse-font-dot" data-step="3" role="radio"
+                                        aria-checked="true"  tabindex="0"  aria-label="3단계 (기본)">
+                                    <span class="verse-font-dot-label" aria-hidden="true">Aa</span>
+                                </button>
+                                <button type="button" class="verse-font-dot" data-step="4" role="radio"
+                                        aria-checked="false" tabindex="-1" aria-label="4단계 (크게)">
+                                    <span class="verse-font-dot-label" aria-hidden="true">Aa</span>
+                                </button>
+                                <button type="button" class="verse-font-dot" data-step="5" role="radio"
+                                        aria-checked="false" tabindex="-1" aria-label="5단계 (가장 크게)">
+                                    <span class="verse-font-dot-label" aria-hidden="true">Aa</span>
+                                </button>
+                            </div>
+
+                            <button type="button" class="verse-font-reset" id="verseFontReset"
+                                    disabled aria-label="기본 크기로 초기화">
+                                <span class="verse-font-reset-label">초기화</span>
+                                <span class="verse-font-reset-icon" aria-hidden="true">↺</span>
+                            </button>
+                            <button type="button" class="verse-font-close" id="verseFontClose"
+                                    aria-label="글씨 크기 조절 닫기">×</button>
+
+                            <span class="visually-hidden" aria-live="polite" id="verseFontLiveRegion"></span>
+                        </div>
+                    </div>
+
                     <button id="topNavNotificationButton"
                             type="button"
                             class="top-nav-notification-button top-nav-btn btn btn-outline-secondary d-none"

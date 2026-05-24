@@ -177,6 +177,35 @@ export const ThemeStore = {
     }
 };
 
+// === Bible Reader Preferences ===
+// 구절 본문 글씨 크기 단계(1~5) 영속화. 디바이스별 분리(서버 동기화 없음).
+const BIBLE_READER_FONT_STEP_KEY = "bibleReaderFontStep";
+const BIBLE_READER_FONT_STEP_DEFAULT = 3;
+
+export const BibleReaderStore = {
+    getFontStep() {
+        // LocalStore.get 내부 JSON.parse 가 깨진 값에 throw 할 수 있으므로 흡수.
+        try {
+            const value = parseInt(LocalStore.get(BIBLE_READER_FONT_STEP_KEY), 10);
+            return (Number.isInteger(value) && value >= 1 && value <= 5)
+                ? value
+                : BIBLE_READER_FONT_STEP_DEFAULT;
+        } catch (e) {
+            return BIBLE_READER_FONT_STEP_DEFAULT;
+        }
+    },
+    saveFontStep(step) {
+        const parsed = parseInt(step, 10);
+        if (Number.isInteger(parsed) && parsed >= 1 && parsed <= 5) {
+            try {
+                LocalStore.set(BIBLE_READER_FONT_STEP_KEY, parsed);
+            } catch (e) {
+                // storage 차단/할당 실패 환경 — 영속화 실패해도 기능은 동작
+            }
+        }
+    }
+};
+
 // 마지막 읽기 위치 관련
 export const LastReadStore = {
     save({translationId, bookOrder, chapterNumber}) {

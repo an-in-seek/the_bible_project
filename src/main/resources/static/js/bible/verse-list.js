@@ -1,4 +1,4 @@
-import {BookStore, ChapterStore, LastReadStore, TranslationStore, VerseStore} from "/js/storage-util.js?v=2.3";
+import {BibleReaderStore, BookStore, ChapterStore, LastReadStore, TranslationStore, VerseStore} from "/js/storage-util.js?v=2.4";
 import {applyOAuthBackGuardIfNeeded, buildLoginRedirectUrl, checkAuthStatus, refreshAccessToken} from "/js/auth/auth-check.js";
 
 const UI_CLASSES = {
@@ -79,6 +79,21 @@ const chapterState = {
     stateLoadPromise: null
 };
 
+const VERSE_FONT_SIZES = {
+    1: "0.875rem",
+    2: "1.0rem",
+    3: "1.125rem",
+    4: "1.3125rem",
+    5: "1.5rem"
+};
+const FONT_STEP_LABELS = {1: "가장 작게", 2: "작게", 3: "기본", 4: "크게", 5: "가장 크게"};
+const DEFAULT_FONT_STEP = 3;
+
+const fontState = {
+    step: DEFAULT_FONT_STEP,
+    expanded: false
+};
+
 let elements = null;
 
 function createAuthState(message) {
@@ -111,7 +126,14 @@ function getElements() {
         chapterSelectLink: get("chapterSelectLink"),
         chapterSelectLinkLabel: get("chapterSelectLinkLabel"),
         nextBtn: get("nextChapterBtn"),
-        fab: get("verseFab")
+        fab: get("verseFab"),
+        fontControl: get("verseFontControl"),
+        fontToggle: get("verseFontToggle"),
+        fontPanel: get("verseFontPanel"),
+        fontStepper: document.querySelector("#verseFontPanel .verse-font-stepper"),
+        fontReset: get("verseFontReset"),
+        fontClose: get("verseFontClose"),
+        fontLiveRegion: get("verseFontLiveRegion")
     };
 }
 
@@ -192,6 +214,8 @@ async function init() {
     saveLastRead();
     bindEvents();
     initFabMenu();
+    syncFontStepFromBoot();
+    bindFontControlEvents();
 
     await loadChapter("CURRENT");
 }
@@ -250,7 +274,7 @@ function bindEvents() {
         verseTable.addEventListener("keydown", handleMemoInputAttempt);
         verseTable.addEventListener("beforeinput", handleMemoInputAttempt);
     }
-    document.addEventListener("click", handleOutsideFabClick);
+    document.addEventListener("click", handleGlobalOutsideClick);
     document.addEventListener("keydown", handleFabEscapeKey);
 }
 
@@ -933,13 +957,17 @@ function handleFabBackdropClick(event) {
     }
 }
 
-function handleOutsideFabClick(event) {
+function handleGlobalOutsideClick(event) {
+    // FAB 외부 클릭 처리
     const fab = elements?.fab;
-    if (!fab || fab.classList.contains("d-none")) {
-        return;
-    }
-    if (!event.target.closest("#verseFab")) {
+    if (fab && !fab.classList.contains("d-none") && !event.target.closest("#verseFab")) {
         closeFabMenu();
+    }
+    // 폰트 패널 외부 클릭 — 사용자 클릭 지점 존중(returnFocus: false).
+    // toggleFontPanel 내부에서 패널에 포커스가 남아 있고 returnFocus=false 인 경우
+    // blur() 처리하여 hidden 요소에 포커스가 머무는 a11y 위반을 방지한다.
+    if (fontState.expanded && !event.target.closest("#verseFontControl")) {
+        toggleFontPanel(false, {returnFocus: false});
     }
 }
 
@@ -947,10 +975,17 @@ function handleFabEscapeKey(event) {
     if (event.key !== "Escape") {
         return;
     }
+    // 1. 장 메모 패널
     if (!elements.chapterMemoOverlay?.classList.contains("d-none")) {
         closeChapterMemoPanel();
         return;
     }
+    // 2. 폰트 패널 — Esc 는 명시적 닫기이므로 토글로 포커스 복귀
+    if (fontState.expanded) {
+        toggleFontPanel(false, {returnFocus: true});
+        return;
+    }
+    // 3. FAB
     const fab = elements?.fab;
     if (!fab || fab.classList.contains("d-none")) {
         return;
@@ -1569,6 +1604,137 @@ async function deleteChapterMemo() {
 
 function buildChapterMemoUrl() {
     return `${API_CONFIG.MEMOS_BASE}/${state.translationId}/books/${state.bookOrder}/chapters/${state.chapterNumber}/chapter-memo`;
+}
+
+// ────────────────────────────────────────────────────────────────
+// Verse Font Size 컨트롤
+// 설계 문서: docs/bible/bible-verse-dynamic-font-size.md
+// ────────────────────────────────────────────────────────────────
+
+function syncFontStepFromBoot() {
+    const bootStep = parseInt(document.documentElement.getAttribute("data-verse-font-step"), 10);
+    // bootStep 이 유효하면 store 를 읽지 않는다(단락 평가).
+    // LocalStore.get 내부 JSON.parse 가 깨진 값에 throw 할 경우 init 중단 방지.
+    let resolved;
+    if (bootStep >= 1 && bootStep <= 5) {
+        resolved = bootStep;
+    } else {
+        try {
+            resolved = BibleReaderStore.getFontStep();
+        } catch (e) {
+            resolved = DEFAULT_FONT_STEP;
+        }
+    }
+    fontState.step = resolved;
+    applyFontStep(fontState.step, {persist: false, announce: false, focus: false});
+}
+
+function applyFontStep(step, {persist = true, announce = true, focus = true} = {}) {
+    // parseInt 결과가 NaN 이면 DEFAULT, 그 외에는 1~5 로 clamp.
+    // (`parseInt(0) || DEFAULT` 는 1단계 ArrowLeft 시 0이 DEFAULT 로 폴백되어 3으로 튀는 버그가 있음)
+    const parsed = parseInt(step, 10);
+    const clamped = Number.isNaN(parsed)
+        ? DEFAULT_FONT_STEP
+        : Math.max(1, Math.min(5, parsed));
+    fontState.step = clamped;
+
+    document.documentElement.style.setProperty("--verse-font-size", VERSE_FONT_SIZES[clamped]);
+    document.documentElement.setAttribute("data-verse-font-step", String(clamped));
+
+    // stepper UI 동기화 + roving tabindex
+    const dots = document.querySelectorAll(".verse-font-dot");
+    dots.forEach(dot => {
+        const dotStep = parseInt(dot.dataset.step, 10);
+        const checked = dotStep === clamped;
+        dot.setAttribute("aria-checked", String(checked));
+        dot.setAttribute("tabindex", checked ? "0" : "-1");
+        if (checked && focus && fontState.expanded) {
+            dot.focus();
+        }
+    });
+
+    if (elements?.fontReset) {
+        elements.fontReset.disabled = (clamped === DEFAULT_FONT_STEP);
+    }
+
+    if (persist) {
+        BibleReaderStore.saveFontStep(clamped);
+    }
+    if (announce && elements?.fontLiveRegion) {
+        elements.fontLiveRegion.textContent =
+            `글씨 크기: ${FONT_STEP_LABELS[clamped]} (${clamped}단계)`;
+    }
+}
+
+function bindFontControlEvents() {
+    if (!elements.fontControl) {
+        return;
+    }
+
+    elements.fontToggle?.addEventListener("click", () => toggleFontPanel(true));
+    elements.fontClose?.addEventListener("click", () => toggleFontPanel(false));
+    elements.fontReset?.addEventListener("click", () => applyFontStep(DEFAULT_FONT_STEP));
+
+    elements.fontStepper?.addEventListener("click", (e) => {
+        const dot = e.target.closest("[data-step]");
+        if (dot) {
+            applyFontStep(dot.dataset.step, {focus: false});
+        }
+    });
+
+    elements.fontStepper?.addEventListener("keydown", (e) => {
+        let nextStep = null;
+        if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+            nextStep = fontState.step - 1;
+        } else if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+            nextStep = fontState.step + 1;
+        } else if (e.key === "Home") {
+            nextStep = 1;
+        } else if (e.key === "End") {
+            nextStep = 5;
+        }
+        // Escape 는 stepper 에서 처리하지 않고 전역 handleFabEscapeKey 로 위임한다.
+        // (중복 처리하면 document 까지 버블링되어 FAB까지 같이 닫힘)
+        if (nextStep !== null) {
+            applyFontStep(nextStep);
+            e.preventDefault();
+        }
+    });
+}
+
+function toggleFontPanel(expand, {returnFocus = true} = {}) {
+    const willCollapse = !expand && fontState.expanded;
+
+    // 1) 닫기 직전: 패널 내부에 포커스가 남아 있다면 미리 캐시.
+    //    포커스 이동/제거는 DOM 상태 플립 이후에 수행해야 한다.
+    //    (현재 시점엔 토글이 display:none 이라 silent fail)
+    let focusInsidePanel = false;
+    let activeBeforeCollapse = null;
+    if (willCollapse) {
+        activeBeforeCollapse = document.activeElement;
+        focusInsidePanel = !!(activeBeforeCollapse && elements.fontPanel?.contains(activeBeforeCollapse));
+    }
+
+    // 2) 상태/속성 플립
+    fontState.expanded = Boolean(expand);
+    elements.fontPanel?.classList.toggle(UI_CLASSES.HIDDEN, !fontState.expanded);
+    elements.fontPanel?.setAttribute("aria-hidden", String(!fontState.expanded));
+    elements.fontToggle?.setAttribute("aria-expanded", String(fontState.expanded));
+    elements.fontControl?.setAttribute("data-expanded", String(fontState.expanded));
+
+    // 3) 포커스 처리 — DOM 가시성 확정 후
+    if (fontState.expanded) {
+        const checked = elements.fontStepper?.querySelector('[aria-checked="true"]');
+        checked?.focus();
+    } else if (returnFocus) {
+        // 명시적 닫기(Esc/×) — focusInsidePanel 여부와 무관하게 항상 토글로 복귀.
+        // 사용자가 Tab 으로 패널 밖에 나간 뒤 Esc 누르는 시나리오도 보장.
+        elements.fontToggle?.focus();
+    } else if (focusInsidePanel) {
+        // 외부 클릭 + 패널 내부에 포커스 남은 경우 — blur 하여 hidden 요소에 active 가 남지 않도록.
+        // (.verse-text 는 div 라 non-focusable 이므로 이 분기가 실제 발동된다.)
+        activeBeforeCollapse?.blur();
+    }
 }
 
 document.addEventListener("DOMContentLoaded", init);

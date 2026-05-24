@@ -41,6 +41,21 @@
         })();
     </script>
 
+    <!-- Verse Font Size — FOUC 방지: 본문 paint 전 인라인 스크립트로 :root 변수 세팅
+         설계 문서: docs/bible/bible-verse-dynamic-font-size.md (caller 에서 th:with="useVerseFontBoot=true") -->
+    <script th:if="${useVerseFontBoot}">
+        (function () {
+            try {
+                var raw = localStorage.getItem("bibleReaderFontStep");
+                var step = parseInt(raw, 10);
+                if (!(step >= 1 && step <= 5)) step = 3;
+                var map = { 1: "0.875rem", 2: "1.0rem", 3: "1.125rem", 4: "1.3125rem", 5: "1.5rem" };
+                document.documentElement.style.setProperty("--verse-font-size", map[step]);
+                document.documentElement.setAttribute("data-verse-font-step", String(step));
+            } catch (e) { /* 무시 */ }
+        })();
+    </script>
+
     <title th:text="${resolvedTitle}">ElSeeker</title>
 
     <!-- SEO -->
