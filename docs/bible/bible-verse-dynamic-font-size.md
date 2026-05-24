@@ -27,16 +27,20 @@
 - **잔존 옛 수치 정리** — "토글 36×36", "점 24px 시각·터치 타겟 일체화", "gap: 32px" 등 v2 잔재를 모두 v2.1 기준(44px hit / 24px 시각·::before / max-width 320px space-between)으로 일치화
 - **360px viewport 오버플로 해결** — 좁은 폭에서 container padding(24→12px), panel gap(16→8px) 축소 + reset 버튼을 라벨 → 아이콘(`↺`)으로 축약. stepper 220px 는 절대 양보하지 않음. 360px 기준 합계 328px 로 안전
 
-**v2.4 변경 요약** (외부 리뷰 4차 3건 반영)
-- **focus() 호출 순서 버그 수정** — 닫기 분기에서 `fontToggle.focus()` 호출 시점이 `data-expanded="true"` (토글이 `display:none`) 상태였음. silent fail 방지를 위해 상태 플립을 먼저 수행하고, 캐시한 `focusInsidePanel` 플래그/`activeBeforeCollapse` 참조로 분기 후 포커스 적용. 펼침 분기도 동일하게 상태 플립 후 점에 focus
-- **localStorage 오염 방어** — `BibleReaderStore.getFontStep/saveFontStep` 양쪽에 try/catch 추가. `LocalStore.get` 내부의 `JSON.parse` 가 throw 해도 기본값(3)으로 폴백. 추가로 `syncFontStepFromBoot` 도 bootStep 유효 시 store 호출을 단락 평가로 스킵하여 이중 안전망 확보
-- **QA #9 표현 정정** — `.verse-text` 가 `<div>`(non-focusable) 임을 명시. 외부 클릭 시 "포커스는 클릭한 요소로 이동" 이 아니라 "패널 내부 포커스가 `blur()` 처리되고 토글로 강제 복귀하지 않음" 으로 실제 동작과 일치화
-
 **v2.3 변경 요약** (외부 리뷰 3차 4건 반영)
 - **clamp 로직 버그 수정** — `parseInt(step,10) || DEFAULT` 패턴은 0/NaN 을 모두 DEFAULT 로 폴백시켜 "1단계에서 ArrowLeft → 3단계로 튐" 버그를 유발. `Number.isNaN(parsed) ? DEFAULT : Math.max(1, Math.min(5, parsed))` 형태로 교체. 경계값(0, -1, 6)이 정상적으로 1/5로 clamp됨
 - **Esc 중복 처리 제거** — stepper keydown 의 Esc 분기는 `preventDefault`/`stopPropagation` 없이 `toggleFontPanel(false)` 호출 → 전역 `handleFabEscapeKey` 까지 버블링되어 FAB도 동시에 닫히는 부수효과. stepper 의 Esc 처리를 **제거**하고 전역 핸들러 1곳에서만 처리하도록 단일화
 - **트랜지션 예시 `::before` 일치화** — section 3-3 의 `.verse-font-dot { transition: ... }` 를 `.verse-font-dot::before` 로 수정. 실제 구현(6-2 CSS)이 시각 점을 `::before` 로 그리므로 트랜지션 대상도 동일해야 함. `prefers-reduced-motion` 분기도 동일하게 보정
 - **v2.1 요약 "초기화 후 닫힘" 표현 수정** — 구현/QA 어디에도 "초기화 후 닫기" 동작 없음. "Esc/×" 만 닫힘 대상, 초기화는 단계만 변경하고 패널 유지하는 점 명시
+
+**v2.4 변경 요약** (외부 리뷰 4차 3건 반영)
+- **focus() 호출 순서 버그 수정** — 닫기 분기에서 `fontToggle.focus()` 호출 시점이 `data-expanded="true"` (토글이 `display:none`) 상태였음. silent fail 방지를 위해 상태 플립을 먼저 수행하고, 캐시한 `focusInsidePanel` 플래그/`activeBeforeCollapse` 참조로 분기 후 포커스 적용. 펼침 분기도 동일하게 상태 플립 후 점에 focus
+- **localStorage 오염 방어** — `BibleReaderStore.getFontStep/saveFontStep` 양쪽에 try/catch 추가. `LocalStore.get` 내부의 `JSON.parse` 가 throw 해도 기본값(3)으로 폴백. 추가로 `syncFontStepFromBoot` 도 bootStep 유효 시 store 호출을 단락 평가로 스킵하여 이중 안전망 확보
+- **QA #9 표현 정정** — `.verse-text` 가 `<div>`(non-focusable) 임을 명시. 외부 클릭 시 "포커스는 클릭한 요소로 이동" 이 아니라 "패널 내부 포커스가 `blur()` 처리되고 토글로 강제 복귀하지 않음" 으로 실제 동작과 일치화
+
+**v2.5 변경 요약** (외부 리뷰 5차 2건 반영)
+- **변경 이력 순서 정렬** — v2.4 가 v2.3 보다 위에 배치되어 있던 역순 문제 수정. 시간 순(v2 → v2.1 → v2.2 → v2.3 → v2.4 → v2.5) 으로 일관 정렬하여 구현자가 흐름을 순방향으로 따라 읽을 수 있도록 함
+- **외부 클릭 포커스 동작의 브라우저 의존성 명시** — 인터랙션 표(section 2-3) 의 "focusable 이면 브라우저 기본 동작으로 포커스 이동" 항목에 "이는 구현 코드가 강제하는 게 아니라 브라우저의 `mousedown → focus` 기본 동작에 의존한다 — focusable 외부 타깃 클릭 시 click 핸들러 실행 전에 이미 active 가 외부로 이동하므로 `focusInsidePanel === false` 가 되어 코드의 별도 분기 진입이 없음" 을 부연 설명으로 추가
 
 ---
 
@@ -100,7 +104,7 @@
 | Space/Enter (점 포커스 시) | 해당 단계 적용 | — |
 | "초기화" 클릭 | 3단계로 복귀 | 기본 상태에서는 disabled |
 | "×" 클릭 / Esc | 컨트롤 접힘 + 토글로 포커스 복귀 | — |
-| 외부 영역 클릭 | 컨트롤 접힘. 클릭 타깃이 focusable 이면 브라우저 기본 동작으로 포커스 이동, non-focusable(예: `.verse-text` div) 이면 패널 내부에 남아 있던 포커스를 `blur()` 하여 hidden 요소에 active 가 남지 않도록 처리 | — |
+| 외부 영역 클릭 | 컨트롤 접힘. 클릭 타깃이 focusable 이면 **브라우저의 기본 `mousedown → focus` 동작에 의해** click 핸들러 실행 전에 이미 active 가 외부로 이동 → `focusInsidePanel === false` → 코드는 별도 처리 안 함 (브라우저 이벤트 순서 의존). non-focusable(예: `.verse-text` div) 이면 패널 내부에 남아 있던 포커스를 `blur()` 하여 hidden 요소에 active 가 남지 않도록 처리 | — |
 | 장 이동 / 새로고침 | 동일 크기 즉시 적용 (FOUC 없음) | — |
 
 ### 2-4. 적용 범위
