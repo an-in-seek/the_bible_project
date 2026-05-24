@@ -239,6 +239,14 @@ html[data-theme="dark"] .verse-text.text-body.verse-highlight-orange {
     border-top: 1px solid #eef1f4;
 }
 
+html[data-theme="dark"] .verse-table td {
+    border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="dark"] .verse-table tbody tr:first-child td {
+    border-top-color: rgba(255, 255, 255, 0.06);
+}
+
 .verse-table td:first-child {
     width: 2.5rem;
     text-align: right;
