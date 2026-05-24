@@ -20,7 +20,7 @@ spring:
       leak-detection-threshold: 3000  # 3초
   jpa:
     hibernate:
-      ddl-auto: none  # ✅ JPA가 테이블을 먼저 생성
+      ddl-auto: none
     properties:
       hibernate:
         show_sql: false
