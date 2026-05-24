@@ -1671,7 +1671,7 @@ function bindFontControlEvents() {
         return;
     }
 
-    elements.fontToggle?.addEventListener("click", () => toggleFontPanel(true));
+    elements.fontToggle?.addEventListener("click", () => toggleFontPanel(!fontState.expanded));
     elements.fontClose?.addEventListener("click", () => toggleFontPanel(false));
     elements.fontReset?.addEventListener("click", () => applyFontStep(DEFAULT_FONT_STEP));
 
