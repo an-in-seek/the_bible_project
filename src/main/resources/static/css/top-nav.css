@@ -374,6 +374,11 @@
     font-weight: 700;
 }
 
+html[data-theme="dark"] .top-nav-title,
+html[data-theme="dark"] .top-nav-title .page-title {
+    color: #ffffff;
+}
+
 @media (min-width: 992px) {
     .top-nav-title {
         padding-left: 1.5rem;

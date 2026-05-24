@@ -100,6 +100,11 @@ html[data-theme="dark"] .mark-read-btn.btn-success {
     padding: 0;
 }
 
+html[data-theme="dark"] .verse-text,
+html[data-theme="dark"] .verse-text.text-body {
+    color: #ffffff !important;
+}
+
 .verse-text.active {
     color: #0d6efd;
     font-weight: bold;
@@ -240,6 +245,10 @@ html[data-theme="dark"] .verse-text.text-body.verse-highlight-orange {
     padding-right: 0.6rem;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
+}
+
+html[data-theme="dark"] .verse-table td:first-child {
+    color: #ffffff;
 }
 
 .verse-fab {
