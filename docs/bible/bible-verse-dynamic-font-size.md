@@ -19,7 +19,19 @@
 - **WCAG 2.5.5 (AAA) 일관성 확보** — 모든 인터랙티브 요소 44×44 px 히트 영역 보장. 점은 24px 시각 + 44px 클릭 박스(`::before` 패턴), 토글/닫기 36px → 44px, 초기화 버튼 height 44px
 - **fragments/head.html 시그니처 변경 폐기** — 기존 `pageDescription`/`pageKeywords` 패턴 그대로 차용. caller `th:with="useVerseFontBoot=true"` + fragment `th:if="${useVerseFontBoot}"` 만 사용
 - **slide-down 200ms 사양 제거** — 작은 패널은 즉시 토글이 더 직관적. 트랜지션은 본문 폰트와 점 시각 변화에만 적용
-- **포커스 복귀 옵션화** — `toggleFontPanel(false, { returnFocus })` 분리. Esc/×/초기화 후 닫힘은 `returnFocus: true`, 외부 클릭은 `returnFocus: false` (사용자 클릭 지점 존중)
+- **포커스 복귀 옵션화** — `toggleFontPanel(false, { returnFocus })` 분리. Esc/× 로 닫힘은 `returnFocus: true`, 외부 클릭은 `returnFocus: false` (사용자 클릭 지점 존중). 초기화 클릭은 패널을 닫지 않음 (단계만 변경, 패널 유지)
+
+**v2.2 변경 요약** (외부 리뷰 2차 4건 반영)
+- **import 지시문 명시** — 기존 `import {BookStore, ChapterStore, LastReadStore, TranslationStore, VerseStore}` 줄을 대체하지 않고 `BibleReaderStore` 를 **추가** (diff 형태로 명시)
+- **외부 클릭 포커스 안전 정책** — `.verse-text` 등 non-focusable 요소(div) 클릭으로 패널이 닫힐 때, 패널 내부에 남아 있는 포커스(`document.activeElement`)를 `blur()` 처리하여 hidden 요소에 active 가 머무는 a11y 위반 방지. `returnFocus: true` 분기는 토글로 명시 복귀
+- **잔존 옛 수치 정리** — "토글 36×36", "점 24px 시각·터치 타겟 일체화", "gap: 32px" 등 v2 잔재를 모두 v2.1 기준(44px hit / 24px 시각·::before / max-width 320px space-between)으로 일치화
+- **360px viewport 오버플로 해결** — 좁은 폭에서 container padding(24→12px), panel gap(16→8px) 축소 + reset 버튼을 라벨 → 아이콘(`↺`)으로 축약. stepper 220px 는 절대 양보하지 않음. 360px 기준 합계 328px 로 안전
+
+**v2.3 변경 요약** (외부 리뷰 3차 4건 반영)
+- **clamp 로직 버그 수정** — `parseInt(step,10) || DEFAULT` 패턴은 0/NaN 을 모두 DEFAULT 로 폴백시켜 "1단계에서 ArrowLeft → 3단계로 튐" 버그를 유발. `Number.isNaN(parsed) ? DEFAULT : Math.max(1, Math.min(5, parsed))` 형태로 교체. 경계값(0, -1, 6)이 정상적으로 1/5로 clamp됨
+- **Esc 중복 처리 제거** — stepper keydown 의 Esc 분기는 `preventDefault`/`stopPropagation` 없이 `toggleFontPanel(false)` 호출 → 전역 `handleFabEscapeKey` 까지 버블링되어 FAB도 동시에 닫히는 부수효과. stepper 의 Esc 처리를 **제거**하고 전역 핸들러 1곳에서만 처리하도록 단일화
+- **트랜지션 예시 `::before` 일치화** — section 3-3 의 `.verse-font-dot { transition: ... }` 를 `.verse-font-dot::before` 로 수정. 실제 구현(6-2 CSS)이 시각 점을 `::before` 로 그리므로 트랜지션 대상도 동일해야 함. `prefers-reduced-motion` 분기도 동일하게 보정
+- **v2.1 요약 "초기화 후 닫힘" 표현 수정** — 구현/QA 어디에도 "초기화 후 닫기" 동작 없음. "Esc/×" 만 닫힘 대상, 초기화는 단계만 변경하고 패널 유지하는 점 명시
 
 ---
 
@@ -56,7 +68,7 @@
 **위치**: `<header>` 와 `<main>` 사이에 sticky 마운트. 기존 `search-controls`, `my-memo-tabs` 와 동일 컨벤션.
 
 **노출 방식**: 접힌 토글 ↔ 펼침 패널 토글.
-- 평소: 우측 정렬된 36×36 `Aa` 토글 버튼만
+- 평소: 우측 정렬된 **44×44** `Aa` 토글 버튼만
 - 펼침: 같은 컨테이너에 stepper 패널 전개. 토글은 JS로 `d-none` 처리.
 
 **펼침 상태 레이아웃** (단순화):
@@ -69,8 +81,8 @@
 ```
 
 - 좌우 `Aa±` 버튼 제거 — 점 직접 클릭 + 키보드 ←/→ 로 충분
-- 점 자체를 24px 로 키우고 시각·터치 타겟 일체화 (별도 invisible hit area 불필요)
-- "초기화" 는 현재 ≠ 기본일 때만 활성
+- 점은 **시각 24px + 클릭 박스 44×44 px** (`::before` 패턴) — 시각 단정함과 WCAG 2.5.5 AAA 동시 충족
+- "초기화" 는 현재 ≠ 기본일 때만 활성, 360px 미만 좁은 폭에선 아이콘(↺)으로 축약
 
 ### 2-3. 인터랙션
 
@@ -83,7 +95,7 @@
 | Space/Enter (점 포커스 시) | 해당 단계 적용 | — |
 | "초기화" 클릭 | 3단계로 복귀 | 기본 상태에서는 disabled |
 | "×" 클릭 / Esc | 컨트롤 접힘 + 토글로 포커스 복귀 | — |
-| 외부 영역 클릭 | 컨트롤 접힘 (포커스 복귀 X — 사용자 클릭 지점 존중) | — |
+| 외부 영역 클릭 | 컨트롤 접힘. 클릭 타깃이 focusable 이면 브라우저 기본 동작으로 포커스 이동, non-focusable(예: `.verse-text` div) 이면 패널 내부에 남아 있던 포커스를 `blur()` 하여 hidden 요소에 active 가 남지 않도록 처리 | — |
 | 장 이동 / 새로고침 | 동일 크기 즉시 적용 (FOUC 없음) | — |
 
 ### 2-4. 적용 범위
@@ -123,9 +135,10 @@
 5단계:  ○─○─○─○─●
 ```
 
-- 점 크기: 24px (시각=터치 타겟 일체화)
-- 점 사이 간격: `gap: 32px` (점 중심 간 56px 보장)
-- 활성 점: `var(--bs-primary, #0d6efd)`, `transform: scale(1.1)` (모션 감소 시 X)
+- 점 시각 크기: 24px (`::before` 로 그림)
+- 점 클릭 박스: 44×44 px (투명 button 본체, `min-width/min-height: 44px`)
+- 점 분포: stepper `max-width: 320px` + `justify-content: space-between` — 5점이 균등 분포, 점 중심 간 ≥ 44px 보장 (히트존 겹침 없음)
+- 활성 점: `var(--bs-primary, #0d6efd)`, `::before` 에 `transform: scale(1.1)` (모션 감소 시 X)
 - 비활성: 2px border `var(--color-border-control)`
 - 다크 모드: 활성 점 `#4ea3ff` 로 대비 보강
 
@@ -133,11 +146,12 @@
 
 ```css
 .verse-text { transition: font-size 150ms ease-out; }
-.verse-font-dot { transition: background 120ms, border-color 120ms, transform 120ms; }
+/* 시각 점은 ::before 로 그리므로 트랜지션도 ::before 대상 (실제 구현 6-2 참조) */
+.verse-font-dot::before { transition: background 120ms, border-color 120ms, transform 120ms; }
 
 @media (prefers-reduced-motion: reduce) {
     .verse-text,
-    .verse-font-dot { transition: none; }
+    .verse-font-dot::before { transition: none; }
 }
 ```
 
@@ -275,7 +289,10 @@ inline 스크립트는 `:root` 의 변수를 **덮어쓴다** (인라인 style�
         </div>
 
         <button type="button" class="verse-font-reset" id="verseFontReset"
-                disabled aria-label="기본 크기로 초기화">초기화</button>
+                disabled aria-label="기본 크기로 초기화">
+            <span class="verse-font-reset-label">초기화</span>
+            <span class="verse-font-reset-icon" aria-hidden="true">↺</span>
+        </button>
         <button type="button" class="verse-font-close" id="verseFontClose"
                 aria-label="글씨 크기 조절 닫기">×</button>
 
@@ -410,6 +427,7 @@ inline 스크립트는 `:root` 의 변수를 **덮어쓴다** (인라인 style�
 
 /* ─────────── 우측 컨트롤 ─────────── */
 .verse-font-reset {
+    min-width: 44px;
     height: 44px;
     padding: 0 0.875rem;
     border: 1px solid var(--color-border-control);
@@ -419,8 +437,14 @@ inline 스크립트는 `:root` 의 변수를 **덮어쓴다** (인라인 style�
     font-size: 0.875rem;
     cursor: pointer;
     flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 .verse-font-reset:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 기본은 라벨 노출, 아이콘 숨김 */
+.verse-font-reset .verse-font-reset-icon { display: none; }
 
 .verse-font-close {
     width: 44px;
@@ -455,10 +479,21 @@ html[data-theme="dark"] .verse-font-dot[aria-checked="true"]::before {
     .verse-font-dot::before { border-width: 3px; }
 }
 
-/* 모바일 좁은 폭에서 우측 컨트롤 압축 — stepper 44px×5=220px 는 항상 유지 */
+/* 모바일 좁은 폭 — stepper 44px×5=220px 는 절대 양보 X.
+   대신 container padding / panel gap 축소 + reset 을 아이콘 버튼으로 축약하여 360px viewport 수용.
+   계산(360px): 220(stepper) + 8(gap×2) + 44(reset) + 44(close) + 12(container padding) = 328px ≤ 348px(360-12) */
 @media (max-width: 419.98px) {
+    .verse-font-control { padding: 0.25rem 0.375rem; }
+    .verse-font-panel { gap: 0.25rem; }
     .verse-font-stepper { max-width: none; }
-    .verse-font-reset { padding: 0 0.625rem; font-size: 0.8125rem; }
+
+    .verse-font-reset {
+        width: 44px;
+        padding: 0;
+        font-size: 1.125rem;
+    }
+    .verse-font-reset .verse-font-reset-label { display: none; }
+    .verse-font-reset .verse-font-reset-icon { display: inline; }
 }
 
 /* 인쇄 시 컨트롤 바 숨김, 본문은 기본 크기로 */
@@ -470,9 +505,16 @@ html[data-theme="dark"] .verse-font-dot[aria-checked="true"]::before {
 
 ### 6-3. JS — `verse-list.js`
 
-```javascript
-import { BibleReaderStore } from "/js/storage-util.js?v=2.4";
+**import 수정** — 기존 named import 줄에 `BibleReaderStore` 를 **추가**한다 (전체 교체 X):
 
+```diff
+- import {BookStore, ChapterStore, LastReadStore, TranslationStore, VerseStore} from "/js/storage-util.js?v=2.3";
++ import {BibleReaderStore, BookStore, ChapterStore, LastReadStore, TranslationStore, VerseStore} from "/js/storage-util.js?v=2.4";
+```
+
+**상수 정의:**
+
+```javascript
 const VERSE_FONT_SIZES = {
     1: "0.875rem",
     2: "1.0rem",
@@ -526,7 +568,13 @@ function syncFontStepFromBoot() {
 
 ```javascript
 function applyFontStep(step, { persist = true, announce = true, focus = true } = {}) {
-    const clamped = Math.max(1, Math.min(5, parseInt(step, 10) || DEFAULT_FONT_STEP));
+    // `parseInt(step, 10) || DEFAULT` 는 0/NaN 모두 DEFAULT 로 폴백시켜서
+    // 1단계에서 ArrowLeft (step → 0) 시 기본값으로 튀는 버그가 있다.
+    // NaN 만 DEFAULT 로 폴백하고 그 외에는 정수로 clamp 한다.
+    const parsed = parseInt(step, 10);
+    const clamped = Number.isNaN(parsed)
+        ? DEFAULT_FONT_STEP
+        : Math.max(1, Math.min(5, parsed));
     fontState.step = clamped;
 
     document.documentElement.style.setProperty("--verse-font-size", VERSE_FONT_SIZES[clamped]);
@@ -578,7 +626,8 @@ function bindFontControlEvents() {
         else if (e.key === "ArrowRight" || e.key === "ArrowDown") nextStep = fontState.step + 1;
         else if (e.key === "Home")                                nextStep = 1;
         else if (e.key === "End")                                 nextStep = 5;
-        else if (e.key === "Escape") { toggleFontPanel(false); return; }
+        // Escape 는 stepper 에서 처리하지 않고 전역 handleFabEscapeKey 로 위임한다.
+        // (중복 처리하면 이벤트가 document 까지 버블링되어 FAB까지 같이 닫히는 문제 발생)
         if (nextStep !== null) {
             applyFontStep(nextStep); // focus: true 기본 — 새 점으로 이동
             e.preventDefault();
@@ -587,6 +636,25 @@ function bindFontControlEvents() {
 }
 
 function toggleFontPanel(expand, { returnFocus = true } = {}) {
+    const willCollapse = !expand && fontState.expanded;
+    // 닫기 직전: 패널 내부에 포커스가 남아 있으면 a11y 위반 방지를 위해 안전 처리
+    if (willCollapse) {
+        const active = document.activeElement;
+        const focusInsidePanel = active && elements.fontPanel?.contains(active);
+        if (focusInsidePanel) {
+            if (returnFocus) {
+                // 명시적 닫기(Esc/×) — 토글로 복귀
+                elements.fontToggle?.focus();
+            } else {
+                // 외부 클릭으로 닫힘 — 클릭 타깃이 focusable 이면 브라우저가 이미 포커스를
+                // 이동시켰을 수 있으므로, 여전히 패널 내부에 머물러 있을 때만 blur() 하여
+                // hidden 요소에 포커스가 남는 상황을 방지한다. (대상 페이지의 .verse-text 는
+                // div 라 native focusable 이 아니므로 이 분기가 실제로 발동된다.)
+                active.blur();
+            }
+        }
+    }
+
     fontState.expanded = Boolean(expand);
     elements.fontPanel?.classList.toggle("d-none", !fontState.expanded);
     elements.fontPanel?.setAttribute("aria-hidden", String(!fontState.expanded));
@@ -597,10 +665,6 @@ function toggleFontPanel(expand, { returnFocus = true } = {}) {
         // 펼치자마자 현재 선택된 점에 포커스
         const checked = elements.fontStepper?.querySelector('[aria-checked="true"]');
         checked?.focus();
-    } else if (returnFocus) {
-        // 명시적 닫기(Esc/×) 에서만 토글로 포커스 복귀 (a11y)
-        // 외부 클릭으로 닫힐 때는 returnFocus: false 로 호출 → 사용자가 클릭한 지점 존중
-        elements.fontToggle?.focus();
     }
 }
 ```
@@ -616,7 +680,9 @@ function handleGlobalOutsideClick(event) {
     if (fab && !fab.classList.contains("d-none") && !event.target.closest("#verseFab")) {
         closeFabMenu();
     }
-    // 폰트 패널 — 외부 클릭이므로 포커스를 토글로 강제 복귀시키지 않음
+    // 폰트 패널 — 외부 클릭이므로 포커스를 토글로 강제 복귀시키지 않는다.
+    // toggleFontPanel 내부에서 패널에 포커스가 남아 있고 returnFocus=false 인 경우
+    // blur() 처리하여 hidden 요소에 포커스가 머무는 a11y 위반을 방지한다.
     if (fontState.expanded && !event.target.closest("#verseFontControl")) {
         toggleFontPanel(false, { returnFocus: false });
     }
