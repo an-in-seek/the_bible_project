@@ -11,11 +11,99 @@
     --error-color: #ef4444;
 }
 
+html[data-theme="dark"] {
+    --glass-bg: rgba(30, 41, 59, 0.72);
+    --glass-border: rgba(71, 85, 105, 0.5);
+    --glass-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+    --text-primary: #e6e8eb;
+    --text-secondary: #adb5bd;
+    --text-light: #e6e8eb;
+}
+
 body {
     background: #f8f9fa;
     min-height: 100vh;
+    min-height: 100dvh;
     font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
     overflow-x: hidden;
+}
+
+html[data-theme="dark"] body {
+    background: #0f1216;
+}
+
+html[data-theme="dark"] .visual-background {
+    background: #0f1216;
+}
+
+html[data-theme="dark"] .game-title {
+    background: linear-gradient(to right, #e6e8eb, #adb5bd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+html[data-theme="dark"] .game-subtitle {
+    color: var(--text-secondary);
+}
+
+html[data-theme="dark"] .stepper-control {
+    background: rgba(255, 255, 255, 0.06);
+}
+
+html[data-theme="dark"] .stepper-btn {
+    background: rgba(255, 255, 255, 0.10);
+}
+
+html[data-theme="dark"] .stepper-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+html[data-theme="dark"] .lot-inputs-scroll-area::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+html[data-theme="dark"] .lot-inputs-scroll-area::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+html[data-theme="dark"] .lot-input-wrapper input {
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .lot-input-wrapper input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 0 0 4px rgba(165, 180, 252, 0.15);
+}
+
+html[data-theme="dark"] .lot-input-wrapper input::placeholder {
+    color: #6c757d;
+}
+
+html[data-theme="dark"] .btn-secondary-glass {
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .btn-secondary-glass:hover {
+    background: rgba(255, 255, 255, 0.12);
+}
+
+html[data-theme="dark"] .status-message {
+    color: var(--text-secondary);
+}
+
+html[data-theme="dark"] .card-front {
+    background: linear-gradient(135deg, #232a33 0%, #161b22 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+html[data-theme="dark"] .card-pattern {
+    border-color: rgba(255, 255, 255, 0.18);
+}
+
+html[data-theme="dark"] .card-back {
+    box-shadow: 0 0 24px rgba(245, 245, 244, 0.18);
 }
 
 /* Ambient Background */
@@ -64,8 +152,8 @@ body {
 /* Layout */
 .game-container {
     max-width: 600px;
-    margin: 48px auto 32px;
-    padding: 16px 20px 24px;
+    margin: clamp(24px, 6vw, 48px) auto clamp(20px, 4vw, 32px);
+    padding: 16px clamp(12px, 4vw, 20px) clamp(16px, 4vw, 24px);
     position: relative;
     display: flex;
     flex-direction: column;
@@ -77,8 +165,8 @@ body {
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
-    border-radius: 24px;
-    padding: 2rem;
+    border-radius: clamp(16px, 4vw, 24px);
+    padding: clamp(1.25rem, 4vw, 2rem);
     box-shadow: var(--glass-shadow);
     color: var(--text-light);
 }
@@ -100,7 +188,7 @@ body {
 }
 
 .game-title {
-    font-size: 2.5rem;
+    font-size: clamp(1.75rem, 5vw, 2.5rem);
     font-weight: 800;
     margin-bottom: 0.5rem;
     background: linear-gradient(to right, #1f2937, #4b5563);
@@ -110,8 +198,8 @@ body {
 
 .game-subtitle {
     color: #64748b;
-    margin-bottom: 2rem;
-    font-size: 1.1rem;
+    margin-bottom: clamp(1.25rem, 4vw, 2rem);
+    font-size: clamp(0.95rem, 2.5vw, 1.1rem);
 }
 
 .input-configuration {
@@ -135,12 +223,14 @@ body {
 }
 
 .stepper-btn {
-    width: 32px;
-    height: 32px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
     border: none;
     background: rgba(15, 23, 42, 0.08);
     color: var(--text-primary);
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 1.2rem;
     display: flex;
@@ -154,7 +244,7 @@ body {
 }
 
 .stepper-control input {
-    width: 40px;
+    width: 56px;
     background: transparent;
     border: none;
     color: var(--text-primary);
@@ -162,6 +252,7 @@ body {
     font-size: 1.1rem;
     font-weight: bold;
     -moz-appearance: textfield;
+    appearance: textfield;
 }
 
 .stepper-control input::-webkit-outer-spin-button,
@@ -171,15 +262,22 @@ body {
 }
 
 .lot-inputs-scroll-area {
-    max-height: 400px;
+    max-height: clamp(240px, 50dvh, 480px);
     overflow-y: auto;
     padding-right: 5px;
     display: flex;
     flex-direction: column;
     gap: 0.8rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(15, 23, 42, 0.2) rgba(15, 23, 42, 0.04);
+    overscroll-behavior: contain;
 }
 
-/* Custom Scrollbar */
+html[data-theme="dark"] .lot-inputs-scroll-area {
+    scrollbar-color: rgba(255, 255, 255, 0.18) rgba(255, 255, 255, 0.04);
+}
+
+/* Custom Scrollbar (WebKit) */
 .lot-inputs-scroll-area::-webkit-scrollbar {
     width: 6px;
 }
@@ -220,12 +318,13 @@ body {
 /* Buttons */
 .btn-primary-glass {
     width: 100%;
+    min-height: 48px;
     padding: 1rem;
     border: none;
     border-radius: 16px;
     background: var(--primary-gradient);
     color: white;
-    font-size: 1.1rem;
+    font-size: clamp(1rem, 2.5vw, 1.1rem);
     font-weight: 700;
     cursor: pointer;
     position: relative;
@@ -244,6 +343,7 @@ body {
 
 .btn-secondary-glass {
     width: 100%;
+    min-height: 44px;
     padding: 0.8rem;
     background: #f1f5f9;
     border: 1px solid #e2e8f0;
@@ -266,11 +366,11 @@ body {
     align-items: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .status-badge {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--color-bg-elevated-strong);
     padding: 0.5rem 1rem;
     border-radius: 20px;
     font-size: 0.9rem;
@@ -278,23 +378,28 @@ body {
 }
 
 .status-message {
-    color: #cbd5e1;
+    color: var(--text-secondary);
     font-size: 0.95rem;
     margin: 0;
 }
 
 .card-arena {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(clamp(80px, 22vw, 110px), 1fr));
+    gap: clamp(0.75rem, 3vw, 1.5rem);
     perspective: 1000px;
-    min-height: 300px;
+    min-height: clamp(220px, 40dvh, 300px);
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
 }
 
 /* Card Styles */
 .game-card {
     position: relative;
     width: 100%; /* controlled by grid */
+    min-width: 0;
+    max-width: 100%;
     aspect-ratio: 2/3;
     cursor: pointer;
     background: transparent;
@@ -343,15 +448,15 @@ body {
 }
 
 .card-back {
-    background: linear-gradient(135deg, #fff 0%, #f1f5f9 100%);
-    color: var(--text-primary);
+    background: linear-gradient(135deg, #f5f5f4 0%, #e7e5e4 100%);
+    color: #1f2937;
     transform: rotateY(180deg);
     font-weight: 700;
     font-size: 1rem;
     word-break: keep-all;
     line-height: 1.4;
-    border: 2px solid #fff;
-    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    border: 2px solid #e7e5e4;
+    box-shadow: 0 0 24px rgba(214, 211, 209, 0.4);
 }
 
 /* Result Section */
@@ -382,7 +487,35 @@ body {
 
 /* Mobile Tweaks */
 @media (max-width: 480px) {
-    .game-title { font-size: 2rem; }
-    .card-arena { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
-    .glass-panel { padding: 1.5rem; }
+    .card-arena { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .input-group-header { flex-wrap: wrap; gap: 0.5rem; }
+}
+
+/* 작은 모바일 — 카드 가독성 확보 */
+@media (max-width: 360px) {
+    .card-arena { gap: 0.6rem; }
+    .card-back { font-size: 0.9rem; }
+}
+
+/* Landscape 짧은 viewport — 입력 스크롤 영역 압축 */
+@media (max-height: 600px) and (orientation: landscape) {
+    .game-container { margin-top: clamp(12px, 3vh, 24px); }
+    .lot-inputs-scroll-area { max-height: clamp(160px, 45dvh, 280px); }
+    .card-arena { min-height: clamp(180px, 35dvh, 240px); }
+}
+
+/* 접근성 — 모션 감소 선호 사용자에게 애니메이션 차단 */
+@media (prefers-reduced-motion: reduce) {
+    .card-inner,
+    .game-phase,
+    .lot-input-wrapper input,
+    .btn-primary-glass,
+    .btn-secondary-glass,
+    .stepper-btn {
+        transition: none !important;
+    }
+
+    .result-panel {
+        animation: none !important;
+    }
 }
