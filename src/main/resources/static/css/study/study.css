@@ -2,6 +2,13 @@
     background: linear-gradient(135deg, #f7fbff 0%, #fff4ea 100%);
 }
 
+body.study-page {
+    background-color: #f7f8fa;
+}
+
+html[data-theme="dark"] body.study-page {
+    background-color: var(--color-bg-base);
+}
 
 .study-card-link {
     display: block;
@@ -10,6 +17,7 @@
 
 .study-card-link .card {
     height: 100%;
+    background-color: var(--color-bg-elevated-bright);
 }
 
 .study-card-link .card-body {

@@ -232,3 +232,32 @@ html[data-theme="dark"] .search-result-badge {
         right: max(24px, calc((100vw - (1320px + 24px)) / 2 - 48px));
     }
 }
+
+/* ── Dictionary list page — 카드/페이지 배경 분리 ── */
+body.dictionary-list-page {
+    background-color: #f7f8fa;
+}
+
+html[data-theme="dark"] body.dictionary-list-page {
+    background-color: var(--color-bg-base);
+}
+
+body.dictionary-list-page .list-group-item {
+    background-color: var(--color-bg-elevated-bright);
+    transition: background-color 0.15s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    body.dictionary-list-page .list-group-item-action:hover {
+        background-color: var(--color-bg-elevated-strong-hover);
+    }
+}
+
+body.dictionary-list-page .list-group-item-action:focus-visible {
+    background-color: var(--color-bg-elevated-strong-hover);
+}
+
+body.dictionary-list-page .badge.bg-light {
+    background-color: var(--color-bg-elevated-strong) !important;
+    color: var(--color-text-secondary) !important;
+}

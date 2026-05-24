@@ -144,6 +144,14 @@
     min-height: clamp(120px, 18vh, 170px);
     border: 1px solid var(--color-border);
     box-shadow: 0 2px 8px var(--color-shadow), 0 0 1px var(--color-shadow);
+    background-color: var(--color-bg-elevated-bright);
+}
+
+body.home-page {
+    background-color: #f7f8fa;
+}
+
+html[data-theme="dark"] body.home-page {
     background-color: var(--color-bg-base);
 }
 

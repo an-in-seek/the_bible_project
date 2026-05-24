@@ -70,12 +70,21 @@ html[data-theme="dark"] {
     max-width: 160px;
 }
 
+body.bible-word-puzzle-page {
+    background-color: #f7f8fa;
+}
+
+html[data-theme="dark"] body.bible-word-puzzle-page {
+    background-color: var(--color-bg-base);
+}
+
 /* ── Puzzle Card (List) ── */
 .wp-puzzle-card {
     cursor: pointer;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
     border: 1px solid var(--bs-border-color);
     border-radius: 0.75rem;
+    background-color: var(--color-bg-elevated-bright);
 }
 @media (hover: hover) and (pointer: fine) {
     .wp-puzzle-card:hover {
