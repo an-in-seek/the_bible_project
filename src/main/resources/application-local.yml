@@ -1,9 +1,15 @@
+server:
+  forward-headers-strategy: framework
+
+logging:
+  config: classpath:logback-spring-local.xml
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:el_seeker}
-    username: ${DB_USER:postgres}
-    password: ${DB_PASSWORD:postgres}
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+    username: ${DB_USER}
+    password: ${DB_PASSWORD}
     hikari:
       pool-name: ${spring.application.name}-${spring.profiles.active}-hikari-pool
       maximum-pool-size: 1
@@ -14,95 +20,20 @@ spring:
       leak-detection-threshold: 3000  # 3초
   jpa:
     hibernate:
-      ddl-auto: create  # ✅ JPA가 테이블을 먼저 생성
+      ddl-auto: none  # ✅ JPA가 테이블을 먼저 생성
     properties:
       hibernate:
         show_sql: false
         format_sql: false
-        jdbc:
-          time_zone: UTC
-    defer-datasource-initialization: true  # ✅ JPA 실행 후 sql 실행
-  sql:
-    init:
-      mode: always # ✅ 항상 SQL 스크립트 실행
-      data-locations:
-        - classpath:data/bible_quiz.sql
-        - classpath:data/bible_ox_quiz.sql
-        - classpath:data/dictionary.sql
-        - classpath:data/bible_translation.sql
-        - classpath:data/bible_book_description_ko.sql
-        - classpath:data/bible_book_description_en.sql
-        # KRV
-        - classpath:data/krv/bible_krv_book.sql
-        - classpath:data/krv/bible_krv_01_genesis.sql
-        - classpath:data/krv/bible_krv_02_exodus.sql
-        - classpath:data/krv/bible_krv_03_leviticus.sql
-        - classpath:data/krv/bible_krv_04_numbers.sql
-        - classpath:data/krv/bible_krv_05_deuteronomy.sql
-        - classpath:data/krv/bible_krv_06_joshua.sql
-        - classpath:data/krv/bible_krv_07_judges.sql
-        - classpath:data/krv/bible_krv_08_ruth.sql
-        - classpath:data/krv/bible_krv_09_1samuel.sql
-        - classpath:data/krv/bible_krv_10_2samuel.sql
-        - classpath:data/krv/bible_krv_11_1kings.sql
-        - classpath:data/krv/bible_krv_12_2kings.sql
-        - classpath:data/krv/bible_krv_13_1chronicles.sql
-        - classpath:data/krv/bible_krv_14_2chronicles.sql
-        - classpath:data/krv/bible_krv_15_ezra.sql
-        - classpath:data/krv/bible_krv_16_nehemiah.sql
-        - classpath:data/krv/bible_krv_17_esther.sql
-        - classpath:data/krv/bible_krv_18_job.sql
-        - classpath:data/krv/bible_krv_19_psalms.sql
-        - classpath:data/krv/bible_krv_20_proverbs.sql
-        - classpath:data/krv/bible_krv_21_ecclesiastes.sql
-        - classpath:data/krv/bible_krv_22_song_of_songs.sql
-        - classpath:data/krv/bible_krv_23_isaiah.sql
-        - classpath:data/krv/bible_krv_24_jeremiah.sql
-        - classpath:data/krv/bible_krv_25_lamentations.sql
-        - classpath:data/krv/bible_krv_26_ezekiel.sql
-        - classpath:data/krv/bible_krv_27_daniel.sql
-        - classpath:data/krv/bible_krv_28_hosea.sql
-        - classpath:data/krv/bible_krv_29_joel.sql
-        - classpath:data/krv/bible_krv_30_amos.sql
-        - classpath:data/krv/bible_krv_31_obadiah.sql
-        - classpath:data/krv/bible_krv_32_jonah.sql
-        - classpath:data/krv/bible_krv_33_micah.sql
-        - classpath:data/krv/bible_krv_34_nahum.sql
-        - classpath:data/krv/bible_krv_35_habakkuk.sql
-        - classpath:data/krv/bible_krv_36_zephaniah.sql
-        - classpath:data/krv/bible_krv_37_haggai.sql
-        - classpath:data/krv/bible_krv_38_zechariah.sql
-        - classpath:data/krv/bible_krv_39_malachi.sql
-        - classpath:data/krv/bible_krv_40_matthew.sql
-        - classpath:data/krv/bible_krv_41_mark.sql
-        - classpath:data/krv/bible_krv_42_luke.sql
-        - classpath:data/krv/bible_krv_43_john.sql
-        - classpath:data/krv/bible_krv_44_acts.sql
-        - classpath:data/krv/bible_krv_45_romans.sql
-        - classpath:data/krv/bible_krv_46_1corinthians.sql
-        - classpath:data/krv/bible_krv_47_2corinthians.sql
-        - classpath:data/krv/bible_krv_48_galatians.sql
-        - classpath:data/krv/bible_krv_49_ephesians.sql
-        - classpath:data/krv/bible_krv_50_philippians.sql
-        - classpath:data/krv/bible_krv_51_colossians.sql
-        - classpath:data/krv/bible_krv_52_1thessalonians.sql
-        - classpath:data/krv/bible_krv_53_2thessalonians.sql
-        - classpath:data/krv/bible_krv_54_1timothy.sql
-        - classpath:data/krv/bible_krv_55_2timothy.sql
-        - classpath:data/krv/bible_krv_56_titus.sql
-        - classpath:data/krv/bible_krv_57_philemon.sql
-        - classpath:data/krv/bible_krv_58_hebrews.sql
-        - classpath:data/krv/bible_krv_59_james.sql
-        - classpath:data/krv/bible_krv_60_1peter.sql
-        - classpath:data/krv/bible_krv_61_2peter.sql
-        - classpath:data/krv/bible_krv_62_1john.sql
-        - classpath:data/krv/bible_krv_63_2john.sql
-        - classpath:data/krv/bible_krv_64_3john.sql
-        - classpath:data/krv/bible_krv_65_jude.sql
-        - classpath:data/krv/bible_krv_66_revelation.sql
-        # NKRV
-        - classpath:data/nkrv/bible_nkrv_book.sql
-        - classpath:data/nkrv/bible_nkrv_01_genesis.sql
-        - classpath:data/nkrv/bible_nkrv_02_exodus.sql
-        # KJV
-        - classpath:data/kjv/bible_kjv_book.sql
+  cloud:
+    gcp:
+      credentials:
+        location: classpath:keys/elseeker_gcp_project_key.json
+      logging:
+        enabled: false
+      trace:
+        enabled: false
+
+management:
+  tracing:
+    enabled: false

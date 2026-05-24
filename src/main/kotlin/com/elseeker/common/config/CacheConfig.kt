@@ -19,6 +19,7 @@ class CacheConfig {
             Caffeine.newBuilder()
                 .expireAfterWrite(Duration.ofSeconds(30))
                 .maximumSize(16)
+                .recordStats()
                 .build()
         )
         registerCustomCache(
@@ -26,6 +27,7 @@ class CacheConfig {
             Caffeine.newBuilder()
                 .expireAfterWrite(Duration.ofSeconds(30))
                 .maximumSize(16)
+                .recordStats()
                 .build()
         )
     }

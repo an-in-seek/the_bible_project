@@ -1,13 +1,13 @@
 package com.elseeker.common.security.jwt
 
 import com.elseeker.common.config.ElSeekerProperties
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtParser
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import jakarta.servlet.http.HttpServletRequest
-import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.util.*
@@ -148,7 +148,7 @@ class JwtProvider(
                 claims
             }
         } catch (e: Exception) {
-            logger.error("Invalid JWT token: ${e.message}")
+            logger.error { "Invalid JWT token: ${e.message}" }
             null
         }
     }

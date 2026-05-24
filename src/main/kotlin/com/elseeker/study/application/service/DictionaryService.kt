@@ -5,12 +5,12 @@ import com.elseeker.common.domain.throwError
 import com.elseeker.study.adapter.output.jpa.DictionaryRepository
 import com.elseeker.study.domain.event.DictionarySearchPerformedEvent
 import com.elseeker.study.domain.model.Dictionary
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.transaction.annotation.Transactional
 
 /**

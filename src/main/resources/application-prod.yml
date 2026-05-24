@@ -1,6 +1,9 @@
 server:
   forward-headers-strategy: framework
 
+logging:
+  config: classpath:logback-spring-prod.xml
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -24,5 +27,15 @@ spring:
       hibernate:
         show_sql: false
         format_sql: false
-        jdbc:
-          time_zone: UTC
+  cloud:
+    gcp:
+      logging:
+        enabled: true
+      trace:
+        enabled: true
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

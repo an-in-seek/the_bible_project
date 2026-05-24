@@ -6,7 +6,7 @@ import com.elseeker.game.domain.model.GameRanking
 import com.elseeker.game.domain.vo.GameType
 import com.elseeker.member.adapter.output.jpa.MemberRepository
 import com.elseeker.member.domain.model.Member
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.dao.DataAccessException
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
@@ -36,9 +36,9 @@ class GameRankingService(
             val member = memberRepository.getReferenceById(event.memberId)
             recalculate(member, event.gameType)
         } catch (e: DataAccessException) {
-            log.warn("랭킹 갱신 실패: memberId={}, gameType={}", event.memberId, event.gameType, e)
+            log.warn(e) { "랭킹 갱신 실패: memberId=${event.memberId}, gameType=${event.gameType}" }
         } catch (e: Exception) {
-            log.error("랭킹 갱신 중 예상치 못한 오류: memberId={}, gameType={}", event.memberId, event.gameType, e)
+            log.error(e) { "랭킹 갱신 중 예상치 못한 오류: memberId=${event.memberId}, gameType=${event.gameType}" }
         }
     }
 

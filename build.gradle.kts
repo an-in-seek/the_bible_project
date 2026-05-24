@@ -2,7 +2,7 @@ plugins {
     kotlin("jvm") version "1.9.25"
     kotlin("plugin.spring") version "1.9.25"
     kotlin("plugin.jpa") version "1.9.25"
-    id("org.springframework.boot") version "3.5.9"
+    id("org.springframework.boot") version "3.5.14"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -19,14 +19,23 @@ repositories {
     mavenCentral()
 }
 
-val springDocVersion = "2.8.14"
-val kotlinLogging = "3.0.5"
+val kotlinLogging = "8.0.01"
 val kotestVersion = "5.9.1"
 val kotlinJdslVersion = "3.5.5"
+val springDocVersion = "2.8.14"
+val springCloudVersion = "2025.0.0"
+val springCloudGcpVersion = "7.4.1"
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}")
+        mavenBom("com.google.cloud:spring-cloud-gcp-dependencies:${springCloudGcpVersion}")
+    }
+}
 
 dependencies {
     // kotlin-logging
-    implementation("io.github.microutils:kotlin-logging:${kotlinLogging}")
+    implementation("io.github.oshai:kotlin-logging:${kotlinLogging}")
 
     // Spring Boot Framework
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -36,6 +45,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-cache")
+
+    // Spring Cloud GCP
+    implementation("com.google.cloud:spring-cloud-gcp-starter")
+    implementation("com.google.cloud:spring-cloud-gcp-starter-trace")
+    implementation("com.google.cloud:spring-cloud-gcp-starter-logging")
 
     // Local cache
     implementation("com.github.ben-manes.caffeine:caffeine")
@@ -87,6 +101,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")
+}
+
+configurations.all {
+    exclude(group = "commons-logging", module = "commons-logging")
 }
 
 kotlin {

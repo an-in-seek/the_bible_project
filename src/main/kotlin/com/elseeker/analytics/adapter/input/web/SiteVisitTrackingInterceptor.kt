@@ -2,9 +2,9 @@ package com.elseeker.analytics.adapter.input.web
 
 import com.elseeker.analytics.application.service.SiteVisitTrackingService
 import com.elseeker.common.security.jwt.JwtPrincipal
+import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import mu.KotlinLogging
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpMethod
 import org.springframework.http.ResponseCookie
@@ -14,7 +14,7 @@ import org.springframework.web.method.HandlerMethod
 import org.springframework.web.servlet.HandlerInterceptor
 import org.springframework.web.servlet.HandlerMapping
 import java.time.Duration
-import java.util.UUID
+import java.util.*
 
 @Component
 class SiteVisitTrackingInterceptor(

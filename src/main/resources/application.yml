@@ -55,6 +55,10 @@ spring:
         format_sql: false
         jdbc:
           time_zone: UTC
+    # defer-datasource-initialization: false  # true로 설정하면 JPA 실행 후 sql 실행
+  cloud:
+    gcp:
+      project-id: seek-web-project
 
 el-seeker:
   jwt:

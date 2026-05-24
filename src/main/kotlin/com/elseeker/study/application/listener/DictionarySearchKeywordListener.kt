@@ -2,7 +2,7 @@ package com.elseeker.study.application.listener
 
 import com.elseeker.study.application.service.DictionarySearchKeywordService
 import com.elseeker.study.domain.event.DictionarySearchPerformedEvent
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional

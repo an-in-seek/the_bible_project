@@ -11,7 +11,7 @@ import com.elseeker.bible.domain.vo.DirectionType
 import com.elseeker.common.domain.ErrorType
 import com.elseeker.common.domain.throwError
 import com.neovisionaries.i18n.LanguageCode
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Component

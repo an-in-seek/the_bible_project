@@ -2,7 +2,7 @@ package com.elseeker.bible.application.listener
 
 import com.elseeker.bible.application.service.BibleSearchKeywordService
 import com.elseeker.bible.domain.event.BibleSearchPerformedEvent
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional

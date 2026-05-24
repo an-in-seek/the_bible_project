@@ -6,7 +6,7 @@ import com.elseeker.member.domain.vo.OAuthProvider
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
-import mu.KotlinLogging
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.core.ParameterizedTypeReference
 import org.springframework.http.client.SimpleClientHttpRequestFactory
@@ -67,7 +67,7 @@ class SocialTokenVerifier(
         val googleIdToken = try {
             googleIdTokenVerifier.verify(idToken)
         } catch (e: Exception) {
-            logger.warn("Google ID Token 검증 실패: {}", e.message)
+            logger.warn(e) { "Google ID Token 검증 실패: ${e.message}" }
             null
         } ?: throwError(ErrorType.SOCIAL_LOGIN_INVALID_TOKEN, "google")
 
@@ -98,7 +98,7 @@ class SocialTokenVerifier(
                 .retrieve()
                 .body(mapType)
         } catch (e: Exception) {
-            logger.warn("Kakao Access Token 검증 실패: {}", e.message)
+            logger.warn(e) { "Kakao Access Token 검증 실패: ${e.message}" }
             throwError(ErrorType.SOCIAL_LOGIN_INVALID_TOKEN, "kakao")
         } ?: throwError(ErrorType.SOCIAL_LOGIN_INVALID_TOKEN, "kakao")
 
@@ -130,7 +130,7 @@ class SocialTokenVerifier(
                 .retrieve()
                 .body(mapType)
         } catch (e: Exception) {
-            logger.warn("Naver Access Token 검증 실패: {}", e.message)
+            logger.warn(e) { "Naver Access Token 검증 실패: ${e.message}" }
             throwError(ErrorType.SOCIAL_LOGIN_INVALID_TOKEN, "naver")
         } ?: throwError(ErrorType.SOCIAL_LOGIN_INVALID_TOKEN, "naver")
 
