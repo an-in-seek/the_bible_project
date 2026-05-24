@@ -773,3 +773,11 @@ html[data-theme="dark"] .comment-editor-actions button.primary {
         gap: 0.35rem;
     }
 }
+
+/* community-detail.js 의 initSidebarSticky() 가 main 의 자연 위치(document Y) 를
+   측정해 --sidebar-sticky-top 으로 주입하면, sidebar 가 자연 위치에서 즉시 sticky 발동되어
+   스크롤 시작 시 시각적 'upward shift' 가 사라진다.
+   변수 미정의 시 top-nav 바로 아래로 정렬. */
+.community-sidebar {
+    top: var(--sidebar-sticky-top, calc(var(--top-nav-height, 52px) + 0.5rem));
+}

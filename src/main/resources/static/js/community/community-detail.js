@@ -48,6 +48,7 @@ const App = {
     init() {
         App.initAuth();
         App.initNav();
+        App.initSidebarSticky();
         App.initWidgetLinks();
         App.bindLikeButton();
         App.bindShareButton();
@@ -215,13 +216,34 @@ const App = {
         App.setText("postContent", message);
     },
 
+    /**
+     * Sidebar sticky top 을 main 본문 자연 위치(viewport Y at scrollY=0)에 맞춤.
+     * 효과: 스크롤 시작 시 sidebar 가 자연 위치에서 즉시 sticky 되어 "올라가는" 시각 변화 0.
+     * 측정 시점: 초기 로드 + 윈도우 리사이즈 + 위젯 비동기 로딩 후.
+     */
+    initSidebarSticky() {
+        const main = document.querySelector(".community-main");
+        const sidebar = document.querySelector(".community-sidebar");
+        if (!main || !sidebar) return;
+
+        const align = () => {
+            // viewport 상단으로부터 main 의 top 거리(스크롤 보정 포함) = main 의 document Y
+            // sticky top 으로 사용하면 main 의 자연 위치에서 정확히 sticky 발동
+            const mainTopInDoc = main.getBoundingClientRect().top + window.scrollY;
+            document.documentElement.style.setProperty("--sidebar-sticky-top", `${mainTopInDoc}px`);
+        };
+
+        align();
+        window.addEventListener("resize", align);
+        // 위젯이 비동기로 로딩되어 main 의 높이/위치가 변경될 수 있으므로 약간 지연 후 재정렬
+        setTimeout(align, 200);
+        setTimeout(align, 800);
+    },
+
     initNav() {
         const backButton = document.getElementById("topNavBackButton");
-        const pageTitleLabel = document.getElementById("pageTitleLabel");
-        if (pageTitleLabel) {
-            pageTitleLabel.textContent = "커뮤니티";
-            pageTitleLabel.classList.remove(UI_CLASSES.HIDDEN);
-        }
+        // 상세 페이지에서는 page-title("커뮤니티") 미노출 — 본문 <h1 class="detail-title"> 가
+        // 페이지 타이틀 역할 100% 담당. Thymeleaf 기본 동작(pageTitle 미지정 → d-none) 그대로 둠.
         if (backButton) {
             backButton.classList.remove(UI_CLASSES.HIDDEN);
             backButton.addEventListener("click", () => {
