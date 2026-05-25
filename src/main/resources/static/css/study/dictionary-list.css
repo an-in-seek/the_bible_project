@@ -1,5 +1,13 @@
 /* Dictionary List — premium card-style entries */
 
+body.dictionary-list-page .search-controls {
+    background-color: #f7f8fa;
+}
+
+html[data-theme="dark"] body.dictionary-list-page .search-controls {
+    background-color: var(--color-bg-base);
+}
+
 #dictionaryList {
     display: flex;
     flex-direction: column;
