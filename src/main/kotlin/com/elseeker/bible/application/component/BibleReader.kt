@@ -152,7 +152,8 @@ class BibleReader(
         keyword: String,
         bookOrder: Int?,
         page: Int,
-        size: Int
+        size: Int,
+        track: Boolean = true
     ): BibleSearchSliceResponse {
         if (keyword.isBlank()) throwError(ErrorType.INVALID_PARAMETER, "keyword is blank")
         if (keyword.length > MAX_SEARCH_KEYWORD_LENGTH) {
@@ -171,7 +172,7 @@ class BibleReader(
             } else {
                 null
             }
-            if (page == 0) {
+            if (page == 0 && track) {
                 runCatching {
                     applicationEventPublisher.publishEvent(BibleSearchPerformedEvent(keyword))
                 }.onFailure { e ->

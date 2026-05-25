@@ -78,9 +78,10 @@ class BibleApi(
         @RequestParam keyword: String,
         @RequestParam(required = false) bookOrder: Int?,
         @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "50") size: Int
+        @RequestParam(defaultValue = "50") size: Int,
+        @RequestParam(defaultValue = "true") track: Boolean
     ): ResponseEntity<BibleSearchSliceResponse> {
-        val response = bibleService.searchBibleVersesSlice(translationId, keyword, bookOrder, page, size)
+        val response = bibleService.searchBibleVersesSlice(translationId, keyword, bookOrder, page, size, track)
         return ResponseEntity.ok(response)
     }
 

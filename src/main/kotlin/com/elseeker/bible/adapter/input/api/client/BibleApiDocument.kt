@@ -55,13 +55,17 @@ interface BibleApiDocument {
 
     /**
      * 📌 성경 구절 검색 (키워드 포함)
+     *
+     * @param track 인기 검색어 집계 여부. 기본 true. 통합 검색의 자동완성/결과 페이지처럼
+     *              사용자 의도가 명확하지 않은 백그라운드 호출은 false 로 전달하여 랭킹 오염 방지.
      */
     fun searchBible(
         translationId: Long,
         keyword: String,
         bookOrder: Int?,
         page: Int,
-        size: Int
+        size: Int,
+        track: Boolean
     ): ResponseEntity<BibleSearchSliceResponse>
 
     /**

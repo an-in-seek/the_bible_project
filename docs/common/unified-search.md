@@ -170,11 +170,13 @@
    - **장 번호**: 매칭된 책의 `chapters` 필드와 비교하여 범위 확인 (예: 창세기는 50장까지). 범위 초과 시 본 파서 결과 0건 반환
    - **절 번호**: **best-effort 정책 채택**. 절별 개수(`verseCountByChapter`)는 정적 인덱스에 포함하지 않는다 (66권 × 평균 25장의 메타 데이터를 클라이언트 번들에 싣는 비용 대비 이득 낮음). 절 번호 sanity range 만 검사(1–200, 성경 최장 시편 119편 176절 기준). 초과 시 `verseNumber` 파라미터 제거하고 장 이동으로 처리
 5. **결과 분기**:
-   - 책만 매칭 → "{책이름} 장 목록 보기" 항목 노출 (`/web/bible/chapter?translationId=1&bookOrder={n}` — 장 선택 페이지)
+   - **책만 매칭 → parser 는 결과를 만들지 않는다** (책 단독 진입은 `searchBibleBooks` 가 동일 라벨·URL 로 이미 제공하므로 중복 방지). "{책이름} 장 목록 보기" 항목은 책 카드 경로로만 노출
    - 책+장 → "{책이름} {장}장 보기" 항목 (`/web/bible/verse?translationId=1&bookOrder={n}&chapterNumber={c}`)
    - 책+장+절 (sanity 통과) → "{책이름} {장}:{절} 절로 이동" 항목 (`/web/bible/verse?translationId=1&bookOrder={n}&chapterNumber={c}&verseNumber={v}`). `verse-list.js:150,474` 가 `verseNumber` 쿼리 파라미터를 읽어 해당 절을 하이라이트 + 스크롤. **존재하지 않는 절 번호 전달 시** `verse-list.js:543` 의 `id="verse-text-{v}"` 요소를 찾지 못해 하이라이트만 실패하고 페이지는 장 상단에 머무름 (UX 허용 수준)
    - 책+장+절 (sanity 실패, 예: `창1:300`) → `verseNumber` 파라미터 제거하고 책+장 결과로 진입
    - 책 prefix 매칭 실패 또는 장 범위 초과 → 본 파서는 결과 0건 반환. "구절 검색" 카테고리는 별도로 원본 입력을 검색 API 로 전달
+
+> **책임 분리**: parser 는 **장·절이 명시된 deep link** 만 책임지고, **책 단독 진입은 `searchBibleBooks`** 가 책임진다. 동일 입력에 대해 두 소스가 같은 항목을 만들지 않도록 분담했다 (예: "요한복음" 입력 시 parser 는 null 반환, `searchBibleBooks` 가 score 100 으로 "요한복음 장 목록 보기" 항목 1건만 노출).
 
 > **deep link 메커니즘**: 기존 성경 검색(`search.js:480`)도 동일한 `verseNumber` 쿼리 파라미터 방식으로 절 이동을 처리. URL fragment(`#v{n}`)는 본 프로젝트에서 사용되지 않는다.
 

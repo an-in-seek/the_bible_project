@@ -19,10 +19,11 @@ class DictionaryApi(
     fun getDictionaries(
         @RequestParam(required = false) keyword: String?,
         @RequestParam(defaultValue = "0") page: Int,
-        @RequestParam(defaultValue = "10") size: Int
+        @RequestParam(defaultValue = "10") size: Int,
+        @RequestParam(defaultValue = "true") track: Boolean
     ): ResponseEntity<DictionaryApiResponse.DictionarySliceResponse> {
         val pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "term"))
-        val dictionaryPage = dictionaryService.getDictionaries(keyword, pageable)
+        val dictionaryPage = dictionaryService.getDictionaries(keyword, pageable, track)
         val response = DictionaryApiResponse.DictionarySliceResponse(
             content = dictionaryPage.content.map(DictionaryApiResponse.DictionaryItem::from),
             hasNext = dictionaryPage.hasNext(),

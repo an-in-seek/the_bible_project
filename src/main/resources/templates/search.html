@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+
+<head th:replace="~{fragments/head :: head(
+        ${#strings.isEmpty(query) ? '통합 검색 - ElSeeker' : query + ' 검색 결과 - ElSeeker'},
+        true,
+        '/css/unified-search.css?v=1.2')}"
+      th:with="robotsContent='noindex,follow'">
+</head>
+
+<body class="has-fixed-nav unified-search-page">
+
+<header th:replace="~{fragments/header :: header}"
+        th:with="pageTitle='통합 검색', pageTitleVisible=true"></header>
+
+<main class="container content-wrapper">
+
+    <!-- 검색 입력바 (sticky 상단) -->
+    <div class="us-page-search-wrap" id="usPageSearchWrap"
+         role="combobox" aria-haspopup="listbox"
+         aria-expanded="false" aria-owns="usPageDropdown">
+        <span class="us-search-icon" aria-hidden="true">🔍</span>
+        <input id="usPageInput" type="search"
+               class="us-search-input"
+               th:value="${query}"
+               placeholder="성경 구절·책·사전·메뉴 한 번에 검색"
+               autocomplete="off" inputmode="search"
+               aria-label="통합 검색"
+               aria-autocomplete="list"
+               aria-controls="usPageDropdown"
+               maxlength="100">
+        <button type="button" id="usPageClear"
+                class="us-search-clear d-none"
+                aria-label="검색어 지우기">×</button>
+    </div>
+
+    <!-- 탭 -->
+    <nav class="us-tabs" role="tablist" aria-label="검색 결과 카테고리">
+        <button type="button" class="us-tab" role="tab"
+                data-tab="all" aria-selected="true" aria-controls="usPanelAll">
+            전체 <span class="us-tab-count" data-tab-count="all">0</span>
+        </button>
+        <button type="button" class="us-tab" role="tab"
+                data-tab="bible" aria-selected="false" aria-controls="usPanelBible">
+            성경 <span class="us-tab-count" data-tab-count="bible">0</span>
+        </button>
+        <button type="button" class="us-tab" role="tab"
+                data-tab="dictionary" aria-selected="false" aria-controls="usPanelDict">
+            사전 <span class="us-tab-count" data-tab-count="dictionary">0</span>
+        </button>
+        <button type="button" class="us-tab" role="tab"
+                data-tab="menu" aria-selected="false" aria-controls="usPanelMenu">
+            메뉴 <span class="us-tab-count" data-tab-count="menu">0</span>
+        </button>
+    </nav>
+
+    <!-- 로딩 -->
+    <div id="usPageLoading" class="us-page-loading text-center py-4 d-none">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">검색 중...</span>
+        </div>
+    </div>
+
+    <!-- 결과 -->
+    <section class="us-results" id="usResults"
+             th:data-initial-query="${query}"
+             th:data-initial-tab="${activeTab}"></section>
+
+    <!-- 빈 상태 -->
+    <div id="usPageEmpty" class="us-page-empty d-none">
+        검색어를 입력해 주세요.
+    </div>
+
+    <!-- 결과 페이지 드롭다운(접근성 더미) — 컨트롤러 'role=listbox' 요구 충족용 -->
+    <div id="usPageDropdown" role="listbox" class="visually-hidden" aria-label="검색 결과 미리보기"></div>
+
+    <span class="visually-hidden" aria-live="polite" id="usPageLiveRegion"></span>
+</main>
+
+<script type="module" src="/js/search/unified-search-page.js?v=1.2"></script>
+<div th:replace="~{fragments/section-nav :: section-nav}"></div>
+</body>
+</html>

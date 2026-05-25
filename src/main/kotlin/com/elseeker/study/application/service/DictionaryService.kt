@@ -25,7 +25,7 @@ class DictionaryService(
 
     private val logger = KotlinLogging.logger {}
 
-    fun getDictionaries(keyword: String?, pageable: Pageable): Page<Dictionary> {
+    fun getDictionaries(keyword: String?, pageable: Pageable, track: Boolean = true): Page<Dictionary> {
         val normalizedKeyword = keyword?.trim()?.takeIf { it.isNotBlank() }
         val page = if (normalizedKeyword == null) {
             dictionaryRepository.findAllOrderByKo(pageable)
@@ -33,7 +33,7 @@ class DictionaryService(
             dictionaryRepository.findByTermContainingKo(normalizedKeyword, pageable)
         }
 
-        if (normalizedKeyword != null && pageable.pageNumber == 0 && page.totalElements > 0) {
+        if (normalizedKeyword != null && pageable.pageNumber == 0 && page.totalElements > 0 && track) {
             runCatching {
                 applicationEventPublisher.publishEvent(DictionarySearchPerformedEvent(normalizedKeyword))
             }.onFailure { e ->
