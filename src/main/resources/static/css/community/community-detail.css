@@ -37,33 +37,6 @@
 
 /* ... existing badge styles ... */
 
-/* Mobile: Reuse the same layout, just ensure spacing */
-@media (max-width: 576px) {
-
-    /* Remove absolute positioning, use flex flow */
-    .detail-card .post-owner-actions {
-        position: static;
-        background: transparent;
-        padding: 0;
-        box-shadow: none;
-        backdrop-filter: none;
-    }
-
-    .post-owner-action {
-        padding: 0;
-        font-size: 1rem;
-        width: 36px;
-        height: 36px;
-        justify-content: center;
-        border: 1px solid var(--comm-border);
-        background: var(--color-bg-elevated);
-        border-radius: 6px;
-    }
-
-    .post-owner-action .action-text {
-        display: none;
-    }
-}
 
 .detail-badge {
     font-size: 0.8rem;
@@ -116,64 +89,141 @@ html[data-theme="dark"] .detail-badge-popular {
     flex-wrap: wrap;
 }
 
-/* Post Owner Actions (Edit/Delete) */
-/* Post Owner Actions (Edit/Delete) */
-.post-owner-actions {
+/* Post Kebab Menu (Edit / Delete / Report) */
+.post-menu {
+    position: relative;
     display: inline-flex;
-    gap: 0.5rem;
     align-items: center;
 }
 
-.action-divider {
-    width: 1px;
-    height: 12px;
-    background-color: var(--comm-border);
-    margin: 0 0.25rem;
-}
-
-.post-owner-action {
-    background: var(--comm-bg-card);
-    border: 1px solid var(--comm-border);
-    padding: 0.3rem 0.6rem;
+.post-menu-toggle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 0;
+    background: transparent;
     color: var(--comm-text-sub);
-    font-size: 0.8rem;
+    font-size: 1.25rem;
+    line-height: 1;
     cursor: pointer;
-    border-radius: 6px;
-    transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
-    font-weight: 500;
-}
-
-/* 다크모드: 카드 배경(--comm-bg-card)과 동색이 되지 않도록 한 단계 밝은 톤으로 분리 */
-html[data-theme="dark"] .post-owner-action {
-    background: var(--color-bg-elevated-strong);
+    justify-content: center;
+    transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 @media (hover: hover) and (pointer: fine) {
-    .post-owner-action:hover {
-        color: var(--comm-primary);
-        border-color: var(--comm-primary);
-        background: #eef2ff;
-        transform: translateY(-1px);
+    .post-menu-toggle:hover {
+        background: var(--color-bg-elevated);
+        color: var(--comm-text-main);
     }
 
-    .post-owner-action-delete:hover {
-        color: #ef4444;
-        border-color: #ef4444;
-        background: #fef2f2;
+    html[data-theme="dark"] .post-menu-toggle:hover {
+        background: var(--color-bg-elevated-strong);
     }
 }
 
-html[data-theme="dark"] .post-owner-action:hover {
-    background: rgba(165, 180, 252, 0.12);
+.post-menu-toggle:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
 }
 
-html[data-theme="dark"] .post-owner-action-delete:hover {
+.post-menu-toggle[aria-expanded="true"] {
+    background: var(--color-bg-elevated);
+}
+
+html[data-theme="dark"] .post-menu-toggle[aria-expanded="true"] {
+    background: var(--color-bg-elevated-strong);
+}
+
+.post-menu-dropdown {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    min-width: 140px;
+    padding: 0.35rem;
+    background: var(--color-bg-elevated-bright);
+    border: 1px solid var(--comm-border);
+    border-radius: 10px;
+    box-shadow: 0 8px 22px var(--color-shadow);
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+html[data-theme="dark"] .post-menu-dropdown {
+    background: var(--color-bg-elevated-strong);
+}
+
+.post-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: var(--comm-text-main);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: background-color 0.12s ease, color 0.12s ease;
+}
+
+.post-menu-item[hidden] {
+    display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .post-menu-item:hover {
+        background: var(--color-bg-elevated-strong);
+    }
+
+    html[data-theme="dark"] .post-menu-item:hover {
+        background: var(--color-bg-elevated-strong-hover);
+    }
+}
+
+.post-menu-item:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: -2px;
+}
+
+.post-menu-item:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.post-menu-item-danger {
+    color: #dc3545;
+}
+
+html[data-theme="dark"] .post-menu-item-danger {
     color: #f5a8a8;
-    border-color: #f5a8a8;
-    background: rgba(220, 53, 69, 0.18);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .post-menu-item-danger:hover {
+        background: #fef2f2;
+        color: #b91c1c;
+    }
+
+    html[data-theme="dark"] .post-menu-item-danger:hover {
+        background: rgba(220, 53, 69, 0.22);
+        color: #f5a8a8;
+    }
+}
+
+.post-menu-item-icon {
+    flex: 0 0 auto;
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.post-menu-item-label {
+    flex: 1 1 auto;
 }
 
 .detail-author-name {
@@ -271,8 +321,7 @@ html[data-theme="dark"] .btn-like:hover {
     opacity: 1;
 }
 
-.btn-share .icon,
-.btn-report .icon {
+.btn-share .icon {
     filter: none;
     opacity: 1;
 }
@@ -288,22 +337,10 @@ html[data-theme="dark"] .btn-like:hover {
         color: var(--comm-primary);
         background: #eef2ff;
     }
-
-    .btn-report:hover {
-        border-color: #f97316;
-        color: #f97316;
-        background: #fff7ed;
-    }
 }
 
 html[data-theme="dark"] .btn-share:hover {
     background: rgba(165, 180, 252, 0.12);
-}
-
-html[data-theme="dark"] .btn-report:hover {
-    color: #fdba74;
-    border-color: #fdba74;
-    background: rgba(249, 115, 22, 0.18);
 }
 
 /* Comments Section */

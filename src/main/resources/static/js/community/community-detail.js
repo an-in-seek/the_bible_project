@@ -63,6 +63,7 @@ const App = {
 
         App.bindCommentForm();
         App.bindCommentActions();
+        App.bindPostMenu();
         App.bindReportPost();
         App.bindPostOwnerActions();
         App.loadPost();
@@ -181,10 +182,14 @@ const App = {
         App.setText("postAuthor", post.authorNickname || "익명");
         App.setText("postTime", App.formatRelativeTime(post.createdAt));
 
-        const ownerActions = document.getElementById("postOwnerActions");
-        if (ownerActions) {
-            ownerActions.hidden = !post.isAuthor;
-        }
+        // 더보기 메뉴: owner는 수정/삭제, 비-owner는 신고 항목 노출
+        const isAuthor = Boolean(post.isAuthor);
+        document.querySelectorAll("[data-owner-only]").forEach(el => {
+            el.hidden = !isAuthor;
+        });
+        document.querySelectorAll("[data-non-owner-only]").forEach(el => {
+            el.hidden = isAuthor;
+        });
         App.setText("postViewCount", formatNumberWithComma(post.viewCount || 0));
         App.setText("postReactionCount", formatNumberWithComma(post.reactionCount || 0));
         App.setText("postCommentCount", formatNumberWithComma(post.commentCount || 0));
@@ -418,6 +423,50 @@ const App = {
                 App.handleDeletePost();
             });
         }
+    },
+
+    bindPostMenu() {
+        const toggle = document.getElementById("postMenuToggle");
+        const dropdown = document.getElementById("postMenuDropdown");
+        if (!toggle || !dropdown) return;
+
+        const close = () => {
+            dropdown.hidden = true;
+            toggle.setAttribute("aria-expanded", "false");
+        };
+        const open = () => {
+            dropdown.hidden = false;
+            toggle.setAttribute("aria-expanded", "true");
+        };
+
+        toggle.addEventListener("click", (e) => {
+            e.stopPropagation();
+            if (dropdown.hidden) open();
+            else close();
+        });
+
+        // 메뉴 항목 클릭 시 메뉴 닫기 (실제 동작은 각 항목의 별도 핸들러가 수행)
+        dropdown.addEventListener("click", (e) => {
+            const item = e.target.closest(".post-menu-item");
+            if (item && !item.disabled) {
+                close();
+            }
+        });
+
+        // 외부 클릭 시 닫기
+        document.addEventListener("click", (e) => {
+            if (!dropdown.hidden && !toggle.contains(e.target) && !dropdown.contains(e.target)) {
+                close();
+            }
+        });
+
+        // ESC 닫기
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Escape" && !dropdown.hidden) {
+                close();
+                toggle.focus();
+            }
+        });
     },
 
     bindReportPost() {
@@ -842,9 +891,9 @@ const App = {
         if (!button) return;
         button.disabled = reported;
         button.setAttribute("aria-disabled", reported ? "true" : "false");
-        const label = button.querySelector(".btn-action-label");
+        const label = button.querySelector(".post-menu-item-label, .btn-action-label");
         if (label) {
-            label.textContent = reported ? "신고됨" : "신고하기";
+            label.textContent = reported ? "신고됨" : "신고";
         }
     },
 
