@@ -63,7 +63,6 @@ body {
     /* For header image/gradient */
     background-color: var(--dict-card-bg);
     border: 1px solid var(--dict-card-border);
-    margin-top: 2rem;
     margin-bottom: 3rem;
     transition: transform 0.3s ease;
 }

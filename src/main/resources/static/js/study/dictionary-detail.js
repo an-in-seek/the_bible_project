@@ -14,7 +14,6 @@ const DomHelper = {
         const get = id => document.getElementById(id);
         return {
             backButton: get("topNavBackButton"),
-            pageTitleLabel: get("pageTitleLabel"),
             referencesContainer: get("referencesContainer"),
             referencesEmpty: get("referencesEmpty")
         };
@@ -30,11 +29,7 @@ const App = {
     },
 
     initNav: () => {
-        const {backButton, pageTitleLabel} = App.elements;
-        if (pageTitleLabel) {
-            pageTitleLabel.textContent = "성경 사전";
-            pageTitleLabel.classList.remove(UI_CLASSES.HIDDEN);
-        }
+        const {backButton} = App.elements;
         if (backButton) {
             backButton.classList.remove(UI_CLASSES.HIDDEN);
             backButton.addEventListener("click", () => {
