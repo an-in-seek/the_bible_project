@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+
+<head th:replace="~{fragments/head :: head('성경 주석 사이트 모음 - 권위 있는 주석 큐레이션 | ElSeeker', true,
+      '/css/card.css?v=5.0,/css/study/bible-commentary.css?v=1.0')}"
+      th:with="pageDescription='Bible Hub, Blue Letter Bible, Calvin Commentaries, FreeBibleCommentary 등 권위 있는 성경 주석·연구 사이트를 한 곳에서 비교·탐색할 수 있는 큐레이션 페이지입니다.',
+               pageKeywords='성경 주석,Bible Hub,Blue Letter Bible,Bible Gateway,FreeBibleCommentary,칼빈 주석,CCEL,성경 연구 사이트'">
+</head>
+
+<body class="has-fixed-nav bible-commentary-page">
+
+<header th:replace="~{fragments/header :: header}"
+        th:with="pageTitle='성경 주석', pageTitleVisible=true"></header>
+
+<main class="container content-wrapper">
+    <!-- Intro -->
+    <section class="bc-intro">
+        <p class="bc-intro-lead">
+            국내외에서 신뢰받는 성경 주석·연구 사이트를 큐레이션했습니다.
+            검색으로 빠르게 비교하세요.
+        </p>
+    </section>
+
+    <!-- 검색 -->
+    <div class="bc-search">
+        <input type="search" id="bcSearchInput" class="bc-search-input"
+               placeholder="사이트명·키워드 검색 (예: 칼빈, 원어, 학술)"
+               autocomplete="off" inputmode="search" aria-label="성경 주석 사이트 검색">
+        <button type="button" id="bcSearchClear" class="bc-search-clear d-none" aria-label="검색어 지우기">×</button>
+    </div>
+
+    <!-- 로딩 -->
+    <div id="bcLoading" class="bc-loading text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">로딩 중...</span>
+        </div>
+    </div>
+
+    <!-- 콘텐츠 -->
+    <div id="bcContent" class="d-none">
+        <div id="bcGrid" class="bc-grid"></div>
+        <div id="bcEmpty" class="bc-empty d-none">
+            검색 결과가 없습니다. 다른 키워드로 다시 시도해 보세요.
+        </div>
+    </div>
+
+    <!-- 면책 안내 -->
+    <p class="bc-disclaimer">
+        본 페이지에 소개된 외부 사이트의 콘텐츠와 신학적 견해는 각 사이트 운영 주체에 귀속됩니다. ElSeeker는 링크만 제공합니다.
+    </p>
+</main>
+
+<script type="module" src="/js/study/bible-commentary.js?v=1.0"></script>
+<div th:replace="~{fragments/section-nav :: section-nav}"></div>
+</body>
+
+</html>

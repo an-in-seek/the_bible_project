@@ -62,4 +62,9 @@ class StudyWebController {
     fun showPublicReadingOfScripture(): String {
         return "study/public-reading-of-scripture"
     }
+
+    @GetMapping("/bible-commentary")
+    fun showBibleCommentary(): String {
+        return "study/bible-commentary"
+    }
 }
