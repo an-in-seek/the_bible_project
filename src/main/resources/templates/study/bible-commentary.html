@@ -9,8 +9,9 @@
 
 <body class="has-fixed-nav bible-commentary-page">
 
-<header th:replace="~{fragments/header :: header}"
-        th:with="pageTitle='성경 주석', pageTitleVisible=true"></header>
+<th:block th:with="pageTitle='성경 주석', pageTitleVisible=true">
+    <header th:replace="~{fragments/header :: header}"></header>
+</th:block>
 
 <main class="container content-wrapper">
     <!-- Intro -->
