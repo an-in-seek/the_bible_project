@@ -8,6 +8,11 @@
     box-shadow: 0 2px 8px var(--color-shadow), 0 0 1px var(--color-shadow);
 }
 
+/* 다크모드: 카드 베이스 배경을 한 단계 낮춰 body와 부드럽게 연결 */
+html[data-theme="dark"] .card-panel {
+    background-color: var(--color-bg-elevated);
+}
+
 .card-clickable {
     cursor: pointer;
 }
@@ -32,6 +37,16 @@
         border-color: var(--color-border);
         box-shadow: 0 8px 24px var(--color-shadow), 0 2px 6px var(--color-shadow);
         transform: translateY(-4px);
+    }
+
+    /* 다크모드: 베이스(#181c22)에서 한 단계 밝게 + 미세한 accent 틴트 + lift 완화 */
+    html[data-theme="dark"] .card-lift:hover .card,
+    html[data-theme="dark"] .card-lift:focus-visible .card,
+    html[data-theme="dark"] .card-lift.card:hover,
+    html[data-theme="dark"] .card-lift.card:focus-visible {
+        background-color: var(--color-bg-elevated-strong);
+        box-shadow: 0 6px 18px rgba(77, 171, 247, 0.10), 0 2px 4px rgba(0, 0, 0, 0.35);
+        transform: translateY(-2px);
     }
 
     .card-lift:hover .text-muted,

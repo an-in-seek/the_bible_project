@@ -1,4 +1,4 @@
-import {initPopularSearchDialog} from "/js/popular-search.js?v=1.1";
+import {initPopularSearchDialog} from "/js/popular-search.js?v=1.3";
 
 const API_CONFIG = {
     BASE_URL: "/api/v1/study/dictionaries",

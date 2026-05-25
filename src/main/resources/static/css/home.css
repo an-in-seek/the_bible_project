@@ -147,6 +147,10 @@
     background-color: var(--color-bg-elevated-bright);
 }
 
+html[data-theme="dark"] .home-menu-card {
+    background-color: var(--color-bg-elevated);
+}
+
 body.home-page {
     background-color: #f7f8fa;
 }

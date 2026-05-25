@@ -52,14 +52,15 @@ html[data-theme="dark"] {
     --bs-link-hover-color: var(--color-accent);
     --bs-emphasis-color: var(--color-text-primary);
 
-    /* list-group — 카드/리스트 형태 컴포넌트 */
+    /* list-group — 카드/리스트 형태 컴포넌트
+       다크모드 hover/active는 베이스보다 더 밝은 토큰으로 (모범사례: 다크는 elevation↑ = 밝게) */
     --bs-list-group-bg: var(--color-bg-elevated);
     --bs-list-group-color: var(--color-text-primary);
     --bs-list-group-border-color: var(--color-border);
     --bs-list-group-action-color: var(--color-text-primary);
-    --bs-list-group-action-hover-bg: var(--color-bg-base);
+    --bs-list-group-action-hover-bg: var(--color-bg-elevated-strong);
     --bs-list-group-action-hover-color: var(--color-text-primary);
-    --bs-list-group-action-active-bg: var(--color-bg-base);
+    --bs-list-group-action-active-bg: var(--color-bg-elevated-strong-hover);
     --bs-list-group-action-active-color: var(--color-text-primary);
 }
 

@@ -1,5 +1,5 @@
 import {buildLoginRedirectUrl, checkAuthStatus} from "/js/auth/auth-check.js";
-import {fetchWithAuthRetry} from "/js/common-util.js?v=2.2";
+import {fetchWithAuthRetry} from "/js/common-util.js?v=2.3";
 
 const PAGE_SIZE = 20;
 const VALID_TABS = ["book", "chapter", "verse"];

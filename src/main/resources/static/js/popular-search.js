@@ -1,3 +1,5 @@
+import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+
 const TIMEOUT_MS = 5000;
 const HOME_INITIAL_LIMIT = 5;
 const DEFAULT_DIALOG_LIMIT = 50;
@@ -85,6 +87,8 @@ export const initPopularSearchDialog = ({
 }) => {
     const dialog = document.getElementById(dialogId);
     if (!dialog || typeof dialog.showModal !== "function") return;
+
+    setupDialogScrollLock(dialog);
 
     const titleEl = dialog.querySelector(".popular-search-dialog-title");
     const listEl = dialog.querySelector("[data-dialog-keyword-list]");

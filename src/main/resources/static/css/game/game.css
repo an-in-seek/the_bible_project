@@ -90,6 +90,11 @@ html[data-theme="dark"] body.game-page {
     height: 100%;
 }
 
+/* 다크모드: 카드 베이스 한 단계 어둡게 */
+html[data-theme="dark"] .card-clickable {
+    background-color: var(--color-bg-elevated);
+}
+
 @media (hover: hover) and (pointer: fine) {
     .card-clickable:hover {
         transform: translateY(-5px);
@@ -98,8 +103,11 @@ html[data-theme="dark"] body.game-page {
         background-color: var(--color-bg-elevated-strong-hover);
     }
 
+    /* 다크모드: 한 단계만 밝게(strong) + 미세 accent 틴트 + lift 완화 */
     html[data-theme="dark"] .card-clickable:hover {
-        background-color: var(--color-bg-elevated);
+        transform: translateY(-2px);
+        background-color: var(--color-bg-elevated-strong);
+        box-shadow: 0 6px 18px rgba(77, 171, 247, 0.10), 0 2px 4px rgba(0, 0, 0, 0.35);
     }
 }
 

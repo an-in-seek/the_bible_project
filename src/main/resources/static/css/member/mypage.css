@@ -286,22 +286,41 @@ html[data-theme="dark"] .mypage-page {
     color: var(--mypage-deep);
 }
 
-/* 미연동 카드: compact */
+/* 미연동 카드: 비어 있는 슬롯 느낌 강조 */
 .mypage-oauth-card.is-empty {
-    padding: 0.75rem 1rem;
+    background: var(--mypage-surface-soft);
+    border-style: dashed;
+    border-color: var(--mypage-control-border);
+    box-shadow: none;
 }
 
 .mypage-oauth-card.is-empty .mypage-oauth-details {
     display: none;
 }
 
-.mypage-oauth-card.is-empty .mypage-oauth-header {
-    margin-bottom: 0;
+.mypage-oauth-card.is-empty .mypage-oauth-icon {
+    opacity: 0.7;
+    filter: saturate(0.85);
 }
 
-.mypage-oauth-card.is-empty .mypage-oauth-footer {
-    flex-direction: row;
-    align-items: center;
+.mypage-oauth-card.is-empty .mypage-oauth-provider {
+    color: var(--mypage-text-soft);
+}
+
+.mypage-oauth-card.is-empty .mypage-oauth-empty-message {
+    margin: 0.6rem 0 0.9rem;
+    font-size: 0.85rem;
+    color: var(--mypage-muted);
+    line-height: 1.45;
+}
+
+.mypage-oauth-card.is-empty .mypage-oauth-action {
+    width: 100%;
+    font-weight: 600;
+}
+
+html[data-theme="dark"] .mypage-page .mypage-oauth-card.is-empty {
+    border-color: rgba(255, 255, 255, 0.18);
 }
 
 .mypage-oauth-footer {
@@ -329,27 +348,21 @@ html[data-theme="dark"] .mypage-page {
     color: var(--mypage-disabled-text);
 }
 
-/* ── 모달 ── */
+/* ── 모달 (native <dialog>) ── */
 
 .mypage-modal {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1050;
+    width: min(420px, 90vw);
+    max-width: none;
+    background: transparent;
+    border: 0;
+    padding: 0;
 }
 
-.mypage-modal-backdrop {
-    position: absolute;
-    inset: 0;
+.mypage-modal::backdrop {
     background: var(--mypage-backdrop);
 }
 
 .mypage-modal-dialog {
-    position: relative;
-    z-index: 1;
-    width: min(420px, 90vw);
     background: var(--mypage-surface);
     border-radius: 1rem;
     padding: 1.25rem;
@@ -513,6 +526,9 @@ html[data-theme="dark"] .mypage-page {
 
     .mypage-oauth-card {
         padding: 0.75rem 0.85rem;
+    }
+
+    .mypage-oauth-card:not(.is-empty) {
         box-shadow: var(--mypage-shadow-md);
     }
 

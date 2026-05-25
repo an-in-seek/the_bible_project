@@ -23,3 +23,27 @@ export const fetchWithAuthRetry = async (url, options = {}) => {
     }
     return fetch(url, options);
 };
+
+/**
+ * 본문 스크롤 잠금/해제 — 다이얼로그 활성 시 사용.
+ * CSS body.scroll-locked 룰과 페어로 동작.
+ */
+export const lockBodyScroll = () => document.body.classList.add("scroll-locked");
+export const unlockBodyScroll = () => document.body.classList.remove("scroll-locked");
+
+/**
+ * Native <dialog> 인스턴스에 자동 스크롤 잠금/해제 바인딩.
+ * showModal을 래핑하여 호출 시점에 lock 자동 처리, close 이벤트로 unlock.
+ * 모든 close 경로(닫기 버튼, ESC, backdrop 클릭)를 한 번에 커버.
+ */
+export const setupDialogScrollLock = (dialog) => {
+    if (!dialog || typeof dialog.showModal !== "function") return;
+    if (dialog.dataset.scrollLockBound === "true") return;
+    const original = dialog.showModal.bind(dialog);
+    dialog.showModal = (...args) => {
+        lockBodyScroll();
+        return original(...args);
+    };
+    dialog.addEventListener("close", unlockBodyScroll);
+    dialog.dataset.scrollLockBound = "true";
+};

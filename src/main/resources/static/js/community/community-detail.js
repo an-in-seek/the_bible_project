@@ -1,4 +1,4 @@
-import {fetchWithAuthRetry, formatNumberWithComma} from "/js/common-util.js";
+import {fetchWithAuthRetry, formatNumberWithComma, setupDialogScrollLock} from "/js/common-util.js?v=2.3";
 import {buildLoginRedirectUrl, checkAuthStatus} from "/js/auth/auth-check.js";
 
 const API = {
@@ -860,6 +860,8 @@ const App = {
         if (!modal || typeof modal.showModal !== "function") {
             return Promise.resolve(null);
         }
+
+        setupDialogScrollLock(modal);
 
         const form = modal.querySelector("form");
         const cancelBtn = document.getElementById("btnCancelReport");

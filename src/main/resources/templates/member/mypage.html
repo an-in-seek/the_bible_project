@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head
-        th:replace="~{fragments/head :: head('마이페이지 | ElSeeker', true, '/css/hero.css?v=5.1,/css/card.css?v=5.0,/css/member/mypage.css?v=5.0')}"
+        th:replace="~{fragments/head :: head('마이페이지 | ElSeeker', true, '/css/hero.css?v=5.1,/css/card.css?v=5.4,/css/member/mypage.css?v=5.3')}"
         th:with="robotsContent='noindex'">
 </head>
 
@@ -88,6 +88,7 @@
                                         <strong class="mypage-oauth-connected">-</strong>
                                     </div>
                                 </div>
+                                <p class="mypage-oauth-empty-message d-none">Kakao 계정을 연동하면 다음 로그인이 더 편해져요.</p>
                                 <div class="mypage-oauth-footer">
                                     <p class="mypage-oauth-notice d-none"></p>
                                     <a class="btn btn-outline-secondary mypage-oauth-action" data-provider="kakao"
@@ -115,6 +116,7 @@
                                         <strong class="mypage-oauth-connected">-</strong>
                                     </div>
                                 </div>
+                                <p class="mypage-oauth-empty-message d-none">Naver 계정을 연동하면 다음 로그인이 더 편해져요.</p>
                                 <div class="mypage-oauth-footer">
                                     <p class="mypage-oauth-notice d-none"></p>
                                     <a class="btn btn-outline-secondary mypage-oauth-action" data-provider="naver"
@@ -142,6 +144,7 @@
                                         <strong class="mypage-oauth-connected">-</strong>
                                     </div>
                                 </div>
+                                <p class="mypage-oauth-empty-message d-none">Google 계정을 연동하면 다음 로그인이 더 편해져요.</p>
                                 <div class="mypage-oauth-footer">
                                     <p class="mypage-oauth-notice d-none"></p>
                                     <a class="btn btn-outline-secondary mypage-oauth-action" data-provider="google"
@@ -191,10 +194,8 @@
     </div>
 </div>
 
-<div id="mypageOAuthConfirmModal" class="mypage-modal d-none" role="dialog" aria-modal="true"
-     aria-labelledby="mypageOAuthConfirmTitle">
-    <div class="mypage-modal-backdrop" data-modal-close="true"></div>
-    <div class="mypage-modal-dialog" role="document">
+<dialog id="mypageOAuthConfirmModal" class="mypage-modal" aria-labelledby="mypageOAuthConfirmTitle">
+    <div class="mypage-modal-dialog">
         <div class="mypage-modal-header">
             <h2 id="mypageOAuthConfirmTitle" class="mypage-modal-title">연동 해제 확인</h2>
         </div>
@@ -206,9 +207,9 @@
             <button id="mypageOAuthConfirmSubmit" type="button" class="btn btn-danger">연동 해제</button>
         </div>
     </div>
-</div>
+</dialog>
 
-<script type="module" src="/js/member/mypage.js?v=4.1"></script>
+<script type="module" src="/js/member/mypage.js?v=4.3"></script>
 </body>
 
 </html>

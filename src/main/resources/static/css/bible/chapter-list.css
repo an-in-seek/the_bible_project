@@ -102,16 +102,7 @@ html[data-theme="dark"] .book-action-btn-active {
     color: #75b798;
 }
 
-.book-memo-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 1050;
-    background: rgba(0, 0, 0, 0.5);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
+/* 책 메모 — native <dialog> */
 .book-memo-panel {
     background: var(--color-bg-elevated-bright);
     color: var(--color-text-primary);
@@ -119,7 +110,16 @@ html[data-theme="dark"] .book-action-btn-active {
     border-radius: 0.5rem;
     width: 90%;
     max-width: 500px;
+    padding: 0;
     box-shadow: 0 0.5rem 1.5rem var(--color-shadow);
+}
+
+html[data-theme="dark"] .book-memo-panel {
+    background: var(--color-bg-elevated);
+}
+
+.book-memo-panel::backdrop {
+    background: rgba(0, 0, 0, 0.5);
 }
 
 .book-memo-panel-header {

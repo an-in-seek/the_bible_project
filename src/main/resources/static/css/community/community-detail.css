@@ -146,6 +146,11 @@ html[data-theme="dark"] .detail-badge-popular {
     font-weight: 500;
 }
 
+/* 다크모드: 카드 배경(--comm-bg-card)과 동색이 되지 않도록 한 단계 밝은 톤으로 분리 */
+html[data-theme="dark"] .post-owner-action {
+    background: var(--color-bg-elevated-strong);
+}
+
 @media (hover: hover) and (pointer: fine) {
     .post-owner-action:hover {
         color: var(--comm-primary);
@@ -227,6 +232,11 @@ html[data-theme="dark"] .post-owner-action-delete:hover {
     border: 1px solid var(--comm-border);
     background: var(--comm-bg-card);
     color: var(--comm-text-main);
+}
+
+/* 다크모드: 카드 배경(--comm-bg-card)과 동색이 되지 않도록 한 단계 밝은 톤으로 분리 */
+html[data-theme="dark"] .btn-action {
+    background: var(--color-bg-elevated-strong);
 }
 
 .btn-like.active {
@@ -389,17 +399,26 @@ html[data-theme="dark"] .btn-report:hover {
     border-radius: 12px;
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1);
-    background: var(--comm-bg-card);
+    /* 폼 배경(--comm-bg-card)과 구분되도록 한 단계 다른 톤 적용 */
+    background: var(--color-bg-elevated);
     position: relative;
     user-select: none;
 }
 
+html[data-theme="dark"] .report-option {
+    background: var(--color-bg-elevated-strong);
+}
+
 @media (hover: hover) and (pointer: fine) {
     .report-option:hover {
-        background-color: var(--color-bg-elevated);
+        background-color: var(--color-bg-elevated-strong);
         border-color: var(--color-border-control);
         transform: translateY(-2px);
         box-shadow: 0 4px 12px var(--color-shadow);
+    }
+
+    html[data-theme="dark"] .report-option:hover {
+        background-color: var(--color-bg-elevated-strong-hover);
     }
 }
 
@@ -428,13 +447,22 @@ html[data-theme="dark"] .report-option:has(input:checked) {
     flex-shrink: 0;
     transition: all 0.2s;
     position: relative;
-    background: var(--comm-bg-card);
+    /* 옵션 배경과 동일 톤으로 자연스러운 인디케이터 표현 */
+    background: var(--color-bg-elevated);
+}
+
+html[data-theme="dark"] .report-option input[type="radio"] {
+    background: var(--color-bg-elevated-strong);
 }
 
 .report-option input[type="radio"]:checked {
     border-color: #ef4444;
     background: #ef4444;
-    box-shadow: inset 0 0 0 4px var(--comm-bg-card);
+    box-shadow: inset 0 0 0 4px var(--color-bg-elevated);
+}
+
+html[data-theme="dark"] .report-option input[type="radio"]:checked {
+    box-shadow: inset 0 0 0 4px var(--color-bg-elevated-strong);
 }
 
 html[data-theme="dark"] .report-option input[type="radio"]:checked {

@@ -1,6 +1,6 @@
 import {BookStore, ChapterStore, TranslationStore, VerseStore} from "/js/storage-util.js?v=2.3";
-import {formatNumberWithComma} from "/js/common-util.js?v=2.2";
-import {initPopularSearchDialog} from "/js/popular-search.js?v=1.1";
+import {formatNumberWithComma} from "/js/common-util.js?v=2.3";
+import {initPopularSearchDialog} from "/js/popular-search.js?v=1.3";
 
 const UI_CLASSES = {
     HIDDEN: "d-none",

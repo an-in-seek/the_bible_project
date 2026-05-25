@@ -1,5 +1,5 @@
 import {buildLoginRedirectUrl, checkAuthStatus} from "/js/auth/auth-check.js";
-import {fetchWithAuthRetry} from "/js/common-util.js?v=2.2";
+import {fetchWithAuthRetry, setupDialogScrollLock} from "/js/common-util.js?v=2.3";
 
 const roleLabels = {
     ADMIN: "관리자",
@@ -204,34 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let modalTriggerElement = null;
 
-    const trapFocusInModal = (event) => {
-        if (!confirmModal || confirmModal.classList.contains("d-none")) {
-            return;
-        }
-        if (event.key !== "Tab") {
-            return;
-        }
-        const focusableElements = confirmModal.querySelectorAll(
-            "button:not([disabled]), [href]:not([disabled]), [tabindex]:not([tabindex='-1'])"
-        );
-        if (focusableElements.length === 0) {
-            return;
-        }
-        const first = focusableElements[0];
-        const last = focusableElements[focusableElements.length - 1];
-        if (event.shiftKey) {
-            if (document.activeElement === first) {
-                event.preventDefault();
-                last.focus();
-            }
-        } else {
-            if (document.activeElement === last) {
-                event.preventDefault();
-                first.focus();
-            }
-        }
-    };
-
+    // Native <dialog>는 focus trap / ESC / inert를 자체 제공.
     const openConfirmModal = (providerLabel) => {
         if (!confirmModal) {
             return;
@@ -240,9 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (confirmMessage) {
             confirmMessage.textContent = `${providerLabel} 계정을 연동 해제하시겠습니까?`;
         }
-        confirmModal.classList.remove("d-none");
-        document.body.style.overflow = "hidden";
-        document.addEventListener("keydown", trapFocusInModal);
+        confirmModal.showModal();
         if (confirmSubmit) {
             confirmSubmit.focus();
         }
@@ -252,9 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!confirmModal) {
             return;
         }
-        confirmModal.classList.add("d-none");
-        document.body.style.overflow = "";
-        document.removeEventListener("keydown", trapFocusInModal);
+        confirmModal.close();
         const triggerToRestore = modalTriggerElement;
         pendingOAuthUnlink = null;
         modalTriggerElement = null;
@@ -278,6 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const connectedField = card.querySelector(".mypage-oauth-connected");
             const actionButton = card.querySelector(".mypage-oauth-action");
             const notice = card.querySelector(".mypage-oauth-notice");
+            const emptyMessage = card.querySelector(".mypage-oauth-empty-message");
 
             const linkedAccount = providerMap.get(provider);
 
@@ -289,6 +259,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (linkedAccount) {
                 card.classList.remove("is-empty");
+                if (emptyMessage) {
+                    emptyMessage.classList.add("d-none");
+                }
                 if (status) {
                     status.className = "mypage-oauth-status-badge is-linked";
                     status.textContent = "연동됨";
@@ -336,6 +309,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 updateText(emailField, "-");
                 updateText(nicknameField, "-");
                 updateText(connectedField, "-");
+                if (emptyMessage) {
+                    emptyMessage.classList.remove("d-none");
+                }
                 if (notice) {
                     notice.textContent = "";
                     notice.classList.add("d-none");
@@ -471,15 +447,20 @@ document.addEventListener("DOMContentLoaded", () => {
         saveToastClose.addEventListener("click", hideSaveToast);
     }
     if (confirmModal) {
+        setupDialogScrollLock(confirmModal);
+        // backdrop click — native <dialog>에서는 e.target===dialog일 때
         confirmModal.addEventListener("click", (event) => {
-            const target = event.target;
-            if (target && target.dataset && target.dataset.modalClose) {
+            if (event.target === confirmModal) {
                 closeConfirmModal();
             }
         });
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape" && !confirmModal.classList.contains("d-none")) {
-                closeConfirmModal();
+        // ESC는 native dialog가 자동 처리하지만 부수 정리(state/focus 복원) 위해 close 이벤트 활용
+        confirmModal.addEventListener("close", () => {
+            const triggerToRestore = modalTriggerElement;
+            pendingOAuthUnlink = null;
+            modalTriggerElement = null;
+            if (triggerToRestore && typeof triggerToRestore.focus === "function") {
+                triggerToRestore.focus();
             }
         });
     }

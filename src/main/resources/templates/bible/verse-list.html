@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head th:replace="~{fragments/head :: head('성경 구절 읽기 - 본문 보기 | ElSeeker', true, '/css/bible/verse-list.css?v=6.0')}"
+<head th:replace="~{fragments/head :: head('성경 구절 읽기 - 본문 보기 | ElSeeker', true, '/css/bible/verse-list.css?v=6.1')}"
       th:with="pageDescription='선택한 장의 성경 구절을 읽고 공유하거나 복사, 메모할 수 있습니다.',
                pageKeywords='성경 구절,성경 본문,성경 읽기,성경 말씀,성경 구절 복사'"></head>
 <body class="has-fixed-nav has-dual-bottom-nav">
@@ -30,22 +30,20 @@
     </div>
 </main>
 
-<div id="chapterMemoOverlay" class="chapter-memo-overlay d-none" aria-hidden="true">
-    <div class="chapter-memo-panel" role="dialog" aria-labelledby="chapterMemoPanelTitle">
-        <div class="chapter-memo-panel-header">
-            <h5 id="chapterMemoPanelTitle" class="mb-0">장 메모</h5>
-            <button type="button" class="btn-close" id="chapterMemoCloseBtn" aria-label="닫기"></button>
-        </div>
-        <div class="chapter-memo-panel-body">
-            <textarea id="chapterMemoInput" class="form-control" rows="6"
-                      placeholder="이 장에 대한 메모를 입력하세요..." aria-label="장 메모 입력"></textarea>
-        </div>
-        <div class="chapter-memo-panel-footer">
-            <button type="button" class="btn btn-outline-danger d-none" id="chapterMemoDeleteBtn">삭제</button>
-            <button type="button" class="btn btn-primary" id="chapterMemoSaveBtn">저장</button>
-        </div>
+<dialog id="chapterMemoPanel" class="chapter-memo-panel" aria-labelledby="chapterMemoPanelTitle">
+    <div class="chapter-memo-panel-header">
+        <h5 id="chapterMemoPanelTitle" class="mb-0">장 메모</h5>
+        <button type="button" class="btn-close" id="chapterMemoCloseBtn" aria-label="닫기"></button>
     </div>
-</div>
+    <div class="chapter-memo-panel-body">
+        <textarea id="chapterMemoInput" class="form-control" rows="6"
+                  placeholder="이 장에 대한 메모를 입력하세요..." aria-label="장 메모 입력"></textarea>
+    </div>
+    <div class="chapter-memo-panel-footer">
+        <button type="button" class="btn btn-outline-danger d-none" id="chapterMemoDeleteBtn">삭제</button>
+        <button type="button" class="btn btn-primary" id="chapterMemoSaveBtn">저장</button>
+    </div>
+</dialog>
 
 <div id="verseFab" class="verse-fab d-none" aria-label="선택 구절 메뉴">
     <button type="button" class="verse-fab-toggle" data-fab-toggle aria-label="선택 메뉴 열기" aria-expanded="false">
@@ -56,7 +54,7 @@
     </button>
     <div class="verse-fab-menu" data-fab-menu role="menu" aria-hidden="true">
         <button type="button" class="verse-fab-item" data-action="share" role="menuitem" aria-label="공유">
-            <span class="verse-fab-item-icon" aria-hidden="true">🔗</span>
+            <span class="verse-fab-item-icon" aria-hidden="true">📤</span>
             <span class="verse-fab-item-label">공유</span>
         </button>
         <button type="button" class="verse-fab-item" data-action="copy" role="menuitem" aria-label="복사">
@@ -114,7 +112,7 @@
     </div>
 </div>
 
-<script type="module" src="/js/bible/verse-list.js?v=3.8"></script>
+<script type="module" src="/js/bible/verse-list.js?v=4.0"></script>
 <div th:replace="~{fragments/section-nav :: section-nav}"></div>
 </body>
 </html>

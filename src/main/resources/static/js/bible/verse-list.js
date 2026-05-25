@@ -1,5 +1,6 @@
 import {BibleReaderStore, BookStore, ChapterStore, LastReadStore, TranslationStore, VerseStore} from "/js/storage-util.js?v=2.4";
 import {applyOAuthBackGuardIfNeeded, buildLoginRedirectUrl, checkAuthStatus, refreshAccessToken} from "/js/auth/auth-check.js";
+import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
 
 const UI_CLASSES = {
     HIDDEN: "d-none"
@@ -118,7 +119,7 @@ function getElements() {
         prevBtn: get("prevChapterBtn"),
         markReadBtn: get("markReadBtn"),
         chapterMemoBtn: get("chapterMemoBtn"),
-        chapterMemoOverlay: get("chapterMemoOverlay"),
+        chapterMemoPanel: get("chapterMemoPanel"),
         chapterMemoInput: get("chapterMemoInput"),
         chapterMemoSaveBtn: get("chapterMemoSaveBtn"),
         chapterMemoDeleteBtn: get("chapterMemoDeleteBtn"),
@@ -975,9 +976,8 @@ function handleFabEscapeKey(event) {
     if (event.key !== "Escape") {
         return;
     }
-    // 1. 장 메모 패널
-    if (!elements.chapterMemoOverlay?.classList.contains("d-none")) {
-        closeChapterMemoPanel();
+    // 1. 장 메모 패널 — native <dialog>는 ESC를 자동 처리하므로 다른 ESC 동작과 충돌하지 않게 우선 차단
+    if (elements.chapterMemoPanel?.open) {
         return;
     }
     // 2. 폰트 패널 — Esc 는 명시적 닫기이므로 토글로 포커스 복귀
@@ -1196,6 +1196,8 @@ async function openMemoForSelected() {
         const firstTextarea = document.getElementById(`memo-input-${verseNumbers[0]}`);
         if (firstTextarea) {
             firstTextarea.focus();
+            const len = firstTextarea.value.length;
+            firstTextarea.setSelectionRange(len, len);
         }
     }
 }
@@ -1487,9 +1489,11 @@ function bindChapterMemoEvents() {
     if (elements.chapterMemoCloseBtn) {
         elements.chapterMemoCloseBtn.addEventListener("click", closeChapterMemoPanel);
     }
-    if (elements.chapterMemoOverlay) {
-        elements.chapterMemoOverlay.addEventListener("click", (e) => {
-            if (e.target === elements.chapterMemoOverlay) {
+    if (elements.chapterMemoPanel) {
+        setupDialogScrollLock(elements.chapterMemoPanel);
+        // backdrop click 시 닫기 — native dialog에서는 e.target===dialog일 때
+        elements.chapterMemoPanel.addEventListener("click", (e) => {
+            if (e.target === elements.chapterMemoPanel) {
                 closeChapterMemoPanel();
             }
         });
@@ -1507,23 +1511,25 @@ function updateChapterMemoButton() {
 }
 
 function openChapterMemoPanel() {
-    const overlay = elements?.chapterMemoOverlay;
-    if (!overlay) {
+    const panel = elements?.chapterMemoPanel;
+    if (!panel) {
         return;
     }
-    elements.chapterMemoInput.value = chapterMemoState.content || "";
+    const input = elements.chapterMemoInput;
+    input.value = chapterMemoState.content || "";
     elements.chapterMemoDeleteBtn.classList.toggle("d-none", !chapterMemoState.memoId);
-    overlay.classList.remove("d-none");
-    overlay.setAttribute("aria-hidden", "false");
+    panel.showModal();
+    input.focus();
+    const len = input.value.length;
+    input.setSelectionRange(len, len);
 }
 
 function closeChapterMemoPanel() {
-    const overlay = elements?.chapterMemoOverlay;
-    if (!overlay) {
+    const panel = elements?.chapterMemoPanel;
+    if (!panel) {
         return;
     }
-    overlay.classList.add("d-none");
-    overlay.setAttribute("aria-hidden", "true");
+    panel.close();
 }
 
 async function handleChapterMemoClick() {

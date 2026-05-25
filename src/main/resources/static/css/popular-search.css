@@ -7,6 +7,11 @@
     box-shadow: 0 1px 3px var(--color-shadow);
 }
 
+/* 다크모드: 다른 카드들과 통일된 한 단계 어두운 베이스 */
+html[data-theme="dark"] .popular-search-card {
+    background: var(--color-bg-elevated);
+}
+
 .popular-search-card-header {
     display: flex;
     align-items: baseline;
@@ -80,6 +85,11 @@
     font-weight: 700;
 }
 
+/* 다크모드: 카드 베이스(#181c22)와 동색이 되지 않도록 한 단계 밝은 토큰으로 */
+html[data-theme="dark"] .popular-search-rank {
+    background: var(--color-bg-elevated-strong);
+}
+
 .popular-search-link.top-rank-1 .popular-search-rank {
     background: #fff3bf;
     color: #b48a00;
@@ -125,6 +135,11 @@ html[data-theme="dark"] .popular-search-link.top-rank-3 .popular-search-rank {
         color: var(--color-text-primary);
     }
 
+    /* 다크모드: 카드 베이스보다 한 단계 밝게 (모범사례: 다크 hover는 밝아지는 방향) */
+    html[data-theme="dark"] .popular-search-link:hover {
+        background: var(--color-bg-elevated-strong);
+    }
+
     .popular-search-more:hover {
         color: var(--color-text-primary);
         text-decoration: underline;
@@ -158,25 +173,46 @@ html[data-theme="dark"] .popular-search-link.top-rank-3 .popular-search-rank {
     box-shadow: 0 16px 44px rgba(0, 0, 0, 0.2);
 }
 
+/* 다크모드: body(#0f1216)보다 한 단계 위로 떠 있도록 elevation 부여 */
+html[data-theme="dark"] .popular-search-dialog {
+    background: var(--color-bg-elevated);
+}
+
 .popular-search-dialog::backdrop {
     background: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(2px);
 }
 
 .popular-search-dialog-body {
-    padding: 1.2rem 1.3rem 1.3rem;
+    padding: 0;
     max-height: min(70vh, 640px);
     overflow-y: auto;
+    /* 모달 내부 스크롤이 끝에 도달했을 때 뒤 본문으로 chaining 되지 않도록 */
+    overscroll-behavior: contain;
 }
 
+/* 다이얼로그 헤더는 스크롤 시 상단 고정 (모범사례: 닫기 affordance 유지) */
 .popular-search-dialog-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
-    margin-bottom: 0.9rem;
-    padding-bottom: 0.75rem;
+    padding: 1.2rem 1.3rem 0.75rem;
+    margin-bottom: 0;
+    background: var(--color-bg-base);
     border-bottom: 1px solid var(--color-border);
+}
+
+html[data-theme="dark"] .popular-search-dialog-header {
+    background: var(--color-bg-elevated);
+}
+
+/* 다이얼로그 내부 리스트는 헤더가 가져간 좌우 padding을 자체 부담 */
+.popular-search-dialog-body .popular-search-list {
+    padding: 0.9rem 1.3rem 1.3rem;
 }
 
 .popular-search-dialog-title {
@@ -203,9 +239,18 @@ html[data-theme="dark"] .popular-search-link.top-rank-3 .popular-search-rank {
     transition: background-color 0.15s ease;
 }
 
+/* 다크모드: 다이얼로그 베이스(#181c22)와 동색이 되지 않도록 한 단계 밝게 */
+html[data-theme="dark"] .popular-search-dialog-close {
+    background: var(--color-bg-elevated-strong);
+}
+
 @media (hover: hover) and (pointer: fine) {
     .popular-search-dialog-close:hover {
         background: var(--color-border);
+    }
+
+    html[data-theme="dark"] .popular-search-dialog-close:hover {
+        background: var(--color-bg-elevated-strong-hover);
     }
 }
 

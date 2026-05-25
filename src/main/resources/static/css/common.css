@@ -288,3 +288,14 @@
     box-shadow: none;
     opacity: 1;
 }
+
+/* ── Dialog 공통 ── */
+/* 다이얼로그 활성 시 뒤 본문 스크롤 잠금 — JS에서 토글 */
+body.scroll-locked {
+    overflow: hidden;
+}
+
+/* 모던 브라우저 보강: native <dialog>[open]을 자동 감지하여 잠금 */
+html:has(dialog[open]) {
+    overflow: hidden;
+}

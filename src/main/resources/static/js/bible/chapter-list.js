@@ -1,5 +1,6 @@
 import {BookStore, ChapterStore, TranslationStore} from "/js/storage-util.js?v=2.3";
 import {checkAuthStatus} from "/js/auth/auth-check.js";
+import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
 
 const UI_CLASSES = {
     HIDDEN: "d-none"
@@ -46,7 +47,7 @@ const DomHelper = {
             bookSelectLinkLabel: get("bookSelectLinkLabel"),
             nextBtn: get("nextBookBtn"),
             bookMemoBtn: get("bookMemoBtn"),
-            bookMemoOverlay: get("bookMemoOverlay"),
+            bookMemoPanel: get("bookMemoPanel"),
             bookMemoInput: get("bookMemoInput"),
             bookMemoSaveBtn: get("bookMemoSaveBtn"),
             bookMemoDeleteBtn: get("bookMemoDeleteBtn"),
@@ -464,16 +465,13 @@ const App = {
         if (el.bookMemoCloseBtn) {
             el.bookMemoCloseBtn.addEventListener("click", App.closeBookMemoPanel);
         }
-        if (el.bookMemoOverlay) {
-            el.bookMemoOverlay.addEventListener("click", (e) => {
-                if (e.target === el.bookMemoOverlay) App.closeBookMemoPanel();
+        if (el.bookMemoPanel) {
+            setupDialogScrollLock(el.bookMemoPanel);
+            // backdrop click 시 닫기 — native dialog에서는 e.target===dialog일 때
+            el.bookMemoPanel.addEventListener("click", (e) => {
+                if (e.target === el.bookMemoPanel) App.closeBookMemoPanel();
             });
         }
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" && !el.bookMemoOverlay?.classList.contains("d-none")) {
-                App.closeBookMemoPanel();
-            }
-        });
     },
 
     buildBookMemoUrl: () => {
@@ -531,19 +529,21 @@ const App = {
     },
 
     openBookMemoPanel: () => {
-        const overlay = App.elements?.bookMemoOverlay;
-        if (!overlay) return;
-        App.elements.bookMemoInput.value = bookMemoState.content || "";
+        const panel = App.elements?.bookMemoPanel;
+        if (!panel) return;
+        const input = App.elements.bookMemoInput;
+        input.value = bookMemoState.content || "";
         App.elements.bookMemoDeleteBtn.classList.toggle("d-none", !bookMemoState.memoId);
-        overlay.classList.remove("d-none");
-        overlay.setAttribute("aria-hidden", "false");
+        panel.showModal();
+        input.focus();
+        const len = input.value.length;
+        input.setSelectionRange(len, len);
     },
 
     closeBookMemoPanel: () => {
-        const overlay = App.elements?.bookMemoOverlay;
-        if (!overlay) return;
-        overlay.classList.add("d-none");
-        overlay.setAttribute("aria-hidden", "true");
+        const panel = App.elements?.bookMemoPanel;
+        if (!panel) return;
+        panel.close();
     },
 
     saveBookMemo: async () => {

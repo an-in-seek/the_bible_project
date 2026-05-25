@@ -20,6 +20,10 @@ html[data-theme="dark"] body.study-page {
     background-color: var(--color-bg-elevated-bright);
 }
 
+html[data-theme="dark"] .study-card-link .card {
+    background-color: var(--color-bg-elevated);
+}
+
 .study-card-link .card-body {
     min-height: 5.5rem;
     display: flex;

@@ -1,6 +1,6 @@
 import {LastReadStore} from "/js/storage-util.js?v=2.3";
 import {initUniverse} from "/js/home/universe-bg.js?v=1.4";
-import {initPopularSearch} from "/js/popular-search.js?v=1.1";
+import {initPopularSearch} from "/js/popular-search.js?v=1.3";
 
 const HERO_INTERVAL_MS = 5000;
 const HERO_SWIPE_THRESHOLD = 50;
