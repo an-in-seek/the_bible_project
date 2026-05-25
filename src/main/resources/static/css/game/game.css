@@ -1,3 +1,11 @@
+body.game-page {
+    background-color: #f7f8fa;
+}
+
+html[data-theme="dark"] body.game-page {
+    background-color: var(--color-bg-base);
+}
+
 .game-hero {
     background: linear-gradient(135deg, #f7fbff 0%, #fff4ea 100%);
     padding: 3rem 0;
@@ -87,6 +95,10 @@
         transform: translateY(-5px);
         border-color: var(--color-border-control);
         box-shadow: 0 8px 24px var(--color-shadow), 0 2px 6px var(--color-shadow);
+        background-color: var(--color-bg-elevated-strong-hover);
+    }
+
+    html[data-theme="dark"] .card-clickable:hover {
         background-color: var(--color-bg-elevated);
     }
 }
