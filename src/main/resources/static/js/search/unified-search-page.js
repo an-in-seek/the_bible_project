@@ -11,13 +11,8 @@
  *  - 페이지네이션: 구절 탭만 적용 ("더보기" append)
  */
 
-import {
-    searchBibleVerses,
-    searchDictionary,
-    searchBibleBooks,
-    searchMenus,
-} from "./search-sources.js";
-import { parseBibleReference } from "./bible-reference-parser.js";
+import {searchBibleBooks, searchBibleVerses, searchDictionary, searchMenus,} from "./search-sources.js";
+import {parseBibleReference} from "./bible-reference-parser.js";
 
 const KEYWORD_MAX_LENGTH = 100;
 const DEBOUNCE_MS = 200;
@@ -38,14 +33,14 @@ class UnifiedSearchPage {
             abortController: null,
             biblePage: 0,
             bibleHasNext: false,
-            counts: { all: 0, bible: 0, dictionary: 0, menu: 0 },
-            cached: { verses: [], dicts: [], books: [], menus: [], parser: null },
+            counts: {all: 0, bible: 0, dictionary: 0, menu: 0},
+            cached: {verses: [], dicts: [], books: [], menus: [], parser: null},
         };
 
         this._debounceTimer = null;
 
         this.bind();
-        this.setActiveTab(this.state.tab, { skipRender: true });
+        this.setActiveTab(this.state.tab, {skipRender: true});
         if (this.state.keyword.length > 0) {
             this.input.value = this.state.keyword;
             this.clearBtn.classList.remove("d-none");
@@ -113,7 +108,7 @@ class UnifiedSearchPage {
         this.clearBtn.classList.add("d-none");
         this.resultsEl.replaceChildren();
         this.emptyEl.classList.remove("d-none");
-        this.updateCounts({ all: 0, bible: 0, dictionary: 0, menu: 0 });
+        this.updateCounts({all: 0, bible: 0, dictionary: 0, menu: 0});
         this.commitKeyword();
     }
 
@@ -135,7 +130,10 @@ class UnifiedSearchPage {
     async run() {
         if (this.state.keyword.length === 0) return;
         if (this.state.abortController) {
-            try { this.state.abortController.abort(); } catch (_) { /* noop */ }
+            try {
+                this.state.abortController.abort();
+            } catch (_) { /* noop */
+            }
         }
         const controller = new AbortController();
         this.state.abortController = controller;
@@ -147,10 +145,10 @@ class UnifiedSearchPage {
         this.state.biblePage = 0;
 
         const settled = await Promise.allSettled([
-            searchBibleVerses(kw, { signal, size: 20, page: 0, track: false }),
-            searchDictionary(kw, { signal, size: 20, page: 0, track: false }),
-            Promise.resolve(searchBibleBooks(kw, { size: 50 })),
-            Promise.resolve(searchMenus(kw, { size: 50 })),
+            searchBibleVerses(kw, {signal, size: 20, page: 0, track: false}),
+            searchDictionary(kw, {signal, size: 20, page: 0, track: false}),
+            Promise.resolve(searchBibleBooks(kw, {size: 50})),
+            Promise.resolve(searchMenus(kw, {size: 50})),
             Promise.resolve(parseBibleReference(kw)),
         ]);
 
@@ -198,7 +196,7 @@ class UnifiedSearchPage {
     render() {
         this.resultsEl.replaceChildren();
         const tab = this.state.tab;
-        const { verses, dicts, books, menus, parser } = this.state.cached;
+        const {verses, dicts, books, menus, parser} = this.state.cached;
 
         const showBible = tab === "all" || tab === "bible";
         const showDict = tab === "all" || tab === "dictionary";
@@ -263,7 +261,7 @@ class UnifiedSearchPage {
         list.className = "us-result-list";
         root.appendChild(list);
 
-        return { root, list };
+        return {root, list};
     }
 
     async loadMoreVerses(btn) {
@@ -344,7 +342,7 @@ class UnifiedSearchPage {
         ref.textContent = `${v.bookName} ${v.chapterNumber}:${v.verseNumber}`;
         const text = document.createElement("span");
         text.className = "us-result-text";
-        text.textContent = ` — ${v.text}`;
+        text.textContent = ` ${v.text}`;
         a.appendChild(ref);
         a.appendChild(text);
         li.appendChild(a);

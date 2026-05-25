@@ -11,13 +11,8 @@
  *  - Stale guard: 응답 도착 시점 키워드가 다르면 렌더 스킵
  */
 
-import {
-    searchBibleVerses,
-    searchDictionary,
-    searchBibleBooks,
-    searchMenus,
-} from "./search-sources.js";
-import { parseBibleReference } from "./bible-reference-parser.js";
+import {searchBibleBooks, searchBibleVerses, searchDictionary, searchMenus,} from "./search-sources.js";
+import {parseBibleReference} from "./bible-reference-parser.js";
 
 const DEBOUNCE_MS = 200;
 const KEYWORD_MAX_LENGTH = 100;
@@ -139,7 +134,10 @@ class UnifiedSearch {
 
     async run() {
         if (this.state.abortController) {
-            try { this.state.abortController.abort(); } catch (_) { /* noop */ }
+            try {
+                this.state.abortController.abort();
+            } catch (_) { /* noop */
+            }
         }
         const controller = new AbortController();
         this.state.abortController = controller;
@@ -147,10 +145,10 @@ class UnifiedSearch {
         const signal = controller.signal;
 
         const results = await Promise.allSettled([
-            searchBibleVerses(kw, { signal, size: 3, track: false }),
-            searchDictionary(kw, { signal, size: 5, track: false }),
-            Promise.resolve(searchBibleBooks(kw, { size: 3 })),
-            Promise.resolve(searchMenus(kw, { size: 5 })),
+            searchBibleVerses(kw, {signal, size: 3, track: false}),
+            searchDictionary(kw, {signal, size: 5, track: false}),
+            Promise.resolve(searchBibleBooks(kw, {size: 3})),
+            Promise.resolve(searchMenus(kw, {size: 5})),
             Promise.resolve(parseBibleReference(kw)),
         ]);
 
@@ -174,15 +172,15 @@ class UnifiedSearch {
 
         // 1. 성경 그룹: parser 결과 + 책 + 구절
         const bibleEntries = [];
-        if (parser) bibleEntries.push({ kind: "parser", data: parser });
-        for (const b of books) bibleEntries.push({ kind: "book", data: b });
-        for (const v of verses) bibleEntries.push({ kind: "verse", data: v });
+        if (parser) bibleEntries.push({kind: "parser", data: parser});
+        for (const b of books) bibleEntries.push({kind: "book", data: b});
+        for (const v of verses) bibleEntries.push({kind: "verse", data: v});
 
         if (bibleEntries.length > 0) {
             this.dropdown.appendChild(
                 this.makeGroup({
                     title: "📖 성경 (구절·책·장)",
-                    seeAllHref: this.searchHref({ tab: "bible" }),
+                    seeAllHref: this.searchHref({tab: "bible"}),
                     entries: bibleEntries,
                     renderItem: e => this.renderBibleEntry(e),
                 }),
@@ -194,8 +192,8 @@ class UnifiedSearch {
             this.dropdown.appendChild(
                 this.makeGroup({
                     title: "📚 성경 사전",
-                    seeAllHref: this.searchHref({ tab: "dictionary" }),
-                    entries: dicts.map(d => ({ kind: "dict", data: d })),
+                    seeAllHref: this.searchHref({tab: "dictionary"}),
+                    entries: dicts.map(d => ({kind: "dict", data: d})),
                     renderItem: e => this.renderDictEntry(e),
                 }),
             );
@@ -206,8 +204,8 @@ class UnifiedSearch {
             this.dropdown.appendChild(
                 this.makeGroup({
                     title: "🧭 메뉴",
-                    seeAllHref: this.searchHref({ tab: "menu" }),
-                    entries: menus.map(m => ({ kind: "menu", data: m })),
+                    seeAllHref: this.searchHref({tab: "menu"}),
+                    entries: menus.map(m => ({kind: "menu", data: m})),
                     renderItem: e => this.renderMenuEntry(e),
                 }),
             );
@@ -224,7 +222,7 @@ class UnifiedSearch {
         this.openDropdown();
     }
 
-    makeGroup({ title, seeAllHref, entries, renderItem }) {
+    makeGroup({title, seeAllHref, entries, renderItem}) {
         const groupEl = document.createElement("div");
         groupEl.className = "us-group";
         groupEl.setAttribute("role", "group");
@@ -296,7 +294,7 @@ class UnifiedSearch {
 
             const sep = document.createElement("span");
             sep.className = "us-item-sep";
-            sep.textContent = " — ";
+            sep.textContent = " ";
             sep.setAttribute("aria-hidden", "true");
             a.appendChild(sep);
 
@@ -327,7 +325,7 @@ class UnifiedSearch {
         if (d.description) {
             const desc = document.createElement("span");
             desc.className = "us-item-desc";
-            desc.textContent = ` — ${d.description}`;
+            desc.textContent = ` ${d.description}`;
             a.appendChild(desc);
         }
 
@@ -378,7 +376,7 @@ class UnifiedSearch {
             this.updateActiveDescendant();
         });
 
-        this.items.push({ id, url: a.href });
+        this.items.push({id, url: a.href});
         return li;
     }
 
@@ -436,7 +434,7 @@ class UnifiedSearch {
         window.location.href = this.searchHref({});
     }
 
-    searchHref({ tab }) {
+    searchHref({tab}) {
         const url = new URL("/web/search", window.location.origin);
         url.searchParams.set("q", this.state.keyword);
         if (tab) url.searchParams.set("tab", tab);
