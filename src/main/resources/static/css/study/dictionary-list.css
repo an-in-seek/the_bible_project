@@ -1,0 +1,156 @@
+/* Dictionary List — premium card-style entries */
+
+#dictionaryList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+    border: 0;
+    border-radius: 0;
+    background-color: transparent;
+}
+
+.dictionary-item {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: 0.75rem;
+    padding: 1rem 1.125rem 1rem 1.125rem;
+    background-color: var(--color-bg-elevated-bright);
+    border: 1px solid var(--color-border);
+    border-radius: 0.875rem;
+    text-decoration: none;
+    color: inherit;
+    transition: transform 0.18s ease, box-shadow 0.18s ease,
+                border-color 0.18s ease, background-color 0.18s ease;
+    overflow: hidden;
+}
+
+.dictionary-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background-color: var(--color-accent);
+    opacity: 0.6;
+    transition: opacity 0.18s ease, width 0.18s ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .dictionary-item:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 22px var(--color-shadow);
+        border-color: var(--color-accent);
+    }
+
+    .dictionary-item:hover::before {
+        opacity: 1;
+        width: 4px;
+    }
+
+    .dictionary-item:hover .dictionary-item-chevron {
+        transform: translateX(3px);
+        color: var(--color-accent);
+    }
+}
+
+.dictionary-item:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-color: var(--color-accent);
+}
+
+.dictionary-item-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.dictionary-item-term {
+    font-family: 'Merriweather', 'Noto Serif KR', serif;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.2px;
+    line-height: 1.3;
+    margin: 0;
+    word-break: break-word;
+}
+
+.dictionary-item-summary {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
+    color: var(--color-text-secondary);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+}
+
+.dictionary-item-summary.is-empty {
+    font-style: italic;
+    opacity: 0.7;
+}
+
+.dictionary-item-chevron {
+    flex: 0 0 auto;
+    align-self: center;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--color-text-secondary);
+    transition: transform 0.18s ease, color 0.18s ease;
+    user-select: none;
+}
+
+.dictionary-mark {
+    background-color: rgba(13, 110, 253, 0.14);
+    color: var(--color-accent);
+    padding: 0 0.15em;
+    border-radius: 3px;
+    font-weight: 700;
+}
+
+html[data-theme="dark"] .dictionary-mark {
+    background-color: rgba(77, 171, 247, 0.22);
+    color: #a8d6ff;
+}
+
+html[data-theme="dark"] .dictionary-item {
+    background-color: var(--color-bg-elevated);
+}
+
+html[data-theme="dark"] .dictionary-item::before {
+    opacity: 0.75;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    html[data-theme="dark"] .dictionary-item:hover {
+        background-color: var(--color-bg-elevated-strong-hover);
+        box-shadow: 0 8px 24px rgba(77, 171, 247, 0.18);
+    }
+}
+
+@media (max-width: 575px) {
+    .dictionary-item {
+        padding: 0.875rem 0.875rem 0.875rem 1rem;
+        border-radius: 0.75rem;
+        gap: 0.5rem;
+    }
+
+    .dictionary-item-term {
+        font-size: 1.05rem;
+    }
+
+    .dictionary-item-summary {
+        font-size: 0.8125rem;
+    }
+
+    .dictionary-item-chevron {
+        font-size: 1.35rem;
+    }
+}

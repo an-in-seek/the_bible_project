@@ -342,12 +342,34 @@ const App = {
     createSummary: description => {
         const normalized = (description ?? "").trim();
         if (!normalized) {
-            return "설명이 등록되지 않았습니다.";
+            return {text: "설명이 등록되지 않았습니다.", isEmpty: true};
         }
-        if (normalized.length <= 120) {
-            return normalized;
+        if (normalized.length <= 140) {
+            return {text: normalized, isEmpty: false};
         }
-        return `${normalized.substring(0, 120).trimEnd()}...`;
+        return {text: `${normalized.substring(0, 140).trimEnd()}…`, isEmpty: false};
+    },
+
+    escapeHtml: str => {
+        const div = document.createElement("div");
+        div.textContent = String(str ?? "");
+        return div.innerHTML;
+    },
+
+    escapeRegExp: str => String(str ?? "").replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+
+    highlight: (text, keyword) => {
+        const safe = App.escapeHtml(text);
+        const trimmed = (keyword ?? "").trim();
+        if (!trimmed) {
+            return safe;
+        }
+        const pattern = App.escapeRegExp(trimmed);
+        if (!pattern) {
+            return safe;
+        }
+        const re = new RegExp(pattern, "gi");
+        return safe.replace(re, match => `<mark class="dictionary-mark">${match}</mark>`);
     },
 
     buildDetailLink: id => {
@@ -364,33 +386,41 @@ const App = {
         if (!listContainer) {
             return;
         }
+        const keyword = App.state.activeKeyword;
+        const fragment = document.createDocumentFragment();
+
         items.forEach(item => {
             const link = document.createElement("a");
-            link.className = "list-group-item list-group-item-action";
+            link.className = "dictionary-item";
             link.href = App.buildDetailLink(item.id);
+            link.setAttribute("aria-label", `${item.term ?? ""} 사전 항목 상세 보기`);
 
-            const header = document.createElement("div");
-            header.className = "d-flex justify-content-between align-items-center";
+            const body = document.createElement("div");
+            body.className = "dictionary-item-body";
 
             const title = document.createElement("h2");
-            title.className = "h6 fw-semibold mb-1";
-            title.textContent = item.term ?? "";
+            title.className = "dictionary-item-term";
+            title.innerHTML = App.highlight(item.term ?? "", keyword);
 
-            const badge = document.createElement("span");
-            badge.className = "badge bg-light text-secondary";
-            badge.textContent = "보기";
-
-            header.appendChild(title);
-            header.appendChild(badge);
-
+            const {text: summaryText, isEmpty} = App.createSummary(item.description);
             const summary = document.createElement("p");
-            summary.className = "text-muted small mb-0";
-            summary.textContent = App.createSummary(item.description);
+            summary.className = isEmpty ? "dictionary-item-summary is-empty" : "dictionary-item-summary";
+            summary.innerHTML = isEmpty ? App.escapeHtml(summaryText) : App.highlight(summaryText, keyword);
 
-            link.appendChild(header);
-            link.appendChild(summary);
-            listContainer.appendChild(link);
+            body.appendChild(title);
+            body.appendChild(summary);
+
+            const chevron = document.createElement("span");
+            chevron.className = "dictionary-item-chevron";
+            chevron.setAttribute("aria-hidden", "true");
+            chevron.textContent = "›";
+
+            link.appendChild(body);
+            link.appendChild(chevron);
+            fragment.appendChild(link);
         });
+
+        listContainer.appendChild(fragment);
     },
 
     updateUrl: () => {
