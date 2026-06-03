@@ -215,8 +215,8 @@ class UnifiedSearch {
             this.renderEmpty(true);
         }
 
-        // 첫 항목으로 active 초기화
-        this.activeIndex = this.items.length > 0 ? 0 : -1;
+        // 기본 선택 없음 (첫 항목 자동 focus 비활성화)
+        this.activeIndex = -1;
         this.updateActiveDescendant();
         this.announceCount();
         this.openDropdown();
