@@ -1,5 +1,7 @@
 package com.elseeker.member.application.service
 
+import com.elseeker.bible.adapter.output.jpa.BibleMemoRepository
+import com.elseeker.bible.domain.model.BibleVerseMemo
 import com.elseeker.common.IntegrationTest
 import com.elseeker.community.adapter.output.jpa.CommentRepository
 import com.elseeker.community.adapter.output.jpa.PostRepository
@@ -55,9 +57,34 @@ class MemberServiceTest @Autowired constructor(
     private val wordPuzzleAttemptCellRepository: WordPuzzleAttemptCellRepository,
     private val wordPuzzleHintUsageRepository: WordPuzzleHintUsageRepository,
     private val dictionaryRepository: DictionaryRepository,
+    private val bibleMemoRepository: BibleMemoRepository,
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
 ) : IntegrationTest() {
+
+    @Test
+    fun `회원 삭제 시 성경 메모가 함께 삭제되고 FK 위반 없이 완료된다`() {
+        // given — bible_verse_memo 는 member 를 단방향 @ManyToOne 으로만 참조한다.
+        // 파생 삭제(deleteAllByMember)는 flush 가 지연되어 member 삭제와 순서가 꼬일 수 있으므로 이를 검증한다.
+        bibleMemoRepository.save(
+            BibleVerseMemo(
+                member = member,
+                translationId = 1L,
+                bookOrder = 1,
+                chapterNumber = 1,
+                verseNumber = 1,
+                content = "테스트 메모"
+            )
+        )
+        bibleMemoRepository.count() shouldBe 1
+
+        // when
+        memberService.deleteMember(member.uid, member.uid)
+
+        // then
+        bibleMemoRepository.count() shouldBe 0
+        memberRepository.findByUid(member.uid) shouldBe null
+    }
 
     @Test
     fun `회원 삭제 시 퀴즈 시도와 문항 시도가 함께 삭제된다`() {

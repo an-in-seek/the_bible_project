@@ -121,6 +121,10 @@ class MemberService(
             commentRepository.reassignAuthor(memberId, sentinel)
         }
         memberOAuthAccountRepository.deleteAllByMember(member)
+        // 위 deleteAllByMember 들은 파생(derived) 삭제라 flush가 커밋까지 지연된다.
+        // member 삭제와 같은 flush에 섞이면 Hibernate가 member를 자식보다 먼저 삭제해 FK 위반이 난다.
+        // 자식 삭제를 먼저 DB에 반영(flush)한 뒤 member를 삭제한다.
+        memberRepository.flush()
         memberRepository.delete(member)
     }
 
