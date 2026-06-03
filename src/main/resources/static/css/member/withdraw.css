@@ -3,7 +3,12 @@
 }
 
 .withdraw-hero {
-    background: linear-gradient(135deg, #fff4e6 0%, #ffffff 60%);
+    --withdraw-hero-bg: linear-gradient(135deg, #fff4e6 0%, #ffffff 60%);
+    background: var(--withdraw-hero-bg);
+}
+
+html[data-theme="dark"] .withdraw-hero {
+    --withdraw-hero-bg: linear-gradient(135deg, #2a2018 0%, var(--color-bg-elevated) 60%);
 }
 
 .withdraw-checklist {
@@ -35,10 +40,9 @@
     flex: 0 0 1.25rem;
 }
 
-.withdraw-steps {
-    margin: 0;
-    padding-left: 1.2rem;
-    color: #495057;
+html[data-theme="dark"] .withdraw-check-icon {
+    background: #3a2a1c;
+    color: #ffa94d;
 }
 
 .withdraw-action-card {
