@@ -1,6 +1,7 @@
 package com.elseeker.common.security
 
 import com.elseeker.common.config.ElSeekerProperties
+import com.elseeker.common.security.jwt.ConsentGateFilter
 import com.elseeker.common.security.jwt.JwtAuthenticationFilter
 import com.elseeker.common.security.jwt.JwtRefreshFilter
 import com.elseeker.common.security.oauth.handler.OAuth2LoginFailureHandler
@@ -37,6 +38,7 @@ class SecurityConfig(
     private val authorizationRequestRepository: HttpCookieOAuth2AuthorizationRequestRepository,
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
     private val jwtRefreshFilter: JwtRefreshFilter,
+    private val consentGateFilter: ConsentGateFilter,
     private val elSeekerProperties: ElSeekerProperties,
 ) {
 
@@ -114,6 +116,8 @@ class SecurityConfig(
                     ).permitAll()
                     .requestMatchers(
                         "/api/v1/auth/me",
+                        "/api/v1/auth/consent",
+                        "/api/v1/auth/consent/cancel",
                         "/api/v1/members/**",
                         "/api/v1/game/bible-quiz/**",
                         "/api/v1/game/ranking/me",
@@ -156,6 +160,8 @@ class SecurityConfig(
             // JWT 관련 필터를 UsernamePasswordAuthenticationFilter 앞단에 등록
             .addFilterBefore(jwtRefreshFilter, UsernamePasswordAuthenticationFilter::class.java)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter::class.java)
+            // 인증 직후, 가입 동의 대기(SIGNUP) 회원의 비허용 경로 접근 차단
+            .addFilterAfter(consentGateFilter, JwtAuthenticationFilter::class.java)
 
             // 인증 예외 처리 (SSR 페이지는 로그인으로, API는 401을 반환)
             .exceptionHandling {

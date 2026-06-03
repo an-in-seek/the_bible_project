@@ -1,0 +1,161 @@
+/**
+ * 회원가입 동의 인터스티셜 화면.
+ * login.css 의 팔레트(.login-page 변수)와 shell 을 재사용해 로그인 화면과 시각적 일관성을 유지한다.
+ */
+
+.consent-wrap {
+    width: 100%;
+    max-width: 460px;
+    margin: 0 auto;
+}
+
+.consent-card {
+    width: 100%;
+}
+
+.consent-logo {
+    display: block;
+    width: 116px;
+    height: auto;
+    margin: 0 auto 1.5rem;
+}
+
+.consent-title {
+    font-family: "Playfair Display", "Noto Sans KR", serif;
+    font-size: clamp(1.6rem, 3vw, 2rem);
+    line-height: 1.25;
+    text-align: center;
+    color: var(--ink);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.consent-subtitle {
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    margin-bottom: 1.75rem;
+}
+
+.consent-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.consent-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.7rem 0.25rem;
+}
+
+.consent-check {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    flex: 1 1 auto;
+    min-width: 0;
+    cursor: pointer;
+    margin: 0;
+}
+
+.consent-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    flex: 0 0 auto;
+    accent-color: var(--sea);
+    cursor: pointer;
+}
+
+.consent-label {
+    font-size: 0.95rem;
+    color: var(--ink);
+}
+
+.consent-label b {
+    color: var(--sea);
+    font-weight: 700;
+}
+
+/* 전체 동의 강조 행 */
+.consent-agree-all {
+    padding: 0.85rem 0.75rem;
+    background: rgba(31, 127, 123, 0.08);
+    border-radius: 12px;
+    cursor: pointer;
+    margin: 0;
+}
+
+.consent-agree-all .consent-label {
+    font-weight: 700;
+    font-size: 1rem;
+}
+
+.consent-divider {
+    height: 1px;
+    background: rgba(12, 27, 42, 0.08);
+    margin: 0.5rem 0;
+}
+
+.consent-view {
+    flex: 0 0 auto;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.consent-view:hover {
+    color: var(--ink);
+}
+
+.consent-submit {
+    width: 100%;
+    min-height: 50px;
+    margin-top: 1.5rem;
+    border: 0;
+    border-radius: 12px;
+    background: var(--sea);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease, opacity 0.2s ease;
+}
+
+.consent-submit:hover:not(:disabled) {
+    background: #1a6f6b;
+}
+
+.consent-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.consent-cancel {
+    width: 100%;
+    margin-top: 0.75rem;
+    padding: 0.5rem;
+    border: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.consent-cancel:hover {
+    color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .consent-submit {
+        transition: none;
+    }
+}
+
+@media (max-width: 576px) {
+    .consent-card {
+        padding: 2rem 1.5rem;
+    }
+}

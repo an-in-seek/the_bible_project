@@ -55,8 +55,9 @@ class JwtAuthenticationFilter(
                     runCatching { MemberRole.valueOf(roleValue) }.getOrNull()
                         ?: MemberRole.fromKey(roleValue)
                 }
+                val scope = claims[JwtProvider.SCOPE_CLAIM]?.toString()
                 if (memberUid != null && roles.isNotEmpty()) {
-                    val principal = JwtPrincipal(memberUid, email, roles)
+                    val principal = JwtPrincipal(memberUid, email, roles, scope)
                     val authorities = roles.map { SimpleGrantedAuthority(it.key) }
                     val authentication = UsernamePasswordAuthenticationToken(principal, null, authorities)
                         .apply {

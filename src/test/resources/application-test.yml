@@ -1,4 +1,14 @@
 spring:
+  # GCP 비활성화 — 테스트 컨텍스트가 Application Default Credentials 없이 부팅되도록 함
+  cloud:
+    gcp:
+      core:
+        enabled: false
+      logging:
+        enabled: false
+      trace:
+        enabled: false
+
   # Security (OAuth, JWT 테스트용 최소 설정)
   security:
     oauth2:

@@ -74,6 +74,35 @@ class JwtProvider(
     }
 
     /**
+     * 가입 동의 대기(PENDING_CONSENT) 회원용 단기 토큰을 생성합니다.
+     *
+     * 일반 Access Token과 구조는 같지만 `scope = SIGNUP` 클레임을 포함하며,
+     * 이 토큰으로는 동의 관련 경로 외 서비스 접근이 차단됩니다(ConsentGateFilter).
+     * Refresh Token은 발급하지 않습니다.
+     *
+     * @param memberUid 회원 UID (UUID 문자열)
+     * @param email 회원 이메일
+     * @return 서명된 Signup Token 문자열
+     */
+    fun generateSignupToken(
+        memberUid: String,
+        email: String,
+    ): String {
+        val now = Instant.now()
+        val expiry = now.plusSeconds(elSeekerProperties.jwt.signupTokenTtl.seconds)
+
+        return Jwts.builder()
+            .subject(memberUid)
+            .claim("email", email)
+            .claim("roles", listOf(com.elseeker.member.domain.vo.MemberRole.USER.name))
+            .claim(SCOPE_CLAIM, SCOPE_SIGNUP)
+            .issuedAt(Date.from(now))
+            .expiration(Date.from(expiry))
+            .signWith(secretKey, Jwts.SIG.HS256)
+            .compact()
+    }
+
+    /**
      * 리프레시 토큰(JWT)을 생성합니다.
      *
      * 리프레시 토큰은 재발급 용도로만 사용되며,
@@ -164,5 +193,15 @@ class JwtProvider(
          * 리프레시 토큰이 저장되는 쿠키 이름입니다.
          */
         const val REFRESH_TOKEN_COOKIE_NAME = "REFRESH_TOKEN"
+
+        /**
+         * 토큰 스코프 클레임 이름입니다.
+         */
+        const val SCOPE_CLAIM = "scope"
+
+        /**
+         * 가입 동의 대기 상태 토큰의 스코프 값입니다.
+         */
+        const val SCOPE_SIGNUP = "SIGNUP"
     }
 }

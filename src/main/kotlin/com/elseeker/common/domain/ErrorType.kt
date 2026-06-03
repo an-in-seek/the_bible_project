@@ -23,6 +23,7 @@ enum class ErrorType(
     NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다.", LogLevel.WARN),
     SESSION_ALREADY_ENDED(HttpStatus.BAD_REQUEST, "이미 종료된 세션입니다.", LogLevel.WARN),
     INVALID_SESSION_KEY(HttpStatus.BAD_REQUEST, "잘못된 세션 키입니다.", LogLevel.WARN),
+    CONSENT_REQUIRED(HttpStatus.BAD_REQUEST, "필수 약관에 모두 동의해야 합니다.", LogLevel.WARN),
 
     // 404
     TRANSLATION_NOT_FOUND(HttpStatus.NOT_FOUND, "번역본을 찾을 수 없습니다.", LogLevel.WARN),

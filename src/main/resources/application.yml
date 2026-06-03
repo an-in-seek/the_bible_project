@@ -66,6 +66,7 @@ el-seeker:
     secret: ${JWT_SECRET_BASE64}
     access-token-ttl: 1h
     refresh-token-ttl: 14d
+    signup-token-ttl: 30m
   api:
     base-url: ${EL_SEEKER_API_BASE_URL:http://localhost:8080}
     api-key: ${EL_SEEKER_API_KEY:TEST_API_KEY}

@@ -15,6 +15,10 @@ ALTER TABLE member
 
 COMMENT ON COLUMN member.status IS '계정 상태: PENDING_CONSENT(동의 대기) / ACTIVE(정상)';
 
+-- 동의 미완 회원 정리 배치(findByStatusAndCreatedAtBefore) 지원 인덱스
+CREATE INDEX IF NOT EXISTS idx_member_status_created_at
+    ON member (status, created_at);
+
 -- 백필 검증 후, 신규 행이 애플리케이션 값으로만 설정되도록 DEFAULT 제거(선택).
 -- ALTER TABLE member ALTER COLUMN status DROP DEFAULT;
 

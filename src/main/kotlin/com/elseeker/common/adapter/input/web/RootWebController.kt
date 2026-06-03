@@ -14,6 +14,11 @@ class RootWebController {
         return "index" // 루트 URL에서 index.html 로 연결
     }
 
+    @GetMapping("/web/about")
+    fun showAbout(): String {
+        return "about" // ElSeeker 서비스 소개 페이지
+    }
+
     @GetMapping("/web/search")
     fun showUnifiedSearch(
         @RequestParam(required = false) q: String?,

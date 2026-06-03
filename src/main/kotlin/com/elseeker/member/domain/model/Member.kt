@@ -4,6 +4,7 @@ import com.elseeker.common.domain.BaseTimeEntity
 import com.elseeker.common.domain.ErrorType
 import com.elseeker.common.domain.throwError
 import com.elseeker.member.domain.vo.MemberRole
+import com.elseeker.member.domain.vo.MemberStatus
 import com.elseeker.member.domain.vo.OAuthProvider
 import jakarta.persistence.*
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -21,6 +22,10 @@ import java.util.*
             name = "uk_member_email",
             columnNames = ["email"]
         )
+    ],
+    indexes = [
+        // 동의 미완 회원 정리 배치(findByStatusAndCreatedAtBefore) 지원
+        Index(name = "idx_member_status_created_at", columnList = "status, created_at")
     ]
 )
 @EntityListeners(AuditingEntityListener::class)
@@ -43,6 +48,10 @@ class Member(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 32)
     var memberRole: MemberRole = MemberRole.USER,
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 32)
+    var status: MemberStatus = MemberStatus.ACTIVE,
 ) : BaseTimeEntity(
     id = id,
 ) {
@@ -56,14 +65,24 @@ class Member(
             email: String,
             nickname: String,
             profileImageUrl: String?,
-            memberRole: MemberRole
+            memberRole: MemberRole,
+            status: MemberStatus = MemberStatus.ACTIVE
         ) = Member(
             email = email,
             nickname = nickname,
             profileImageUrl = profileImageUrl,
-            memberRole = memberRole
+            memberRole = memberRole,
+            status = status
         )
     }
+
+    /** 동의 완료 처리 — 가입 대기(PENDING_CONSENT) 상태를 정상(ACTIVE)으로 전환. */
+    fun activate() {
+        this.status = MemberStatus.ACTIVE
+    }
+
+    val isPendingConsent: Boolean
+        get() = this.status == MemberStatus.PENDING_CONSENT
 
     fun update(
         nickname: String,

@@ -10,6 +10,7 @@ data class AuthMeResponse(
     val nickname: String,
     val profileImageUrl: String?,
     val provider: String,
+    val status: String,
     val createdAt: Instant,
 ) {
     companion object {
@@ -25,6 +26,7 @@ data class AuthMeResponse(
                 nickname = member.nickname,
                 profileImageUrl = member.profileImageUrl,
                 provider = providerRegistrationId,
+                status = member.status.name,
                 createdAt = member.createdAt,
             )
         }

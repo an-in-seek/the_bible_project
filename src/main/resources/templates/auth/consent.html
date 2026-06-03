@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head th:replace="~{fragments/head :: head('약관 동의 | ElSeeker', true, '/css/login.css?v=5.0,/css/auth/consent.css?v=1.0')}"
+      th:with="robotsContent='noindex'"></head>
+<body class="login-page consent-page">
+<main class="content-wrapper login-shell">
+    <div class="consent-wrap">
+        <div class="login-card consent-card">
+            <img class="consent-logo" src="/images/elseeker_login.png" alt="ElSeeker">
+            <h1 class="consent-title">약관에 동의하고<br>시작하세요</h1>
+            <p class="consent-subtitle">서비스 이용을 위해 아래 필수 항목에 동의해 주세요.</p>
+
+            <div id="consentError" class="alert alert-warning d-none" role="alert"></div>
+
+            <div class="consent-list">
+                <label class="consent-item consent-agree-all">
+                    <input type="checkbox" id="agreeAll">
+                    <span class="consent-label">전체 동의</span>
+                </label>
+
+                <div class="consent-divider"></div>
+
+                <div class="consent-item">
+                    <label class="consent-check">
+                        <input type="checkbox" class="consent-required" id="ageOver14">
+                        <span class="consent-label"><b>[필수]</b> 만 14세 이상입니다</span>
+                    </label>
+                </div>
+
+                <div class="consent-item">
+                    <label class="consent-check">
+                        <input type="checkbox" class="consent-required" id="agreeTerms">
+                        <span class="consent-label"><b>[필수]</b> 서비스 이용약관 동의</span>
+                    </label>
+                    <a class="consent-view" href="/web/legal/terms" target="_blank" rel="noopener noreferrer">보기</a>
+                </div>
+
+                <div class="consent-item">
+                    <label class="consent-check">
+                        <input type="checkbox" class="consent-required" id="agreePrivacy">
+                        <span class="consent-label"><b>[필수]</b> 개인정보 수집 및 이용 동의</span>
+                    </label>
+                    <a class="consent-view" href="/web/legal/privacy" target="_blank" rel="noopener noreferrer">보기</a>
+                </div>
+            </div>
+
+            <button type="button" id="consentSubmit" class="consent-submit" disabled>동의하고 시작하기</button>
+            <button type="button" id="consentCancel" class="consent-cancel">취소하고 돌아가기</button>
+        </div>
+    </div>
+</main>
+<script type="module" src="/js/auth/consent.js?v=1.0"></script>
+</body>
+</html>

@@ -11,6 +11,7 @@ import com.elseeker.member.adapter.output.jpa.MemberOAuthAccountRepository
 import com.elseeker.member.adapter.output.jpa.MemberRepository
 import com.elseeker.member.domain.model.Member
 import com.elseeker.member.domain.vo.MemberRole
+import com.elseeker.member.domain.vo.MemberStatus
 import com.elseeker.member.domain.vo.OAuthProvider
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.security.core.authority.SimpleGrantedAuthority
@@ -106,7 +107,8 @@ class CustomOAuth2UserService(
                         email = userInfo.email,
                         nickname = "",
                         memberRole = MemberRole.USER,
-                        profileImageUrl = null
+                        profileImageUrl = null,
+                        status = MemberStatus.PENDING_CONSENT
                     ).also { newMember ->
                         newMember.addOAuthAccount(
                             provider = userInfo.provider,
@@ -127,6 +129,7 @@ class CustomOAuth2UserService(
         enrichedAttributes["memberUid"] = savedMemberUid.toString()
         enrichedAttributes["role"] = savedMember.memberRole.name
         enrichedAttributes["email"] = savedMember.email // Provider 구조에 따라 최상위에 없을 수 있으므로 명시적 추가
+        enrichedAttributes["status"] = savedMember.status.name // 가입 동의 대기(PENDING_CONSENT) 분기용
 
         // 5. authorities
         val authorities = listOf(SimpleGrantedAuthority("ROLE_${savedMember.memberRole.name}"))

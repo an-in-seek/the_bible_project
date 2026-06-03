@@ -11,6 +11,7 @@ import com.elseeker.member.adapter.output.jpa.MemberOAuthAccountRepository
 import com.elseeker.member.adapter.output.jpa.MemberRepository
 import com.elseeker.member.domain.model.Member
 import com.elseeker.member.domain.vo.MemberRole
+import com.elseeker.member.domain.vo.MemberStatus
 import com.elseeker.member.domain.vo.OAuthProvider
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -46,6 +47,16 @@ class SocialLoginService(
 
         val member = findOrCreateMember(userInfo)
 
+        // 신규 가입자(동의 대기) — 동의 전용 단기 토큰만 발급하고 consentRequired 반환
+        if (member.isPendingConsent) {
+            val signupToken = jwtProvider.generateSignupToken(member.uid.toString(), member.email)
+            return SocialLoginResponse(
+                consentRequired = true,
+                accessToken = signupToken,
+                refreshToken = null,
+            )
+        }
+
         val accessToken = jwtProvider.generateAccessToken(
             member.uid.toString(),
             member.email,
@@ -54,6 +65,7 @@ class SocialLoginService(
         val refreshToken = jwtProvider.generateRefreshToken(member.uid.toString())
 
         return SocialLoginResponse(
+            consentRequired = false,
             accessToken = accessToken,
             refreshToken = refreshToken,
         )
@@ -95,12 +107,13 @@ class SocialLoginService(
             return existingMember
         }
 
-        // 3. 신규 회원 생성
+        // 3. 신규 회원 생성 (동의 대기 상태)
         val newMember = Member.create(
             email = userInfo.email,
             nickname = "",
             memberRole = MemberRole.USER,
             profileImageUrl = null,
+            status = MemberStatus.PENDING_CONSENT,
         ).also {
             it.addOAuthAccount(
                 provider = userInfo.provider,
