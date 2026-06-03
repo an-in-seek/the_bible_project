@@ -162,7 +162,9 @@
 .prs-card.is-spotlight-target {
     position: relative;
     z-index: 999;
-    overflow: visible;
+    /* overflow:hidden 유지 — 썸네일 사각 모서리를 둥근 카드에 맞춰 클리핑.
+       흰 링(box-shadow)은 요소 자신의 overflow에 클리핑되지 않으므로 정상 표시됨. */
+    overflow: hidden;
     background: #fff;
     border-radius: 0.75rem;
     box-shadow: 0 0 0 4px rgba(255, 255, 255, 1),
