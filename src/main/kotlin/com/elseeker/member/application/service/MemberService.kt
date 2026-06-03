@@ -25,11 +25,10 @@ import com.elseeker.game.adapter.output.jpa.WordPuzzleHintUsageRepository
 import com.elseeker.member.adapter.output.jpa.MemberOAuthAccountRepository
 import com.elseeker.member.adapter.output.jpa.MemberRepository
 import com.elseeker.member.adapter.output.jpa.MemberWithdrawalAuditRepository
-import com.elseeker.member.application.component.WithdrawnSentinelProvider
 import com.elseeker.member.domain.model.Member
 import com.elseeker.member.domain.model.MemberWithdrawalAudit
+import com.elseeker.member.domain.vo.MemberRole
 import com.elseeker.member.domain.vo.OAuthProvider
-import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -58,7 +57,6 @@ class MemberService(
     private val memberDictionaryProgressRepository: MemberDictionaryProgressRepository,
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
-    private val withdrawnSentinelProvider: WithdrawnSentinelProvider,
     private val memberWithdrawalAuditRepository: MemberWithdrawalAuditRepository,
 ) {
 
@@ -129,17 +127,21 @@ class MemberService(
     /**
      * 익명 센티넬 계정을 조회하거나, 없으면 생성한다. 로그인 불가(OAuth 미연결) 시스템 계정.
      *
-     * 동시 최초 탈퇴 레이스에서 이메일 unique 제약 위반이 발생할 수 있다. 생성은 별도 트랜잭션
-     * ([WithdrawnSentinelProvider.create], REQUIRES_NEW)으로 격리되므로 위반이 나도 호출자(탈퇴)
-     * 트랜잭션은 오염되지 않으며, 위반 시 먼저 커밋된 행을 재조회하여 반환한다.
+     * 탈퇴 트랜잭션과 같은 커넥션/트랜잭션에서 처리한다. (로컬 풀 크기가 1이라 별도 트랜잭션을
+     * 여는 REQUIRES_NEW 방식은 커넥션 고갈로 데드락을 유발하므로 사용하지 않는다.)
+     * 동시 최초 탈퇴가 겹치면 이메일 unique 제약 위반으로 한쪽 탈퇴가 실패해 재시도가 필요할 수 있으나,
+     * 센티넬은 최초 1회만 생성되므로 그 외에는 항상 조회로 처리된다.
      */
     private fun getOrCreateWithdrawnSentinel(): Member =
         memberRepository.findByEmail(WITHDRAWN_SENTINEL_EMAIL)
-            ?: try {
-                withdrawnSentinelProvider.create(WITHDRAWN_SENTINEL_EMAIL, WITHDRAWN_SENTINEL_NICKNAME)
-            } catch (e: DataIntegrityViolationException) {
-                memberRepository.findByEmail(WITHDRAWN_SENTINEL_EMAIL) ?: throw e
-            }
+            ?: memberRepository.save(
+                Member.create(
+                    email = WITHDRAWN_SENTINEL_EMAIL,
+                    nickname = WITHDRAWN_SENTINEL_NICKNAME,
+                    profileImageUrl = null,
+                    memberRole = MemberRole.USER,
+                )
+            )
 
     @Transactional
     fun updateMember(memberUid: UUID, principalUid: UUID, nickname: String, profileImageUrl: String?): Member {
