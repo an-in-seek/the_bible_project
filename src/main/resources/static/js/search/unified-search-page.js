@@ -17,6 +17,67 @@ import {parseBibleReference} from "./bible-reference-parser.js";
 const KEYWORD_MAX_LENGTH = 100;
 const DEBOUNCE_MS = 200;
 
+/** 구절 스니펫 윈도우: 매칭 앞 문맥(글자 수)과 최대 노출 길이. */
+const SNIPPET_LEAD = 16;
+const SNIPPET_MAX = 110;
+
+/**
+ * 키워드 대소문자 무시 매칭 후, 일치 구간을 [{text, mark}] 세그먼트로 분할.
+ * 정규식 대신 indexOf 루프로 처리해 특수문자/한글 안전.
+ */
+function splitByKeyword(text, keyword) {
+    if (!keyword) return [{text, mark: false}];
+    const segments = [];
+    const lower = text.toLowerCase();
+    const kw = keyword.toLowerCase();
+    let i = 0;
+    while (i < text.length) {
+        const idx = lower.indexOf(kw, i);
+        if (idx === -1) {
+            segments.push({text: text.slice(i), mark: false});
+            break;
+        }
+        if (idx > i) segments.push({text: text.slice(i, idx), mark: false});
+        segments.push({text: text.slice(idx, idx + kw.length), mark: true});
+        i = idx + kw.length;
+    }
+    return segments;
+}
+
+/** parent 요소에 text 를 추가하되 keyword 매칭 구간을 <mark> 로 감싼다 (XSS 안전: 텍스트 노드 사용). */
+function appendHighlighted(parent, text, keyword) {
+    for (const seg of splitByKeyword(text, keyword)) {
+        if (seg.mark) {
+            const m = document.createElement("mark");
+            m.className = "us-result-mark";
+            m.textContent = seg.text;
+            parent.appendChild(m);
+        } else {
+            parent.appendChild(document.createTextNode(seg.text));
+        }
+    }
+}
+
+/**
+ * 긴 구절 본문에서 첫 매칭 주변을 잘라 스니펫 생성.
+ * 매칭이 본문 뒤쪽에 있어도 하이라이트가 항상 보이도록 윈도우 이동.
+ * 반환: {prefix, body, suffix} — prefix/suffix 는 생략 부호(…), body 는 하이라이트 대상.
+ */
+function buildVerseSnippet(text, keyword) {
+    if (!keyword) {
+        const body = text.slice(0, SNIPPET_MAX);
+        return {prefix: "", body, suffix: text.length > SNIPPET_MAX ? "…" : ""};
+    }
+    const idx = text.toLowerCase().indexOf(keyword.toLowerCase());
+    const start = idx > SNIPPET_LEAD ? idx - SNIPPET_LEAD : 0;
+    const body = text.slice(start, start + SNIPPET_MAX);
+    return {
+        prefix: start > 0 ? "…" : "",
+        body,
+        suffix: start + SNIPPET_MAX < text.length ? "…" : "",
+    };
+}
+
 class UnifiedSearchPage {
     constructor() {
         this.input = document.getElementById("usPageInput");
@@ -324,7 +385,7 @@ class UnifiedSearchPage {
         icon.setAttribute("aria-hidden", "true");
         const text = document.createElement("span");
         text.className = "us-result-text";
-        text.textContent = b.label;
+        appendHighlighted(text, b.label, this.state.keyword);
         a.appendChild(icon);
         a.appendChild(text);
         li.appendChild(a);
@@ -335,16 +396,25 @@ class UnifiedSearchPage {
         const li = document.createElement("li");
         li.className = "us-result-item";
         const a = document.createElement("a");
-        a.className = "us-result-link";
+        a.className = "us-result-link us-result-link-block";
         a.href = v.url;
+
+        const head = document.createElement("div");
+        head.className = "us-result-head";
         const ref = document.createElement("span");
         ref.className = "us-result-ref";
         ref.textContent = `${v.bookName} ${v.chapterNumber}:${v.verseNumber}`;
-        const text = document.createElement("span");
-        text.className = "us-result-text";
-        text.textContent = ` ${v.text}`;
-        a.appendChild(ref);
-        a.appendChild(text);
+        head.appendChild(ref);
+        a.appendChild(head);
+
+        const snippet = document.createElement("p");
+        snippet.className = "us-result-snippet";
+        const {prefix, body, suffix} = buildVerseSnippet(v.text, this.state.keyword);
+        if (prefix) snippet.appendChild(document.createTextNode(prefix));
+        appendHighlighted(snippet, body, this.state.keyword);
+        if (suffix) snippet.appendChild(document.createTextNode(suffix));
+        a.appendChild(snippet);
+
         li.appendChild(a);
         return li;
     }
@@ -359,15 +429,15 @@ class UnifiedSearchPage {
         const head = document.createElement("div");
         head.className = "us-result-head";
         const term = document.createElement("span");
-        term.className = "us-result-ref";
-        term.textContent = d.term;
+        term.className = "us-result-ref us-result-term";
+        appendHighlighted(term, d.term, this.state.keyword);
         head.appendChild(term);
         a.appendChild(head);
 
         if (d.description) {
             const desc = document.createElement("p");
             desc.className = "us-result-desc";
-            desc.textContent = d.description;
+            appendHighlighted(desc, d.description, this.state.keyword);
             a.appendChild(desc);
         }
 
@@ -393,7 +463,7 @@ class UnifiedSearchPage {
 
         const text = document.createElement("span");
         text.className = "us-result-text";
-        text.textContent = m.title;
+        appendHighlighted(text, m.title, this.state.keyword);
         head.appendChild(text);
 
         if (m.requiresAuth) {
@@ -408,7 +478,7 @@ class UnifiedSearchPage {
         if (m.description) {
             const desc = document.createElement("p");
             desc.className = "us-result-desc";
-            desc.textContent = m.description;
+            appendHighlighted(desc, m.description, this.state.keyword);
             a.appendChild(desc);
         }
 
