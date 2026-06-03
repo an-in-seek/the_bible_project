@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head th:replace="~{fragments/head :: head('서비스 소개 | ElSeeker', true, '/css/about.css?v=1.4')}"
+      th:with="pageDescription='성경 읽기·학습·게임·커뮤니티를 한 곳에서 제공하는 온라인 성경 플랫폼 ElSeeker를 소개합니다.',
+               pageKeywords='ElSeeker,엘시커,서비스 소개,온라인 성경,성경 플랫폼,성경 읽기,성경 학습,성경 퀴즈'"></head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container content-wrapper my-4 about-page">
+
+    <!-- Hero -->
+    <section class="about-hero">
+        <div class="about-hero-glow" aria-hidden="true"></div>
+        <span class="about-hero-eyebrow">온라인 성경 플랫폼</span>
+        <img class="about-hero-logo" src="/images/elseeker.png" th:src="@{/images/elseeker.png}" alt="ElSeeker 로고">
+        <h1 class="about-hero-title">말씀과 함께하는 여정,<br class="about-br-mobile"> ElSeeker</h1>
+        <p class="about-hero-sub">
+            성경을 읽고, 배우고, 즐기고, 나누는 모든 과정을 한 곳에서.<br>
+            ElSeeker는 누구나 쉽게 하나님의 말씀에 다가갈 수 있도록 돕는 온라인 성경 플랫폼입니다.
+        </p>
+
+        <ul class="about-stats" aria-label="ElSeeker 주요 지표">
+            <li class="about-stat">
+                <span class="about-stat-num">66<span class="about-stat-unit">권</span></span>
+                <span class="about-stat-label">개역한글 전권 본문</span>
+            </li>
+            <li class="about-stat">
+                <span class="about-stat-num">4<span class="about-stat-unit">개</span></span>
+                <span class="about-stat-label">핵심 콘텐츠 영역</span>
+            </li>
+            <li class="about-stat">
+                <span class="about-stat-num">5<span class="about-stat-unit">종</span></span>
+                <span class="about-stat-label">성경 게임 모드</span>
+            </li>
+        </ul>
+    </section>
+
+    <!-- 미션 -->
+    <section class="about-section">
+        <div class="about-mission">
+            <span class="about-mission-mark" aria-hidden="true">“</span>
+            <p class="about-mission-lead">
+                <strong>ElSeeker</strong>는 <strong>‘하나님을 구하는 사람, 하나님을 찾는 사람’</strong>이라는
+                의미를 담은 이름입니다. 저희는 성경을 통해 하나님을 알아가는 여정을 돕는 플랫폼을 지향합니다.
+            </p>
+            <p class="about-mission-text">
+                다양한 번역본의 성경 본문을 읽고 검색하며, 사전·역사 등 깊이 있는 학습 콘텐츠로 말씀을 이해하고,
+                퀴즈·타자·낱말 퍼즐 같은 게임으로 즐겁게 익히며, 커뮤니티에서 함께 질문하고 나눌 수 있습니다.
+                찾는 이의 걸음마다 말씀이 더 가까워지도록 ElSeeker가 함께합니다.
+            </p>
+        </div>
+    </section>
+
+    <!-- 핵심 기능 -->
+    <section class="about-section">
+        <header class="about-section-head">
+            <span class="about-eyebrow">무엇을 할 수 있나요</span>
+            <h2 class="about-section-title">ElSeeker가 제공하는 것</h2>
+            <p class="about-section-desc">읽기부터 나눔까지, 신앙의 여정에 필요한 네 가지 공간을 준비했습니다.</p>
+        </header>
+
+        <div class="row g-3 g-md-4">
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a class="about-feature-link" href="/web/bible/translation" th:href="@{/web/bible/translation}">
+                    <article class="about-feature-card about-feature--bible">
+                        <span class="about-feature-icon" aria-hidden="true">📖</span>
+                        <h3 class="about-feature-title">성경</h3>
+                        <p class="about-feature-desc">개역한글 등 여러 번역본의 본문을 빠르게 읽고, 구절을 손쉽게 검색합니다.</p>
+                        <span class="about-feature-go">성경 읽기 <span aria-hidden="true">&rsaquo;</span></span>
+                    </article>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a class="about-feature-link" href="/web/study" th:href="@{/web/study}">
+                    <article class="about-feature-card about-feature--study">
+                        <span class="about-feature-icon" aria-hidden="true">📚</span>
+                        <h3 class="about-feature-title">학습</h3>
+                        <p class="about-feature-desc">성경 사전, 인물·역사, 창조 이야기 등 말씀을 깊이 이해하는 학습 콘텐츠를 제공합니다.</p>
+                        <span class="about-feature-go">학습 둘러보기 <span aria-hidden="true">&rsaquo;</span></span>
+                    </article>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a class="about-feature-link" href="/web/game" th:href="@{/web/game}">
+                    <article class="about-feature-card about-feature--game">
+                        <span class="about-feature-icon" aria-hidden="true">🎮</span>
+                        <h3 class="about-feature-title">게임</h3>
+                        <p class="about-feature-desc">성경 퀴즈, 타이핑, 낱말 퍼즐 등 즐기면서 자연스럽게 말씀을 익힙니다.</p>
+                        <span class="about-feature-go">게임 즐기기 <span aria-hidden="true">&rsaquo;</span></span>
+                    </article>
+                </a>
+            </div>
+            <div class="col-12 col-sm-6 col-lg-3">
+                <a class="about-feature-link" href="/web/community" th:href="@{/web/community}">
+                    <article class="about-feature-card about-feature--community">
+                        <span class="about-feature-icon" aria-hidden="true">💬</span>
+                        <h3 class="about-feature-title">커뮤니티</h3>
+                        <p class="about-feature-desc">질문과 묵상을 나누며 함께 신앙의 여정을 걸어가는 공간입니다.</p>
+                        <span class="about-feature-go">커뮤니티 가기 <span aria-hidden="true">&rsaquo;</span></span>
+                    </article>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 통합 검색 강조 -->
+    <section class="about-section">
+        <div class="about-highlight">
+            <span class="about-highlight-icon" aria-hidden="true">🔍</span>
+            <div class="about-highlight-body">
+                <span class="about-eyebrow about-eyebrow--invert">통합 검색</span>
+                <h2 class="about-highlight-title">찾고 싶은 모든 것을, 한 번에</h2>
+                <p class="about-highlight-text">
+                    성경 구절, 책, 사전, 메뉴까지 — 통합 검색으로 원하는 말씀과 정보를 한 곳에서 찾아보세요.
+                </p>
+            </div>
+            <a href="/web/search" th:href="@{/web/search}" class="about-highlight-cta">
+                통합 검색 바로가기 <span aria-hidden="true">&rsaquo;</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- 시작하기 -->
+    <section class="about-section">
+        <div class="about-cta">
+            <h2 class="about-cta-title">지금, 말씀과 함께 시작하세요</h2>
+            <p class="about-cta-text">로그인 없이도 성경 본문과 학습 콘텐츠를 바로 만나보실 수 있습니다.</p>
+            <div class="about-cta-actions">
+                <a href="/web/bible/translation" th:href="@{/web/bible/translation}" class="about-btn about-btn--primary">
+                    성경 읽기 시작 <span aria-hidden="true">&rsaquo;</span>
+                </a>
+                <a href="/web/study" th:href="@{/web/study}" class="about-btn about-btn--ghost">
+                    학습 콘텐츠 보기
+                </a>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
