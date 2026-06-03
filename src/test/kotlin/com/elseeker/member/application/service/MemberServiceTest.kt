@@ -1,7 +1,11 @@
 package com.elseeker.member.application.service
 
+import com.elseeker.bible.adapter.output.jpa.BibleBookMemoRepository
+import com.elseeker.bible.adapter.output.jpa.BibleChapterMemoRepository
+import com.elseeker.bible.adapter.output.jpa.BibleHighlightRepository
 import com.elseeker.bible.adapter.output.jpa.BibleMemoRepository
-import com.elseeker.bible.domain.model.BibleVerseMemo
+import com.elseeker.bible.adapter.output.jpa.BibleReadingProgressRepository
+import com.elseeker.bible.domain.model.*
 import com.elseeker.common.IntegrationTest
 import com.elseeker.community.adapter.output.jpa.CommentRepository
 import com.elseeker.community.adapter.output.jpa.PostRepository
@@ -58,14 +62,35 @@ class MemberServiceTest @Autowired constructor(
     private val wordPuzzleHintUsageRepository: WordPuzzleHintUsageRepository,
     private val dictionaryRepository: DictionaryRepository,
     private val bibleMemoRepository: BibleMemoRepository,
+    private val bibleChapterMemoRepository: BibleChapterMemoRepository,
+    private val bibleBookMemoRepository: BibleBookMemoRepository,
+    private val bibleHighlightRepository: BibleHighlightRepository,
+    private val bibleReadingProgressRepository: BibleReadingProgressRepository,
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
 ) : IntegrationTest() {
 
     @Test
-    fun `회원 삭제 시 성경 메모가 함께 삭제되고 FK 위반 없이 완료된다`() {
-        // given — bible_verse_memo 는 member 를 단방향 @ManyToOne 으로만 참조한다.
+    fun `회원 삭제 시 성경 개인 데이터가 함께 삭제되고 FK 위반 없이 완료된다`() {
+        // given — 성경 개인 데이터는 member 를 단방향 @ManyToOne 으로만 참조한다.
         // 파생 삭제(deleteAllByMember)는 flush 가 지연되어 member 삭제와 순서가 꼬일 수 있으므로 이를 검증한다.
+        bibleBookMemoRepository.save(
+            BibleBookMemo(
+                member = member,
+                translationId = 1L,
+                bookOrder = 1,
+                content = "테스트 책 메모"
+            )
+        )
+        bibleChapterMemoRepository.save(
+            BibleChapterMemo(
+                member = member,
+                translationId = 1L,
+                bookOrder = 1,
+                chapterNumber = 1,
+                content = "테스트 장 메모"
+            )
+        )
         bibleMemoRepository.save(
             BibleVerseMemo(
                 member = member,
@@ -76,13 +101,39 @@ class MemberServiceTest @Autowired constructor(
                 content = "테스트 메모"
             )
         )
+        bibleHighlightRepository.save(
+            BibleVerseHighlight(
+                member = member,
+                translationId = 1L,
+                bookOrder = 1,
+                chapterNumber = 1,
+                verseNumber = 2,
+                color = BibleHighlightColor.YELLOW
+            )
+        )
+        bibleReadingProgressRepository.save(
+            BibleReadingProgress(
+                member = member,
+                translationId = 1L,
+                bookOrder = 1,
+                chapterNumber = 1,
+            )
+        )
+        bibleBookMemoRepository.count() shouldBe 1
+        bibleChapterMemoRepository.count() shouldBe 1
         bibleMemoRepository.count() shouldBe 1
+        bibleHighlightRepository.count() shouldBe 1
+        bibleReadingProgressRepository.count() shouldBe 1
 
         // when
         memberService.deleteMember(member.uid, member.uid)
 
         // then
+        bibleBookMemoRepository.count() shouldBe 0
+        bibleChapterMemoRepository.count() shouldBe 0
         bibleMemoRepository.count() shouldBe 0
+        bibleHighlightRepository.count() shouldBe 0
+        bibleReadingProgressRepository.count() shouldBe 0
         memberRepository.findByUid(member.uid) shouldBe null
     }
 

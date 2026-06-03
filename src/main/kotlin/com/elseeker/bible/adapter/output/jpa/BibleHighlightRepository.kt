@@ -3,6 +3,8 @@ package com.elseeker.bible.adapter.output.jpa
 import com.elseeker.bible.domain.model.BibleVerseHighlight
 import com.elseeker.member.domain.model.Member
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
 import java.util.UUID
 
 interface BibleHighlightRepository : JpaRepository<BibleVerseHighlight, Long> {
@@ -38,4 +40,8 @@ interface BibleHighlightRepository : JpaRepository<BibleVerseHighlight, Long> {
     ): BibleVerseHighlight?
 
     fun deleteAllByMember(member: Member)
+
+    @Modifying(flushAutomatically = true)
+    @Query("DELETE FROM BibleVerseHighlight highlight WHERE highlight.member.id = ?1")
+    fun deleteAllByMemberId(memberId: Long)
 }

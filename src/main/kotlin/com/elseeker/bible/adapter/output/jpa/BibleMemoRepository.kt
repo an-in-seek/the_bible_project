@@ -5,6 +5,7 @@ import com.elseeker.member.domain.model.Member
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Slice
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.stereotype.Repository
 import java.time.Instant
@@ -14,6 +15,10 @@ import java.util.*
 interface BibleMemoRepository : JpaRepository<BibleVerseMemo, Long> {
 
     fun deleteAllByMember(member: Member)
+
+    @Modifying(flushAutomatically = true)
+    @Query("DELETE FROM BibleVerseMemo memo WHERE memo.member.id = ?1")
+    fun deleteAllByMemberId(memberId: Long)
 
     fun countByMemberUid(memberUid: UUID): Long
 
