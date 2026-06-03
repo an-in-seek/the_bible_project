@@ -16,6 +16,8 @@ import {parseBibleReference} from "./bible-reference-parser.js";
 
 const DEBOUNCE_MS = 200;
 const KEYWORD_MAX_LENGTH = 100;
+// 모바일(Bootstrap md 미만): 자동완성 드롭다운 UX 저하 → 비활성화하고 결과 페이지 이동만 유지
+const MOBILE_QUERY = "(max-width: 767.98px)";
 
 class UnifiedSearch {
     constructor(rootEl) {
@@ -34,8 +36,15 @@ class UnifiedSearch {
         this.items = []; // 평탄화된 결과 항목 (키보드 네비용)
         this.activeIndex = -1;
         this._debounceTimer = null;
+        // 라이브 판정 — 화면 회전/리사이즈에도 즉시 반영
+        this.mobileMql = window.matchMedia(MOBILE_QUERY);
 
         this.bind();
+    }
+
+    /** 모바일 여부 (자동완성 비활성 기준). */
+    isMobile() {
+        return this.mobileMql.matches;
     }
 
     bind() {
@@ -49,6 +58,7 @@ class UnifiedSearch {
         });
         this.input.addEventListener("keydown", e => this.onKeydown(e));
         this.input.addEventListener("focus", () => {
+            if (this.isMobile()) return;
             if (this.state.keyword.length > 0 && this.items.length > 0) {
                 this.openDropdown();
             }
@@ -58,6 +68,16 @@ class UnifiedSearch {
 
         document.addEventListener("click", e => {
             if (!this.root.contains(e.target)) {
+                this.closeDropdown();
+            }
+        });
+
+        // 데스크톱 → 모바일 전환 시 열려있던 자동완성 즉시 정리
+        this.mobileMql.addEventListener("change", e => {
+            if (e.matches) {
+                clearTimeout(this._debounceTimer);
+                this.items = [];
+                this.activeIndex = -1;
                 this.closeDropdown();
             }
         });
@@ -73,6 +93,15 @@ class UnifiedSearch {
         kw = kw.trim();
         this.state.keyword = kw;
         this.clearBtn.classList.toggle("d-none", kw.length === 0);
+
+        // 모바일: 자동완성 미사용 — 소스 호출/드롭다운 없이 Enter 시 결과 페이지로 이동
+        if (this.isMobile()) {
+            clearTimeout(this._debounceTimer);
+            this.items = [];
+            this.activeIndex = -1;
+            this.closeDropdown();
+            return;
+        }
 
         if (kw.length === 0) {
             this.items = [];
@@ -133,6 +162,7 @@ class UnifiedSearch {
     }
 
     async run() {
+        if (this.isMobile()) return; // 모바일: 자동완성 소스 호출 차단
         if (this.state.abortController) {
             try {
                 this.state.abortController.abort();
