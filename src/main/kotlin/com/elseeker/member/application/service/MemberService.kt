@@ -7,18 +7,27 @@ import com.elseeker.bible.adapter.output.jpa.BibleMemoRepository
 import com.elseeker.bible.adapter.output.jpa.BibleReadingProgressRepository
 import com.elseeker.common.domain.ErrorType
 import com.elseeker.common.domain.throwError
+import com.elseeker.community.adapter.output.jpa.CommentRepository
+import com.elseeker.community.adapter.output.jpa.PostRepository
 import com.elseeker.game.adapter.output.jpa.BibleTypingSessionRepository
+import com.elseeker.game.adapter.output.jpa.GameRankingRepository
+import com.elseeker.game.adapter.output.jpa.MemberDictionaryProgressRepository
+import com.elseeker.game.adapter.output.jpa.OxMemberQuestionAttemptRepository
+import com.elseeker.game.adapter.output.jpa.OxMemberStageAttemptRepository
 import com.elseeker.game.adapter.output.jpa.QuizProgressRepository
 import com.elseeker.game.adapter.output.jpa.QuizQuestionAttemptRepository
 import com.elseeker.game.adapter.output.jpa.QuizQuestionStatRepository
 import com.elseeker.game.adapter.output.jpa.QuizStageAttemptRepository
 import com.elseeker.game.adapter.output.jpa.QuizStageProgressRepository
+import com.elseeker.game.adapter.output.jpa.WordPuzzleAttemptRepository
 import com.elseeker.member.adapter.output.jpa.MemberOAuthAccountRepository
 import com.elseeker.member.adapter.output.jpa.MemberRepository
 import com.elseeker.member.adapter.output.jpa.MemberWithdrawalAuditRepository
+import com.elseeker.member.application.component.WithdrawnSentinelProvider
 import com.elseeker.member.domain.model.Member
 import com.elseeker.member.domain.model.MemberWithdrawalAudit
 import com.elseeker.member.domain.vo.OAuthProvider
+import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -38,8 +47,22 @@ class MemberService(
     private val quizQuestionAttemptRepository: QuizQuestionAttemptRepository,
     private val quizStageProgressRepository: QuizStageProgressRepository,
     private val quizQuestionStatRepository: QuizQuestionStatRepository,
+    private val oxMemberQuestionAttemptRepository: OxMemberQuestionAttemptRepository,
+    private val oxMemberStageAttemptRepository: OxMemberStageAttemptRepository,
+    private val wordPuzzleAttemptRepository: WordPuzzleAttemptRepository,
+    private val gameRankingRepository: GameRankingRepository,
+    private val memberDictionaryProgressRepository: MemberDictionaryProgressRepository,
+    private val postRepository: PostRepository,
+    private val commentRepository: CommentRepository,
+    private val withdrawnSentinelProvider: WithdrawnSentinelProvider,
     private val memberWithdrawalAuditRepository: MemberWithdrawalAuditRepository,
 ) {
+
+    companion object {
+        /** 탈퇴 회원이 작성한 커뮤니티 글의 작성자를 넘겨받는 익명 센티넬 계정. */
+        private const val WITHDRAWN_SENTINEL_EMAIL = "withdrawn-user@system.elseeker"
+        private const val WITHDRAWN_SENTINEL_NICKNAME = "탈퇴한 사용자"
+    }
 
     // TODO: 회원(Member) 가입
 
@@ -61,6 +84,7 @@ class MemberService(
             throwError(ErrorType.MEMBER_ACCESS_DENIED, memberUid)
         }
         val member = getMember(memberUid)
+        val memberId = member.id ?: throwError(ErrorType.MEMBER_ID_MISSING, memberUid)
         memberWithdrawalAuditRepository.save(
             MemberWithdrawalAudit(
                 memberUid = member.uid,
@@ -79,9 +103,36 @@ class MemberService(
         quizQuestionStatRepository.deleteAllByMember(member)
         quizStageProgressRepository.deleteAllByMember(member)
         quizProgressRepository.deleteAllByMember(member)
+        // OX 퀴즈: 자식(문제 시도) → 부모(스테이지 시도) 순서로 삭제 (벌크 삭제는 cascade 미적용)
+        oxMemberQuestionAttemptRepository.deleteAllByMemberId(memberId)
+        oxMemberStageAttemptRepository.deleteAllByMemberId(memberId)
+        wordPuzzleAttemptRepository.deleteAllByMemberId(memberId)
+        gameRankingRepository.deleteAllByMemberId(memberId)
+        memberDictionaryProgressRepository.deleteAllByMemberId(memberId)
+        // 커뮤니티(게시글/댓글)는 정책상 보존 — 작성자만 익명 센티넬 계정으로 재지정하여 회원 삭제를 허용
+        val sentinel = getOrCreateWithdrawnSentinel()
+        if (sentinel.id != memberId) {
+            postRepository.reassignAuthor(memberId, sentinel)
+            commentRepository.reassignAuthor(memberId, sentinel)
+        }
         memberOAuthAccountRepository.deleteAllByMember(member)
         memberRepository.delete(member)
     }
+
+    /**
+     * 익명 센티넬 계정을 조회하거나, 없으면 생성한다. 로그인 불가(OAuth 미연결) 시스템 계정.
+     *
+     * 동시 최초 탈퇴 레이스에서 이메일 unique 제약 위반이 발생할 수 있다. 생성은 별도 트랜잭션
+     * ([WithdrawnSentinelProvider.create], REQUIRES_NEW)으로 격리되므로 위반이 나도 호출자(탈퇴)
+     * 트랜잭션은 오염되지 않으며, 위반 시 먼저 커밋된 행을 재조회하여 반환한다.
+     */
+    private fun getOrCreateWithdrawnSentinel(): Member =
+        memberRepository.findByEmail(WITHDRAWN_SENTINEL_EMAIL)
+            ?: try {
+                withdrawnSentinelProvider.create(WITHDRAWN_SENTINEL_EMAIL, WITHDRAWN_SENTINEL_NICKNAME)
+            } catch (e: DataIntegrityViolationException) {
+                memberRepository.findByEmail(WITHDRAWN_SENTINEL_EMAIL) ?: throw e
+            }
 
     @Transactional
     fun updateMember(memberUid: UUID, principalUid: UUID, nickname: String, profileImageUrl: String?): Member {

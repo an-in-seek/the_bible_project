@@ -2,6 +2,7 @@ package com.elseeker.community.adapter.output.jpa
 
 import com.elseeker.community.domain.model.Post
 import com.elseeker.community.domain.vo.PostStatus
+import com.elseeker.member.domain.model.Member
 import com.linecorp.kotlinjdsl.support.spring.data.jpa.repository.KotlinJdslJpqlExecutor
 import jakarta.persistence.LockModeType
 import org.springframework.data.jpa.repository.JpaRepository
@@ -66,4 +67,9 @@ interface PostRepository : JpaRepository<Post, Long>, KotlinJdslJpqlExecutor {
         """
     )
     fun updateScore(@Param("postId") postId: Long): Int
+
+    /** 회원 탈퇴 시 작성자를 익명(탈퇴 회원) 센티넬 계정으로 재지정 — 게시글은 보존. */
+    @Modifying
+    @Query("UPDATE Post p SET p.author = :sentinel WHERE p.author.id = :memberId")
+    fun reassignAuthor(@Param("memberId") memberId: Long, @Param("sentinel") sentinel: Member): Int
 }

@@ -1,12 +1,24 @@
 package com.elseeker.member.application.service
 
 import com.elseeker.common.IntegrationTest
+import com.elseeker.community.adapter.output.jpa.CommentRepository
+import com.elseeker.community.adapter.output.jpa.PostRepository
+import com.elseeker.community.domain.model.Comment
+import com.elseeker.community.domain.model.Post
+import com.elseeker.community.domain.vo.PostType
+import com.elseeker.game.adapter.output.jpa.OxMemberQuestionAttemptRepository
+import com.elseeker.game.adapter.output.jpa.OxMemberStageAttemptRepository
+import com.elseeker.game.adapter.output.jpa.OxQuestionRepository
+import com.elseeker.game.adapter.output.jpa.OxStageRepository
 import com.elseeker.game.adapter.output.jpa.QuizQuestionAttemptRepository
 import com.elseeker.game.adapter.output.jpa.QuizQuestionRepository
 import com.elseeker.game.adapter.output.jpa.QuizStageAttemptRepository
 import com.elseeker.game.adapter.output.jpa.QuizStageRepository
 import com.elseeker.game.domain.model.*
 import com.elseeker.game.domain.vo.QuizStageAttemptMode
+import com.elseeker.member.adapter.output.jpa.MemberRepository
+import com.neovisionaries.i18n.CountryCode
+import com.neovisionaries.i18n.LanguageCode
 import io.kotest.matchers.collections.shouldBeEmpty
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.DisplayName
@@ -17,10 +29,17 @@ import java.time.Instant
 @DisplayName("MemberService 통합테스트")
 class MemberServiceTest @Autowired constructor(
     private val memberService: MemberService,
+    private val memberRepository: MemberRepository,
     private val quizStageRepository: QuizStageRepository,
     private val quizQuestionRepository: QuizQuestionRepository,
     private val quizStageAttemptRepository: QuizStageAttemptRepository,
-    private val quizQuestionAttemptRepository: QuizQuestionAttemptRepository
+    private val quizQuestionAttemptRepository: QuizQuestionAttemptRepository,
+    private val oxStageRepository: OxStageRepository,
+    private val oxQuestionRepository: OxQuestionRepository,
+    private val oxMemberStageAttemptRepository: OxMemberStageAttemptRepository,
+    private val oxMemberQuestionAttemptRepository: OxMemberQuestionAttemptRepository,
+    private val postRepository: PostRepository,
+    private val commentRepository: CommentRepository,
 ) : IntegrationTest() {
 
     @Test
@@ -73,5 +92,78 @@ class MemberServiceTest @Autowired constructor(
         // then
         quizQuestionAttemptRepository.count() shouldBe 0
         quizStageAttemptRepository.findAllByMember(member).shouldBeEmpty()
+    }
+
+    @Test
+    fun `회원 삭제 시 OX 퀴즈 스테이지 시도와 문항 시도가 함께 삭제된다`() {
+        // given
+        val stage = oxStageRepository.save(
+            OxStage(stageNumber = 1, bookName = "창세기")
+        )
+        val question = oxQuestionRepository.save(
+            OxQuestion(
+                stage = stage,
+                questionText = "OX 테스트 문제",
+                correctAnswer = true,
+                orderIndex = 1
+            )
+        )
+        val stageAttempt = oxMemberStageAttemptRepository.save(
+            OxMemberStageAttempt(
+                member = member,
+                stageNumber = stage.stageNumber,
+                startedAt = Instant.now()
+            )
+        )
+        oxMemberQuestionAttemptRepository.save(
+            OxMemberQuestionAttempt(
+                stageAttempt = stageAttempt,
+                question = question,
+                selectedAnswer = true,
+                isCorrect = true,
+                answeredAt = Instant.now()
+            )
+        )
+
+        oxMemberStageAttemptRepository.count() shouldBe 1
+        oxMemberQuestionAttemptRepository.count() shouldBe 1
+
+        // when
+        memberService.deleteMember(member.uid, member.uid)
+
+        // then — 자식(문항 시도)이 먼저, 부모(스테이지 시도)가 그 다음 삭제되어야 한다
+        oxMemberQuestionAttemptRepository.count() shouldBe 0
+        oxMemberStageAttemptRepository.count() shouldBe 0
+    }
+
+    @Test
+    fun `회원 삭제 시 작성한 게시글과 댓글은 보존되고 작성자가 익명 센티넬로 재지정된다`() {
+        // given
+        val post = postRepository.save(
+            Post.create(
+                author = member,
+                postType = PostType.FREE,
+                language = LanguageCode.ko,
+                country = CountryCode.KR,
+                title = "테스트 제목",
+                content = "테스트 내용"
+            )
+        )
+        val comment = commentRepository.save(
+            Comment.create(
+                post = post,
+                author = member,
+                content = "테스트 댓글"
+            )
+        )
+
+        // when
+        memberService.deleteMember(member.uid, member.uid)
+
+        // then — 회원은 삭제되지만 게시글/댓글은 보존되고 작성자만 센티넬로 재지정된다
+        memberRepository.findByUid(member.uid) shouldBe null
+        postRepository.findByIdWithAuthor(post.id!!)?.author?.nickname shouldBe "탈퇴한 사용자"
+        commentRepository.findByIdWithAuthor(comment.id!!)?.author?.nickname shouldBe "탈퇴한 사용자"
+        memberRepository.findByEmail("withdrawn-user@system.elseeker")?.nickname shouldBe "탈퇴한 사용자"
     }
 }

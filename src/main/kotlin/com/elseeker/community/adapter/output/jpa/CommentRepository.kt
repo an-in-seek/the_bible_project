@@ -2,12 +2,14 @@ package com.elseeker.community.adapter.output.jpa
 
 import com.elseeker.community.domain.model.Comment
 import com.elseeker.community.domain.vo.CommentStatus
+import com.elseeker.member.domain.model.Member
 import jakarta.persistence.LockModeType
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Slice
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Lock
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
@@ -89,5 +91,10 @@ interface CommentRepository : JpaRepository<Comment, Long> {
         @Param("author") author: String?,
         pageable: Pageable,
     ): Page<Comment>
+
+    /** 회원 탈퇴 시 작성자를 익명(탈퇴 회원) 센티넬 계정으로 재지정 — 댓글은 보존. */
+    @Modifying
+    @Query("UPDATE Comment c SET c.author = :sentinel WHERE c.author.id = :memberId")
+    fun reassignAuthor(@Param("memberId") memberId: Long, @Param("sentinel") sentinel: Member): Int
 
 }
