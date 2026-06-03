@@ -2,6 +2,7 @@ package com.elseeker.game.adapter.output.jpa
 
 import com.elseeker.game.domain.model.WordPuzzleAttemptCell
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
@@ -29,4 +30,15 @@ interface WordPuzzleAttemptCellRepository : JpaRepository<WordPuzzleAttemptCell,
         @Param("row") row: Int,
         @Param("col") col: Int
     ): WordPuzzleAttemptCell?
+
+    @Modifying
+    @Query(
+        """
+        DELETE FROM WordPuzzleAttemptCell c
+        WHERE c.attempt IN (
+            SELECT a FROM WordPuzzleAttempt a WHERE a.member.id = :memberId
+        )
+        """
+    )
+    fun deleteAllByMemberId(@Param("memberId") memberId: Long)
 }

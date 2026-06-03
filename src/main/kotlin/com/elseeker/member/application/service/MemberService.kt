@@ -19,7 +19,9 @@ import com.elseeker.game.adapter.output.jpa.QuizQuestionAttemptRepository
 import com.elseeker.game.adapter.output.jpa.QuizQuestionStatRepository
 import com.elseeker.game.adapter.output.jpa.QuizStageAttemptRepository
 import com.elseeker.game.adapter.output.jpa.QuizStageProgressRepository
+import com.elseeker.game.adapter.output.jpa.WordPuzzleAttemptCellRepository
 import com.elseeker.game.adapter.output.jpa.WordPuzzleAttemptRepository
+import com.elseeker.game.adapter.output.jpa.WordPuzzleHintUsageRepository
 import com.elseeker.member.adapter.output.jpa.MemberOAuthAccountRepository
 import com.elseeker.member.adapter.output.jpa.MemberRepository
 import com.elseeker.member.adapter.output.jpa.MemberWithdrawalAuditRepository
@@ -49,6 +51,8 @@ class MemberService(
     private val quizQuestionStatRepository: QuizQuestionStatRepository,
     private val oxMemberQuestionAttemptRepository: OxMemberQuestionAttemptRepository,
     private val oxMemberStageAttemptRepository: OxMemberStageAttemptRepository,
+    private val wordPuzzleAttemptCellRepository: WordPuzzleAttemptCellRepository,
+    private val wordPuzzleHintUsageRepository: WordPuzzleHintUsageRepository,
     private val wordPuzzleAttemptRepository: WordPuzzleAttemptRepository,
     private val gameRankingRepository: GameRankingRepository,
     private val memberDictionaryProgressRepository: MemberDictionaryProgressRepository,
@@ -106,6 +110,9 @@ class MemberService(
         // OX 퀴즈: 자식(문제 시도) → 부모(스테이지 시도) 순서로 삭제 (벌크 삭제는 cascade 미적용)
         oxMemberQuestionAttemptRepository.deleteAllByMemberId(memberId)
         oxMemberStageAttemptRepository.deleteAllByMemberId(memberId)
+        // 워드 퍼즐: 자식(셀/힌트 사용) → 부모(시도) 순서로 삭제 (벌크 삭제는 cascade 미적용)
+        wordPuzzleAttemptCellRepository.deleteAllByMemberId(memberId)
+        wordPuzzleHintUsageRepository.deleteAllByMemberId(memberId)
         wordPuzzleAttemptRepository.deleteAllByMemberId(memberId)
         gameRankingRepository.deleteAllByMemberId(memberId)
         memberDictionaryProgressRepository.deleteAllByMemberId(memberId)

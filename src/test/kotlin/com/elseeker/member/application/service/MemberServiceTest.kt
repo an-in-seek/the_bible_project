@@ -14,9 +14,20 @@ import com.elseeker.game.adapter.output.jpa.QuizQuestionAttemptRepository
 import com.elseeker.game.adapter.output.jpa.QuizQuestionRepository
 import com.elseeker.game.adapter.output.jpa.QuizStageAttemptRepository
 import com.elseeker.game.adapter.output.jpa.QuizStageRepository
+import com.elseeker.game.adapter.output.jpa.WordPuzzleAttemptCellRepository
+import com.elseeker.game.adapter.output.jpa.WordPuzzleAttemptRepository
+import com.elseeker.game.adapter.output.jpa.WordPuzzleEntryRepository
+import com.elseeker.game.adapter.output.jpa.WordPuzzleHintUsageRepository
+import com.elseeker.game.adapter.output.jpa.WordPuzzleRepository
 import com.elseeker.game.domain.model.*
+import com.elseeker.game.domain.vo.ClueType
+import com.elseeker.game.domain.vo.HintType
+import com.elseeker.game.domain.vo.PuzzleDirection
+import com.elseeker.game.domain.vo.QuizDifficulty
 import com.elseeker.game.domain.vo.QuizStageAttemptMode
 import com.elseeker.member.adapter.output.jpa.MemberRepository
+import com.elseeker.study.adapter.output.jpa.DictionaryRepository
+import com.elseeker.study.domain.model.Dictionary
 import com.neovisionaries.i18n.CountryCode
 import com.neovisionaries.i18n.LanguageCode
 import io.kotest.matchers.collections.shouldBeEmpty
@@ -38,6 +49,12 @@ class MemberServiceTest @Autowired constructor(
     private val oxQuestionRepository: OxQuestionRepository,
     private val oxMemberStageAttemptRepository: OxMemberStageAttemptRepository,
     private val oxMemberQuestionAttemptRepository: OxMemberQuestionAttemptRepository,
+    private val wordPuzzleRepository: WordPuzzleRepository,
+    private val wordPuzzleEntryRepository: WordPuzzleEntryRepository,
+    private val wordPuzzleAttemptRepository: WordPuzzleAttemptRepository,
+    private val wordPuzzleAttemptCellRepository: WordPuzzleAttemptCellRepository,
+    private val wordPuzzleHintUsageRepository: WordPuzzleHintUsageRepository,
+    private val dictionaryRepository: DictionaryRepository,
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
 ) : IntegrationTest() {
@@ -134,6 +151,52 @@ class MemberServiceTest @Autowired constructor(
         // then — 자식(문항 시도)이 먼저, 부모(스테이지 시도)가 그 다음 삭제되어야 한다
         oxMemberQuestionAttemptRepository.count() shouldBe 0
         oxMemberStageAttemptRepository.count() shouldBe 0
+    }
+
+    @Test
+    fun `회원 삭제 시 워드 퍼즐 시도와 자식(셀-힌트 사용)이 함께 삭제된다`() {
+        // given
+        val puzzle = wordPuzzleRepository.save(
+            WordPuzzle(
+                title = "테스트 퍼즐",
+                themeCode = "test",
+                difficultyCode = QuizDifficulty.NORMAL,
+                boardWidth = 5,
+                boardHeight = 5
+            )
+        )
+        val dictionary = dictionaryRepository.save(Dictionary(term = "테스트 용어"))
+        val entry = wordPuzzleEntryRepository.save(
+            WordPuzzleEntry(
+                wordPuzzle = puzzle,
+                dictionary = dictionary,
+                answerText = "답",
+                directionCode = PuzzleDirection.ACROSS,
+                startRow = 0,
+                startCol = 0,
+                clueNumber = 1,
+                clueTypeCode = ClueType.DEFINITION,
+                clueText = "단서"
+            )
+        )
+        val attempt = WordPuzzleAttempt(member = member, wordPuzzle = puzzle)
+        attempt.cells.add(WordPuzzleAttemptCell(attempt = attempt, rowIndex = 0, colIndex = 0))
+        attempt.hintUsages.add(
+            WordPuzzleHintUsage(attempt = attempt, entry = entry, hintTypeCode = HintType.REVEAL_LETTER)
+        )
+        wordPuzzleAttemptRepository.save(attempt) // cascade로 셀/힌트 사용 저장
+
+        wordPuzzleAttemptRepository.count() shouldBe 1
+        wordPuzzleAttemptCellRepository.count() shouldBe 1
+        wordPuzzleHintUsageRepository.count() shouldBe 1
+
+        // when
+        memberService.deleteMember(member.uid, member.uid)
+
+        // then — 자식(셀/힌트 사용)이 먼저, 부모(시도)가 그 다음 삭제되어야 한다
+        wordPuzzleAttemptCellRepository.count() shouldBe 0
+        wordPuzzleHintUsageRepository.count() shouldBe 0
+        wordPuzzleAttemptRepository.count() shouldBe 0
     }
 
     @Test
