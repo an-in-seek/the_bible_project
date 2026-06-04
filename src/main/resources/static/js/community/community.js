@@ -30,6 +30,26 @@ const TYPE_LABELS = {
 
 const DEFAULT_EMPTY_MESSAGE = "아직 등록된 글이 없습니다<br>첫 번째 글을 작성해보세요!";
 
+/** 뒤로가기/새로고침 복귀 시 활성 탭·더보기 깊이·스크롤 위치 복원을 위한 sessionStorage 키. */
+const RESTORE_KEY = "communityListRestore";
+
+function readRestoreState() {
+    try {
+        const raw = sessionStorage.getItem(RESTORE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function writeRestoreState(state) {
+    try {
+        sessionStorage.setItem(RESTORE_KEY, JSON.stringify(state));
+    } catch (_) {
+        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
+    }
+}
+
 const App = {
     state: {
         activeCategory: "all",
@@ -38,6 +58,9 @@ const App = {
         isLoading: false,
         abortController: null,
         observer: null,
+        // 복원 대상: 더보기로 펼쳤던 페이지 깊이와 스크롤 위치(초기 로드 시 1회 소비).
+        pendingRestorePage: 0,
+        pendingRestoreScroll: null,
     },
 
     init() {
@@ -51,8 +74,27 @@ const App = {
         App.loadTopPosts();
         App.loadNoticePosts();
 
+        // 결과 클릭 등으로 페이지를 떠날 때(또는 bfcache 진입 시) 복원 상태를 저장.
+        window.addEventListener("pagehide", () => App.saveRestoreState());
+
         const initialCategory = App.getInitialCategory();
-        App.selectCategory(initialCategory);
+
+        // 뒤로가기/새로고침으로 동일 탭에 복귀한 경우, 더보기 깊이·스크롤을 복원한다.
+        const saved = readRestoreState();
+        if (saved && saved.tab === initialCategory) {
+            App.state.pendingRestorePage = Number(saved.page) || 0;
+            App.state.pendingRestoreScroll = Number.isFinite(saved.scrollY) ? saved.scrollY : null;
+        }
+
+        App.selectCategory(initialCategory, { isInitial: true });
+    },
+
+    saveRestoreState() {
+        writeRestoreState({
+            tab: App.state.activeCategory,
+            page: App.state.page,
+            scrollY: window.scrollY || window.pageYOffset || 0,
+        });
     },
 
     setPageTitle() {
@@ -166,8 +208,14 @@ const App = {
         return activeTab?.dataset.category || "all";
     },
 
-    selectCategory(category) {
+    selectCategory(category, opts = {}) {
         if (!category) return;
+
+        // 사용자가 직접 탭을 전환하면 복원 의도를 폐기한다(오늘처럼 page 0부터 새로 로드).
+        if (!opts.isInitial) {
+            App.state.pendingRestorePage = 0;
+            App.state.pendingRestoreScroll = null;
+        }
 
         App.state.activeCategory = category;
         App.updateTabState(category);
@@ -182,7 +230,45 @@ const App = {
             return;
         }
 
+        if (opts.isInitial && App.state.pendingRestorePage > 0) {
+            App.restoreFeedDepth(category);
+            return;
+        }
+
         App.loadPosts(category, { append: false });
+
+        // 깊이는 없고 스크롤만 복원할 경우(첫 페이지 복귀): 단일 로드 후 스크롤 복원.
+        if (opts.isInitial && App.state.pendingRestoreScroll != null) {
+            App.consumeRestoreScroll();
+        }
+    },
+
+    /**
+     * 더보기로 펼쳤던 페이지(0..pendingRestorePage)를 기존 loadPosts append 경로로 순차 재로드한 뒤
+     * 스크롤 위치를 복원한다. 기존 page/hasNext 증가 의미를 그대로 사용해 다음 "더보기"가 이어지도록 한다.
+     */
+    async restoreFeedDepth(category) {
+        const targetPage = App.state.pendingRestorePage;
+        App.state.pendingRestorePage = 0;
+
+        // 첫 페이지(append=false)로 피드를 초기화하며 로드.
+        await App.loadPosts(category, { append: false });
+
+        // 이후 페이지를 append=true 로 순차 로드. state.page 는 다음에 가져올 페이지 번호이므로,
+        // state.page 가 targetPage 에 도달하면(= 저장 시점과 동일한 깊이) 멈춰 다음 "더보기"가 이어지게 한다.
+        while (App.state.hasNext && App.state.page < targetPage) {
+            await App.loadPosts(category, { append: true });
+        }
+
+        App.consumeRestoreScroll();
+    },
+
+    /** 저장해 둔 스크롤 위치를 렌더 후 1회 복원. */
+    consumeRestoreScroll() {
+        if (App.state.pendingRestoreScroll == null) return;
+        const y = App.state.pendingRestoreScroll;
+        App.state.pendingRestoreScroll = null;
+        requestAnimationFrame(() => window.scrollTo(0, y));
     },
 
     resetPagination() {

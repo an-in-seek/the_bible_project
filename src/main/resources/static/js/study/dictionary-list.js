@@ -1,5 +1,25 @@
 import {initPopularSearchDialog} from "/js/popular-search.js?v=1.3";
 
+/** 뒤로가기/새로고침 복귀 시 더보기 깊이·스크롤 위치 복원을 위한 sessionStorage 키. */
+const RESTORE_KEY = "dictionaryListRestore";
+
+function readRestoreState() {
+    try {
+        const raw = sessionStorage.getItem(RESTORE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function writeRestoreState(state) {
+    try {
+        sessionStorage.setItem(RESTORE_KEY, JSON.stringify(state));
+    } catch (_) {
+        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
+    }
+}
+
 const API_CONFIG = {
     BASE_URL: "/api/v1/study/dictionaries",
     RANKING_URL: "/api/v1/study/dictionaries/search-keywords/ranking"
@@ -93,6 +113,9 @@ const App = {
         totalCount: null,
         from: null
     },
+    // 복귀 시 1회 소비: 더보기로 펼쳤던 마지막 페이지 인덱스와 스크롤 위치.
+    _pendingRestorePage: 0,
+    _pendingRestoreScroll: null,
 
     init: () => {
         App.elements = DomHelper.getElements();
@@ -112,6 +135,14 @@ const App = {
         if (App.elements.keywordInput) {
             App.elements.keywordInput.value = initialKeyword;
         }
+
+        // 뒤로가기/새로고침으로 동일 검색어에 복귀한 경우, 더보기 깊이·스크롤을 복원한다.
+        const saved = readRestoreState();
+        if (saved && saved.keyword === App.normalizeKeyword(initialKeyword)) {
+            App._pendingRestorePage = Number(saved.currentPage) || 0;
+            App._pendingRestoreScroll = Number.isFinite(saved.scrollY) ? saved.scrollY : null;
+        }
+
         App.startSearch(initialKeyword);
     },
 
@@ -170,6 +201,9 @@ const App = {
         }
 
         window.addEventListener("scroll", App.maybeLoadNextPage, {passive: true});
+
+        // 결과 클릭 등으로 페이지를 떠날 때(또는 bfcache 진입 시) 복원 상태를 저장.
+        window.addEventListener("pagehide", () => App.saveRestoreState());
     },
 
     renderKeywordRanking: data => {
@@ -498,6 +532,17 @@ const App = {
         }
     },
 
+    saveRestoreState: () => {
+        if (!App.state.activeKeyword && App.state.currentPage === 0) {
+            return;
+        }
+        writeRestoreState({
+            keyword: App.state.activeKeyword,
+            currentPage: App.state.currentPage,
+            scrollY: window.scrollY || window.pageYOffset || 0,
+        });
+    },
+
     normalizeKeyword: keyword => (keyword ?? "").trim(),
 
     clearResults: () => {
@@ -519,7 +564,39 @@ const App = {
         App.updateUrl();
         App.setLoadingState("목록을 불러오는 중입니다.");
         await App.fetchDictionaryPage(0);
-        App.maybeLoadNextPage();
+
+        // 복귀 복원: 저장된 페이지 깊이까지 순차적으로 추가 페이지를 가져온다.
+        const restorePage = App._pendingRestorePage;
+        App._pendingRestorePage = 0;
+        if (restorePage > 0 && App.state.hasNext) {
+            for (let p = 1; p <= restorePage; p++) {
+                if (!App.state.hasNext) break;
+                try {
+                    const data = await ApiService.fetchDictionaryPage({
+                        keyword: App.state.activeKeyword,
+                        page: p,
+                        size: CONFIG.PAGE_SIZE
+                    });
+                    const items = Array.isArray(data.content) ? data.content : [];
+                    App.appendResults(items);
+                    const sliceHasNext = data.hasNext === true;
+                    const pageHasNext = typeof data.last === "boolean" ? !data.last : false;
+                    App.state.hasNext = sliceHasNext || pageHasNext || items.length === CONFIG.PAGE_SIZE;
+                    App.state.currentPage = p;
+                } catch (_) {
+                    break;
+                }
+            }
+        }
+
+        // 복귀 시 저장해 둔 스크롤 위치를 렌더 후 1회 복원.
+        if (App._pendingRestoreScroll != null) {
+            const y = App._pendingRestoreScroll;
+            App._pendingRestoreScroll = null;
+            requestAnimationFrame(() => window.scrollTo(0, y));
+        } else {
+            App.maybeLoadNextPage();
+        }
     }
 };
 

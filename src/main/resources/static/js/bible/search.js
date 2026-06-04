@@ -51,6 +51,26 @@ const DomHelper = {
     }
 };
 
+/** 뒤로가기/새로고침 복귀 시 더보기 깊이·스크롤 위치 복원을 위한 sessionStorage 키. */
+const RESTORE_KEY = "bibleVerseSearchRestore";
+
+function readRestoreState() {
+    try {
+        const raw = sessionStorage.getItem(RESTORE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function writeRestoreState(s) {
+    try {
+        sessionStorage.setItem(RESTORE_KEY, JSON.stringify(s));
+    } catch (_) {
+        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
+    }
+}
+
 const App = {
     elements: null,
     state: {
@@ -66,6 +86,21 @@ const App = {
         selectedBookOrder: null,
         abortController: null
     },
+    _pendingRestorePage: 0,
+    _pendingRestoreScroll: null,
+
+    saveRestoreState: () => {
+        if (!App.state.activeKeyword) {
+            return;
+        }
+        writeRestoreState({
+            keyword: App.state.activeKeyword,
+            translationId: App.state.translationId,
+            selectedBookOrder: App.state.selectedBookOrder ?? null,
+            currentPage: App.state.currentPage,
+            scrollY: window.scrollY || window.pageYOffset || 0
+        });
+    },
 
     init: async () => {
         App.elements = DomHelper.getElements();
@@ -76,6 +111,8 @@ const App = {
             App.redirectToTranslation();
             return;
         }
+
+        window.addEventListener("pagehide", App.saveRestoreState);
 
         App.initNav();
         App.loadKeywordRanking();
@@ -96,6 +133,19 @@ const App = {
             if (App.elements.keywordInput) {
                 App.elements.keywordInput.value = App.state.initialKeyword;
             }
+
+            // 뒤로가기/새로고침으로 동일 검색 조건에 복귀한 경우, 더보기 깊이·스크롤을 복원한다.
+            const saved = readRestoreState();
+            if (
+                saved &&
+                saved.keyword === App.state.initialKeyword &&
+                saved.translationId === App.state.translationId &&
+                (saved.selectedBookOrder ?? null) === (App.state.selectedBookOrder ?? null)
+            ) {
+                App._pendingRestorePage = Number(saved.currentPage) || 0;
+                App._pendingRestoreScroll = Number.isFinite(saved.scrollY) ? saved.scrollY : null;
+            }
+
             App.startSearch(App.state.initialKeyword);
         } else {
             App.updateUrl();
@@ -442,6 +492,9 @@ const App = {
         if (!normalizedKeyword) {
             App.resetToInitialView();
             App.updateUrl();
+            // 빈 검색어로 새 검색 시작 시 복원 상태 초기화
+            App._pendingRestorePage = 0;
+            App._pendingRestoreScroll = null;
             return;
         }
         App.hideEmptyState();
@@ -449,8 +502,61 @@ const App = {
         App.state.hasNext = true;
         App.state.currentPage = 0;
         App.updateUrl();
+
+        // 복원 깊이: 뒤로가기/새로고침 복귀 시 1회 소비. 일반 검색은 0이므로 루프 미진입.
+        const restorePage = App._pendingRestorePage || 0;
+        App._pendingRestorePage = 0;
+
         await App.fetchSearchPage(0);
+
+        // restorePage > 0 이면 1..restorePage 페이지를 순차 로드하여 더보기 깊이를 복원한다.
+        for (let p = 1; p <= restorePage && App.state.hasNext; p++) {
+            App.state.currentPage = p;
+            // fetchSearchPage 내부 가드(hasNext, isLoading)를 우회하기 위해 직접 fetch 수행
+            await App.fetchRestorePage(p);
+        }
+
+        // 복귀 시 저장해 둔 스크롤 위치를 결과 렌더 후 1회 복원.
+        if (App._pendingRestoreScroll != null) {
+            const y = App._pendingRestoreScroll;
+            App._pendingRestoreScroll = null;
+            requestAnimationFrame(() => window.scrollTo(0, y));
+        }
+
         App.maybeLoadNextPage();
+    },
+
+    fetchRestorePage: async page => {
+        const controller = new AbortController();
+        App.state.abortController = controller;
+        App.state.isLoading = true;
+        try {
+            let searchUrl = `${API_CONFIG.TRANSLATIONS}/${App.state.translationId}/search?keyword=${encodeURIComponent(App.state.activeKeyword)}&page=${page}&size=${CONFIG.PAGE_SIZE}`;
+            if (App.state.selectedBookOrder !== null) {
+                searchUrl += `&bookOrder=${App.state.selectedBookOrder}`;
+            }
+            const response = await fetch(searchUrl, {signal: controller.signal});
+            if (!response.ok) {
+                throw new Error("검색 실패");
+            }
+            const data = await response.json();
+            if (!data.content || data.content.length === 0) {
+                App.state.hasNext = false;
+                return;
+            }
+            App.appendResults(data.content);
+            App.state.hasNext = data.hasNext === true;
+        } catch (error) {
+            if (error.name === "AbortError") {
+                return;
+            }
+            App.state.hasNext = false;
+            console.error(error);
+        } finally {
+            if (App.state.abortController === controller) {
+                App.state.isLoading = false;
+            }
+        }
     },
 
     maybeLoadNextPage: () => {

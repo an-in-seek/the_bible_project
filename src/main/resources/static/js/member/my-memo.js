@@ -6,6 +6,26 @@ const VALID_TABS = ["book", "chapter", "verse"];
 const DEFAULT_TAB = "verse";
 const SCROLL_ROOT_MARGIN = "200px";
 
+/** 뒤로가기/새로고침 복귀 시 탭·더보기 깊이·필터·스크롤 위치 복원을 위한 sessionStorage 키. */
+const RESTORE_KEY = "myMemoRestore";
+
+const readRestoreState = () => {
+    try {
+        const raw = sessionStorage.getItem(RESTORE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+        return null;
+    }
+};
+
+const writeRestoreState = (value) => {
+    try {
+        sessionStorage.setItem(RESTORE_KEY, JSON.stringify(value));
+    } catch (_) {
+        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
+    }
+};
+
 const TAB_SPEC = {
     book: {
         listEndpoint: "/api/v1/bibles/my-book-memos",
@@ -151,6 +171,35 @@ document.addEventListener("DOMContentLoaded", () => {
         if (visible) elements.loader.removeAttribute("hidden");
         else elements.loader.setAttribute("hidden", "");
     };
+
+    // 복원 대상: 더보기로 펼쳤던 페이지 수와 스크롤 위치 (인증 후 활성 탭 첫 로드에서 1회 소비).
+    let pendingRestore = null; // {tab, page, translationFilter, bookFilter}
+    let pendingRestoreScroll = null;
+
+    const restoreMatchesCurrent = () => {
+        if (!pendingRestore || pendingRestore.tab !== state.activeTab) return false;
+        const t = cur();
+        const rt = pendingRestore.translationFilter ?? null;
+        const rb = pendingRestore.bookFilter ?? null;
+        return (t.translationFilter ?? null) === rt && (t.bookFilter ?? null) === rb;
+    };
+
+    const saveRestoreState = () => {
+        const t = cur();
+        // 인증 전이거나 아무것도 로드되지 않았으면 저장하지 않음.
+        if (t.page === 0 && !t.hasNext && elements.list && elements.list.childElementCount === 0) {
+            return;
+        }
+        writeRestoreState({
+            tab: state.activeTab,
+            page: t.page,
+            translationFilter: t.translationFilter ?? null,
+            bookFilter: t.bookFilter ?? null,
+            scrollY: window.scrollY || window.pageYOffset || 0,
+        });
+    };
+
+    window.addEventListener("pagehide", saveRestoreState);
 
     let scrollObserver = null;
     const initInfiniteScroll = () => {
@@ -311,14 +360,21 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (translations.length === 1) {
                 const [translation] = translations;
+                const savedBookFilter = t.bookFilter; // loadBooks 가 초기화하기 전 보존 (복원용)
                 elements.translationSelect.value = String(translation.translationId);
                 t.translationFilter = translation.translationId;
                 await loadBooks(tab, t.translationFilter);
+                if (elements.bookSelect && savedBookFilter != null) {
+                    elements.bookSelect.value = String(savedBookFilter);
+                    t.bookFilter = savedBookFilter;
+                }
             } else if (t.translationFilter != null) {
+                const savedBookFilter = t.bookFilter; // loadBooks 가 초기화하기 전 보존 (복원용)
                 elements.translationSelect.value = String(t.translationFilter);
                 await loadBooks(tab, t.translationFilter);
-                if (elements.bookSelect && t.bookFilter != null) {
-                    elements.bookSelect.value = String(t.bookFilter);
+                if (elements.bookSelect && savedBookFilter != null) {
+                    elements.bookSelect.value = String(savedBookFilter);
+                    t.bookFilter = savedBookFilter;
                 }
             }
         } catch {
@@ -385,6 +441,36 @@ document.addEventListener("DOMContentLoaded", () => {
             elements.skeleton?.classList.add("d-none");
             setLoaderVisible(false);
             t.loading = false;
+        }
+    };
+
+    // 인증 후 활성 탭 첫 페이지가 렌더된 뒤, 동일 식별자(탭+필터)로 복귀한 경우에만
+    // 저장된 깊이만큼 기존 더보기 경로(loadList append)를 재사용해 다시 펼치고 스크롤을 복원한다.
+    const maybeRestoreDepth = async () => {
+        if (!pendingRestore) return;
+        if (!restoreMatchesCurrent()) {
+            // 식별자 불일치: 복원하지 않고 1회 소비.
+            pendingRestore = null;
+            pendingRestoreScroll = null;
+            return;
+        }
+
+        const targetPage = Number(pendingRestore.page) || 0;
+        const restoreTab = pendingRestore.tab;
+        pendingRestore = null; // 1회 소비
+
+        const t = cur();
+        // 첫 페이지(page 0)는 이미 로드됨. 1..targetPage 를 순차 append.
+        while (t.page < targetPage && t.hasNext && state.activeTab === restoreTab) {
+            if (t.loading) return; // 진행 중인 로드가 있으면 중단 (방어)
+            t.page += 1;
+            await loadList(true);
+        }
+
+        if (pendingRestoreScroll != null) {
+            const y = pendingRestoreScroll;
+            pendingRestoreScroll = null;
+            requestAnimationFrame(() => window.scrollTo(0, y));
         }
     };
 
@@ -476,14 +562,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
     checkAuthStatus({
         onAuthenticated: async () => {
-            state.activeTab = parseTabFromUrl();
+            const urlHasTab = VALID_TABS.includes(new URLSearchParams(window.location.search).get("tab"));
+            const urlTab = parseTabFromUrl();
+
+            // 뒤로가기/새로고침 복귀 시 저장된 상태를 읽어 복원 대기열에 적재.
+            const saved = readRestoreState();
+            // URL 에 명시적 탭이 없으면 저장된 탭을 우선 사용 (명시적 URL 탭과는 싸우지 않음).
+            const activeTab = (!urlHasTab && saved && VALID_TABS.includes(saved.tab)) ? saved.tab : urlTab;
+            state.activeTab = activeTab;
             applyTabActive(state.activeTab);
+
+            if (saved && saved.tab === state.activeTab) {
+                pendingRestore = {
+                    tab: saved.tab,
+                    page: Number(saved.page) || 0,
+                    translationFilter: saved.translationFilter ?? null,
+                    bookFilter: saved.bookFilter ?? null,
+                };
+                pendingRestoreScroll = Number.isFinite(saved.scrollY) ? saved.scrollY : null;
+                // 저장된 필터를 활성 탭 상태에 선반영 → loadTranslations 가 select 값을 복원하고
+                // loadList 가 동일 스코프로 조회하도록 한다.
+                const t = cur();
+                t.translationFilter = pendingRestore.translationFilter;
+                t.bookFilter = pendingRestore.bookFilter;
+            }
 
             // 탭 배지용 카운트 프리페치 (단일 round-trip)
             prefetchCounts();
 
             await loadTranslations(state.activeTab);
             await loadList(false);
+            await maybeRestoreDepth();
             initInfiniteScroll();
         },
         onUnauthenticated: redirectToLogin,

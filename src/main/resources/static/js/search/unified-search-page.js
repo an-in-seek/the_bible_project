@@ -16,6 +16,27 @@ import {parseBibleReference} from "./bible-reference-parser.js";
 
 const KEYWORD_MAX_LENGTH = 100;
 const DEBOUNCE_MS = 200;
+const VERSE_PAGE_SIZE = 20;
+
+/** 뒤로가기/새로고침 복귀 시 더보기 깊이·스크롤 위치 복원을 위한 sessionStorage 키. */
+const RESTORE_KEY = "unifiedSearchPageState";
+
+function readRestoreState() {
+    try {
+        const raw = sessionStorage.getItem(RESTORE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function writeRestoreState(state) {
+    try {
+        sessionStorage.setItem(RESTORE_KEY, JSON.stringify(state));
+    } catch (_) {
+        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
+    }
+}
 
 /** 구절 스니펫 윈도우: 매칭 앞 문맥(글자 수)과 최대 노출 길이. */
 const SNIPPET_LEAD = 16;
@@ -99,12 +120,23 @@ class UnifiedSearchPage {
         };
 
         this._debounceTimer = null;
+        // 복원 대상: 더보기로 펼쳤던 페이지 수와 스크롤 위치(복귀 시 run()에서 1회 소비).
+        this._pendingRestorePage = 0;
+        this._pendingRestoreScroll = null;
 
         this.bind();
         this.setActiveTab(this.state.tab, {skipRender: true});
         if (this.state.keyword.length > 0) {
             this.input.value = this.state.keyword;
             this.clearBtn.classList.remove("d-none");
+
+            // 뒤로가기/새로고침으로 동일 검색어·탭에 복귀한 경우, 더보기 깊이·스크롤을 복원한다.
+            const saved = readRestoreState();
+            if (saved && saved.keyword === this.state.keyword && saved.tab === this.state.tab) {
+                this._pendingRestorePage = Number(saved.biblePage) || 0;
+                this._pendingRestoreScroll = Number.isFinite(saved.scrollY) ? saved.scrollY : null;
+            }
+
             this.run();
         } else {
             this.emptyEl.classList.remove("d-none");
@@ -128,6 +160,21 @@ class UnifiedSearchPage {
                 this.setActiveTab(tab.dataset.tab);
             });
         }
+
+        // 결과 클릭 등으로 페이지를 떠날 때(또는 bfcache 진입 시) 복원 상태를 저장.
+        window.addEventListener("pagehide", () => this.saveRestoreState());
+    }
+
+    saveRestoreState() {
+        if (this.state.keyword.length === 0) {
+            return;
+        }
+        writeRestoreState({
+            keyword: this.state.keyword,
+            tab: this.state.tab,
+            biblePage: this.state.biblePage,
+            scrollY: window.scrollY || window.pageYOffset || 0,
+        });
     }
 
     onInput() {
@@ -203,10 +250,14 @@ class UnifiedSearchPage {
 
         this.emptyEl.classList.add("d-none");
         this.loadingEl.classList.remove("d-none");
-        this.state.biblePage = 0;
+
+        // 복원 깊이: 더보기로 펼쳤던 페이지 수만큼 첫 호출에서 한 번에 가져온다(0이면 일반 첫 페이지).
+        const restorePage = this._pendingRestorePage || 0;
+        this._pendingRestorePage = 0;
+        const verseSize = (restorePage + 1) * VERSE_PAGE_SIZE;
 
         const settled = await Promise.allSettled([
-            searchBibleVerses(kw, {signal, size: 20, page: 0, track: false}),
+            searchBibleVerses(kw, {signal, size: verseSize, page: 0, track: false}),
             searchDictionary(kw, {signal, size: 20, page: 0, track: false}),
             Promise.resolve(searchBibleBooks(kw, {size: 50})),
             Promise.resolve(searchMenus(kw, {size: 50})),
@@ -219,6 +270,8 @@ class UnifiedSearchPage {
         const [versesR, dictR, booksR, menusR, parserR] = settled;
         this.state.cached.verses = versesR.status === "fulfilled" ? versesR.value.items : [];
         this.state.bibleHasNext = versesR.status === "fulfilled" ? versesR.value.hasNext : false;
+        // 첫 호출에서 (restorePage+1) 페이지 분량을 가져왔으므로, 다음 "더보기"는 restorePage+1 페이지부터.
+        this.state.biblePage = restorePage;
         this.state.cached.dicts = dictR.status === "fulfilled" ? dictR.value.items : [];
         this.state.cached.books = booksR.status === "fulfilled" ? booksR.value.items : [];
         this.state.cached.menus = menusR.status === "fulfilled" ? menusR.value.items : [];
@@ -240,6 +293,13 @@ class UnifiedSearchPage {
 
         this.loadingEl.classList.add("d-none");
         this.render();
+
+        // 복귀 시 저장해 둔 스크롤 위치를 결과 렌더 후 1회 복원.
+        if (this._pendingRestoreScroll != null) {
+            const y = this._pendingRestoreScroll;
+            this._pendingRestoreScroll = null;
+            requestAnimationFrame(() => window.scrollTo(0, y));
+        }
     }
 
     updateCounts(counts) {

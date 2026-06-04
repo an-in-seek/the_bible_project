@@ -15,6 +15,26 @@ const NOTICE_CATEGORY = "공지";
 const POPULAR_CATEGORY = "인기";
 const COMMUNITY_LIST_URL = "/web/community";
 
+/** 댓글 더보기 깊이·스크롤 위치 복원(뒤로가기/새로고침)용 sessionStorage 키. */
+const COMMENT_RESTORE_KEY = "communityDetailRestore";
+
+function readCommentRestoreState() {
+    try {
+        const raw = sessionStorage.getItem(COMMENT_RESTORE_KEY);
+        return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+        return null;
+    }
+}
+
+function writeCommentRestoreState(state) {
+    try {
+        sessionStorage.setItem(COMMENT_RESTORE_KEY, JSON.stringify(state));
+    } catch (_) {
+        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
+    }
+}
+
 const TYPE_LABELS = {
     FREE: "자유",
     QUESTION: "Q&A",
@@ -32,6 +52,8 @@ const App = {
         commentPage: 0,
         commentHasNext: true,
         commentLoading: false,
+        _pendingRestoreCount: 0,
+        _pendingRestoreScroll: null,
         commentInputAuthChecked: false,
         likeActive: false,
         likeLoading: false,
@@ -67,8 +89,9 @@ const App = {
         App.bindReportPost();
         App.bindPostOwnerActions();
         App.loadPost();
-        App.loadComments();
         App.bindCommentMore();
+        window.addEventListener("pagehide", () => App.saveCommentRestoreState());
+        App.loadCommentsInitial();
     },
 
     getPostId() {
@@ -311,6 +334,48 @@ const App = {
             App.state.commentLoading = false;
             App.toggleCommentMore(App.state.commentHasNext);
         }
+    },
+
+    async loadCommentsInitial() {
+        // 뒤로가기/새로고침으로 같은 게시글에 복귀한 경우: 댓글 더보기 깊이와 스크롤 위치를 복원.
+        const saved = readCommentRestoreState();
+        if (saved && Number(saved.postId) === Number(App.state.postId)) {
+            App.state._pendingRestoreCount = Number(saved.loadedCount) || 0;
+            App.state._pendingRestoreScroll = Number.isFinite(saved.scrollY) ? saved.scrollY : null;
+        }
+
+        await App.loadComments(); // 첫 페이지(page 0)
+
+        // 저장된 페이지 수만큼 추가 로드(끝에 도달하면 중단). 일반 진입 시 target<=1 이라 루프 미실행.
+        const target = App.state._pendingRestoreCount;
+        App.state._pendingRestoreCount = 0;
+        let loaded = 1;
+        while (loaded < target && App.state.commentHasNext) {
+            await App.loadComments();
+            loaded += 1;
+        }
+
+        // 결과 렌더 후 스크롤 1회 복원. 단, 앵커 해시(#comment-...)가 있으면 브라우저 앵커 이동에 양보.
+        if (App.state._pendingRestoreScroll != null) {
+            const y = App.state._pendingRestoreScroll;
+            App.state._pendingRestoreScroll = null;
+            if (!window.location.hash) {
+                requestAnimationFrame(() => window.scrollTo(0, y));
+            }
+        }
+    },
+
+    saveCommentRestoreState() {
+        if (!App.state.postId) return;
+        // commentPage 는 '다음에 가져올 페이지' 포인터라 끝 도달(hasNext=false) 시 증가하지 않으므로 +1 보정.
+        const loadedCount = App.state.commentHasNext
+            ? App.state.commentPage
+            : App.state.commentPage + 1;
+        writeCommentRestoreState({
+            postId: App.state.postId,
+            loadedCount,
+            scrollY: window.scrollY || window.pageYOffset || 0,
+        });
     },
 
     renderComments(comments) {
