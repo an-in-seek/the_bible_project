@@ -92,6 +92,11 @@ class CustomOAuth2UserService(
             linkTarget
         } else {
             oauthAccount?.let { account ->
+                // 로그인 상태에서 '다른 회원'에 이미 연동된 소셜 계정으로 들어오면 연동 충돌로 차단한다.
+                // (링크 플래그 인식 실패 등으로 linkTarget 이 null 이어도 여기서 막아 의도치 않은 계정 전환/탈취를 방지)
+                if (authenticatedMember != null && account.member.id != authenticatedMember.id) {
+                    throwError(ErrorType.OAUTH_ACCOUNT_ALREADY_LINKED, userInfo.provider.registrationId)
+                }
                 account.syncOAuthProfile(
                     email = userInfo.email,
                     nickname = userInfo.name,
