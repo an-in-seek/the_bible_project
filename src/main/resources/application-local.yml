@@ -12,12 +12,12 @@ spring:
     password: ${DB_PASSWORD}
     hikari:
       pool-name: ${spring.application.name}-${spring.profiles.active}-hikari-pool
-      maximum-pool-size: 1
-      minimum-idle: 1
+      maximum-pool-size: 2
+      minimum-idle: 2
       connection-timeout: 3000        # 3초
       validation-timeout: 1500        # 1.5초
       max-lifetime: 300000            # 5분 (PostgreSQL보다 짧게)
-      leak-detection-threshold: 3000  # 3초
+      leak-detection-threshold: 6000  # 권장: connection-timeout(3000)보다 크게 → 오탐 방지 (운영과 동일)
   jpa:
     hibernate:
       ddl-auto: none
