@@ -1,5 +1,6 @@
 import {fetchWithAuthRetry, formatNumberWithComma, setupDialogScrollLock} from "/js/common-util.js?v=2.3";
 import {buildLoginRedirectUrl, checkAuthStatus} from "/js/auth/auth-check.js";
+import { createRestoreStore, restoreScroll } from "/js/nav-restore.js?v=1.0";
 
 const API = {
     POSTS: "/api/v1/community/posts",
@@ -18,22 +19,7 @@ const COMMUNITY_LIST_URL = "/web/community";
 /** 댓글 더보기 깊이·스크롤 위치 복원(뒤로가기/새로고침)용 sessionStorage 키. */
 const COMMENT_RESTORE_KEY = "communityDetailRestore";
 
-function readCommentRestoreState() {
-    try {
-        const raw = sessionStorage.getItem(COMMENT_RESTORE_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch (_) {
-        return null;
-    }
-}
-
-function writeCommentRestoreState(state) {
-    try {
-        sessionStorage.setItem(COMMENT_RESTORE_KEY, JSON.stringify(state));
-    } catch (_) {
-        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
-    }
-}
+const commentRestoreStore = createRestoreStore(COMMENT_RESTORE_KEY);
 
 const TYPE_LABELS = {
     FREE: "자유",
@@ -338,7 +324,7 @@ const App = {
 
     async loadCommentsInitial() {
         // 뒤로가기/새로고침으로 같은 게시글에 복귀한 경우: 댓글 더보기 깊이와 스크롤 위치를 복원.
-        const saved = readCommentRestoreState();
+        const saved = commentRestoreStore.load();
         if (saved && Number(saved.postId) === Number(App.state.postId)) {
             App.state._pendingRestoreCount = Number(saved.loadedCount) || 0;
             App.state._pendingRestoreScroll = Number.isFinite(saved.scrollY) ? saved.scrollY : null;
@@ -360,7 +346,7 @@ const App = {
             const y = App.state._pendingRestoreScroll;
             App.state._pendingRestoreScroll = null;
             if (!window.location.hash) {
-                requestAnimationFrame(() => window.scrollTo(0, y));
+                restoreScroll(y);
             }
         }
     },
@@ -371,7 +357,7 @@ const App = {
         const loadedCount = App.state.commentHasNext
             ? App.state.commentPage
             : App.state.commentPage + 1;
-        writeCommentRestoreState({
+        commentRestoreStore.save({
             postId: App.state.postId,
             loadedCount,
             scrollY: window.scrollY || window.pageYOffset || 0,

@@ -1,5 +1,6 @@
 import {buildLoginRedirectUrl, checkAuthStatus} from "/js/auth/auth-check.js";
 import {fetchWithAuthRetry} from "/js/common-util.js?v=2.3";
+import { createRestoreStore, restoreScroll } from "/js/nav-restore.js?v=1.0";
 
 const PAGE_SIZE = 20;
 const VALID_TABS = ["book", "chapter", "verse"];
@@ -9,22 +10,7 @@ const SCROLL_ROOT_MARGIN = "200px";
 /** 뒤로가기/새로고침 복귀 시 탭·더보기 깊이·필터·스크롤 위치 복원을 위한 sessionStorage 키. */
 const RESTORE_KEY = "myMemoRestore";
 
-const readRestoreState = () => {
-    try {
-        const raw = sessionStorage.getItem(RESTORE_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch (_) {
-        return null;
-    }
-};
-
-const writeRestoreState = (value) => {
-    try {
-        sessionStorage.setItem(RESTORE_KEY, JSON.stringify(value));
-    } catch (_) {
-        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
-    }
-};
+const restoreStore = createRestoreStore(RESTORE_KEY);
 
 const TAB_SPEC = {
     book: {
@@ -190,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (t.page === 0 && !t.hasNext && elements.list && elements.list.childElementCount === 0) {
             return;
         }
-        writeRestoreState({
+        restoreStore.save({
             tab: state.activeTab,
             page: t.page,
             translationFilter: t.translationFilter ?? null,
@@ -470,7 +456,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (pendingRestoreScroll != null) {
             const y = pendingRestoreScroll;
             pendingRestoreScroll = null;
-            requestAnimationFrame(() => window.scrollTo(0, y));
+            restoreScroll(y);
         }
     };
 
@@ -566,7 +552,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const urlTab = parseTabFromUrl();
 
             // 뒤로가기/새로고침 복귀 시 저장된 상태를 읽어 복원 대기열에 적재.
-            const saved = readRestoreState();
+            const saved = restoreStore.load();
             // URL 에 명시적 탭이 없으면 저장된 탭을 우선 사용 (명시적 URL 탭과는 싸우지 않음).
             const activeTab = (!urlHasTab && saved && VALID_TABS.includes(saved.tab)) ? saved.tab : urlTab;
             state.activeTab = activeTab;

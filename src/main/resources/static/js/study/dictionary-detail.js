@@ -1,4 +1,5 @@
 import {TranslationStore} from "/js/storage-util.js?v=2.3";
+import {bindFromBackButton} from "/js/nav-restore.js?v=1.0";
 
 const UI_CLASSES = {
     HIDDEN: "d-none"
@@ -32,14 +33,9 @@ const App = {
         const {backButton} = App.elements;
         if (backButton) {
             backButton.classList.remove(UI_CLASSES.HIDDEN);
-            backButton.addEventListener("click", () => {
-                // 통합검색에서 진입한 경우(from=search) 이전 화면(검색 결과)으로 복귀
-                if (new URLSearchParams(window.location.search).get("from") === "search") {
-                    history.back();
-                    return;
-                }
-                const backLink = document.body.dataset.backLink || "/web/study";
-                window.location.href = backLink;
+            bindFromBackButton(backButton, {
+                backOn: ["search"],
+                fallback: () => { window.location.href = document.body.dataset.backLink || "/web/study"; },
             });
         }
     },

@@ -1,6 +1,7 @@
 import {BibleReaderStore, BookStore, ChapterStore, LastReadStore, TranslationStore, VerseStore} from "/js/storage-util.js?v=2.4";
 import {applyOAuthBackGuardIfNeeded, buildLoginRedirectUrl, checkAuthStatus, refreshAccessToken} from "/js/auth/auth-check.js";
 import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+import {bindFromBackButton} from "/js/nav-restore.js?v=1.0";
 
 const UI_CLASSES = {
     HIDDEN: "d-none"
@@ -243,18 +244,14 @@ function setupBackButton(button) {
         return;
     }
     button.classList.remove(UI_CLASSES.HIDDEN);
-    button.addEventListener("click", () => {
-        if (state.fromSearch || state.fromMypage || state.fromDictionary || state.fromMyMemo) {
-            history.back();
-            return;
-        }
-        if (state.fromHome) {
-            window.location.href = "/";
-            return;
-        }
-        window.location.href = state.translationId && state.bookOrder
-            ? `${ROUTES.CHAPTER_LIST}?translationId=${state.translationId}&bookOrder=${state.bookOrder}`
-            : ROUTES.TRANSLATION_LIST;
+    bindFromBackButton(button, {
+        backOn: ["search", "mypage", "dictionary", "my-memo"],
+        fallback: () => {
+            if (state.fromHome) { window.location.href = "/"; return; }
+            window.location.href = state.translationId && state.bookOrder
+                ? `${ROUTES.CHAPTER_LIST}?translationId=${state.translationId}&bookOrder=${state.bookOrder}`
+                : ROUTES.TRANSLATION_LIST;
+        },
     });
 }
 

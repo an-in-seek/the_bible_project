@@ -69,3 +69,4 @@ out/
 /src/main/resources/static/js/.omc/state/subagent-tracking.json
 /src/main/resources/.omc/state/agent-replay-b54b24dd-401c-42be-8ccb-77e841b2d3e8.jsonl
 /src/main/resources/.omc/state/subagent-tracking.json
+/src/main/resources/static/js/.omc/state/mission-state.json

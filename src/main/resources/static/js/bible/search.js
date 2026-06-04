@@ -1,6 +1,7 @@
 import {BookStore, ChapterStore, TranslationStore, VerseStore} from "/js/storage-util.js?v=2.3";
 import {formatNumberWithComma} from "/js/common-util.js?v=2.3";
 import {initPopularSearchDialog} from "/js/popular-search.js?v=1.3";
+import {createRestoreStore, restoreScroll} from "/js/nav-restore.js?v=1.0";
 
 const UI_CLASSES = {
     HIDDEN: "d-none",
@@ -53,23 +54,7 @@ const DomHelper = {
 
 /** 뒤로가기/새로고침 복귀 시 더보기 깊이·스크롤 위치 복원을 위한 sessionStorage 키. */
 const RESTORE_KEY = "bibleVerseSearchRestore";
-
-function readRestoreState() {
-    try {
-        const raw = sessionStorage.getItem(RESTORE_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch (_) {
-        return null;
-    }
-}
-
-function writeRestoreState(s) {
-    try {
-        sessionStorage.setItem(RESTORE_KEY, JSON.stringify(s));
-    } catch (_) {
-        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
-    }
-}
+const restoreStore = createRestoreStore(RESTORE_KEY);
 
 const App = {
     elements: null,
@@ -93,7 +78,7 @@ const App = {
         if (!App.state.activeKeyword) {
             return;
         }
-        writeRestoreState({
+        restoreStore.save({
             keyword: App.state.activeKeyword,
             translationId: App.state.translationId,
             selectedBookOrder: App.state.selectedBookOrder ?? null,
@@ -135,7 +120,7 @@ const App = {
             }
 
             // 뒤로가기/새로고침으로 동일 검색 조건에 복귀한 경우, 더보기 깊이·스크롤을 복원한다.
-            const saved = readRestoreState();
+            const saved = restoreStore.load();
             if (
                 saved &&
                 saved.keyword === App.state.initialKeyword &&
@@ -520,7 +505,7 @@ const App = {
         if (App._pendingRestoreScroll != null) {
             const y = App._pendingRestoreScroll;
             App._pendingRestoreScroll = null;
-            requestAnimationFrame(() => window.scrollTo(0, y));
+            restoreScroll(y);
         }
 
         App.maybeLoadNextPage();

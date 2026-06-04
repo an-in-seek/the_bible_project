@@ -1,6 +1,7 @@
 import {BookStore, ChapterStore, TranslationStore} from "/js/storage-util.js?v=2.3";
 import {checkAuthStatus} from "/js/auth/auth-check.js";
 import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+import {bindFromBackButton} from "/js/nav-restore.js?v=1.0";
 
 const UI_CLASSES = {
     HIDDEN: "d-none"
@@ -211,14 +212,13 @@ const App = {
             return;
         }
         button.classList.remove(UI_CLASSES.HIDDEN);
-        button.addEventListener("click", () => {
-            if (App.state.fromMyMemo || App.state.fromSearch) {
-                history.back();
-                return;
-            }
-            window.location.href = App.state.translationId
-                ? `${ROUTES.BOOK_LIST}?translationId=${App.state.translationId}`
-                : ROUTES.TRANSLATION_LIST;
+        bindFromBackButton(button, {
+            backOn: ["my-memo", "search"],
+            fallback: () => {
+                window.location.href = App.state.translationId
+                    ? `${ROUTES.BOOK_LIST}?translationId=${App.state.translationId}`
+                    : ROUTES.TRANSLATION_LIST;
+            },
         });
     },
 

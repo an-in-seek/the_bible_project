@@ -13,6 +13,7 @@
 
 import {searchBibleBooks, searchBibleVerses, searchDictionary, searchMenus,} from "./search-sources.js?v=1.2";
 import {parseBibleReference} from "./bible-reference-parser.js?v=1.1";
+import {createRestoreStore, restoreScroll} from "/js/nav-restore.js?v=1.0";
 
 const KEYWORD_MAX_LENGTH = 100;
 const DEBOUNCE_MS = 200;
@@ -20,23 +21,7 @@ const VERSE_PAGE_SIZE = 20;
 
 /** 뒤로가기/새로고침 복귀 시 더보기 깊이·스크롤 위치 복원을 위한 sessionStorage 키. */
 const RESTORE_KEY = "unifiedSearchPageState";
-
-function readRestoreState() {
-    try {
-        const raw = sessionStorage.getItem(RESTORE_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch (_) {
-        return null;
-    }
-}
-
-function writeRestoreState(state) {
-    try {
-        sessionStorage.setItem(RESTORE_KEY, JSON.stringify(state));
-    } catch (_) {
-        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
-    }
-}
+const restoreStore = createRestoreStore(RESTORE_KEY);
 
 /** 구절 스니펫 윈도우: 매칭 앞 문맥(글자 수)과 최대 노출 길이. */
 const SNIPPET_LEAD = 16;
@@ -131,7 +116,7 @@ class UnifiedSearchPage {
             this.clearBtn.classList.remove("d-none");
 
             // 뒤로가기/새로고침으로 동일 검색어·탭에 복귀한 경우, 더보기 깊이·스크롤을 복원한다.
-            const saved = readRestoreState();
+            const saved = restoreStore.load();
             if (saved && saved.keyword === this.state.keyword && saved.tab === this.state.tab) {
                 this._pendingRestorePage = Number(saved.biblePage) || 0;
                 this._pendingRestoreScroll = Number.isFinite(saved.scrollY) ? saved.scrollY : null;
@@ -169,7 +154,7 @@ class UnifiedSearchPage {
         if (this.state.keyword.length === 0) {
             return;
         }
-        writeRestoreState({
+        restoreStore.save({
             keyword: this.state.keyword,
             tab: this.state.tab,
             biblePage: this.state.biblePage,
@@ -298,7 +283,7 @@ class UnifiedSearchPage {
         if (this._pendingRestoreScroll != null) {
             const y = this._pendingRestoreScroll;
             this._pendingRestoreScroll = null;
-            requestAnimationFrame(() => window.scrollTo(0, y));
+            restoreScroll(y);
         }
     }
 

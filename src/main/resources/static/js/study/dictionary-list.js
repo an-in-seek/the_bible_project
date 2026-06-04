@@ -1,24 +1,9 @@
 import {initPopularSearchDialog} from "/js/popular-search.js?v=1.3";
+import {createRestoreStore, restoreScroll} from "/js/nav-restore.js?v=1.0";
 
 /** 뒤로가기/새로고침 복귀 시 더보기 깊이·스크롤 위치 복원을 위한 sessionStorage 키. */
 const RESTORE_KEY = "dictionaryListRestore";
-
-function readRestoreState() {
-    try {
-        const raw = sessionStorage.getItem(RESTORE_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch (_) {
-        return null;
-    }
-}
-
-function writeRestoreState(state) {
-    try {
-        sessionStorage.setItem(RESTORE_KEY, JSON.stringify(state));
-    } catch (_) {
-        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
-    }
-}
+const restoreStore = createRestoreStore(RESTORE_KEY);
 
 const API_CONFIG = {
     BASE_URL: "/api/v1/study/dictionaries",
@@ -137,7 +122,7 @@ const App = {
         }
 
         // 뒤로가기/새로고침으로 동일 검색어에 복귀한 경우, 더보기 깊이·스크롤을 복원한다.
-        const saved = readRestoreState();
+        const saved = restoreStore.load();
         if (saved && saved.keyword === App.normalizeKeyword(initialKeyword)) {
             App._pendingRestorePage = Number(saved.currentPage) || 0;
             App._pendingRestoreScroll = Number.isFinite(saved.scrollY) ? saved.scrollY : null;
@@ -536,7 +521,7 @@ const App = {
         if (!App.state.activeKeyword && App.state.currentPage === 0) {
             return;
         }
-        writeRestoreState({
+        restoreStore.save({
             keyword: App.state.activeKeyword,
             currentPage: App.state.currentPage,
             scrollY: window.scrollY || window.pageYOffset || 0,
@@ -593,7 +578,7 @@ const App = {
         if (App._pendingRestoreScroll != null) {
             const y = App._pendingRestoreScroll;
             App._pendingRestoreScroll = null;
-            requestAnimationFrame(() => window.scrollTo(0, y));
+            restoreScroll(y);
         } else {
             App.maybeLoadNextPage();
         }

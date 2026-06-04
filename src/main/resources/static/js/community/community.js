@@ -1,5 +1,6 @@
 import { formatNumberWithComma } from "/js/common-util.js";
 import { checkAuthStatus, buildLoginRedirectUrl } from "/js/auth/auth-check.js";
+import { createRestoreStore, restoreScroll } from "/js/nav-restore.js?v=1.0";
 
 const API = {
     POSTS: "/api/v1/community/posts",
@@ -33,22 +34,7 @@ const DEFAULT_EMPTY_MESSAGE = "아직 등록된 글이 없습니다<br>첫 번�
 /** 뒤로가기/새로고침 복귀 시 활성 탭·더보기 깊이·스크롤 위치 복원을 위한 sessionStorage 키. */
 const RESTORE_KEY = "communityListRestore";
 
-function readRestoreState() {
-    try {
-        const raw = sessionStorage.getItem(RESTORE_KEY);
-        return raw ? JSON.parse(raw) : null;
-    } catch (_) {
-        return null;
-    }
-}
-
-function writeRestoreState(state) {
-    try {
-        sessionStorage.setItem(RESTORE_KEY, JSON.stringify(state));
-    } catch (_) {
-        /* sessionStorage 비활성/용량 초과 시 복원 기능만 비활성화 */
-    }
-}
+const restoreStore = createRestoreStore(RESTORE_KEY);
 
 const App = {
     state: {
@@ -80,7 +66,7 @@ const App = {
         const initialCategory = App.getInitialCategory();
 
         // 뒤로가기/새로고침으로 동일 탭에 복귀한 경우, 더보기 깊이·스크롤을 복원한다.
-        const saved = readRestoreState();
+        const saved = restoreStore.load();
         if (saved && saved.tab === initialCategory) {
             App.state.pendingRestorePage = Number(saved.page) || 0;
             App.state.pendingRestoreScroll = Number.isFinite(saved.scrollY) ? saved.scrollY : null;
@@ -90,7 +76,7 @@ const App = {
     },
 
     saveRestoreState() {
-        writeRestoreState({
+        restoreStore.save({
             tab: App.state.activeCategory,
             page: App.state.page,
             scrollY: window.scrollY || window.pageYOffset || 0,
@@ -268,7 +254,7 @@ const App = {
         if (App.state.pendingRestoreScroll == null) return;
         const y = App.state.pendingRestoreScroll;
         App.state.pendingRestoreScroll = null;
-        requestAnimationFrame(() => window.scrollTo(0, y));
+        restoreScroll(y);
     },
 
     resetPagination() {
