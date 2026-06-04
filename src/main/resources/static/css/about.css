@@ -196,8 +196,7 @@
 /* ── 미션 ──────────────────────────────────────── */
 .about-mission {
     position: relative;
-    background: linear-gradient(180deg, var(--about-tint-soft), transparent 70%),
-    var(--color-bg-elevated);
+    background-color: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
     border-radius: var(--about-radius);
     padding: 2.75rem 2rem 2.25rem;
@@ -322,10 +321,8 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 1.1rem 1.5rem;
-    background: linear-gradient(135deg,
-    color-mix(in srgb, var(--color-accent) 14%, var(--color-bg-elevated)),
-    var(--color-bg-elevated) 70%);
-    border: 1px solid color-mix(in srgb, var(--color-accent) 24%, var(--color-border));
+    background-color: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
     border-radius: var(--about-radius);
     padding: 1.85rem 2rem;
 }
@@ -389,8 +386,7 @@
 /* ── 시작하기 CTA ──────────────────────────────── */
 .about-cta {
     text-align: center;
-    background: radial-gradient(circle at 50% 0%, var(--about-tint-strong), transparent 60%),
-    var(--color-bg-elevated);
+    background-color: var(--color-bg-elevated);
     border: 1px solid var(--color-border);
     border-radius: var(--about-radius);
     padding: 3rem 1.5rem;
