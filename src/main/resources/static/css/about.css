@@ -12,8 +12,14 @@
 
 /* ── 진입 애니메이션 ─────────────────────────────── */
 @keyframes about-fade-up {
-    from { opacity: 0; transform: translateY(16px); }
-    to   { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(16px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .about-hero,
@@ -21,10 +27,21 @@
     animation: about-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.about-section:nth-of-type(2) { animation-delay: 0.05s; }
-.about-section:nth-of-type(3) { animation-delay: 0.10s; }
-.about-section:nth-of-type(4) { animation-delay: 0.15s; }
-.about-section:nth-of-type(5) { animation-delay: 0.20s; }
+.about-section:nth-of-type(2) {
+    animation-delay: 0.05s;
+}
+
+.about-section:nth-of-type(3) {
+    animation-delay: 0.10s;
+}
+
+.about-section:nth-of-type(4) {
+    animation-delay: 0.15s;
+}
+
+.about-section:nth-of-type(5) {
+    animation-delay: 0.20s;
+}
 
 /* ── Hero ───────────────────────────────────────── */
 .about-hero {
@@ -43,11 +60,6 @@
     width: min(680px, 120%);
     aspect-ratio: 1 / 1;
     transform: translateX(-50%);
-    background: radial-gradient(
-        circle at center,
-        color-mix(in srgb, var(--color-accent) 18%, transparent) 0%,
-        transparent 62%
-    );
     pointer-events: none;
     z-index: 0;
 }
@@ -71,9 +83,9 @@
 
 .about-hero-logo {
     display: block;
-    height: 60px;
+    height: 150px;
     width: auto;
-    margin: 0 auto 1.25rem;
+    margin: 0 auto 1rem;
 }
 
 .about-hero-title {
@@ -94,7 +106,9 @@
 }
 
 /* 모바일에서만 타이틀 줄바꿈 */
-.about-br-mobile { display: none; }
+.about-br-mobile {
+    display: none;
+}
 
 /* ── Hero 지표 스트립 ────────────────────────────── */
 .about-stats {
@@ -182,9 +196,8 @@
 /* ── 미션 ──────────────────────────────────────── */
 .about-mission {
     position: relative;
-    background:
-        linear-gradient(180deg, var(--about-tint-soft), transparent 70%),
-        var(--color-bg-elevated);
+    background: linear-gradient(180deg, var(--about-tint-soft), transparent 70%),
+    var(--color-bg-elevated);
     border: 1px solid var(--color-border);
     border-radius: var(--about-radius);
     padding: 2.75rem 2rem 2.25rem;
@@ -309,10 +322,9 @@
     align-items: center;
     flex-wrap: wrap;
     gap: 1.1rem 1.5rem;
-    background:
-        linear-gradient(135deg,
-            color-mix(in srgb, var(--color-accent) 14%, var(--color-bg-elevated)),
-            var(--color-bg-elevated) 70%);
+    background: linear-gradient(135deg,
+    color-mix(in srgb, var(--color-accent) 14%, var(--color-bg-elevated)),
+    var(--color-bg-elevated) 70%);
     border: 1px solid color-mix(in srgb, var(--color-accent) 24%, var(--color-border));
     border-radius: var(--about-radius);
     padding: 1.85rem 2rem;
@@ -377,9 +389,8 @@
 /* ── 시작하기 CTA ──────────────────────────────── */
 .about-cta {
     text-align: center;
-    background:
-        radial-gradient(circle at 50% 0%, var(--about-tint-strong), transparent 60%),
-        var(--color-bg-elevated);
+    background: radial-gradient(circle at 50% 0%, var(--about-tint-strong), transparent 60%),
+    var(--color-bg-elevated);
     border: 1px solid var(--color-border);
     border-radius: var(--about-radius);
     padding: 3rem 1.5rem;
@@ -441,8 +452,13 @@
         box-shadow: 0 12px 28px var(--color-shadow);
     }
 
-    .about-feature-link:hover .about-feature-card::before { opacity: 1; }
-    .about-feature-link:hover .about-feature-go span { transform: translateX(3px); }
+    .about-feature-link:hover .about-feature-card::before {
+        opacity: 1;
+    }
+
+    .about-feature-link:hover .about-feature-go span {
+        transform: translateX(3px);
+    }
 
     .about-highlight-cta:hover,
     .about-btn--primary:hover {
@@ -495,33 +511,71 @@
 
 /* 태블릿 범위 — 섹션 간격·여백 약간 축소 */
 @media (min-width: 576px) and (max-width: 991.98px) {
-    .about-section { margin-bottom: 3rem; }
-    .about-hero { padding: 2.75rem 1rem 2.5rem; }
+    .about-section {
+        margin-bottom: 3rem;
+    }
+
+    .about-hero {
+        padding: 2.75rem 1rem 2.5rem;
+    }
 }
 
 /* 모바일(소형 폰) */
 @media (max-width: 575.98px) {
-    .about-hero { padding: 2.25rem 0.5rem 2rem; }
-    .about-br-mobile { display: inline; }
-    .about-section { margin-bottom: 2.75rem; }
+    .about-hero {
+        padding: 2.25rem 0.5rem 2rem;
+    }
+
+    .about-br-mobile {
+        display: inline;
+    }
+
+    .about-section {
+        margin-bottom: 2.75rem;
+    }
 
     .about-stats {
         gap: 0.5rem;
         padding: 1rem 0.75rem;
     }
 
-    .about-stat { min-width: 0; }
-    .about-stat-num { font-size: 1.4rem; }
-    .about-stat-label { font-size: 0.72rem; }
+    .about-stat {
+        min-width: 0;
+    }
 
-    .about-mission { padding: 2.25rem 1.25rem 1.75rem; }
-    .about-mission-mark { font-size: 3.5rem; left: 0.75rem; }
+    .about-stat-num {
+        font-size: 1.4rem;
+    }
 
-    .about-highlight { padding: 1.5rem 1.25rem; }
+    .about-stat-label {
+        font-size: 0.72rem;
+    }
 
-    .about-cta { padding: 2.25rem 1.25rem; }
-    .about-cta-actions { flex-direction: column; }
-    .about-btn { width: 100%; justify-content: center; }
+    .about-mission {
+        padding: 2.25rem 1.25rem 1.75rem;
+    }
+
+    .about-mission-mark {
+        font-size: 3.5rem;
+        left: 0.75rem;
+    }
+
+    .about-highlight {
+        padding: 1.5rem 1.25rem;
+    }
+
+    .about-cta {
+        padding: 2.25rem 1.25rem;
+    }
+
+    .about-cta-actions {
+        flex-direction: column;
+    }
+
+    .about-btn {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* 모션 최소화 선호 사용자 — 진입 애니메이션/이동 제거 */

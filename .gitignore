@@ -55,3 +55,10 @@ out/
 /src/main/resources/data/community_sample.sql
 /docs/mobile/social-login-api.md
 /.codex
+/docs/policy/.omc/state/agent-replay-8950ded6-605b-434a-9ca6-d7cda3938e23.jsonl
+/src/main/resources/templates/legal/.omc/state/agent-replay-8950ded6-605b-434a-9ca6-d7cda3938e23.jsonl
+/src/main/resources/static/css/.omc/state/last-tool-error.json
+/docs/policy/.omc/state/subagent-tracking.json
+/src/main/resources/templates/legal/.omc/state/subagent-tracking.json
+/src/main/resources/templates/.omc/state/agent-replay-b54b24dd-401c-42be-8ccb-77e841b2d3e8.jsonl
+/src/main/resources/templates/.omc/state/subagent-tracking.json
