@@ -62,7 +62,8 @@ const App = {
     state: {
         translationId: null,
         bookOrder: null,
-        fromMyMemo: false
+        fromMyMemo: false,
+        fromSearch: false
     },
 
     init: async () => {
@@ -178,6 +179,7 @@ const App = {
             ? (canUseStoredBookOrder ? storedBookOrder : null)
             : parsedBookOrder;
         App.state.fromMyMemo = urlParams.get("from") === "my-memo";
+        App.state.fromSearch = urlParams.get("from") === "search";
     },
 
     initNav: () => {
@@ -210,7 +212,7 @@ const App = {
         }
         button.classList.remove(UI_CLASSES.HIDDEN);
         button.addEventListener("click", () => {
-            if (App.state.fromMyMemo) {
+            if (App.state.fromMyMemo || App.state.fromSearch) {
                 history.back();
                 return;
             }

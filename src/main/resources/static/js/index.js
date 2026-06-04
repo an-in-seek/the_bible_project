@@ -78,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 verseUrl.searchParams.set("translationId", lastRead.translationId);
                 verseUrl.searchParams.set("bookOrder", lastRead.bookOrder);
                 verseUrl.searchParams.set("chapterNumber", lastRead.chapterNumber);
+                verseUrl.searchParams.set("from", "home"); // 뒤로가기 시 홈으로 복귀
                 window.location.href = `${verseUrl.pathname}${verseUrl.search}`;
             }
         });

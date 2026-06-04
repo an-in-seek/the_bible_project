@@ -69,7 +69,7 @@ export async function searchBibleVerses(keyword, opts = {}) {
             chapterNumber: v.chapterNumber,
             verseNumber: v.verseNumber,
             text: v.text,
-            url: `/web/bible/verse?translationId=${translationId}&bookOrder=${v.bookOrder}&chapterNumber=${v.chapterNumber}&verseNumber=${v.verseNumber}`,
+            url: `/web/bible/verse?translationId=${translationId}&bookOrder=${v.bookOrder}&chapterNumber=${v.chapterNumber}&verseNumber=${v.verseNumber}&from=search`,
         })),
         hasNext: !!data.hasNext,
         totalCount: data.totalCount ?? null,
@@ -105,7 +105,7 @@ export async function searchDictionary(keyword, opts = {}) {
             id: d.id,
             term: d.term,
             description: d.description,
-            url: `/web/study/dictionary/${d.id}`,
+            url: `/web/study/dictionary/${d.id}?from=search`,
         })),
         hasNext: !!data.hasNext,
         totalCount: data.totalCount ?? null,
@@ -144,7 +144,7 @@ export function searchBibleBooks(keyword, opts = {}) {
         bookOrder: book.bookOrder,
         name: book.name,
         nameEn: book.nameEn,
-        url: `/web/bible/chapter?translationId=${translationId}&bookOrder=${book.bookOrder}`,
+        url: `/web/bible/chapter?translationId=${translationId}&bookOrder=${book.bookOrder}&from=search`,
         label: `${book.name} 장 목록 보기`,
     }));
 

@@ -97,7 +97,7 @@ export function parseBibleReference(rawInput) {
             kind: "chapter",
             book,
             chapter,
-            url: `/web/bible/verse?translationId=${translationId}&bookOrder=${book.bookOrder}&chapterNumber=${chapter}`,
+            url: `/web/bible/verse?translationId=${translationId}&bookOrder=${book.bookOrder}&chapterNumber=${chapter}&from=search`,
             label: `${book.name} ${chapter}장 보기`,
         };
     }
@@ -110,7 +110,7 @@ export function parseBibleReference(rawInput) {
             kind: "chapter",
             book,
             chapter,
-            url: `/web/bible/verse?translationId=${translationId}&bookOrder=${book.bookOrder}&chapterNumber=${chapter}`,
+            url: `/web/bible/verse?translationId=${translationId}&bookOrder=${book.bookOrder}&chapterNumber=${chapter}&from=search`,
             label: `${book.name} ${chapter}장 보기`,
         };
     }
@@ -120,7 +120,7 @@ export function parseBibleReference(rawInput) {
         book,
         chapter,
         verse,
-        url: `/web/bible/verse?translationId=${translationId}&bookOrder=${book.bookOrder}&chapterNumber=${chapter}&verseNumber=${verse}`,
+        url: `/web/bible/verse?translationId=${translationId}&bookOrder=${book.bookOrder}&chapterNumber=${chapter}&verseNumber=${verse}&from=search`,
         label: `${book.name} ${chapter}:${verse} 절로 이동`,
     };
 }

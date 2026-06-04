@@ -11,8 +11,8 @@
  *  - Stale guard: 응답 도착 시점 키워드가 다르면 렌더 스킵
  */
 
-import {searchBibleBooks, searchBibleVerses, searchDictionary, searchMenus,} from "./search-sources.js";
-import {parseBibleReference} from "./bible-reference-parser.js";
+import {searchBibleBooks, searchBibleVerses, searchDictionary, searchMenus,} from "./search-sources.js?v=1.2";
+import {parseBibleReference} from "./bible-reference-parser.js?v=1.1";
 
 const DEBOUNCE_MS = 200;
 const KEYWORD_MAX_LENGTH = 100;
