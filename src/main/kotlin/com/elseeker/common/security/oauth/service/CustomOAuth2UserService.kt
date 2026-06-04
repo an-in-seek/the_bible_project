@@ -5,11 +5,13 @@ import com.elseeker.common.domain.ServiceError
 import com.elseeker.common.domain.throwError
 import com.elseeker.common.security.jwt.JwtProvider
 import com.elseeker.common.security.oauth.factory.OAuth2UserInfoFactory
+import com.elseeker.common.security.oauth.info.OAuth2UserInfo
 import com.elseeker.common.security.oauth.repository.HttpCookieOAuth2AuthorizationRequestRepository
 import com.elseeker.common.security.oauth.util.CookieUtils
 import com.elseeker.member.adapter.output.jpa.MemberOAuthAccountRepository
 import com.elseeker.member.adapter.output.jpa.MemberRepository
 import com.elseeker.member.domain.model.Member
+import com.elseeker.member.domain.model.MemberOAuthAccount
 import com.elseeker.member.domain.vo.MemberRole
 import com.elseeker.member.domain.vo.MemberStatus
 import com.elseeker.member.domain.vo.OAuthProvider
@@ -51,98 +53,131 @@ class CustomOAuth2UserService(
     private fun doLoadUser(userRequest: OAuth2UserRequest): OAuth2User {
         val oAuth2User = super.loadUser(userRequest)
 
-        // 1. Factory를 통해 Provider별 파싱된 정보 획득
+        // 1. Provider별 파싱된 사용자 정보 획득 후 필수 값 검증
         val provider = OAuthProvider.fromRegistrationId(userRequest.clientRegistration.registrationId)
         val userInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(provider, oAuth2User.attributes)
+        validateUserInfo(userInfo)
 
-        // 2. 이메일 검증 (필수 값인 경우)
+        // 2. OAuth 계정 기준으로 회원을 연동/로그인/가입 처리
+        val savedMember = memberRepository.save(resolveMember(userInfo))
+
+        // 3. 후속 Handler가 사용할 OAuth2User 구성 (memberUid/role/status 등 주입)
+        val userNameAttributeName = userRequest.clientRegistration.providerDetails.userInfoEndpoint.userNameAttributeName
+        return buildOAuth2User(oAuth2User, savedMember, userNameAttributeName)
+    }
+
+    /** 이메일·providerUserId 등 필수 값 존재 여부 검증. */
+    private fun validateUserInfo(userInfo: OAuth2UserInfo) {
         if (userInfo.email.isBlank()) {
-            throwError(ErrorType.OAUTH_EMAIL_MISSING, provider.registrationId)
+            throwError(ErrorType.OAUTH_EMAIL_MISSING, userInfo.provider.registrationId)
         }
         if (userInfo.providerUserId.isBlank()) {
-            throwError(ErrorType.OAUTH_PROVIDER_USER_ID_MISSING, provider.registrationId)
+            throwError(ErrorType.OAUTH_PROVIDER_USER_ID_MISSING, userInfo.provider.registrationId)
         }
+    }
 
-        // 3. 사용자 저장 또는 업데이트 (OAuth 계정 기준)
+    /**
+     * OAuth 사용자 정보로부터 대상 회원을 해석한다.
+     *
+     * - linkTarget 존재(연동 요청): 현재 회원에 연동, 단 타 회원 점유 계정이면 충돌
+     * - 기존 OAuth 계정 존재: 해당 계정으로 로그인, 단 로그인 상태에서 타 회원 계정이면 충돌
+     * - 로그인 상태인데 미연동 계정: 연동 전용 안내(OAUTH_LINK_REQUIRED)
+     * - 그 외: 신규 회원 가입
+     */
+    private fun resolveMember(userInfo: OAuth2UserInfo): Member {
         val oauthAccount = memberOAuthAccountRepository.findByProviderAndProviderUserId(
             provider = userInfo.provider,
             providerUserId = userInfo.providerUserId
         )
         val linkTarget = resolveLinkTargetMember()
         val authenticatedMember = linkTarget ?: resolveAuthenticatedMember()
-        val member = if (linkTarget != null) {
-            if (oauthAccount != null && oauthAccount.member.id != linkTarget.id) {
-                throwError(ErrorType.OAUTH_ACCOUNT_ALREADY_LINKED, userInfo.provider.registrationId)
-            }
-            if (oauthAccount == null) {
-                linkTarget.addOAuthAccount(
-                    provider = userInfo.provider,
-                    providerUserId = userInfo.providerUserId,
-                    email = userInfo.email,
-                    oauthNickname = userInfo.name,
-                    oauthProfileImageUrl = userInfo.imageUrl
-                )
-            } else {
-                oauthAccount.syncOAuthProfile(
-                    email = userInfo.email,
-                    nickname = userInfo.name,
-                    profileImageUrl = userInfo.imageUrl
-                )
-            }
-            linkTarget
-        } else {
-            oauthAccount?.let { account ->
-                // 로그인 상태에서 '다른 회원'에 이미 연동된 소셜 계정으로 들어오면 연동 충돌로 차단한다.
-                // (링크 플래그 인식 실패 등으로 linkTarget 이 null 이어도 여기서 막아 의도치 않은 계정 전환/탈취를 방지)
-                if (authenticatedMember != null && account.member.id != authenticatedMember.id) {
-                    throwError(ErrorType.OAUTH_ACCOUNT_ALREADY_LINKED, userInfo.provider.registrationId)
-                }
-                account.syncOAuthProfile(
-                    email = userInfo.email,
-                    nickname = userInfo.name,
-                    profileImageUrl = userInfo.imageUrl
-                )
-                account.member
-            }
-                ?: run {
-                    if (authenticatedMember != null) {
-                        throwError(ErrorType.OAUTH_LINK_REQUIRED, userInfo.provider.registrationId)
-                    }
-                    Member.create(
-                        email = userInfo.email,
-                        nickname = "",
-                        memberRole = MemberRole.USER,
-                        profileImageUrl = null,
-                        status = MemberStatus.PENDING_CONSENT
-                    ).also { newMember ->
-                        newMember.addOAuthAccount(
-                            provider = userInfo.provider,
-                            providerUserId = userInfo.providerUserId,
-                            email = userInfo.email,
-                            oauthNickname = userInfo.name,
-                            oauthProfileImageUrl = userInfo.imageUrl
-                        )
-                    }
-                }
+
+        return when {
+            linkTarget != null -> linkAccountToMember(userInfo, oauthAccount, linkTarget)
+            oauthAccount != null -> loginWithExistingAccount(userInfo, oauthAccount, authenticatedMember)
+            authenticatedMember != null -> throwError(ErrorType.OAUTH_LINK_REQUIRED, userInfo.provider.registrationId)
+            else -> registerNewMember(userInfo)
         }
-        val savedMember = memberRepository.save(member)
-        val savedMemberUid = savedMember.uid
+    }
 
-        // 4. 기존 attributes에 내부 시스템용 데이터(memberUid, role) 추가
-        // 주의: Handler에서 attributes["memberUid"] 등으로 접근하므로 반드시 포함시켜야 함
-        val enrichedAttributes = HashMap<String, Any>(oAuth2User.attributes)
-        enrichedAttributes["memberUid"] = savedMemberUid.toString()
-        enrichedAttributes["role"] = savedMember.memberRole.name
-        enrichedAttributes["email"] = savedMember.email // Provider 구조에 따라 최상위에 없을 수 있으므로 명시적 추가
-        enrichedAttributes["status"] = savedMember.status.name // 가입 동의 대기(PENDING_CONSENT) 분기용
+    /** 연동 요청: 대상 회원에 OAuth 계정을 신규 연동하거나 기존 프로필을 동기화한다. */
+    private fun linkAccountToMember(
+        userInfo: OAuth2UserInfo,
+        oauthAccount: MemberOAuthAccount?,
+        linkTarget: Member,
+    ): Member {
+        if (oauthAccount != null && oauthAccount.member.id != linkTarget.id) {
+            throwError(ErrorType.OAUTH_ACCOUNT_ALREADY_LINKED, userInfo.provider.registrationId)
+        }
+        if (oauthAccount == null) {
+            linkTarget.addOAuthAccountFrom(userInfo)
+        } else {
+            oauthAccount.syncProfileFrom(userInfo)
+        }
+        return linkTarget
+    }
 
-        // 5. authorities
-        val authorities = listOf(SimpleGrantedAuthority("ROLE_${savedMember.memberRole.name}"))
+    /** 기존 OAuth 계정으로 로그인. 로그인 상태에서 '다른 회원' 계정이면 연동 충돌로 차단한다. */
+    private fun loginWithExistingAccount(
+        userInfo: OAuth2UserInfo,
+        oauthAccount: MemberOAuthAccount,
+        authenticatedMember: Member?,
+    ): Member {
+        // 링크 플래그 인식 실패 등으로 linkTarget 이 null 이어도 여기서 막아 의도치 않은 계정 전환/탈취를 방지한다.
+        if (authenticatedMember != null && oauthAccount.member.id != authenticatedMember.id) {
+            throwError(ErrorType.OAUTH_ACCOUNT_ALREADY_LINKED, userInfo.provider.registrationId)
+        }
+        oauthAccount.syncProfileFrom(userInfo)
+        return oauthAccount.member
+    }
 
-        // 6. UserInfoEndpoint의 userNameAttributeName 가져오기
-        // (Google은 "sub", Naver는 "response", Kakao는 "id" 등이 될 수 있음)
-        val userNameAttributeName = userRequest.clientRegistration.providerDetails.userInfoEndpoint.userNameAttributeName
+    /** 신규 회원 가입(동의 대기 상태)과 OAuth 계정 연동. */
+    private fun registerNewMember(userInfo: OAuth2UserInfo): Member {
+        return Member.create(
+            email = userInfo.email,
+            nickname = "",
+            memberRole = MemberRole.USER,
+            profileImageUrl = null,
+            status = MemberStatus.PENDING_CONSENT
+        ).also { it.addOAuthAccountFrom(userInfo) }
+    }
+
+    /**
+     * 후속 Handler용 OAuth2User 구성.
+     * 주의: Handler에서 attributes["memberUid"] 등으로 접근하므로 내부 시스템용 데이터를 반드시 포함시킨다.
+     */
+    private fun buildOAuth2User(
+        oAuth2User: OAuth2User,
+        member: Member,
+        userNameAttributeName: String,
+    ): OAuth2User {
+        val enrichedAttributes = HashMap<String, Any>(oAuth2User.attributes).apply {
+            put("memberUid", member.uid.toString())
+            put("role", member.memberRole.name)
+            put("email", member.email) // Provider 구조에 따라 최상위에 없을 수 있으므로 명시적 추가
+            put("status", member.status.name) // 가입 동의 대기(PENDING_CONSENT) 분기용
+        }
+        // userNameAttributeName: Google은 "sub", Naver는 "response", Kakao는 "id" 등
+        val authorities = listOf(SimpleGrantedAuthority("ROLE_${member.memberRole.name}"))
         return DefaultOAuth2User(authorities, enrichedAttributes, userNameAttributeName)
+    }
+
+    private fun Member.addOAuthAccountFrom(userInfo: OAuth2UserInfo) {
+        addOAuthAccount(
+            provider = userInfo.provider,
+            providerUserId = userInfo.providerUserId,
+            email = userInfo.email,
+            oauthNickname = userInfo.name,
+            oauthProfileImageUrl = userInfo.imageUrl
+        )
+    }
+
+    private fun MemberOAuthAccount.syncProfileFrom(userInfo: OAuth2UserInfo) {
+        syncOAuthProfile(
+            email = userInfo.email,
+            nickname = userInfo.name,
+            profileImageUrl = userInfo.imageUrl
+        )
     }
 
     private fun resolveLinkTargetMember(): Member? {
