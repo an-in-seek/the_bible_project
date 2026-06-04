@@ -54,7 +54,7 @@ class BibleWebController(
         model: Model
     ): String {
         model.addAttribute("keyword", keyword?.trim().orEmpty())
-        return "bible/search"
+        return "bible/verse-search"
     }
 
     // ------------ Private Methods ------------

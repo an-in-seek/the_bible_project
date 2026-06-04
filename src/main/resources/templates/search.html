@@ -10,8 +10,7 @@
 
 <body class="has-fixed-nav unified-search-page">
 
-<header th:replace="~{fragments/header :: header}"
-        th:with="pageTitle='통합 검색', pageTitleVisible=true"></header>
+<header th:replace="~{fragments/header :: header(pageTitle='통합 검색', pageTitleVisible=true, hideTopNavAccount=true)}"></header>
 
 <main class="container content-wrapper">
 
@@ -78,6 +77,5 @@
 </main>
 
 <script type="module" src="/js/search/unified-search-page.js?v=1.3"></script>
-<div th:replace="~{fragments/section-nav :: section-nav}"></div>
 </body>
 </html>

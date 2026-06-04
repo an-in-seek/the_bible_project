@@ -63,3 +63,5 @@ out/
 /src/main/resources/templates/.omc/state/agent-replay-b54b24dd-401c-42be-8ccb-77e841b2d3e8.jsonl
 /src/main/resources/templates/.omc/state/subagent-tracking.json
 /src/main/resources/templates/.omc/state/mission-state.json
+/src/main/resources/templates/bible/.omc/state/agent-replay-b54b24dd-401c-42be-8ccb-77e841b2d3e8.jsonl
+/src/main/resources/templates/bible/.omc/state/subagent-tracking.json
