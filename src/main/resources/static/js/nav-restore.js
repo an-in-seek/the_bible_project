@@ -61,8 +61,11 @@ export function bindFromBackButton(button, { backOn = ["search"], fallback } = {
     if (!button) {
         return;
     }
+    // ?from 은 바인딩(페이지 로드) 시점에 캡처한다.
+    // 일부 페이지(verse-list, chapter-list)는 로드 후 history.replaceState/pushState 로
+    // URL 을 갱신하면서 from 을 제거하므로, 클릭 시점에 읽으면 값이 유실된다.
+    const from = new URLSearchParams(window.location.search).get("from");
     button.addEventListener("click", () => {
-        const from = new URLSearchParams(window.location.search).get("from");
         if (backOn.includes(from)) {
             history.back();
             return;

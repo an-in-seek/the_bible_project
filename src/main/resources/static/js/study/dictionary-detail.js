@@ -1,5 +1,5 @@
 import {TranslationStore} from "/js/storage-util.js?v=2.3";
-import {bindFromBackButton} from "/js/nav-restore.js?v=1.0";
+import {bindFromBackButton} from "/js/nav-restore.js?v=1.1";
 
 const UI_CLASSES = {
     HIDDEN: "d-none"
