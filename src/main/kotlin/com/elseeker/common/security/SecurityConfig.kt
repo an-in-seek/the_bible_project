@@ -105,6 +105,7 @@ class SecurityConfig(
                         "/api/v1/bibles/**",
                         "/api/v1/study/dictionaries/**",
                         "/api/v1/auth/refresh",
+                        "/api/v1/auth/reissue",
                         "/api/v1/auth/social-login"
                     ).permitAll()
                     .requestMatchers(

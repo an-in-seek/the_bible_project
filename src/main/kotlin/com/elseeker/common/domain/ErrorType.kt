@@ -18,6 +18,7 @@ enum class ErrorType(
     OAUTH_ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "소셜 계정을 찾을 수 없습니다.", LogLevel.WARN),
     OAUTH_LINK_REQUIRED(HttpStatus.BAD_REQUEST, "연동 전용 요청입니다. 마이페이지에서 연동을 진행해 주세요.", LogLevel.WARN),
     SOCIAL_LOGIN_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "소셜 로그인 토큰이 유효하지 않습니다.", LogLevel.WARN),
+    SOCIAL_LOGIN_EMAIL_NOT_VERIFIED(HttpStatus.CONFLICT, "이메일이 인증되지 않아 기존 계정과 연결할 수 없습니다.", LogLevel.WARN),
     REQUIRED_NICKNAME(HttpStatus.BAD_REQUEST, "닉네임은 필수입니다.", LogLevel.WARN),
     INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, "닉네임은 공백을 포함할 수 없습니다.", LogLevel.WARN),
     NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다.", LogLevel.WARN),
@@ -62,6 +63,9 @@ enum class ErrorType(
     POST_ACCESS_DENIED(HttpStatus.FORBIDDEN, "게시글에 대한 접근 권한이 없습니다.", LogLevel.WARN),
     COMMENT_DISABLED(HttpStatus.BAD_REQUEST, "댓글이 비활성화된 게시글입니다.", LogLevel.WARN),
     COMMENT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "댓글에 대한 접근 권한이 없습니다.", LogLevel.WARN),
+
+    // 401
+    AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다. 다시 로그인해 주세요.", LogLevel.WARN),
 
     // 403
     MEMBER_ACCESS_DENIED(HttpStatus.FORBIDDEN, "요청한 회원 정보에 접근할 수 없습니다.", LogLevel.WARN),

@@ -15,6 +15,7 @@ import com.elseeker.member.domain.vo.MemberStatus
 import com.elseeker.member.domain.vo.OAuthProvider
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.util.UUID
 
 /**
  * 모바일 앱 소셜 로그인 서비스.
@@ -72,6 +73,50 @@ class SocialLoginService(
     }
 
     /**
+     * 현재 로그인한 회원(currentMemberUid)에게 소셜 계정을 연동한다. (intent=link)
+     *
+     * - 소셜 토큰을 검증해 서버가 providerUserId를 도출한다(클라이언트 신뢰 X).
+     * - 해당 소셜 계정이 '다른 회원'에 이미 연동돼 있으면 OAUTH_ACCOUNT_ALREADY_LINKED(409)로 차단.
+     * - 이미 본인에게 연동돼 있으면 프로필만 동기화(멱등).
+     */
+    @Transactional
+    fun linkAccount(request: SocialLoginRequest, currentMemberUid: UUID): Member {
+        val provider = OAuthProvider.fromRegistrationId(request.provider)
+        val userInfo = socialTokenVerifier.verify(provider, request.token)
+        if (userInfo.email.isBlank()) {
+            throwError(ErrorType.OAUTH_EMAIL_MISSING, provider.registrationId)
+        }
+
+        val current = memberRepository.findWithOAuthAccountsByUid(currentMemberUid)
+            ?: throwError(ErrorType.MEMBER_NOT_FOUND, currentMemberUid)
+
+        val existingAccount = memberOAuthAccountRepository.findByProviderAndProviderUserId(
+            provider = provider,
+            providerUserId = userInfo.providerUserId,
+        )
+        if (existingAccount != null) {
+            if (existingAccount.member.id != current.id) {
+                throwError(ErrorType.OAUTH_ACCOUNT_ALREADY_LINKED, provider.registrationId)
+            }
+            existingAccount.syncOAuthProfile(
+                email = userInfo.email,
+                nickname = userInfo.name,
+                profileImageUrl = userInfo.imageUrl,
+            )
+            return current
+        }
+
+        current.addOAuthAccount(
+            provider = provider,
+            providerUserId = userInfo.providerUserId,
+            email = userInfo.email,
+            oauthNickname = userInfo.name,
+            oauthProfileImageUrl = userInfo.imageUrl,
+        )
+        return memberRepository.save(current)
+    }
+
+    /**
      * OAuth 계정 기준으로 기존 회원을 조회하거나 신규 생성합니다.
      *
      * 1. provider + providerUserId로 기존 OAuth 계정 조회 → 프로필 동기화 후 반환
@@ -94,8 +139,12 @@ class SocialLoginService(
         }
 
         // 2. 동일 이메일 회원이 있으면 OAuth 계정 연결
+        //    단, provider가 이메일 미인증 상태면 자동 병합을 차단(계정 탈취 방지).
         val existingMember = memberRepository.findByEmail(userInfo.email)
         if (existingMember != null) {
+            if (!userInfo.emailVerified) {
+                throwError(ErrorType.SOCIAL_LOGIN_EMAIL_NOT_VERIFIED, userInfo.provider.registrationId)
+            }
             existingMember.addOAuthAccount(
                 provider = userInfo.provider,
                 providerUserId = userInfo.providerUserId,

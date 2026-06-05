@@ -164,35 +164,8 @@ class MemberService(
             ?: member
     }
 
-    @Transactional
-    fun linkOAuthAccount(
-        memberUid: UUID,
-        principalUid: UUID,
-        providerRegistrationId: String,
-        providerUserId: String
-    ): Member {
-        if (memberUid != principalUid) {
-            throwError(ErrorType.MEMBER_ACCESS_DENIED, memberUid)
-        }
-        if (providerRegistrationId.isBlank()) {
-            throwError(ErrorType.INVALID_PARAMETER, "provider")
-        }
-        if (providerUserId.isBlank()) {
-            throwError(ErrorType.OAUTH_PROVIDER_USER_ID_MISSING, providerRegistrationId)
-        }
-        val provider = runCatching { OAuthProvider.fromRegistrationId(providerRegistrationId) }
-            .getOrElse { throwError(ErrorType.INVALID_PARAMETER, providerRegistrationId) }
-        val member = getMember(memberUid)
-        val existingAccount = memberOAuthAccountRepository.findByProviderAndProviderUserId(provider, providerUserId)
-        if (existingAccount != null) {
-            if (existingAccount.member.id == member.id) {
-                return member
-            }
-            throwError(ErrorType.OAUTH_ACCOUNT_ALREADY_LINKED, provider.registrationId)
-        }
-        member.addOAuthAccount(provider, providerUserId)
-        return memberRepository.save(member)
-    }
+    // 소셜 계정 연동(providerUserId 직접 신뢰)은 보안상 제거됨.
+    // 연동은 토큰 검증을 거치는 SocialLoginService.linkAccount (POST /api/v1/auth/social-login intent=link) 로 일원화.
 
     @Transactional(readOnly = true)
     fun getOAuthAccounts(memberUid: UUID, principalUid: UUID) =

@@ -20,4 +20,14 @@ data class SocialLoginRequest(
     @field:NotBlank(message = "token은 필수입니다.")
     @Schema(description = "소셜 로그인 토큰 (Google: ID Token, Kakao/Naver: Access Token)")
     val token: String,
-)
+
+    @Schema(
+        description = "요청 의도. login=소셜 로그인(기본), link=현재 로그인 계정에 소셜 연동(Authorization 헤더 필수)",
+        example = "login",
+        allowableValues = ["login", "link"],
+    )
+    val intent: String? = null,
+) {
+    /** intent 가 "link" 인지 여부(대소문자 무시). 미지정/그 외는 로그인으로 간주. */
+    fun isLinkIntent(): Boolean = intent?.equals("link", ignoreCase = true) == true
+}

@@ -2,7 +2,6 @@ package com.elseeker.member.adapter.input.api.client
 
 import com.elseeker.auth.adapter.input.api.client.response.AuthMeResponse
 import com.elseeker.common.security.jwt.JwtPrincipal
-import com.elseeker.member.adapter.input.api.client.request.MemberOAuthAccountLinkRequest
 import com.elseeker.member.adapter.input.api.client.request.MemberOAuthProfileInitializeRequest
 import com.elseeker.member.adapter.input.api.client.request.MemberUpdateRequest
 import com.elseeker.member.adapter.input.api.client.response.MemberOAuthAccountResponse
@@ -52,20 +51,8 @@ class MemberApi(
         return ResponseEntity.ok(accounts.map(MemberOAuthAccountResponse.Companion::from))
     }
 
-    @PostMapping("/{memberUid}/oauth-accounts")
-    fun linkOAuthAccount(
-        @PathVariable memberUid: UUID,
-        @RequestBody request: MemberOAuthAccountLinkRequest,
-        @AuthenticationPrincipal principal: JwtPrincipal
-    ): ResponseEntity<AuthMeResponse> {
-        val member = memberService.linkOAuthAccount(
-            memberUid = memberUid,
-            principalUid = principal.memberUid,
-            providerRegistrationId = request.provider,
-            providerUserId = request.providerUserId
-        )
-        return ResponseEntity.ok(AuthMeResponse.from(member))
-    }
+    // 소셜 계정 연동은 토큰 검증을 거치는 POST /api/v1/auth/social-login (intent=link) 로 일원화한다.
+    // (클라이언트가 providerUserId를 직접 주장하던 기존 POST /oauth-accounts 는 보안상 제거됨.)
 
     @DeleteMapping("/{memberUid}/oauth-accounts")
     fun unlinkOAuthAccount(

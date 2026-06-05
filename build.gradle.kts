@@ -97,6 +97,9 @@ dependencies {
     testImplementation("io.kotest:kotest-assertions-core:${kotestVersion}")
     testImplementation("io.kotest:kotest-framework-engine:${kotestVersion}")
 
+    // MockK (Kotlin 친화 모킹 — Docker 불필요 단위 테스트용)
+    testImplementation("io.mockk:mockk:1.13.13")
+
     // testcontainers
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")

@@ -80,6 +80,7 @@ class SocialTokenVerifier(
             email = payload.email ?: "",
             name = payload["name"] as? String ?: "",
             imageUrl = payload["picture"] as? String,
+            emailVerified = payload.emailVerified == true,
         )
     }
 
@@ -112,6 +113,7 @@ class SocialTokenVerifier(
             email = kakaoAccount["email"] as? String ?: "",
             name = profile["nickname"] as? String ?: "",
             imageUrl = profile["profile_image_url"] as? String,
+            emailVerified = (kakaoAccount["is_email_verified"] as? Boolean) == true,
         )
     }
 
@@ -145,6 +147,8 @@ class SocialTokenVerifier(
             name = naverResponse["name"] as? String
                 ?: naverResponse["nickname"] as? String ?: "",
             imageUrl = naverResponse["profile_image"] as? String,
+            // Naver userinfo는 이메일 인증 플래그를 제공하지 않으나, Naver 가입 시 이메일 소유 인증을 거치므로 verified로 간주.
+            emailVerified = true,
         )
     }
 }
@@ -155,4 +159,9 @@ data class SocialUserInfo(
     val email: String,
     val name: String,
     val imageUrl: String?,
+    /**
+     * Provider가 제공하는 이메일 인증 여부.
+     * 기본값을 두지 않아 모든 provider에서 명시적으로 설정하도록 강제한다(신규 provider 추가 시 무검증 자동병합 방지).
+     */
+    val emailVerified: Boolean,
 )

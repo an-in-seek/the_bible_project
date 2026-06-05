@@ -26,6 +26,7 @@ class GlobalExceptionHandler {
         }
         val responseBody = ErrorResponse(
             status = errorType.status.value(),
+            code = errorType.name,
             message = ex.message
         )
         return ResponseEntity.status(errorType.status).body(responseBody)

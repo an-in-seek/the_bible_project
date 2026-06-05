@@ -1,10 +1,14 @@
 package com.elseeker.auth.adapter.input.api.client
 
+import com.elseeker.auth.adapter.input.api.client.request.ReissueRequest
 import com.elseeker.auth.adapter.input.api.client.request.SocialLoginRequest
 import com.elseeker.auth.adapter.input.api.client.response.AuthMeResponse
+import com.elseeker.auth.adapter.input.api.client.response.ReissueResponse
 import com.elseeker.auth.adapter.input.api.client.response.SocialLoginResponse
 import com.elseeker.auth.application.service.SocialLoginService
 import com.elseeker.common.config.ElSeekerProperties
+import com.elseeker.common.domain.ErrorType
+import com.elseeker.common.domain.throwError
 import com.elseeker.common.security.jwt.JwtPrincipal
 import com.elseeker.common.security.jwt.JwtProvider
 import com.elseeker.common.security.oauth.util.CookieUtils
@@ -74,8 +78,41 @@ class AuthApi(
     @PostMapping("/social-login")
     override fun socialLogin(
         @Valid @RequestBody request: SocialLoginRequest,
-    ): SocialLoginResponse {
-        return socialLoginService.login(request)
+        @AuthenticationPrincipal principal: JwtPrincipal?,
+    ): ResponseEntity<Any> {
+        // intent=link: 현재 로그인 사용자에게 연동(충돌 시 409). 미인증이면 401.
+        if (request.isLinkIntent()) {
+            val currentMemberUid = principal?.memberUid
+                ?: throwError(ErrorType.AUTHENTICATION_REQUIRED, "link")
+            val member = socialLoginService.linkAccount(request, currentMemberUid)
+            return ResponseEntity.ok<Any>(AuthMeResponse.from(member))
+        }
+        // intent=login(기본): 기존 로그인 동작.
+        return ResponseEntity.ok<Any>(socialLoginService.login(request))
+    }
+
+    @PostMapping("/reissue")
+    override fun reissue(
+        @Valid @RequestBody request: ReissueRequest,
+    ): ReissueResponse {
+        val claims = jwtProvider.resolveRefreshClaims(request.refreshToken)
+            ?: throwError(ErrorType.AUTHENTICATION_REQUIRED, "refresh")
+        val memberUid = runCatching { UUID.fromString(claims.subject) }.getOrNull()
+            ?: throwError(ErrorType.AUTHENTICATION_REQUIRED, "refresh")
+        val member = memberService.getMember(memberUid)
+        if (member.isPendingConsent) {
+            // 동의 미완료 회원에게는 정식 토큰을 재발급하지 않는다(소셜 재로그인 → 동의 플로우로 유도).
+            throwError(ErrorType.AUTHENTICATION_REQUIRED, "consent")
+        }
+        val newAccessToken = jwtProvider.generateAccessToken(
+            member.uid.toString(),
+            member.email,
+            listOf(member.memberRole),
+        )
+        return ReissueResponse(
+            accessToken = newAccessToken,
+            refreshToken = request.refreshToken,
+        )
     }
 
     private fun cookieSecure(request: HttpServletRequest): Boolean {
