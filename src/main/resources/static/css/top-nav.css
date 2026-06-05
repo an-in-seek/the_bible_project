@@ -179,6 +179,12 @@
     border-radius: 0.375rem;
 }
 
+.top-nav-account-icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+}
+
 .top-nav-account-menu {
     position: absolute;
     top: calc(100% + 0.35rem);
@@ -202,7 +208,21 @@
     font-size: 0.95rem;
 }
 
+.top-nav-account-primary {
+    font-weight: 700;
+}
+
+.top-nav-account-close {
+    display: none;
+}
+
 .top-nav-account-item:focus {
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    outline: none;
+}
+
+.top-nav-account-close:focus {
     background: var(--color-bg-elevated);
     color: var(--color-text-primary);
     outline: none;
@@ -210,6 +230,12 @@
 
 @media (hover: hover) and (pointer: fine) {
     .top-nav-account-item:hover {
+        background: var(--color-bg-elevated);
+        color: var(--color-text-primary);
+        outline: none;
+    }
+
+    .top-nav-account-close:hover {
         background: var(--color-bg-elevated);
         color: var(--color-text-primary);
         outline: none;
@@ -295,11 +321,14 @@
 .top-nav-theme-submenu {
     overflow: hidden;
     max-height: 0;
-    transition: max-height 220ms ease;
+    visibility: hidden;
+    transition: max-height 220ms ease, visibility 0s linear 220ms;
 }
 
 .top-nav-theme-submenu.is-open {
     max-height: 200px; /* 3 항목 * 약 44px + buffer */
+    visibility: visible;
+    transition: max-height 220ms ease, visibility 0s;
 }
 
 .top-nav-theme-item {
@@ -383,5 +412,147 @@ html[data-theme="dark"] .top-nav-title .page-title {
     .top-nav-title {
         padding-left: 1.5rem;
         padding-right: 1.5rem;
+    }
+}
+
+/* ============================================================
+   계정 메뉴 모션 + 모바일 바텀시트 (B안)
+   - 데스크톱: 트리거 기준 fade + scale + slide 드롭다운
+   - 모바일(≤600px): 하단 바텀시트 + 백드롭
+   - 토글은 .d-none 대신 .is-open 사용(JS)
+   ============================================================ */
+
+/* 닫힘 기본 상태 (데스크톱 드롭다운) */
+.top-nav-account-menu {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px) scale(0.97);
+    transform-origin: top right;
+    transition: opacity 140ms ease-out, transform 140ms ease-out, visibility 0s linear 140ms;
+}
+
+.top-nav-account-menu.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    transition: opacity 140ms ease-out, transform 140ms ease-out, visibility 0s;
+}
+
+/* 메뉴가 열려 있는 동안 상단바를 다른 오버레이(서브내비/토스트) 위로 올림 */
+.top-nav.top-nav--menu-open {
+    z-index: 1070;
+}
+
+/* 백드롭은 모바일에서만 노출 */
+.top-nav-account-backdrop {
+    display: none;
+}
+
+@media (max-width: 599.98px) {
+    body.top-nav-account-menu-open {
+        overflow: hidden;
+    }
+
+    /* auto-hide용 will-change가 fixed 자식의 컨테이닝 블록을 만들지 않도록 해제 */
+    body.has-dual-bottom-nav .top-nav-row,
+    body.mypage-page .top-nav-row,
+    body.typing-page .top-nav-row {
+        will-change: auto;
+    }
+
+    /* 계정 메뉴 → 하단 바텀시트 */
+    .top-nav-account-menu {
+        position: fixed;
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        min-width: 0;
+        width: 100%;
+        max-height: calc(100vh - 0.75rem);
+        max-height: calc(100dvh - 0.75rem);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: 0.5rem 0.75rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+        border-radius: 1rem 1rem 0 0;
+        border-bottom: 0;
+        box-shadow: 0 -8px 28px var(--color-shadow);
+        opacity: 1;
+        transform: translateY(100%);
+        transform-origin: center bottom;
+        transition: transform 260ms cubic-bezier(0.32, 0.72, 0, 1), visibility 0s linear 260ms;
+    }
+
+    .top-nav-account-menu.is-open {
+        opacity: 1;
+        transform: translateY(0);
+        transition: transform 260ms cubic-bezier(0.32, 0.72, 0, 1), visibility 0s;
+    }
+
+    .top-nav-account-close {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 44px;
+        height: 44px;
+        margin: -0.15rem 0 0.2rem auto;
+        border: 0;
+        border-radius: 999px;
+        background: transparent;
+        color: var(--color-text-secondary);
+        font-size: 1.6rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    /* 모바일 터치 타깃 확대 */
+    .top-nav-account-menu .top-nav-account-item,
+    .top-nav-account-menu .top-nav-theme-menu-toggle,
+    .top-nav-account-menu .top-nav-theme-item {
+        min-height: 48px;
+        padding-top: 0.7rem;
+        padding-bottom: 0.7rem;
+    }
+
+    /* 바텀시트 상단 그립 핸들 */
+    .top-nav-account-menu::before {
+        content: "";
+        display: block;
+        width: 36px;
+        height: 4px;
+        margin: 0.1rem auto 0.5rem;
+        border-radius: 999px;
+        background: var(--color-border);
+    }
+
+    /* 백드롭 (모바일) */
+    .top-nav-account-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.4);
+        opacity: 0;
+        visibility: hidden;
+        z-index: 1039;
+        transition: opacity 200ms ease, visibility 0s linear 200ms;
+    }
+
+    .top-nav-account-menu.is-open ~ .top-nav-account-backdrop {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 200ms ease, visibility 0s;
+    }
+}
+
+/* 모션 최소화 선호 시 애니메이션 제거 */
+@media (prefers-reduced-motion: reduce) {
+    .top-nav-account-menu,
+    .top-nav-account-menu.is-open,
+    .top-nav-account-backdrop {
+        transition-duration: 1ms !important;
+    }
+
+    .top-nav-account-menu {
+        transform: none !important;
     }
 }

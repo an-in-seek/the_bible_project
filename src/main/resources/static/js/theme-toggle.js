@@ -81,6 +81,7 @@ function setSubmenuOpen(open) {
     if (!toggle || !submenu) return;
     submenu.classList.toggle(SUBMENU_OPEN_CLASS, open);
     toggle.setAttribute("aria-expanded", open ? "true" : "false");
+    submenu.setAttribute("aria-hidden", open ? "false" : "true");
 }
 
 function isSubmenuOpen() {
@@ -91,9 +92,13 @@ function isSubmenuOpen() {
 function closeAccountMenu() {
     const menu = document.getElementById(ACCOUNT_MENU_ID);
     const button = document.getElementById(ACCOUNT_BUTTON_ID);
-    if (menu) menu.classList.add("d-none");
+    if (menu) menu.classList.remove("is-open");
     if (button) button.setAttribute("aria-expanded", "false");
+    const topNav = document.querySelector(".top-nav");
+    if (topNav) topNav.classList.remove("top-nav--menu-open");
+    document.body.classList.remove("top-nav-account-menu-open");
     setSubmenuOpen(false);
+    if (button) button.focus();
 }
 
 function setupMenuToggleHandler() {
@@ -120,7 +125,7 @@ function setupAccountMenuObserver() {
     const menu = document.getElementById(ACCOUNT_MENU_ID);
     if (!menu) return;
     const observer = new MutationObserver(() => {
-        if (menu.classList.contains("d-none")) {
+        if (!menu.classList.contains("is-open")) {
             setSubmenuOpen(false);
         }
     });

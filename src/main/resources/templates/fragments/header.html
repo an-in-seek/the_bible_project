@@ -107,17 +107,38 @@
                                 type="button"
                                 class="top-nav-account-button top-nav-btn btn btn-outline-secondary"
                                 aria-label="계정 메뉴"
-                                aria-haspopup="true"
+                                aria-haspopup="menu"
+                                aria-controls="topNavAccountMenu"
                                 aria-expanded="false">
-                            👤
+                            <svg class="top-nav-account-icon"
+                                 viewBox="0 0 24 24"
+                                 fill="none"
+                                 stroke="currentColor"
+                                 stroke-width="2"
+                                 stroke-linecap="round"
+                                 stroke-linejoin="round"
+                                 aria-hidden="true"
+                                 focusable="false">
+                                <path d="M4 6h16"></path>
+                                <path d="M4 12h16"></path>
+                                <path d="M4 18h16"></path>
+                            </svg>
                         </button>
                         <div id="topNavAccountMenu"
-                             class="top-nav-account-menu d-none"
+                             class="top-nav-account-menu"
                              role="menu"
                              aria-label="계정 메뉴">
+                            <button id="topNavAccountMenuClose"
+                                    type="button"
+                                    class="top-nav-account-close"
+                                    role="menuitem"
+                                    aria-label="계정 메뉴 닫기">
+                                <span aria-hidden="true">×</span>
+                            </button>
                             <button id="topNavThemeMenuToggle"
                                     type="button"
                                     class="top-nav-account-item top-nav-theme-menu-toggle"
+                                    role="menuitem"
                                     aria-haspopup="true"
                                     aria-expanded="false"
                                     aria-controls="topNavThemeSubmenu">
@@ -128,6 +149,7 @@
                             <div id="topNavThemeSubmenu"
                                  class="top-nav-theme-submenu"
                                  role="group"
+                                 aria-hidden="true"
                                  aria-label="테마 선택">
                                 <button type="button"
                                         class="top-nav-account-item top-nav-theme-item"
@@ -166,13 +188,13 @@
                                  aria-orientation="horizontal"></div>
                             <a id="topNavLoginLink"
                                href="/web/auth/login"
-                               class="top-nav-account-item d-none"
+                               class="top-nav-account-item top-nav-account-primary d-none"
                                role="menuitem">
                                 로그인
                             </a>
                             <a id="topNavMyPageLink"
                                href="/web/member/mypage"
-                               class="top-nav-account-item d-none"
+                               class="top-nav-account-item top-nav-account-primary d-none"
                                role="menuitem">
                                 마이페이지
                             </a>
@@ -193,6 +215,7 @@
                                 로그아웃
                             </a>
                         </div>
+                        <div id="topNavAccountBackdrop" class="top-nav-account-backdrop" aria-hidden="true"></div>
                     </div>
                 </div>
             </div>
@@ -218,6 +241,8 @@
             const accountDivider = document.getElementById("topNavAccountDivider");
             const accountButton = document.getElementById("topNavAccountButton");
             const accountMenu = document.getElementById("topNavAccountMenu");
+            const accountCloseButton = document.getElementById("topNavAccountMenuClose");
+            const accountBackdrop = document.getElementById("topNavAccountBackdrop");
             if (!loginLink || !logoutLink || !myPageLink || !myMemoLink || !accountDivider || !accountButton || !accountMenu) {
                 return;
             }
@@ -243,47 +268,120 @@
                 },
             });
 
-            const closeAccountMenu = () => {
-                accountMenu.classList.add("d-none");
+            const topNav = document.querySelector(".top-nav");
+            const isAccountMenuOpen = () => accountMenu.classList.contains("is-open");
+
+            const isVisibleMenuItem = (element) => {
+                if (!element || element.classList.contains("d-none")) {
+                    return false;
+                }
+                const style = window.getComputedStyle(element);
+                return style.display !== "none" && style.visibility !== "hidden";
+            };
+
+            const getMenuItems = () => Array.from(accountMenu.querySelectorAll('[role="menuitem"], [role="menuitemradio"]'))
+                .filter(isVisibleMenuItem);
+
+            const focusMenuItem = (index) => {
+                const items = getMenuItems();
+                if (items.length === 0) {
+                    return;
+                }
+                const normalizedIndex = (index + items.length) % items.length;
+                items[normalizedIndex].focus();
+            };
+
+            const closeAccountMenu = ({restoreFocus = false} = {}) => {
+                accountMenu.classList.remove("is-open");
                 accountButton.setAttribute("aria-expanded", "false");
+                if (topNav) topNav.classList.remove("top-nav--menu-open");
+                document.body.classList.remove("top-nav-account-menu-open");
+                if (restoreFocus) {
+                    accountButton.focus();
+                }
             };
 
-            const openAccountMenu = () => {
-                accountMenu.classList.remove("d-none");
+            const openAccountMenu = ({focusIndex = null} = {}) => {
+                accountMenu.classList.add("is-open");
                 accountButton.setAttribute("aria-expanded", "true");
+                if (topNav) topNav.classList.add("top-nav--menu-open");
+                document.body.classList.add("top-nav-account-menu-open");
+                if (Number.isInteger(focusIndex)) {
+                    requestAnimationFrame(() => focusMenuItem(focusIndex));
+                }
             };
 
-            accountButton.addEventListener("click", () => {
-                if (accountMenu.classList.contains("d-none")) {
-                    openAccountMenu();
-                } else {
+            accountButton.addEventListener("click", (event) => {
+                if (isAccountMenuOpen()) {
                     closeAccountMenu();
+                } else {
+                    openAccountMenu({focusIndex: event.detail === 0 ? 0 : null});
                 }
             });
 
             accountButton.addEventListener("keydown", (event) => {
-                if (event.key === "ArrowDown") {
+                if (event.key === "ArrowDown" || event.key === "ArrowUp") {
                     event.preventDefault();
-                    openAccountMenu();
-                    const firstItem = accountMenu.querySelector(".top-nav-account-item:not(.d-none)");
-                    if (firstItem) {
-                        firstItem.focus();
-                    }
+                    openAccountMenu({focusIndex: event.key === "ArrowDown" ? 0 : getMenuItems().length - 1});
                 }
             });
 
             accountMenu.addEventListener("keydown", (event) => {
                 if (event.key === "Escape") {
                     event.preventDefault();
-                    closeAccountMenu();
-                    accountButton.focus();
+                    closeAccountMenu({restoreFocus: true});
+                    return;
+                }
+
+                const items = getMenuItems();
+                if (items.length === 0) {
+                    return;
+                }
+
+                const currentIndex = items.indexOf(document.activeElement);
+                if (event.key === "ArrowDown") {
+                    event.preventDefault();
+                    focusMenuItem(currentIndex + 1);
+                } else if (event.key === "ArrowUp") {
+                    event.preventDefault();
+                    focusMenuItem(currentIndex === -1 ? items.length - 1 : currentIndex - 1);
+                } else if (event.key === "Home") {
+                    event.preventDefault();
+                    focusMenuItem(0);
+                } else if (event.key === "End") {
+                    event.preventDefault();
+                    focusMenuItem(items.length - 1);
                 }
             });
 
+            if (accountCloseButton) {
+                accountCloseButton.addEventListener("click", () => {
+                    closeAccountMenu({restoreFocus: true});
+                });
+            }
+
+            if (accountBackdrop) {
+                accountBackdrop.addEventListener("click", () => {
+                    closeAccountMenu();
+                });
+            }
+
             document.addEventListener("click", (event) => {
-                if (!accountMenu.classList.contains("d-none") &&
+                if (isAccountMenuOpen() &&
                     !accountMenu.contains(event.target) &&
                     !accountButton.contains(event.target)) {
+                    closeAccountMenu();
+                }
+            });
+
+            // 스크롤/리사이즈 시 메뉴 닫기 (상단바 auto-hide·뷰포트 변화 대응)
+            window.addEventListener("scroll", () => {
+                if (isAccountMenuOpen()) {
+                    closeAccountMenu();
+                }
+            }, {passive: true});
+            window.addEventListener("resize", () => {
+                if (isAccountMenuOpen()) {
                     closeAccountMenu();
                 }
             });
