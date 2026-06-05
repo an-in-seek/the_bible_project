@@ -187,7 +187,7 @@
                                  role="separator"
                                  aria-orientation="horizontal"></div>
                             <a id="topNavLogoutLink"
-                               href="/web/auth/logout"
+                               href="/web/auth/logout?returnUrl=/web/auth/login"
                                class="top-nav-account-item d-none"
                                role="menuitem">
                                 로그아웃
@@ -223,7 +223,8 @@
             }
             const returnUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`;
             loginLink.href = buildLoginRedirectUrl(returnUrl);
-            logoutLink.href = `/web/auth/logout?returnUrl=${encodeURIComponent(returnUrl)}`;
+            // 로그아웃 후에는 현재 페이지가 아니라 로그인 화면으로 이동시킨다.
+            logoutLink.href = `/web/auth/logout?returnUrl=${encodeURIComponent("/web/auth/login")}`;
 
             const notificationButton = document.getElementById("topNavNotificationButton");
 
