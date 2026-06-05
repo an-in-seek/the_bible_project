@@ -71,7 +71,7 @@ class JwtRefreshFilter(
             return
         }
         val refreshToken = jwtProvider.resolveRefreshToken(request)
-        val refreshClaims = refreshToken?.let(jwtProvider::resolveClaims)
+        val refreshClaims = refreshToken?.let(jwtProvider::resolveRefreshClaims)
         if (refreshClaims == null) {
             filterChain.doFilter(request, response)
             return
@@ -93,7 +93,7 @@ class JwtRefreshFilter(
             JwtProvider.ACCESS_TOKEN_COOKIE_NAME,
             newAccessToken,
             properties.jwt.accessTokenTtl.seconds,
-            request.isSecure
+            cookieSecure(request)
         )
         val principal = JwtPrincipal(member.uid, member.email, roles)
         val authorities = roles.map { SimpleGrantedAuthority(it.key) }
@@ -103,6 +103,10 @@ class JwtRefreshFilter(
             }
         SecurityContextHolder.getContext().authentication = authentication
         filterChain.doFilter(request, response)
+    }
+
+    private fun cookieSecure(request: HttpServletRequest): Boolean {
+        return properties.jwt.cookieSecure ?: request.isSecure
     }
 
 }

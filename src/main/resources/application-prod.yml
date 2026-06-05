@@ -39,3 +39,7 @@ springdoc:
     enabled: false
   swagger-ui:
     enabled: false
+
+el-seeker:
+  jwt:
+    cookie-secure: true

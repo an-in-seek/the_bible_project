@@ -63,6 +63,7 @@ class OAuth2LoginSuccessHandler(
         val safeReturnUrl = returnUrl?.takeIf { it.startsWith("/") && !it.startsWith("//") }
         authorizationRequestRepository.removeAuthorizationRequestCookies(request, response)
         CookieUtils.deleteCookie(response, HttpCookieOAuth2AuthorizationRequestRepository.LINK_FLAG_COOKIE_NAME, request.isSecure)
+        val cookieSecure = cookieSecure(request)
 
         // [신규 가입자] 동의 미완료 → 단기 Signup 토큰만 발급하고 동의 페이지로 유도 (Refresh 미발급)
         if (status == MemberStatus.PENDING_CONSENT.name) {
@@ -72,7 +73,7 @@ class OAuth2LoginSuccessHandler(
                 JwtProvider.ACCESS_TOKEN_COOKIE_NAME,
                 signupToken,
                 properties.jwt.signupTokenTtl.seconds,
-                request.isSecure,
+                cookieSecure,
             )
             // 동의 완료 후 복귀할 returnUrl 을 단기 쿠키로 보존 (기존 RETURN_URL TTL 은 동의 단계에 부족)
             if (safeReturnUrl != null) {
@@ -99,14 +100,14 @@ class OAuth2LoginSuccessHandler(
             JwtProvider.ACCESS_TOKEN_COOKIE_NAME,
             accessToken,
             properties.jwt.accessTokenTtl.seconds,
-            request.isSecure,
+            cookieSecure,
         )
         CookieUtils.addCookie(
             response,
             JwtProvider.REFRESH_TOKEN_COOKIE_NAME,
             refreshToken,
             properties.jwt.refreshTokenTtl.seconds,
-            request.isSecure,
+            cookieSecure,
         )
 
         redirectStrategy.sendRedirect(request, response, safeReturnUrl ?: "/")
@@ -127,6 +128,10 @@ class OAuth2LoginSuccessHandler(
          * - 웹: /
          * - 앱: 커스텀 스킴 또는 App/Universal Links 사용
          */
+    }
+
+    private fun cookieSecure(request: HttpServletRequest): Boolean {
+        return properties.jwt.cookieSecure ?: request.isSecure
     }
 
     companion object {

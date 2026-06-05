@@ -44,17 +44,18 @@ class AuthApi(
         response: HttpServletResponse,
     ): ResponseEntity<Void> {
         val refreshToken = jwtProvider.resolveRefreshToken(request)
-        val claims = refreshToken?.let(jwtProvider::resolveClaims)
+        val claims = refreshToken?.let(jwtProvider::resolveRefreshClaims)
+        val cookieSecure = cookieSecure(request)
         if (claims == null) {
-            CookieUtils.deleteCookie(response, JwtProvider.ACCESS_TOKEN_COOKIE_NAME, request.isSecure)
-            CookieUtils.deleteCookie(response, JwtProvider.REFRESH_TOKEN_COOKIE_NAME, request.isSecure)
+            CookieUtils.deleteCookie(response, JwtProvider.ACCESS_TOKEN_COOKIE_NAME, cookieSecure)
+            CookieUtils.deleteCookie(response, JwtProvider.REFRESH_TOKEN_COOKIE_NAME, cookieSecure)
             return ResponseEntity.status(401).build()
         }
 
         val memberUid = runCatching { UUID.fromString(claims.subject) }.getOrNull()
             ?: run {
-                CookieUtils.deleteCookie(response, JwtProvider.ACCESS_TOKEN_COOKIE_NAME, request.isSecure)
-                CookieUtils.deleteCookie(response, JwtProvider.REFRESH_TOKEN_COOKIE_NAME, request.isSecure)
+                CookieUtils.deleteCookie(response, JwtProvider.ACCESS_TOKEN_COOKIE_NAME, cookieSecure)
+                CookieUtils.deleteCookie(response, JwtProvider.REFRESH_TOKEN_COOKIE_NAME, cookieSecure)
                 return ResponseEntity.status(401).build()
             }
         val member = memberService.getMember(memberUid)
@@ -65,7 +66,7 @@ class AuthApi(
             JwtProvider.ACCESS_TOKEN_COOKIE_NAME,
             newAccessToken,
             properties.jwt.accessTokenTtl.seconds,
-            request.isSecure
+            cookieSecure
         )
         return ResponseEntity.noContent().build()
     }
@@ -75,5 +76,9 @@ class AuthApi(
         @Valid @RequestBody request: SocialLoginRequest,
     ): SocialLoginResponse {
         return socialLoginService.login(request)
+    }
+
+    private fun cookieSecure(request: HttpServletRequest): Boolean {
+        return properties.jwt.cookieSecure ?: request.isSecure
     }
 }

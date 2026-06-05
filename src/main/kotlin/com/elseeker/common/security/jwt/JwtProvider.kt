@@ -67,6 +67,7 @@ class JwtProvider(
             .subject(memberUid)
             .claim("email", email)
             .claim("roles", roles.map { it.name })
+            .claim(TYP_CLAIM, TYP_ACCESS)
             .issuedAt(Date.from(now))
             .expiration(Date.from(expiry))
             .signWith(secretKey, Jwts.SIG.HS256)
@@ -96,6 +97,7 @@ class JwtProvider(
             .claim("email", email)
             .claim("roles", listOf(com.elseeker.member.domain.vo.MemberRole.USER.name))
             .claim(SCOPE_CLAIM, SCOPE_SIGNUP)
+            .claim(TYP_CLAIM, TYP_SIGNUP)
             .issuedAt(Date.from(now))
             .expiration(Date.from(expiry))
             .signWith(secretKey, Jwts.SIG.HS256)
@@ -117,6 +119,7 @@ class JwtProvider(
 
         return Jwts.builder()
             .subject(memberUid)
+            .claim(TYP_CLAIM, TYP_REFRESH)
             .issuedAt(Date.from(now))
             .expiration(Date.from(expiry))
             .signWith(secretKey, Jwts.SIG.HS256)
@@ -177,9 +180,18 @@ class JwtProvider(
                 claims
             }
         } catch (e: Exception) {
-            logger.error { "Invalid JWT token: ${e.message}" }
+            logger.debug { "Invalid JWT token" }
             null
         }
+    }
+
+    /**
+     * 리프레시 토큰 전용 검증. 서명·만료 검증에 더해 typ=refresh 클레임을 강제합니다.
+     * (Access/Signup 토큰을 Refresh 쿠키에 넣어 Access 토큰을 재발급받는 토큰 혼동 공격 차단)
+     */
+    fun resolveRefreshClaims(token: String): Claims? {
+        val claims = resolveClaims(token) ?: return null
+        return if (claims[TYP_CLAIM]?.toString() == TYP_REFRESH) claims else null
     }
 
     companion object {
@@ -193,6 +205,14 @@ class JwtProvider(
          * 리프레시 토큰이 저장되는 쿠키 이름입니다.
          */
         const val REFRESH_TOKEN_COOKIE_NAME = "REFRESH_TOKEN"
+
+        const val TYP_CLAIM = "typ"
+
+        const val TYP_ACCESS = "access"
+
+        const val TYP_REFRESH = "refresh"
+
+        const val TYP_SIGNUP = "signup"
 
         /**
          * 토큰 스코프 클레임 이름입니다.
