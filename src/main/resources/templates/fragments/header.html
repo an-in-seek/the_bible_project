@@ -385,6 +385,68 @@
                     closeAccountMenu();
                 }
             });
+
+            // 모바일 바텀시트: 아래로 끌어내려 닫기 (swipe-to-dismiss)
+            const SWIPE_CLOSE_DISTANCE = 80;   // 이 이상 끌어내리면 닫힘 (px)
+            const SWIPE_CLOSE_VELOCITY = 0.5;  // 또는 이 이상의 하향 속도면 닫힘 (px/ms)
+            const isBottomSheet = () => window.matchMedia("(max-width: 599.98px)").matches;
+
+            let dragStartY = 0;
+            let dragLastY = 0;
+            let dragLastT = 0;
+            let dragVelocity = 0;
+            let dragging = false;
+
+            const onSheetTouchStart = (event) => {
+                if (!isBottomSheet() || !isAccountMenuOpen() || event.touches.length !== 1) {
+                    return;
+                }
+                // 내부 콘텐츠가 최상단에 있을 때만 드래그로 닫기를 시작한다(스크롤과 충돌 방지)
+                if (accountMenu.scrollTop > 0) {
+                    return;
+                }
+                dragging = true;
+                dragStartY = dragLastY = event.touches[0].clientY;
+                dragLastT = event.timeStamp;
+                dragVelocity = 0;
+                accountMenu.classList.add("is-dragging");
+            };
+
+            const onSheetTouchMove = (event) => {
+                if (!dragging) {
+                    return;
+                }
+                const y = event.touches[0].clientY;
+                const dt = event.timeStamp - dragLastT;
+                if (dt > 0) {
+                    dragVelocity = (y - dragLastY) / dt;
+                }
+                dragLastY = y;
+                dragLastT = event.timeStamp;
+
+                const delta = y - dragStartY;
+                // 위로 끌면 따라가지 않음(시트는 이미 바닥에 붙어 있음)
+                accountMenu.style.transform = delta > 0 ? `translateY(${delta}px)` : "translateY(0)";
+            };
+
+            const onSheetTouchEnd = () => {
+                if (!dragging) {
+                    return;
+                }
+                dragging = false;
+                const delta = dragLastY - dragStartY;
+                accountMenu.classList.remove("is-dragging");
+                accountMenu.style.transform = "";
+                // 충분히 끌어내렸거나 빠르게 튕겼으면 닫고, 아니면 제자리로 스냅백
+                if (delta > SWIPE_CLOSE_DISTANCE || dragVelocity > SWIPE_CLOSE_VELOCITY) {
+                    closeAccountMenu();
+                }
+            };
+
+            accountMenu.addEventListener("touchstart", onSheetTouchStart, {passive: true});
+            accountMenu.addEventListener("touchmove", onSheetTouchMove, {passive: true});
+            accountMenu.addEventListener("touchend", onSheetTouchEnd);
+            accountMenu.addEventListener("touchcancel", onSheetTouchEnd);
         });
     </script>
 </header>

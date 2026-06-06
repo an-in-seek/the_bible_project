@@ -489,6 +489,11 @@ html[data-theme="dark"] .top-nav-title .page-title {
         transition: transform 260ms cubic-bezier(0.32, 0.72, 0, 1), visibility 0s;
     }
 
+    /* 손가락으로 끌어내리는 동안에는 트랜지션을 끄고 위치를 즉시 따라가게 한다 */
+    .top-nav-account-menu.is-dragging {
+        transition: none;
+    }
+
     .top-nav-account-close {
         display: flex;
         align-items: center;

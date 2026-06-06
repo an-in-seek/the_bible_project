@@ -171,6 +171,30 @@ html[data-theme="dark"] .popular-search-link.top-rank-3 .popular-search-rank {
     background: var(--color-bg-base);
     color: var(--color-text-primary);
     box-shadow: 0 16px 44px rgba(0, 0, 0, 0.2);
+
+    /* 등장/퇴장 애니메이션 (데스크톱: 페이드 + 살짝 확대 + 상승)
+       네이티브 <dialog>는 display 전환이라 @starting-style + allow-discrete 필요.
+       미지원 브라우저는 transition이 무시되어 즉시 표시(graceful degradation). */
+    opacity: 0;
+    transform: translateY(8px) scale(0.97);
+    transition:
+        opacity 200ms ease,
+        transform 200ms cubic-bezier(0.32, 0.72, 0, 1),
+        overlay 200ms ease allow-discrete,
+        display 200ms ease allow-discrete;
+}
+
+.popular-search-dialog[open] {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+/* 열림 직전의 시작 프레임 (이 상태에서 [open] 상태로 전환) */
+@starting-style {
+    .popular-search-dialog[open] {
+        opacity: 0;
+        transform: translateY(8px) scale(0.97);
+    }
 }
 
 /* 다크모드: body(#0f1216)보다 한 단계 위로 떠 있도록 elevation 부여 */
@@ -179,8 +203,25 @@ html[data-theme="dark"] .popular-search-dialog {
 }
 
 .popular-search-dialog::backdrop {
+    background: rgba(0, 0, 0, 0);
+    backdrop-filter: blur(0);
+    transition:
+        background-color 200ms ease,
+        backdrop-filter 200ms ease,
+        overlay 200ms ease allow-discrete,
+        display 200ms ease allow-discrete;
+}
+
+.popular-search-dialog[open]::backdrop {
     background: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(2px);
+}
+
+@starting-style {
+    .popular-search-dialog[open]::backdrop {
+        background: rgba(0, 0, 0, 0);
+        backdrop-filter: blur(0);
+    }
 }
 
 .popular-search-dialog-body {
@@ -264,9 +305,33 @@ html[data-theme="dark"] .popular-search-dialog-close {
         width: min(100vw, 520px);
         border-radius: 16px 16px 0 0;
         margin: auto 0 0;
+        /* 하단 시트: 아래에서 위로 슬라이드 */
+        transform: translateY(100%);
+    }
+
+    .popular-search-dialog[open] {
+        transform: translateY(0);
+    }
+
+    @starting-style {
+        .popular-search-dialog[open] {
+            transform: translateY(100%);
+        }
     }
 
     .popular-search-dialog-body {
         max-height: 75vh;
+    }
+}
+
+/* 모션 최소화 선호 시: 애니메이션 없이 즉시 표시 */
+@media (prefers-reduced-motion: reduce) {
+    .popular-search-dialog,
+    .popular-search-dialog::backdrop {
+        transition: none;
+    }
+
+    .popular-search-dialog {
+        transform: none;
     }
 }
