@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
-<head th:replace="~{fragments/head :: head('성경 구절 검색 - 키워드로 빠르게 찾기 | ElSeeker', true, '/css/search.css?v=5.6,/css/popular-search.css?v=5.7')}"
+<head th:replace="~{fragments/head :: head('성경 구절 검색 - 키워드로 빠르게 찾기 | ElSeeker', true, '/css/search.css?v=5.8,/css/popular-search.css?v=5.7')}"
       th:with="pageDescription='성경 본문을 키워드로 검색해 원하는 구절을 빠르게 찾을 수 있습니다.',
                pageKeywords='성경 검색,성경 구절 찾기,성경 키워드 검색,성경 본문 검색,말씀 찾기'"></head>
 
@@ -13,14 +13,20 @@
     <div class="search-controls">
         <form id="searchForm" role="search" class="mb-2">
             <div class="input-group">
-                <input type="search"
-                       id="keywordInput"
-                       class="form-control"
-                       placeholder="검색할 단어를 입력하세요"
-                       th:value="${keyword}"
-                       autocomplete="on"
-                       inputmode="search">
-                <button id="clearBtn" type="button" class="btn btn-outline-secondary">지우기</button>
+                <span class="search-clear-field">
+                    <input type="search"
+                           id="keywordInput"
+                           class="form-control"
+                           placeholder="검색할 단어를 입력하세요"
+                           th:value="${keyword}"
+                           autocomplete="on"
+                           inputmode="search">
+                    <button id="clearBtn" type="button" class="search-clear d-none" aria-label="검색어 지우기">
+                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+                        </svg>
+                    </button>
+                </span>
                 <button id="searchBtn" type="submit" class="btn btn-outline-primary">🔍</button>
             </div>
         </form>
@@ -63,7 +69,7 @@
     ↑
 </button>
 
-<script type="module" src="/js/bible/search.js?v=3.1"></script>
+<script type="module" src="/js/bible/search.js?v=3.2"></script>
 </body>
 
 </html>

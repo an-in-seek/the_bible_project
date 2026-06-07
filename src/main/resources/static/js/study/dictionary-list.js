@@ -148,17 +148,19 @@ const App = {
     bindEvents: () => {
         const {keywordInput, clearBtn, searchForm, scrollToTopBtn} = App.elements;
 
+        const toggleClear = () => {
+            if (clearBtn && keywordInput) {
+                clearBtn.classList.toggle("d-none", keywordInput.value.trim().length === 0);
+            }
+        };
+
         if (keywordInput) {
             keywordInput.focus();
-            keywordInput.addEventListener("input", () => {
-                if (clearBtn) {
-                    clearBtn.disabled = keywordInput.value.trim().length === 0;
-                }
-            });
+            keywordInput.addEventListener("input", toggleClear);
         }
 
         if (clearBtn) {
-            clearBtn.disabled = keywordInput?.value.trim().length === 0;
+            toggleClear();
             clearBtn.addEventListener("click", () => {
                 if (keywordInput) {
                     keywordInput.value = "";
@@ -166,6 +168,7 @@ const App = {
                 }
                 App.clearResults();
                 App.startSearch("");
+                toggleClear();
             });
         }
 

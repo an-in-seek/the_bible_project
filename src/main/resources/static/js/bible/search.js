@@ -184,6 +184,9 @@ const App = {
     initFormControls: () => {
         const {clearBtn, keywordInput, searchForm} = App.elements;
         if (clearBtn && keywordInput) {
+            const toggleClear = () =>
+                clearBtn.classList.toggle("d-none", keywordInput.value.trim().length === 0);
+
             clearBtn.addEventListener("click", () => {
                 keywordInput.value = "";
                 keywordInput.focus();
@@ -191,13 +194,12 @@ const App = {
                 App.resetSearchState();
                 App.resetBookFilter();
                 App.updateUrl();
+                toggleClear();
             });
 
-            keywordInput.addEventListener("input", () => {
-                clearBtn.disabled = keywordInput.value.trim().length === 0;
-            });
+            keywordInput.addEventListener("input", toggleClear);
             keywordInput.focus();
-            clearBtn.disabled = keywordInput.value.trim().length === 0;
+            toggleClear();
         }
 
         if (searchForm && keywordInput) {

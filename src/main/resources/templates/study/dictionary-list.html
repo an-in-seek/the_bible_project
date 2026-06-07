@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
-<head th:replace="~{fragments/head :: head('성경 사전 - 단어·용어 검색 | ElSeeker', true, '/css/search.css?v=5.7,/css/popular-search.css?v=5.7,/css/study/dictionary-list.css?v=1.2')}"
+<head th:replace="~{fragments/head :: head('성경 사전 - 단어·용어 검색 | ElSeeker', true, '/css/search.css?v=5.8,/css/popular-search.css?v=5.7,/css/study/dictionary-list.css?v=1.2')}"
       th:with="pageDescription='성경에 등장하는 단어와 용어를 검색하고 정의, 원어, 관련 구절을 확인할 수 있는 성경 사전입니다.',
                pageKeywords='성경 사전,성경 단어,성경 용어,히브리어,헬라어,성경 원어,성경 뜻'"></head>
 
@@ -14,16 +14,22 @@
         <form id="dictionarySearchForm" class="mb-2" method="get" th:action="@{/web/study/dictionary}"
               role="search">
             <div class="input-group">
-                <input type="search"
-                       id="dictionaryKeywordInput"
-                       class="form-control"
-                       name="keyword"
-                       placeholder="찾고 싶은 성경 용어를 입력하세요"
-                       th:value="${keyword}"
-                       autocomplete="on"
-                       inputmode="search"
-                       aria-label="성경 용어 검색">
-                <button id="dictionaryClearBtn" class="btn btn-outline-secondary" type="button">지우기</button>
+                <span class="search-clear-field">
+                    <input type="search"
+                           id="dictionaryKeywordInput"
+                           class="form-control"
+                           name="keyword"
+                           placeholder="찾고 싶은 성경 용어를 입력하세요"
+                           th:value="${keyword}"
+                           autocomplete="on"
+                           inputmode="search"
+                           aria-label="성경 용어 검색">
+                    <button id="dictionaryClearBtn" class="search-clear d-none" type="button" aria-label="검색어 지우기">
+                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+                        </svg>
+                    </button>
+                </span>
                 <button id="dictionarySearchBtn" class="btn btn-outline-primary" type="submit">🔍</button>
             </div>
         </form>
@@ -58,7 +64,7 @@
 
 <button id="scrollToTopBtn" class="scroll-to-top-btn" type="button" aria-label="맨 위로 이동">↑</button>
 
-<script type="module" src="/js/study/dictionary-list.js?v=3.2"></script>
+<script type="module" src="/js/study/dictionary-list.js?v=3.3"></script>
 </body>
 
 </html>
