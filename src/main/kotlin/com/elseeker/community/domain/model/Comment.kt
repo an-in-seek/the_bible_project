@@ -21,6 +21,10 @@ import java.time.Instant
         Index(
             name = "idx_comment_author_created_at",
             columnList = "author_id, created_at"
+        ),
+        Index(
+            name = "idx_comment_parent_created_at",
+            columnList = "parent_id, created_at, id"
         )
     ]
 )
@@ -46,6 +50,10 @@ class Comment(
     @Column(name = "report_count", nullable = false)
     var reportCount: Long = 0,
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    val parent: Comment? = null,
+
     createdAt: Instant = Instant.now(),
     updatedAt: Instant = Instant.now(),
 ) : BaseTimeEntity(
@@ -64,8 +72,24 @@ class Comment(
             author = author,
             content = content,
             status = CommentStatus.PUBLISHED,
+            parent = null,
+        )
+
+        fun createReply(
+            post: Post,
+            author: Member,
+            content: String,
+            parent: Comment,
+        ) = Comment(
+            post = post,
+            author = author,
+            content = content,
+            status = CommentStatus.PUBLISHED,
+            parent = parent,
         )
     }
+
+    fun isReply(): Boolean = parent != null
 
     fun update(content: String) {
         this.content = content

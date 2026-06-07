@@ -58,6 +58,15 @@ interface PostRepository : JpaRepository<Post, Long>, KotlinJdslJpqlExecutor {
     @Query("UPDATE Post p SET p.statistics.commentCount = p.statistics.commentCount - 1 WHERE p.id = :postId AND p.statistics.commentCount > 0")
     fun decrementCommentCount(@Param("postId") postId: Long): Int
 
+    /** 7-3 부모+자식 N건 1회 벌크 차감. GREATEST 가드로 음수 방지 (H2/PostgreSQL 모두 지원). */
+    @Modifying
+    @Query("UPDATE Post p SET p.statistics.commentCount = GREATEST(p.statistics.commentCount - :n, 0) WHERE p.id = :postId")
+    fun decrementCommentCountBy(@Param("postId") postId: Long, @Param("n") n: Long): Int
+
+    /** 5-2-1 벌크 UPDATE 후 fresh scalar 조회 (findById는 L1 stale). */
+    @Query("SELECT p.statistics.commentCount FROM Post p WHERE p.id = :postId")
+    fun findCommentCountByPostId(@Param("postId") postId: Long): Long
+
     @Modifying
     @Query(
         """

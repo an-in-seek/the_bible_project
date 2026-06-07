@@ -615,7 +615,12 @@ html[data-theme="dark"] .report-actions .btn-submit-report:hover {
 
 .comment-input:focus {
     border-color: var(--comm-primary);
-    background: var(--comm-bg-card);
+}
+
+/* 다크모드: 댓글/답글/수정 입력창을 모두 동일한 sunken 톤(--color-bg-base)으로 통일.
+   각자의 컨테이너(메인=wrapper, 답글=카드)와 구분되면서 입력창끼리는 색이 일치한다. */
+html[data-theme="dark"] .comment-input {
+    background: var(--color-bg-base);
 }
 
 .comment-form-footer {
@@ -755,29 +760,51 @@ html[data-theme="dark"] .comment-avatar {
     color: var(--comm-text-main);
 }
 
+/* 다크모드: 메인 댓글 입력창(.comment-input)과 동일한 sunken 톤으로 통일 + 카드 배경과 구분 */
+html[data-theme="dark"] .comment-editor textarea {
+    background: var(--color-bg-base);
+}
+
+.comment-editor textarea:focus {
+    outline: none;
+    border-color: var(--comm-primary);
+}
+
 .comment-editor-actions {
     display: flex;
+    justify-content: flex-end;
     gap: 0.5rem;
 }
 
+/* 답글/수정 액션 버튼 — 댓글 등록 버튼(.btn-submit-comment) 시스템과 통일.
+   취소 = secondary(아웃라인), 등록 = primary(솔리드). 라운드/패딩/폰트 모두 일치. */
 .comment-editor-actions button {
     border: 1px solid var(--comm-border);
-    background: var(--comm-bg-card);
-    color: var(--comm-text-main);
-    padding: 0.4rem 0.9rem;
-    border-radius: 999px;
-    font-size: 0.8rem;
+    background: transparent;
+    color: var(--comm-text-sub);
+    padding: 0.5rem 1.25rem;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
     cursor: pointer;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
 }
 
 .comment-editor-actions button.primary {
-    border-color: var(--comm-primary);
-    color: var(--comm-primary);
-    background: #eef2ff;
+    border: none;
+    background: var(--comm-text-main);
+    color: var(--color-bg-base);
 }
 
-html[data-theme="dark"] .comment-editor-actions button.primary {
-    background: rgba(165, 180, 252, 0.18);
+@media (hover: hover) and (pointer: fine) {
+    .comment-editor-actions button.primary:hover {
+        background: var(--color-text-secondary);
+    }
+
+    .comment-editor-actions button:not(.primary):hover {
+        border-color: var(--comm-text-main);
+        color: var(--comm-text-main);
+    }
 }
 
 .comment-empty {
@@ -789,6 +816,67 @@ html[data-theme="dark"] .comment-editor-actions button.primary {
     flex-direction: column;
     align-items: center;
     gap: 0.5rem;
+}
+
+/* ── 대댓글(2단계) ── */
+.comment-replies {
+    display: flex;
+    flex-direction: column;
+    margin-top: 0.5rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--comm-border);
+}
+
+/* 대댓글 행: 부모보다 한 단계 작은 아바타, 위/아래 여백 축소 */
+.comment-reply-item {
+    gap: 0.75rem;
+    padding: 0.85rem 0;
+}
+
+.comment-reply-item .comment-avatar {
+    width: 32px;
+    height: 32px;
+    font-size: 0.85rem;
+}
+
+.comment-reply-item .comment-content {
+    font-size: 0.9rem;
+}
+
+/* "답글 N개 더 보기" */
+.comment-replies-more {
+    align-self: flex-start;
+    margin-top: 0.4rem;
+    margin-left: 1rem;
+    padding: 0.25rem 0;
+    background: transparent;
+    border: none;
+    color: var(--comm-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .comment-replies-more:hover {
+        text-decoration: underline;
+    }
+}
+
+/* 인라인 답글 입력창은 .comment-editor 스타일을 그대로 재사용하되 약간의 상단 여백 */
+.comment-reply-form {
+    margin-top: 0.5rem;
+}
+
+@media (max-width: 576px) {
+    /* 모바일: 들여쓰기 최소화 */
+    .comment-replies {
+        padding-left: 0.6rem;
+    }
+
+    .comment-replies-more {
+        margin-left: 0.6rem;
+    }
 }
 
 /* Local Overrides for imported styles */

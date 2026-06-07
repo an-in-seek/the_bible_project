@@ -13,6 +13,17 @@ fun Comment.toResponse(memberUid: UUID? = null) = CommentResponse(
     status = this.status,
     isAuthor = memberUid != null && this.author.uid == memberUid,
     createdAt = this.createdAt,
+    parentId = this.parent?.id,
+)
+
+/** 최상위 댓글 + 미리보기 대댓글(parentId만 채움) + 서버 count replyCount 조립. */
+fun Comment.toResponseWithReplies(
+    memberUid: UUID? = null,
+    replies: List<Comment>,
+    replyCount: Int,
+) = this.toResponse(memberUid).copy(
+    replyCount = replyCount,
+    replies = replies.map { it.toResponse(memberUid) },
 )
 
 fun Comment.toAdminItem() = AdminCommentItem(
@@ -24,4 +35,5 @@ fun Comment.toAdminItem() = AdminCommentItem(
     status = this.status,
     reportCount = this.reportCount,
     createdAt = this.createdAt,
+    parentId = this.parent?.id,
 )

@@ -10,6 +10,7 @@ const API = {
 };
 
 const COMMENT_PAGE_SIZE = 20;
+const REPLY_PAGE_SIZE = 20;
 const NOTICE_PAGE_SIZE = 1;
 const NOTICE_TYPE = "NOTICE";
 const NOTICE_CATEGORY = "공지";
@@ -45,6 +46,9 @@ const App = {
         likeLoading: false,
         reportedPost: false,
         reportedComments: new Set(),
+        // 부모(최상위)별 대댓글 페이지네이션 상태.
+        // { [parentId]: { total, serverLoaded, cursor: {createdAt, id} | null } }
+        replyState: {},
         auth: {
             checked: false,
             allowed: false,
@@ -384,11 +388,14 @@ const App = {
         App.toggleCommentEmpty(false);
     },
 
-    createCommentItem(comment) {
+    createCommentItem(comment, isReply = false) {
         const item = document.createElement("div");
-        item.className = "comment-item";
+        item.className = isReply ? "comment-item comment-reply-item" : "comment-item";
         item.dataset.commentId = String(comment.id || "");
         item.dataset.isAuthor = String(!!comment.isAuthor);
+        if (comment.parentId != null) {
+            item.dataset.parentId = String(comment.parentId);
+        }
 
         // Avatar
         const avatar = document.createElement("div");
@@ -413,7 +420,7 @@ const App = {
 
         meta.appendChild(author);
         meta.appendChild(time);
-        meta.appendChild(App.createCommentActions(comment));
+        meta.appendChild(App.createCommentActions(comment, isReply));
 
         const content = document.createElement("div");
         content.className = "comment-content";
@@ -422,13 +429,49 @@ const App = {
         body.appendChild(meta);
         body.appendChild(content);
 
+        // 최상위 댓글에만 대댓글 영역(컨테이너 + "더 보기")을 둔다 (2단계 고정).
+        if (!isReply) {
+            const parentId = comment.id;
+            const repliesWrap = document.createElement("div");
+            repliesWrap.className = "comment-replies";
+            repliesWrap.dataset.parentId = String(parentId || "");
+
+            const preview = Array.isArray(comment.replies) ? comment.replies : [];
+            preview.forEach(reply => repliesWrap.appendChild(App.createCommentItem(reply, true)));
+            body.appendChild(repliesWrap);
+
+            const total = Number(comment.replyCount) || 0;
+            const moreBtn = document.createElement("button");
+            moreBtn.type = "button";
+            moreBtn.className = "comment-replies-more";
+            moreBtn.dataset.action = "load-replies";
+            moreBtn.dataset.parentId = String(parentId || "");
+            body.appendChild(moreBtn);
+
+            // 부모별 페이지네이션 상태 초기화: 미리보기 = 서버에서 연속 로드된 첫 구간.
+            const last = preview.length ? preview[preview.length - 1] : null;
+            App.state.replyState[parentId] = {
+                total,
+                serverLoaded: preview.length,
+                localCount: 0,
+                cursor: last ? {createdAt: last.createdAt, id: last.id} : null,
+                loading: false,
+            };
+            App.updateRepliesMoreButton(parentId);
+        }
+
         item.appendChild(body);
         return item;
     },
 
-    createCommentActions(comment) {
+    createCommentActions(comment, isReply = false) {
         const actions = document.createElement("div");
         actions.className = "comment-actions";
+
+        // 답글 버튼: 최상위 댓글에만 (2단계 평탄화 — 대댓글의 답글도 같은 부모로 모임)
+        if (!isReply) {
+            actions.appendChild(App.createCommentAction("reply", "답글"));
+        }
 
         const editBtn = App.createCommentAction("edit", "수정");
         editBtn.classList.add("comment-action-owner");
@@ -443,6 +486,24 @@ const App = {
 
         App.applyOwnerActionVisibility(actions, comment);
         return actions;
+    },
+
+    /** 부모별 "답글 N개 더 보기" 버튼 노출/문구 갱신 (serverLoaded < total 일 때만 노출). */
+    updateRepliesMoreButton(parentId) {
+        const moreBtn = document.querySelector(`.comment-replies-more[data-parent-id="${parentId}"]`);
+        if (!moreBtn) return;
+        const st = App.state.replyState[parentId];
+        if (!st) {
+            moreBtn.hidden = true;
+            return;
+        }
+        const remaining = Math.max(st.total - st.serverLoaded - (st.localCount || 0), 0);
+        if (remaining <= 0) {
+            moreBtn.hidden = true;
+        } else {
+            moreBtn.hidden = false;
+            moreBtn.textContent = `답글 ${formatNumberWithComma(remaining)}개 더 보기`;
+        }
     },
 
     createCommentAction(action, label) {
@@ -733,6 +794,14 @@ const App = {
             }
             if (action === "report") {
                 App.reportComment(item);
+                return;
+            }
+            if (action === "reply") {
+                App.toggleReplyForm(item);
+                return;
+            }
+            if (action === "load-replies") {
+                App.loadMoreReplies(actionButton.dataset.parentId);
             }
         });
     },
@@ -830,14 +899,17 @@ const App = {
             }
 
             const updated = await response.json();
-            const editor = item.querySelector(".comment-editor");
+            const newContent = updated.comment?.content || trimmed;
+            // 인라인 편집기는 .comment-content 자리에서 바뀐 것이므로, 답글 편집기와 구분해
+            // 편집 중인 item 직속 편집기를 찾는다.
+            const editor = item.querySelector(".comment-editor:not(.comment-reply-form)");
             if (!editor) return;
             const contentEl = document.createElement("div");
             contentEl.className = "comment-content";
-            contentEl.textContent = updated.content || trimmed;
+            contentEl.textContent = newContent;
             editor.replaceWith(contentEl);
             item.classList.remove("is-editing");
-            item.dataset.originalContent = updated.content || trimmed;
+            item.dataset.originalContent = newContent;
         } catch (error) {
             alert("댓글 수정에 실패했습니다. 잠시 후 다시 시도해주세요.");
         }
@@ -874,11 +946,33 @@ const App = {
                 throw new Error(`댓글 삭제 실패 (${response.status})`);
             }
 
+            const payload = await response.json().catch(() => null);
+            const isReply = item.classList.contains("comment-reply-item");
+            const parentId = item.dataset.parentId;
+            const wasLocal = item.dataset.local === "true";
+            const topLevelId = item.dataset.commentId;
             item.remove();
-            App.updateCommentCountBy(-1);
-            const list = document.getElementById("commentList");
-            if (list && list.children.length === 0) {
-                App.toggleCommentEmpty(true, "등록된 댓글이 없습니다.");
+
+            if (payload) App.applyPostCommentCount(payload.postCommentCount);
+
+            if (isReply && parentId) {
+                const st = App.state.replyState[parentId];
+                if (st) {
+                    if (wasLocal) st.localCount = Math.max((st.localCount || 0) - 1, 0);
+                    else st.serverLoaded = Math.max(st.serverLoaded - 1, 0);
+                }
+                if (payload && payload.parentReplyCount != null) {
+                    App.setParentReplyTotal(parentId, payload.parentReplyCount);
+                } else {
+                    App.updateRepliesMoreButton(parentId);
+                }
+            } else {
+                // 최상위 삭제: 서버가 자식까지 cascade 처리 → 상태 정리
+                delete App.state.replyState[topLevelId];
+                const list = document.getElementById("commentList");
+                if (list && list.children.length === 0) {
+                    App.toggleCommentEmpty(true, "등록된 댓글이 없습니다.");
+                }
             }
         } catch (error) {
             alert("댓글 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
@@ -918,9 +1012,17 @@ const App = {
             }
 
             if (response.ok) {
+                const payload = await response.json().catch(() => null);
                 alert("신고가 접수되었습니다.");
                 App.state.reportedComments.add(commentId);
                 App.setCommentReportButtonState(item, true);
+                if (payload) {
+                    App.applyPostCommentCount(payload.postCommentCount);
+                    const parentId = item.dataset.parentId;
+                    if (parentId && payload.parentReplyCount != null) {
+                        App.setParentReplyTotal(parentId, payload.parentReplyCount);
+                    }
+                }
                 return;
             }
 
@@ -936,6 +1038,194 @@ const App = {
         } catch (error) {
             console.warn(error.message);
         }
+    },
+
+    /** 최상위 댓글 아래 인라인 답글 입력창 토글. */
+    toggleReplyForm(item) {
+        const body = item.querySelector(".comment-body");
+        if (!body) return;
+        const existing = body.querySelector(".comment-reply-form");
+        if (existing) {
+            existing.remove();
+            return;
+        }
+        const parentId = item.dataset.commentId;
+        const repliesWrap = body.querySelector(".comment-replies");
+
+        const form = document.createElement("div");
+        form.className = "comment-editor comment-reply-form";
+
+        const textarea = document.createElement("textarea");
+        textarea.placeholder = "답글을 입력해주세요...";
+        form.appendChild(textarea);
+
+        const actions = document.createElement("div");
+        actions.className = "comment-editor-actions";
+
+        const saveBtn = document.createElement("button");
+        saveBtn.type = "button";
+        saveBtn.className = "primary";
+        saveBtn.textContent = "등록";
+        saveBtn.addEventListener("click", () => App.submitReply(parentId, textarea.value, form));
+
+        const cancelBtn = document.createElement("button");
+        cancelBtn.type = "button";
+        cancelBtn.textContent = "취소";
+        cancelBtn.addEventListener("click", () => form.remove());
+
+        actions.appendChild(saveBtn);
+        actions.appendChild(cancelBtn);
+        form.appendChild(actions);
+
+        // 대댓글 컨테이너 바로 앞에 입력창 배치
+        if (repliesWrap) {
+            body.insertBefore(form, repliesWrap);
+        } else {
+            body.appendChild(form);
+        }
+        textarea.focus();
+    },
+
+    async submitReply(parentId, rawContent, formEl) {
+        const content = (rawContent || "").trim();
+        if (!content) {
+            alert("답글 내용을 입력해주세요.");
+            return;
+        }
+        const allowed = await App.ensureNickname();
+        if (!allowed) return;
+
+        try {
+            const response = await fetchWithAuthRetry(
+                `${API.COMMENTS}/${App.state.postId}/comments/${parentId}/replies`,
+                {
+                    method: "POST",
+                    credentials: "include",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Accept: "application/json",
+                    },
+                    body: JSON.stringify({content}),
+                }
+            );
+
+            if (response.status === 401) {
+                App.redirectToLogin();
+                return;
+            }
+            if (!response.ok) {
+                throw new Error(`답글 작성 실패 (${response.status})`);
+            }
+
+            const saved = await response.json();
+            // 2단계 평탄화: 서버가 실제 부모(최상위) id를 반환한다.
+            const realParentId = saved.parentId != null ? String(saved.parentId) : String(parentId);
+            App.appendAuthoredReply(realParentId, saved.comment);
+            App.applyPostCommentCount(saved.postCommentCount);
+            if (saved.parentReplyCount != null) {
+                App.setParentReplyTotal(realParentId, saved.parentReplyCount);
+            }
+            if (formEl) formEl.remove();
+        } catch (error) {
+            console.error(error);
+            alert("답글 작성에 실패했습니다. 잠시 후 다시 시도해주세요.");
+        }
+    },
+
+    /** 새로 작성한 대댓글을 해당 부모의 로컬 tail로 추가(서버 커서는 건드리지 않음). */
+    appendAuthoredReply(parentId, replyComment) {
+        const wrap = document.querySelector(`.comment-replies[data-parent-id="${parentId}"]`);
+        if (!wrap) return;
+        const node = App.createCommentItem(replyComment, true);
+        node.dataset.local = "true";
+        wrap.appendChild(node);
+        const st = App.state.replyState[parentId];
+        if (st) st.localCount = (st.localCount || 0) + 1;
+    },
+
+    /** 부모의 서버 권위 총 대댓글 수 갱신 + "더 보기" 버튼 재계산. */
+    setParentReplyTotal(parentId, total) {
+        const st = App.state.replyState[parentId];
+        if (!st) {
+            App.state.replyState[parentId] = {total: Number(total) || 0, serverLoaded: 0, localCount: 0, cursor: null, loading: false};
+        } else {
+            st.total = Number(total) || 0;
+        }
+        App.updateRepliesMoreButton(parentId);
+    },
+
+    /** "답글 N개 더 보기" — keyset 커서(nextReplyCursor) 이후를 불러와 로컬 tail 앞에 dedupe 삽입. */
+    async loadMoreReplies(parentId) {
+        const st = App.state.replyState[parentId];
+        if (!st || st.loading) return;
+        st.loading = true;
+
+        const wrap = document.querySelector(`.comment-replies[data-parent-id="${parentId}"]`);
+        if (!wrap) {
+            st.loading = false;
+            return;
+        }
+
+        const params = new URLSearchParams();
+        params.set("size", String(REPLY_PAGE_SIZE));
+        if (st.cursor) {
+            params.set("afterCreatedAt", st.cursor.createdAt);
+            params.set("afterId", String(st.cursor.id));
+        }
+
+        try {
+            const response = await fetch(
+                `${API.COMMENTS}/${App.state.postId}/comments/${parentId}/replies?${params.toString()}`,
+                {credentials: "include", headers: {Accept: "application/json"}},
+            );
+            if (!response.ok) throw new Error(`대댓글 조회 실패 (${response.status})`);
+            const payload = await response.json();
+            const replies = payload?.content || [];
+
+            if (replies.length === 0) {
+                // 빈 응답: 서버에 남은 게 없음 → 더 보기 버튼이 영구 잔존하지 않도록 보정
+                st.serverLoaded = st.total;
+                App.updateRepliesMoreButton(parentId);
+                return;
+            }
+
+            const firstLocal = wrap.querySelector('.comment-item[data-local="true"]');
+            replies.forEach(reply => {
+                st.cursor = {createdAt: reply.createdAt, id: reply.id};
+                const existing = wrap.querySelector(`.comment-item[data-comment-id="${reply.id}"]`);
+                if (existing) {
+                    // 로컬로 먼저 추가했던 항목이 서버 시퀀스로 확정된 경우에만 serverLoaded 증가.
+                    // 순수 중복(이미 서버 로드분)은 이중 카운트 방지 위해 건너뜀.
+                    // (strict keyset `>` 라 순수 중복은 정상 흐름에선 발생하지 않으며, 만약 발생해
+                    //  remaining이 남아도 다음 빈 응답에서 serverLoaded=total 보정으로 자가 치유됨)
+                    if (existing.dataset.local === "true") {
+                        existing.dataset.local = "";
+                        st.localCount = Math.max((st.localCount || 0) - 1, 0);
+                        st.serverLoaded += 1;
+                    }
+                    return;
+                }
+                const node = App.createCommentItem(reply, true);
+                if (firstLocal) {
+                    wrap.insertBefore(node, firstLocal);
+                } else {
+                    wrap.appendChild(node);
+                }
+                st.serverLoaded += 1;
+            });
+            App.updateRepliesMoreButton(parentId);
+        } catch (error) {
+            console.warn(error.message);
+        } finally {
+            st.loading = false;
+        }
+    },
+
+    /** 서버 권위 Post.commentCount 로 댓글 수 라벨 동기화 (로컬 증감 폐기). */
+    applyPostCommentCount(count) {
+        if (count == null) return;
+        const value = formatNumberWithComma(Number(count) || 0);
+        ["postCommentCount", "commentCountLabel"].forEach(id => App.setText(id, value));
     },
 
     setReportButtonState(button, reported) {
@@ -1078,8 +1368,8 @@ const App = {
             }
 
             const saved = await response.json();
-            App.appendNewComment(saved);
-            App.updateCommentCountBy(1);
+            App.appendNewComment(saved.comment);
+            App.applyPostCommentCount(saved.postCommentCount);
             const input = document.getElementById("commentInput");
             if (input) input.value = "";
         } catch (error) {
@@ -1197,17 +1487,6 @@ const App = {
 
     updateReactionCountBy(delta) {
         const targets = ["postReactionCount", "likeCountLabel"];
-        targets.forEach(id => {
-            const element = document.getElementById(id);
-            if (!element) return;
-            const current = App.parseNumber(element.textContent);
-            const next = Math.max(current + delta, 0);
-            element.textContent = formatNumberWithComma(next);
-        });
-    },
-
-    updateCommentCountBy(delta) {
-        const targets = ["postCommentCount", "commentCountLabel"];
         targets.forEach(id => {
             const element = document.getElementById(id);
             if (!element) return;

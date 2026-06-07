@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
+import java.time.Instant
 
 @Validated
 @RestController
@@ -108,9 +109,33 @@ class CommunityApi(
         @PathVariable postId: Long,
         @Valid @RequestBody request: CreateCommentRequest,
         @AuthenticationPrincipal principal: JwtPrincipal,
-    ): ResponseEntity<CommentResponse> {
+    ): ResponseEntity<CommentMutationResponse> {
         val response = commentService.createComment(postId, principal.memberUid, request.content)
         return ResponseEntity.status(HttpStatus.CREATED).body(response)
+    }
+
+    @PostMapping("/posts/{postId}/comments/{parentId}/replies")
+    override fun createReply(
+        @PathVariable postId: Long,
+        @PathVariable parentId: Long,
+        @Valid @RequestBody request: CreateCommentRequest,
+        @AuthenticationPrincipal principal: JwtPrincipal,
+    ): ResponseEntity<CommentMutationResponse> {
+        val response = commentService.createReply(postId, parentId, principal.memberUid, request.content)
+        return ResponseEntity.status(HttpStatus.CREATED).body(response)
+    }
+
+    @GetMapping("/posts/{postId}/comments/{parentId}/replies")
+    override fun getReplies(
+        @PathVariable postId: Long,
+        @PathVariable parentId: Long,
+        @RequestParam(required = false) afterCreatedAt: Instant?,
+        @RequestParam(required = false) afterId: Long?,
+        @PageableDefault(size = 20) pageable: Pageable,
+        @AuthenticationPrincipal principal: JwtPrincipal?,
+    ): ResponseEntity<CommentSliceResponse> {
+        val response = commentService.getReplies(postId, parentId, afterCreatedAt, afterId, pageable, principal?.memberUid)
+        return ResponseEntity.ok(response)
     }
 
     @PutMapping("/posts/{postId}/comments/{commentId}")
@@ -119,8 +144,8 @@ class CommunityApi(
         @PathVariable commentId: Long,
         @Valid @RequestBody request: UpdateCommentRequest,
         @AuthenticationPrincipal principal: JwtPrincipal,
-    ): ResponseEntity<CommentResponse> {
-        val response = commentService.updateComment(commentId, principal.memberUid, request.content)
+    ): ResponseEntity<CommentMutationResponse> {
+        val response = commentService.updateComment(postId, commentId, principal.memberUid, request.content)
         return ResponseEntity.ok(response)
     }
 
@@ -129,9 +154,9 @@ class CommunityApi(
         @PathVariable postId: Long,
         @PathVariable commentId: Long,
         @AuthenticationPrincipal principal: JwtPrincipal,
-    ): ResponseEntity<Void> {
-        commentService.deleteComment(commentId, principal.memberUid)
-        return ResponseEntity.noContent().build()
+    ): ResponseEntity<CommentCountResponse> {
+        val response = commentService.deleteComment(commentId, principal.memberUid, postId)
+        return ResponseEntity.ok(response)
     }
 
     @PostMapping("/posts/{postId}/reports")
@@ -150,9 +175,9 @@ class CommunityApi(
         @PathVariable commentId: Long,
         @Valid @RequestBody request: CreateReportRequest,
         @AuthenticationPrincipal principal: JwtPrincipal,
-    ): ResponseEntity<Void> {
-        commentService.reportComment(commentId, principal.memberUid, request.reason)
-        return ResponseEntity.status(HttpStatus.CREATED).build()
+    ): ResponseEntity<CommentCountResponse> {
+        val response = commentService.reportComment(commentId, principal.memberUid, request.reason, postId)
+        return ResponseEntity.ok(response)
     }
 
     @GetMapping("/posts/top")

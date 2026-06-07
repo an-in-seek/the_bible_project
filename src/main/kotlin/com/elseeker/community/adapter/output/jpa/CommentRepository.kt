@@ -12,6 +12,13 @@ import org.springframework.data.jpa.repository.Lock
 import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
+import java.time.Instant
+
+/** 부모 댓글별 PUBLISHED 대댓글 수 집계 projection. */
+interface ReplyCountProjection {
+    val parentId: Long
+    val count: Long
+}
 
 interface CommentRepository : JpaRepository<Comment, Long> {
 
@@ -38,6 +45,116 @@ interface CommentRepository : JpaRepository<Comment, Long> {
         """
     )
     fun findByIdWithAuthor(@Param("id") id: Long): Comment?
+
+    /** 4-2-1 최상위 댓글만 작성순 페이징 (parent IS NULL). */
+    @Query(
+        """
+        SELECT c FROM Comment c
+        JOIN FETCH c.author
+        WHERE c.post.id = :postId
+          AND c.parent IS NULL
+          AND c.status = :status
+        ORDER BY c.createdAt ASC, c.id ASC
+        """
+    )
+    fun findTopLevelByPostId(
+        @Param("postId") postId: Long,
+        @Param("status") status: CommentStatus,
+        pageable: Pageable,
+    ): Slice<Comment>
+
+    /** 4-2-2 부모당 대댓글 미리보기(DB-side LIMIT) / 4-2-4 더보기 첫 페이지. parent도 페치해 응답 매핑 시 N+1 회피. */
+    @Query(
+        """
+        SELECT c FROM Comment c
+        JOIN FETCH c.author
+        JOIN FETCH c.parent
+        WHERE c.parent.id = :parentId
+          AND c.status = :status
+        ORDER BY c.createdAt ASC, c.id ASC
+        """
+    )
+    fun findRepliesByParentId(
+        @Param("parentId") parentId: Long,
+        @Param("status") status: CommentStatus,
+        pageable: Pageable,
+    ): Slice<Comment>
+
+    /** 4-2-4 "더 보기" keyset 커서 — (createdAt, id) 이후. parent도 페치해 응답 매핑 시 N+1 회피. */
+    @Query(
+        """
+        SELECT c FROM Comment c
+        JOIN FETCH c.author
+        JOIN FETCH c.parent
+        WHERE c.parent.id = :parentId
+          AND c.status = :status
+          AND (c.createdAt > :afterCreatedAt
+               OR (c.createdAt = :afterCreatedAt AND c.id > :afterId))
+        ORDER BY c.createdAt ASC, c.id ASC
+        """
+    )
+    fun findRepliesByParentIdAfter(
+        @Param("parentId") parentId: Long,
+        @Param("status") status: CommentStatus,
+        @Param("afterCreatedAt") afterCreatedAt: Instant,
+        @Param("afterId") afterId: Long,
+        pageable: Pageable,
+    ): Slice<Comment>
+
+    /** 7-3 cascade hide 대상 — 부모들의 PUBLISHED 자식 전량. (상태 변경 전용 — author 페치 불필요) */
+    @Query(
+        """
+        SELECT c FROM Comment c
+        WHERE c.parent.id IN :parentIds
+          AND c.status = :status
+        """
+    )
+    fun findRepliesByParentIds(
+        @Param("parentIds") parentIds: Collection<Long>,
+        @Param("status") status: CommentStatus,
+    ): List<Comment>
+
+    /** 7-3 cascade delete 대상 — 부모의 비-DELETED 자식 전량. */
+    @Query(
+        """
+        SELECT c FROM Comment c
+        WHERE c.parent.id = :parentId
+          AND c.status <> :excluded
+        """
+    )
+    fun findRepliesByParentIdAndStatusNot(
+        @Param("parentId") parentId: Long,
+        @Param("excluded") excluded: CommentStatus,
+    ): List<Comment>
+
+    /** 4-2-3 부모별 PUBLISHED 대댓글 수 집계. */
+    @Query(
+        """
+        SELECT c.parent.id AS parentId, COUNT(c) AS count FROM Comment c
+        WHERE c.parent.id IN :parentIds
+          AND c.status = :status
+        GROUP BY c.parent.id
+        """
+    )
+    fun countRepliesByParentIds(
+        @Param("parentIds") parentIds: Collection<Long>,
+        @Param("status") status: CommentStatus,
+    ): List<ReplyCountProjection>
+
+    /**
+     * 4-3 C1 — 대댓글 작성 가드 / 댓글 수정용. author·post·parent를 함께 페치해 LAZY N+1 회피.
+     * 최상위 부모는 parent가 null이므로 LEFT FETCH.
+     */
+    @Query(
+        """
+        SELECT c FROM Comment c
+        JOIN FETCH c.author
+        JOIN FETCH c.post
+        LEFT JOIN FETCH c.parent
+        WHERE c.id = :id
+        """
+    )
+    fun findByIdWithParentAndPost(@Param("id") id: Long): Comment?
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query(

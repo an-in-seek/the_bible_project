@@ -24,6 +24,8 @@ data class AdminCommentItem(
     val reportCount: Long,
     @field:Schema(description = "작성일시 (UTC)")
     val createdAt: Instant,
+    @field:Schema(description = "부모 댓글 ID (대댓글이면 부모 id, 최상위면 null)")
+    val parentId: Long? = null,
 )
 
 @Schema(description = "관리자 신고 목록 아이템")

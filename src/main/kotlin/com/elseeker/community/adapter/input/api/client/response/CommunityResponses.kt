@@ -120,6 +120,12 @@ data class CommentResponse(
     val isAuthor: Boolean,
     @field:Schema(description = "작성일시 (UTC)")
     val createdAt: Instant,
+    @field:Schema(description = "부모 댓글 ID (최상위면 null)")
+    val parentId: Long? = null,
+    @field:Schema(description = "이 댓글의 총 PUBLISHED 대댓글 수 (서버 count, 최상위에서만 의미)")
+    val replyCount: Int = 0,
+    @field:Schema(description = "대댓글 미리보기 (최상위에만, 상한 N개)")
+    val replies: List<CommentResponse> = emptyList(),
 )
 
 @Schema(description = "댓글 Slice 응답")
@@ -128,4 +134,26 @@ data class CommentSliceResponse(
     val content: List<CommentResponse>,
     @field:Schema(description = "다음 페이지 존재 여부")
     val hasNext: Boolean,
+)
+
+@Schema(description = "댓글 변이 응답 — 댓글 본문 + 게시글/부모 최신 카운트 (작성/수정/대댓글 작성)")
+data class CommentMutationResponse(
+    @field:Schema(description = "댓글 본문 (항상 존재)")
+    val comment: CommentResponse,
+    @field:Schema(description = "변이 후 서버 권위 Post.commentCount")
+    val postCommentCount: Long,
+    @field:Schema(description = "대댓글 변이면 그 부모 id, 아니면 null")
+    val parentId: Long? = null,
+    @field:Schema(description = "대댓글 변이면 부모의 최신 PUBLISHED 대댓글 수 (서버 count)")
+    val parentReplyCount: Int? = null,
+)
+
+@Schema(description = "댓글 수 응답 — 본문 없는 변이 (삭제/신고)")
+data class CommentCountResponse(
+    @field:Schema(description = "변이 후 서버 권위 Post.commentCount")
+    val postCommentCount: Long,
+    @field:Schema(description = "대상이 대댓글이었으면 그 부모 id")
+    val parentId: Long? = null,
+    @field:Schema(description = "대상이 대댓글이었으면 부모의 최신 PUBLISHED 대댓글 수")
+    val parentReplyCount: Int? = null,
 )

@@ -112,7 +112,33 @@ interface CommunityApiDocument {
         @Parameter(description = "게시글 ID") postId: Long,
         @Valid request: CreateCommentRequest,
         @Parameter(hidden = true) principal: JwtPrincipal,
-    ): ResponseEntity<CommentResponse>
+    ): ResponseEntity<CommentMutationResponse>
+
+    @Operation(summary = "대댓글 작성", description = "댓글에 대댓글(답글)을 작성합니다. 2단계 평탄화로 항상 최상위 부모 아래에 달립니다.")
+    @ApiResponses(
+        ApiResponse(responseCode = "201", description = "작성 성공"),
+        ApiResponse(responseCode = "401", description = "인증 필요"),
+        ApiResponse(responseCode = "404", description = "부모 댓글 없음/비노출"),
+    )
+    fun createReply(
+        @Parameter(description = "게시글 ID") postId: Long,
+        @Parameter(description = "부모 댓글 ID") parentId: Long,
+        @Valid request: CreateCommentRequest,
+        @Parameter(hidden = true) principal: JwtPrincipal,
+    ): ResponseEntity<CommentMutationResponse>
+
+    @Operation(summary = "대댓글 추가 조회", description = "부모 댓글의 대댓글을 keyset 커서로 추가 조회합니다 (\"더 보기\").")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "조회 성공"),
+    )
+    fun getReplies(
+        @Parameter(description = "게시글 ID") postId: Long,
+        @Parameter(description = "부모 댓글 ID") parentId: Long,
+        @Parameter(description = "커서 — 이 작성시각 이후 (ISO-8601)") afterCreatedAt: java.time.Instant?,
+        @Parameter(description = "커서 — 이 댓글 ID 이후 (동일 시각 tie-breaker)") afterId: Long?,
+        pageable: Pageable,
+        @Parameter(hidden = true) principal: JwtPrincipal?,
+    ): ResponseEntity<CommentSliceResponse>
 
     @Operation(summary = "댓글 수정", description = "댓글을 수정합니다.")
     @ApiResponses(
@@ -125,11 +151,11 @@ interface CommunityApiDocument {
         @Parameter(description = "댓글 ID") commentId: Long,
         @Valid request: UpdateCommentRequest,
         @Parameter(hidden = true) principal: JwtPrincipal,
-    ): ResponseEntity<CommentResponse>
+    ): ResponseEntity<CommentMutationResponse>
 
     @Operation(summary = "댓글 삭제", description = "댓글을 삭제합니다 (soft delete).")
     @ApiResponses(
-        ApiResponse(responseCode = "204", description = "삭제 성공"),
+        ApiResponse(responseCode = "200", description = "삭제 성공"),
         ApiResponse(responseCode = "403", description = "권한 없음"),
         ApiResponse(responseCode = "404", description = "댓글 없음"),
     )
@@ -137,7 +163,7 @@ interface CommunityApiDocument {
         @Parameter(description = "게시글 ID") postId: Long,
         @Parameter(description = "댓글 ID") commentId: Long,
         @Parameter(hidden = true) principal: JwtPrincipal,
-    ): ResponseEntity<Void>
+    ): ResponseEntity<CommentCountResponse>
 
     @Operation(summary = "게시글 신고", description = "게시글을 신고합니다.")
     @ApiResponses(
@@ -153,7 +179,7 @@ interface CommunityApiDocument {
 
     @Operation(summary = "댓글 신고", description = "댓글을 신고합니다.")
     @ApiResponses(
-        ApiResponse(responseCode = "201", description = "신고 성공"),
+        ApiResponse(responseCode = "200", description = "신고 성공"),
         ApiResponse(responseCode = "400", description = "이미 신고한 댓글"),
         ApiResponse(responseCode = "404", description = "댓글 없음"),
     )
@@ -162,7 +188,7 @@ interface CommunityApiDocument {
         @Parameter(description = "댓글 ID") commentId: Long,
         @Valid request: CreateReportRequest,
         @Parameter(hidden = true) principal: JwtPrincipal,
-    ): ResponseEntity<Void>
+    ): ResponseEntity<CommentCountResponse>
 
     @Operation(summary = "주간 인기글 Top 3", description = "최근 7일간 인기글 상위 3개를 조회합니다.")
     @ApiResponses(
