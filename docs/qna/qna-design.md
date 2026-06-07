@@ -625,16 +625,30 @@ data class AdminInquiryItem(
 
 ### 8-1. 회원 — "내 문의"
 
-- `MemberWebController`에 라우트 추가(기존 `redirectIfUnauthenticated` 패턴):
-  - `GET /web/member/my-inquiries` → `member/my-inquiries` (목록 + 작성 폼; 작성은 모달 또는 별도 영역)
-  - `GET /web/member/my-inquiries/{id}` → `member/my-inquiry-detail` (상세 + 답변 표시)
-- 템플릿은 `member/my-memo.html` 구조(상태 탭/필터, 스켈레톤, 빈 상태, 무한 스크롤)를 차용한다.
-  상태 배지(`접수`/`답변완료`/`종료`)와 카테고리 라벨을 표시하고, **답변 전 항목에만 수정/삭제 노출**.
-- JS는 ES6 모듈 `js/member/my-inquiries.js`에서 `fetchWithAuthRetry`(`common-util.js`)로 API 호출.
-  CSS `css/member/my-inquiries.css`. CSS/JS 수정 시 참조 템플릿의 `?v=` 쿼리 파라미터를 올린다.
-- 진입점: 헤더 계정 메뉴(`fragments/header.html`의 `#topNavAccountMenu`)에 "내 문의" 링크를 마이페이지 인근에 추가.
-  현재 헤더 스크립트가 인증 상태에 따라 `myMemoLink`만 노출하므로, `myInquiryLink`(또는 동일 역할 id)를 함께 조회하고
-  `onAuthenticated`에서 `d-none`을 제거하도록 스크립트도 같이 갱신한다.
+**목록 / 작성·수정 / 상세를 3개의 독립 화면으로 분리**한다(인라인 폼·모달이 아님). `MemberWebController`에 라우트를
+추가한다(기존 `redirectIfUnauthenticated` 패턴, 리터럴 `new`·`{id}/edit`가 `{id}`보다 우선 매칭).
+
+| 화면 | 라우트 | 뷰 | JS |
+|------|--------|-----|-----|
+| 목록 | `GET /web/member/my-inquiries` | `member/my-inquiries` | `js/member/my-inquiries.js` |
+| 작성 | `GET /web/member/my-inquiries/new` | `member/my-inquiry-form` | `js/member/my-inquiry-form.js` |
+| 수정 | `GET /web/member/my-inquiries/{id}/edit` | `member/my-inquiry-form` | `js/member/my-inquiry-form.js` |
+| 상세 | `GET /web/member/my-inquiries/{id}` | `member/my-inquiry-detail` | `js/member/my-inquiry-detail.js` |
+
+- **목록**: 상태 탭(전체/접수/답변완료/종료) + 카드 목록(카테고리·상태 배지·제목·작성일) + 스켈레톤·빈 상태·무한 스크롤.
+  "문의하기"는 **작성 화면 링크**(`/web/member/my-inquiries/new`)다(상단 액션 + 빈 상태 CTA). 카드 클릭 → 상세.
+- **작성·수정(폼)**: 단독 폼 화면(공용). 카테고리 select + 제목(`max 200`)·내용(`max 4000`) **실시간 글자수 카운터** +
+  인라인 검증. URL로 모드 판별 — `/new`=생성(POST), `/{id}/edit`=수정(PUT, 로드 후 프리필; **`RECEIVED`가 아니면 수정 불가
+  안내·복귀**). 제출 성공 시 `location.replace()`로 상세로 이동(폼을 히스토리에서 제거 → 상세의 뒤로가기가 폼이 아닌
+  목록/이전 화면으로 향함).
+- **상세**: 질문(배지·제목·작성일·내용) + 관리자 답변(없으면 "답변 대기 중", 있으면 본문 + 답변일). **작성자 본인이고
+  `RECEIVED`일 때만** "수정"(→ `/{id}/edit` 링크)·"삭제"(confirm → DELETE → 목록) 노출. 하단에 "목록으로" 버튼,
+  상단 네비 백버튼은 폼(`/new`·`/{id}/edit`)에서 진입한 경우 목록으로 이동(아니면 `history.back()`).
+- 공통 CSS `css/member/my-inquiries.css`(3화면 공유, 테마 변수 + 다크 오버라이드). **목록 화면만** `css/search.css`를
+  추가 로드(스크롤-투-top 위젯). CSS/JS 수정 시 참조 템플릿의 `?v=` 쿼리 파라미터를 올린다. API 호출은
+  `fetchWithAuthRetry`(`common-util.js`), 인증은 `checkAuthStatus`(`auth/auth-check.js`)로 401 시 로그인 리다이렉트.
+- 진입점: 헤더 계정 메뉴(`fragments/header.html`의 `#topNavAccountMenu`)에 "내 문의" 링크(`#topNavMyInquiryLink`)를
+  마이페이지 인근에 추가하고, 인라인 헤더 스크립트의 `onAuthenticated`에서 `d-none`을 제거한다(`myMemoLink`와 동일 패턴).
 - 활성 메뉴 표시는 서버 주입 `currentPath`(`GlobalModelAttribute`) + `th:classappend` 방식(클라이언트 `location.pathname` 금지).
 
 ### 8-2. 관리자 — Q&A 콘솔
@@ -721,7 +735,7 @@ INQUIRY_ACCESS_DENIED(HttpStatus.FORBIDDEN, "문의에 대한 접근 권한이 �
 - 회원 탈퇴 연동: `MemberService.deleteMember`에서 `InquiryRepository.reassignAuthor`/`clearAnswerer` 호출.
 - 회원 API(`/api/v1/qna/inquiries`) + 관리자 API(`/api/v1/admin/qna/inquiries`) + `*ApiDocument`.
 - DTO/매퍼, `ErrorType` 4종 추가, `SecurityConfig`에 `/api/v1/qna/**` 인증 규칙.
-- 회원 "내 문의" 화면(목록/상세/작성) + 헤더 진입점, 관리자 Q&A 콘솔.
+- 회원 "내 문의" 화면 — 목록 / 작성·수정(공용 폼) / 상세 **3개 화면 분리** + 헤더 진입점, 관리자 Q&A 콘솔.
 - DDL(`docs/qna/ddl/qna_inquiry.sql`), 통합/단위 테스트(11절).
 
 **2차**
