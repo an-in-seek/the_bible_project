@@ -110,3 +110,22 @@ if (nav) {
         }
     });
 }
+
+/**
+ * 상단 뒤로가기 버튼 — opt-in 페이지(body[data-show-back="true"])에서 노출.
+ * 별도 페이지 JS가 없는 정적 페이지(약관/방침 등)도 back 버튼을 쓸 수 있게 한다.
+ * 회원가입 약관 동의 절차에서 진입하는 케이스가 있어 홈이 아니라 직전 화면으로 복귀해야 한다.
+ * 이동: 히스토리가 있으면 history.back(), 없으면(직접 진입) data-back-link(기본 "/").
+ */
+const backButton = document.getElementById('topNavBackButton');
+if (backButton && document.body.dataset.showBack === 'true') {
+    backButton.classList.remove('d-none');
+    backButton.addEventListener('click', () => {
+        const fallback = document.body.dataset.backLink || '/';
+        if (document.referrer && window.history.length > 1) {
+            window.history.back();
+        } else {
+            window.location.href = fallback;
+        }
+    });
+}
