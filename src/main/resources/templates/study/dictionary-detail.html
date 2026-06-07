@@ -10,44 +10,43 @@
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main class="container content-wrapper">
-    <div class="row justify-content-center">
-        <div class="col-lg-10 col-xl-9">
-            <article class="dictionary-card">
-                <!-- Header / Term Area -->
-                <header class="dictionary-header">
-                    <h1 class="dictionary-term" th:text="${dictionary.term}">용어명</h1>
-                </header>
+  <div class="row justify-content-center">
+    <div class="col-lg-10 col-xl-9">
+      <article class="dictionary-card">
+        <!-- Header / Term Area -->
+        <header class="dictionary-header">
+          <h1 class="dictionary-term" th:text="${dictionary.term}">용어명</h1>
+        </header>
 
-                <div class="dictionary-body">
-                    <!-- Description Section -->
-                    <section class="dictionary-section">
-                        <h2 class="section-title">
-                            <span class="section-icon">📖</span> 의미 및 설명
-                        </h2>
-                        <div class="dictionary-definition"
-                             th:text="${dictionary.description.isBlank()} ? '등록된 설명이 없습니다.' : ${dictionary.description}">
-                            설명 내용
-                        </div>
-                    </section>
+        <div class="dictionary-body">
+          <!-- Description Section -->
+          <section class="dictionary-section">
+            <h2 class="section-title">
+              <span class="section-icon">📖</span> 의미 및 설명
+            </h2>
+            <div class="dictionary-definition"
+                 th:text="${dictionary.description.isBlank()} ? '등록된 설명이 없습니다.' : ${dictionary.description}">
+              설명 내용
+            </div>
+          </section>
 
-                    <!-- Related Verses Section (references API) -->
-                    <section class="dictionary-section" id="referencesSection">
-                        <h2 class="section-title">
-                            <span class="section-icon">🔗</span> 관련 성경 구절
-                        </h2>
-                        <div class="related-verses-box">
-                            <div id="referencesContainer" class="related-verses-tags"></div>
-                            <div id="referencesEmpty" class="related-verses-content empty-text d-none">등록된 관련 구절이 없습니다.</div>
-                        </div>
-                    </section>
+          <!-- Related Verses Section (references API) -->
+          <section class="dictionary-section" id="referencesSection">
+            <h2 class="section-title">
+              <span class="section-icon">🔗</span> 관련 성경 구절
+            </h2>
+            <div class="related-verses-box">
+              <div id="referencesContainer" class="related-verses-tags"></div>
+              <div id="referencesEmpty" class="related-verses-content empty-text d-none">등록된 관련 구절이 없습니다.</div>
+            </div>
+          </section>
 
-                </div>
-            </article>
         </div>
+      </article>
     </div>
+  </div>
 </main>
 <script type="module" src="/js/study/dictionary-detail.js?v=2.7"></script>
-<div th:replace="~{fragments/section-nav :: section-nav}"></div>
 </body>
 
 </html>

@@ -8,52 +8,51 @@
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main class="container content-wrapper">
-    <section class="mb-3">
-        <h2 class="h4 fw-semibold mb-2"
-            th:text="${currentEra != null ? currentEra.label : '알 수 없는 시대'}"></h2>
-        <p class="text-muted mb-0">선택한 시대의 주요 사건을 확인하세요.</p>
-    </section>
+  <section class="mb-3">
+    <h2 class="h4 fw-semibold mb-2"
+        th:text="${currentEra != null ? currentEra.label : '알 수 없는 시대'}"></h2>
+    <p class="text-muted mb-0">선택한 시대의 주요 사건을 확인하세요.</p>
+  </section>
 
-    <section class="mb-4">
-        <div class="card border-0 shadow-sm">
+  <section class="mb-4">
+    <div class="card border-0 shadow-sm">
+      <div class="card-body">
+        <div class="d-flex flex-wrap gap-2">
+          <a th:each="era : ${eras}"
+             th:href="@{/web/study/history/{era}(era=${era.slug})}"
+             class="btn btn-sm"
+             th:classappend="${currentEraSlug == era.slug} ? ' btn-primary' : ' btn-outline-secondary'"
+             th:text="${era.label}">
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div th:if="${#lists.isEmpty(events)}" class="alert alert-secondary mb-0">
+      준비중
+    </div>
+    <div class="row g-3" th:if="${!#lists.isEmpty(events)}">
+      <div class="col-12 col-lg-6" th:each="event : ${events}">
+        <a class="text-decoration-none"
+           th:href="@{/web/study/history/event/{id}(id=${event.id})}">
+          <div class="card h-100 border-0 shadow-sm">
             <div class="card-body">
-                <div class="d-flex flex-wrap gap-2">
-                    <a th:each="era : ${eras}"
-                       th:href="@{/web/study/history/{era}(era=${era.slug})}"
-                       class="btn btn-sm"
-                       th:classappend="${currentEraSlug == era.slug} ? ' btn-primary' : ' btn-outline-secondary'"
-                       th:text="${era.label}">
-                    </a>
-                </div>
+              <h3 class="h6 fw-semibold mb-2" th:text="${event.title}"></h3>
+              <p class="text-muted small mb-2" th:text="${event.description}"></p>
+              <span class="badge text-bg-light border text-muted"
+                    th:text="${event.scriptureRange}"></span>
             </div>
-        </div>
-    </section>
-
-    <section>
-        <div th:if="${#lists.isEmpty(events)}" class="alert alert-secondary mb-0">
-            준비중
-        </div>
-        <div class="row g-3" th:if="${!#lists.isEmpty(events)}">
-            <div class="col-12 col-lg-6" th:each="event : ${events}">
-                <a class="text-decoration-none"
-                   th:href="@{/web/study/history/event/{id}(id=${event.id})}">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <div class="card-body">
-                            <h3 class="h6 fw-semibold mb-2" th:text="${event.title}"></h3>
-                            <p class="text-muted small mb-2" th:text="${event.description}"></p>
-                            <span class="badge text-bg-light border text-muted"
-                                  th:text="${event.scriptureRange}"></span>
-                        </div>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </section>
+          </div>
+        </a>
+      </div>
+    </div>
+  </section>
 </main>
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 
 <script type="module" src="/js/study/history-era.js?v=2.2"></script>
-<div th:replace="~{fragments/section-nav :: section-nav}"></div>
 </body>
 </html>
