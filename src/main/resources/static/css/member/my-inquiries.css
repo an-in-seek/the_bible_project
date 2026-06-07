@@ -606,6 +606,21 @@ html[data-theme="dark"] .my-inquiries-form-error {
     }
 }
 
+/* ── Form screen (standalone create / edit page) ── */
+
+.my-inquiry-form-shell {
+    position: relative;
+}
+
+.my-inquiry-form-counter {
+    display: flex;
+    justify-content: flex-end;
+    font-size: 0.75rem;
+    color: var(--mi-muted);
+    margin-top: 0.3rem;
+    user-select: none;
+}
+
 /* ── Animations ── */
 
 @keyframes misShimmer {

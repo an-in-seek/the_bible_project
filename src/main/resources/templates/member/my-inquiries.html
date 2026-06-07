@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head
-        th:replace="~{fragments/head :: head('나의 문의 | ElSeeker', true, '/css/member/my-inquiries.css?v=1.0')}"
+        th:replace="~{fragments/head :: head('나의 문의 | ElSeeker', true, '/css/search.css?v=5.9,/css/member/my-inquiries.css?v=1.1')}"
         th:with="robotsContent='noindex'">
 </head>
 
@@ -31,47 +31,9 @@
     </nav>
 
     <div class="my-inquiries-actions">
-        <button id="myInquiriesCreateBtn" type="button" class="btn btn-primary btn-sm my-inquiries-create-btn">
+        <a href="/web/member/my-inquiries/new" class="btn btn-primary btn-sm my-inquiries-create-btn">
             문의하기
-        </button>
-    </div>
-
-    <!-- 문의하기 폼 패널 -->
-    <div id="myInquiriesFormPanel" class="my-inquiries-form-panel d-none" aria-label="문의 작성">
-        <div class="my-inquiries-form-header">
-            <span id="myInquiriesFormTitle" class="my-inquiries-form-title">새 문의 작성</span>
-            <button id="myInquiriesFormCancelBtn" type="button" class="my-inquiries-form-close" aria-label="닫기">✕</button>
-        </div>
-        <form id="myInquiriesForm" novalidate>
-            <input type="hidden" id="myInquiriesEditId" value="">
-            <div class="my-inquiries-form-field">
-                <label class="my-inquiries-form-label" for="myInquiriesCategory">카테고리</label>
-                <select id="myInquiriesCategory" class="form-select my-inquiries-form-select" required>
-                    <option value="">카테고리 선택</option>
-                    <option value="ACCOUNT">계정/로그인</option>
-                    <option value="CONTENT">성경/콘텐츠</option>
-                    <option value="GAME">게임</option>
-                    <option value="BUG">오류/버그</option>
-                    <option value="SUGGESTION">제안/건의</option>
-                    <option value="ETC">기타</option>
-                </select>
-            </div>
-            <div class="my-inquiries-form-field">
-                <label class="my-inquiries-form-label" for="myInquiriesTitle">제목</label>
-                <input type="text" id="myInquiriesTitle" class="form-control my-inquiries-form-input"
-                       placeholder="제목을 입력하세요 (최대 200자)" maxlength="200" required>
-            </div>
-            <div class="my-inquiries-form-field">
-                <label class="my-inquiries-form-label" for="myInquiriesContent">내용</label>
-                <textarea id="myInquiriesContent" class="form-control my-inquiries-form-textarea"
-                          placeholder="문의 내용을 입력하세요 (최대 4000자)" maxlength="4000" rows="6" required></textarea>
-            </div>
-            <div id="myInquiriesFormError" class="my-inquiries-form-error d-none"></div>
-            <div class="my-inquiries-form-actions">
-                <button type="button" id="myInquiriesFormCancelBtn2" class="btn btn-outline-secondary btn-sm">취소</button>
-                <button type="submit" id="myInquiriesFormSubmitBtn" class="btn btn-primary btn-sm">등록</button>
-            </div>
-        </form>
+        </a>
     </div>
 
     <article class="card card-panel card-soft my-inquiries-info-card border-0 shadow-sm">
@@ -89,7 +51,7 @@
                 <div class="my-inquiries-empty-icon" aria-hidden="true">💬</div>
                 <p class="my-inquiries-empty-title">아직 등록한 문의가 없습니다</p>
                 <p class="my-inquiries-empty-desc">궁금한 점이나 불편한 사항을 문의해 보세요.</p>
-                <button type="button" id="myInquiriesEmptyCta" class="btn btn-primary">문의하기</button>
+                <a href="/web/member/my-inquiries/new" class="btn btn-primary">문의하기</a>
             </div>
 
             <div id="myInquiriesLoader" class="my-inquiries-loader" hidden>
@@ -105,7 +67,7 @@
 
 <button id="scrollToTopBtn" class="scroll-to-top-btn" type="button" aria-label="맨 위로 이동">↑</button>
 
-<script type="module" src="/js/member/my-inquiries.js?v=1.0"></script>
+<script type="module" src="/js/member/my-inquiries.js?v=1.1"></script>
 </body>
 
 </html>

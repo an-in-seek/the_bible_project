@@ -39,7 +39,6 @@ const state = {
     page: 0,
     hasNext: false,
     loading: false,
-    formMode: null, // null | "create"
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -59,21 +58,8 @@ document.addEventListener("DOMContentLoaded", () => {
         skeleton: document.getElementById("myInquiriesSkeleton"),
         list: document.getElementById("myInquiriesList"),
         empty: document.getElementById("myInquiriesEmpty"),
-        emptyCta: document.getElementById("myInquiriesEmptyCta"),
         loader: document.getElementById("myInquiriesLoader"),
         sentinel: document.getElementById("myInquiriesSentinel"),
-        createBtn: document.getElementById("myInquiriesCreateBtn"),
-        formPanel: document.getElementById("myInquiriesFormPanel"),
-        formTitle: document.getElementById("myInquiriesFormTitle"),
-        form: document.getElementById("myInquiriesForm"),
-        editId: document.getElementById("myInquiriesEditId"),
-        categorySelect: document.getElementById("myInquiriesCategory"),
-        titleInput: document.getElementById("myInquiriesTitle"),
-        contentTextarea: document.getElementById("myInquiriesContent"),
-        formError: document.getElementById("myInquiriesFormError"),
-        formSubmitBtn: document.getElementById("myInquiriesFormSubmitBtn"),
-        formCancelBtn: document.getElementById("myInquiriesFormCancelBtn"),
-        formCancelBtn2: document.getElementById("myInquiriesFormCancelBtn2"),
         tabButtons: {
             "": document.getElementById("myInquiriesTabAll"),
             RECEIVED: document.getElementById("myInquiriesTabReceived"),
@@ -90,35 +76,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!elements.loader) return;
         if (visible) elements.loader.removeAttribute("hidden");
         else elements.loader.setAttribute("hidden", "");
-    };
-
-    // ── Form helpers ────────────────────────────────────────────────────
-
-    const showForm = (mode = "create") => {
-        state.formMode = mode;
-        if (elements.formTitle) {
-            elements.formTitle.textContent = mode === "create" ? "새 문의 작성" : "문의 수정";
-        }
-        if (elements.formSubmitBtn) {
-            elements.formSubmitBtn.textContent = mode === "create" ? "등록" : "저장";
-        }
-        elements.formPanel?.classList.remove("d-none");
-        elements.formError?.classList.add("d-none");
-        elements.titleInput?.focus();
-    };
-
-    const hideForm = () => {
-        state.formMode = null;
-        elements.formPanel?.classList.add("d-none");
-        elements.form?.reset();
-        if (elements.editId) elements.editId.value = "";
-        elements.formError?.classList.add("d-none");
-    };
-
-    const showFormError = (msg) => {
-        if (!elements.formError) return;
-        elements.formError.textContent = msg;
-        elements.formError.classList.remove("d-none");
     };
 
     // ── Tab ──────────────────────────────────────────────────────────────
@@ -246,51 +203,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    const submitInquiry = async (e) => {
-        e.preventDefault();
-
-        const category = elements.categorySelect?.value ?? "";
-        const title = (elements.titleInput?.value ?? "").trim();
-        const content = (elements.contentTextarea?.value ?? "").trim();
-
-        if (!category) { showFormError("카테고리를 선택해 주세요."); return; }
-        if (!title) { showFormError("제목을 입력해 주세요."); return; }
-        if (!content) { showFormError("내용을 입력해 주세요."); return; }
-
-        elements.formSubmitBtn && (elements.formSubmitBtn.disabled = true);
-        elements.formError?.classList.add("d-none");
-
-        try {
-            const isEdit = !!elements.editId?.value;
-            const url = isEdit
-                ? `/api/v1/qna/inquiries/${elements.editId.value}`
-                : "/api/v1/qna/inquiries";
-            const method = isEdit ? "PUT" : "POST";
-
-            const response = await fetchWithAuthRetry(url, {
-                method,
-                credentials: "include",
-                headers: {"Content-Type": "application/json", Accept: "application/json"},
-                body: JSON.stringify({category, title, content}),
-            });
-
-            if (response.status === 401) { redirectToLogin(); return; }
-            if (!response.ok) {
-                const err = await response.json().catch(() => null);
-                showFormError(err?.message ?? "등록에 실패했습니다. 다시 시도해 주세요.");
-                return;
-            }
-
-            hideForm();
-            state.page = 0;
-            await loadList(false);
-        } catch {
-            showFormError("요청 중 오류가 발생했습니다. 다시 시도해 주세요.");
-        } finally {
-            if (elements.formSubmitBtn) elements.formSubmitBtn.disabled = false;
-        }
-    };
-
     // ── Infinite scroll ──────────────────────────────────────────────────
 
     let scrollObserver = null;
@@ -337,22 +249,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // ── Event wiring ─────────────────────────────────────────────────────
-
-    elements.createBtn?.addEventListener("click", () => {
-        hideForm();
-        showForm("create");
-        elements.formPanel?.scrollIntoView({behavior: "smooth", block: "nearest"});
-    });
-
-    elements.emptyCta?.addEventListener("click", () => {
-        hideForm();
-        showForm("create");
-        elements.formPanel?.scrollIntoView({behavior: "smooth", block: "nearest"});
-    });
-
-    elements.formCancelBtn?.addEventListener("click", hideForm);
-    elements.formCancelBtn2?.addEventListener("click", hideForm);
-    elements.form?.addEventListener("submit", submitInquiry);
 
     for (const status of VALID_STATUSES) {
         const btn = elements.tabButtons[status];

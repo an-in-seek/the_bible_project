@@ -66,21 +66,11 @@ document.addEventListener("DOMContentLoaded", () => {
         date: document.getElementById("myInquiryDate"),
         content: document.getElementById("myInquiryContent"),
         actions: document.getElementById("myInquiryActions"),
-        editBtn: document.getElementById("myInquiryEditBtn"),
+        editLink: document.getElementById("myInquiryEditLink"),
         deleteBtn: document.getElementById("myInquiryDeleteBtn"),
-        editPanel: document.getElementById("myInquiryEditPanel"),
-        editCancelBtn: document.getElementById("myInquiryEditCancelBtn"),
-        editCancelBtn2: document.getElementById("myInquiryEditCancelBtn2"),
-        editForm: document.getElementById("myInquiryEditForm"),
-        editCategory: document.getElementById("myInquiryEditCategory"),
-        editTitle: document.getElementById("myInquiryEditTitle"),
-        editContent: document.getElementById("myInquiryEditContent"),
-        editError: document.getElementById("myInquiryEditError"),
         answerContent: document.getElementById("myInquiryAnswerContent"),
         answeredAt: document.getElementById("myInquiryAnsweredAt"),
     };
-
-    let currentInquiry = null;
 
     const redirectToLogin = () => {
         window.location.replace(buildLoginRedirectUrl(`/web/member/my-inquiries/${inquiryId ?? ""}`));
@@ -92,35 +82,9 @@ document.addEventListener("DOMContentLoaded", () => {
         elements.errorBlock?.classList.remove("d-none");
     };
 
-    // ── Edit form ────────────────────────────────────────────────────────
-
-    const showEditForm = () => {
-        if (!currentInquiry) return;
-        if (elements.editCategory) elements.editCategory.value = currentInquiry.category ?? "";
-        if (elements.editTitle) elements.editTitle.value = currentInquiry.title ?? "";
-        if (elements.editContent) elements.editContent.value = currentInquiry.content ?? "";
-        elements.editError?.classList.add("d-none");
-        elements.editPanel?.classList.remove("d-none");
-        elements.editTitle?.focus();
-    };
-
-    const hideEditForm = () => {
-        elements.editPanel?.classList.add("d-none");
-        elements.editForm?.reset();
-        elements.editError?.classList.add("d-none");
-    };
-
-    const showEditError = (msg) => {
-        if (!elements.editError) return;
-        elements.editError.textContent = msg;
-        elements.editError.classList.remove("d-none");
-    };
-
     // ── Render ───────────────────────────────────────────────────────────
 
     const render = (inquiry) => {
-        currentInquiry = inquiry;
-
         if (elements.categoryBadge) {
             elements.categoryBadge.textContent = CATEGORY_LABELS[inquiry.category] ?? inquiry.category;
         }
@@ -130,14 +94,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         if (elements.title) elements.title.textContent = inquiry.title ?? "";
         if (elements.date) elements.date.textContent = `작성일: ${formatDate(inquiry.createdAt)}`;
-
-        if (elements.content) {
-            elements.content.textContent = inquiry.content ?? "";
-        }
+        if (elements.content) elements.content.textContent = inquiry.content ?? "";
 
         // 수정/삭제 버튼: 작성자 본인이고 RECEIVED 상태일 때만
         const canModify = inquiry.isAuthor && inquiry.status === "RECEIVED";
         if (canModify) {
+            if (elements.editLink) {
+                elements.editLink.href = `/web/member/my-inquiries/${inquiry.id}/edit`;
+            }
             elements.actions?.classList.remove("d-none");
         } else {
             elements.actions?.classList.add("d-none");
@@ -185,49 +149,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    const handleEdit = async (e) => {
-        e.preventDefault();
-
-        const category = elements.editCategory?.value ?? "";
-        const title = (elements.editTitle?.value ?? "").trim();
-        const content = (elements.editContent?.value ?? "").trim();
-
-        if (!category) { showEditError("카테고리를 선택해 주세요."); return; }
-        if (!title) { showEditError("제목을 입력해 주세요."); return; }
-        if (!content) { showEditError("내용을 입력해 주세요."); return; }
-
-        const submitBtn = elements.editForm?.querySelector("[type=submit]");
-        if (submitBtn) submitBtn.disabled = true;
-        elements.editError?.classList.add("d-none");
-
-        try {
-            const response = await fetchWithAuthRetry(`/api/v1/qna/inquiries/${inquiryId}`, {
-                method: "PUT",
-                credentials: "include",
-                headers: {"Content-Type": "application/json", Accept: "application/json"},
-                body: JSON.stringify({category, title, content}),
-            });
-
-            if (response.status === 401) { redirectToLogin(); return; }
-            if (!response.ok) {
-                const err = await response.json().catch(() => null);
-                showEditError(err?.message ?? "수정에 실패했습니다. 다시 시도해 주세요.");
-                return;
-            }
-
-            const data = await response.json().catch(() => null);
-            if (data) {
-                hideEditForm();
-                render(data);
-            }
-        } catch {
-            showEditError("요청 중 오류가 발생했습니다. 다시 시도해 주세요.");
-        } finally {
-            const submitBtn = elements.editForm?.querySelector("[type=submit]");
-            if (submitBtn) submitBtn.disabled = false;
-        }
-    };
-
     const handleDelete = async () => {
         if (!confirm("문의를 삭제하시겠습니까? 삭제된 문의는 복구할 수 없습니다.")) return;
 
@@ -251,24 +172,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // ── Scroll-to-top ────────────────────────────────────────────────────
-
-    const scrollTopBtn = document.getElementById("scrollToTopBtn");
-    if (scrollTopBtn) {
-        window.addEventListener("scroll", () => {
-            scrollTopBtn.classList.toggle("is-visible", window.scrollY > 300);
-        });
-        scrollTopBtn.addEventListener("click", () => {
-            window.scrollTo({top: 0, behavior: "smooth"});
-        });
-    }
-
     // ── Event wiring ─────────────────────────────────────────────────────
 
-    elements.editBtn?.addEventListener("click", showEditForm);
-    elements.editCancelBtn?.addEventListener("click", hideEditForm);
-    elements.editCancelBtn2?.addEventListener("click", hideEditForm);
-    elements.editForm?.addEventListener("submit", handleEdit);
     elements.deleteBtn?.addEventListener("click", handleDelete);
 
     // ── Boot ─────────────────────────────────────────────────────────────

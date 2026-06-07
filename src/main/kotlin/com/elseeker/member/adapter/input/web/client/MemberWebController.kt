@@ -46,6 +46,18 @@ class MemberWebController {
         return "member/my-inquiries"
     }
 
+    @GetMapping("/my-inquiries/new")
+    fun showMyInquiryCreate(authentication: Authentication?): String {
+        redirectIfUnauthenticated(authentication, "/web/member/my-inquiries/new")?.let { return it }
+        return "member/my-inquiry-form"
+    }
+
+    @GetMapping("/my-inquiries/{id}/edit")
+    fun showMyInquiryEdit(authentication: Authentication?): String {
+        redirectIfUnauthenticated(authentication, "/web/member/my-inquiries")?.let { return it }
+        return "member/my-inquiry-form"
+    }
+
     @GetMapping("/my-inquiries/{id}")
     fun showMyInquiryDetail(authentication: Authentication?): String {
         redirectIfUnauthenticated(authentication, "/web/member/my-inquiries")?.let { return it }

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+
+<head
+        th:replace="~{fragments/head :: head('문의 작성 | ElSeeker', true, '/css/member/my-inquiries.css?v=1.1')}"
+        th:with="robotsContent='noindex'">
+</head>
+
+<body class="has-fixed-nav my-inquiries-page">
+<header th:replace="~{fragments/header :: header(hideTopNavAccount=true)}"></header>
+
+<main class="container content-wrapper my-inquiry-form-shell">
+
+    <div id="myInquiryFormSkeleton" class="my-inquiry-detail-skeleton d-none">
+        <div class="skeleton skeleton-detail-title"></div>
+        <div class="skeleton skeleton-detail-meta"></div>
+        <div class="skeleton skeleton-detail-body"></div>
+    </div>
+
+    <article id="myInquiryFormCard" class="card card-panel card-soft my-inquiries-info-card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <form id="myInquiryForm" novalidate>
+
+                <div class="my-inquiries-form-field">
+                    <label class="my-inquiries-form-label" for="myInquiryCategory">카테고리</label>
+                    <select id="myInquiryCategory" class="form-select my-inquiries-form-select" required aria-required="true">
+                        <option value="">카테고리 선택</option>
+                        <option value="ACCOUNT">계정/로그인</option>
+                        <option value="CONTENT">성경/콘텐츠</option>
+                        <option value="GAME">게임</option>
+                        <option value="BUG">오류/버그</option>
+                        <option value="SUGGESTION">제안/건의</option>
+                        <option value="ETC">기타</option>
+                    </select>
+                </div>
+
+                <div class="my-inquiries-form-field">
+                    <label class="my-inquiries-form-label" for="myInquiryTitle">제목</label>
+                    <input type="text" id="myInquiryTitle" class="form-control my-inquiries-form-input"
+                           placeholder="제목을 입력하세요" maxlength="200" required aria-required="true">
+                    <div class="my-inquiry-form-counter" aria-live="polite" aria-atomic="true">
+                        <span id="myInquiryTitleCount">0</span>/200
+                    </div>
+                </div>
+
+                <div class="my-inquiries-form-field">
+                    <label class="my-inquiries-form-label" for="myInquiryContent">내용</label>
+                    <textarea id="myInquiryContent" class="form-control my-inquiries-form-textarea"
+                              placeholder="문의 내용을 입력하세요" maxlength="4000" rows="8"
+                              required aria-required="true"></textarea>
+                    <div class="my-inquiry-form-counter" aria-live="polite" aria-atomic="true">
+                        <span id="myInquiryContentCount">0</span>/4000
+                    </div>
+                </div>
+
+                <div id="myInquiryFormError" class="my-inquiries-form-error d-none" role="alert"></div>
+
+                <div class="my-inquiries-form-actions">
+                    <button type="button" id="myInquiryCancelBtn" class="btn btn-outline-secondary btn-sm">취소</button>
+                    <button type="submit" id="myInquirySubmitBtn" class="btn btn-primary btn-sm">등록</button>
+                </div>
+
+            </form>
+        </div>
+    </article>
+
+    <div id="myInquiryFormError2" class="my-inquiries-empty d-none">
+        <div class="my-inquiries-empty-icon" aria-hidden="true">⚠️</div>
+        <p class="my-inquiries-empty-title">문의를 불러오지 못했습니다</p>
+        <p class="my-inquiries-empty-desc">잠시 후 다시 시도해 주세요.</p>
+        <a href="/web/member/my-inquiries" class="btn btn-outline-primary btn-sm">목록으로 돌아가기</a>
+    </div>
+
+</main>
+
+<script type="module" src="/js/member/my-inquiry-form.js?v=1.0"></script>
+</body>
+
+</html>
