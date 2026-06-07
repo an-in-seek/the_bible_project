@@ -8,50 +8,49 @@
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main class="container content-wrapper">
-    <section class="mb-4 container">
-        <p class="text-muted mb-0">성경 연대기 흐름 속에서 시대 별 사건과 관련된 성경책을 한눈에 살펴보세요.</p>
-    </section>
+  <section class="mb-4 container">
+    <p class="text-muted mb-0">성경 연대기 흐름 속에서 시대 별 사건과 관련된 성경책을 한눈에 살펴보세요.</p>
+  </section>
 
-    <section class="history-map">
-        <div class="history-pc">
-            <div class="history-row"
-                 th:each="block, iter : ${timelineBlocks}"
-                 th:classappend="${selectedEra == block.era.slug} ? ' is-selected' : ''">
-                <div class="era-axis">
-                    <div class="era-marker">
-                        <span th:text="${#numbers.formatInteger(iter.index + 1, 2)}"></span>
-                    </div>
-                    <div class="era-period" th:text="${block.era.period}"></div>
-                    <a class="text-decoration-none era-label"
-                       th:href="@{/web/study/history/{era}(era=${block.era.slug})}"
-                       th:text="${block.era.label}"></a>
-                    <div class="era-keywords" th:text="|${block.era.keywords[0]} · ${block.era.keywords[1]}|"></div>
-                    <div class="d-flex flex-wrap gap-1 mt-1" th:if="${!#lists.isEmpty(block.eventHighlights)}">
-                        <a th:each="event : ${block.eventHighlights}"
-                           class="event-chip"
-                           th:href="@{/web/study/history/event/{id}(id=${event.id})}"
-                           th:text="${event.title}"></a>
-                    </div>
-                </div>
-
-                <div class="era-content">
-                    <div class="card shadow-sm era-block"
-                         th:each="group : ${block.bookGroups}">
-                        <div class="card-body">
-                            <div class="category-title" th:text="${group.groupName}"></div>
-                            <a th:each="book : ${group.books}"
-                               class="book-chip"
-                               th:href="${book.url}"
-                               th:text="${book.label}"></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+  <section class="history-map">
+    <div class="history-pc">
+      <div class="history-row"
+           th:each="block, iter : ${timelineBlocks}"
+           th:classappend="${selectedEra == block.era.slug} ? ' is-selected' : ''">
+        <div class="era-axis">
+          <div class="era-marker">
+            <span th:text="${#numbers.formatInteger(iter.index + 1, 2)}"></span>
+          </div>
+          <div class="era-period" th:text="${block.era.period}"></div>
+          <a class="text-decoration-none era-label"
+             th:href="@{/web/study/history/{era}(era=${block.era.slug})}"
+             th:text="${block.era.label}"></a>
+          <div class="era-keywords" th:text="|${block.era.keywords[0]} · ${block.era.keywords[1]}|"></div>
+          <div class="d-flex flex-wrap gap-1 mt-1" th:if="${!#lists.isEmpty(block.eventHighlights)}">
+            <a th:each="event : ${block.eventHighlights}"
+               class="event-chip"
+               th:href="@{/web/study/history/event/{id}(id=${event.id})}"
+               th:text="${event.title}"></a>
+          </div>
         </div>
-    </section>
+
+        <div class="era-content">
+          <div class="card shadow-sm era-block"
+               th:each="group : ${block.bookGroups}">
+            <div class="card-body">
+              <div class="category-title" th:text="${group.groupName}"></div>
+              <a th:each="book : ${group.books}"
+                 class="book-chip"
+                 th:href="${book.url}"
+                 th:text="${book.label}"></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
 </main>
 
 <script type="module" src="/js/study/history.js?v=2.2"></script>
-<div th:replace="~{fragments/section-nav :: section-nav}"></div>
 </body>
 </html>

@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head th:replace="~{fragments/head :: head('성경 66권 개요 영상 - 책별 요약 | ElSeeker', true, '/css/hero.css?v=5.1,/css/card.css?v=5.4,/css/book-search.css?v=5.0,/css/study/bible-overview-video.css?v=5.2')}"
-      th:with="pageDescription='성경 66권 각 책의 개요를 영상으로 쉽게 배울 수 있는 학습 페이지입니다.',
+<head
+    th:replace="~{fragments/head :: head('성경 66권 개요 영상 - 책별 요약 | ElSeeker', true, '/css/hero.css?v=5.1,/css/card.css?v=5.4,/css/book-search.css?v=5.0,/css/study/bible-overview-video.css?v=5.2')}"
+    th:with="pageDescription='성경 66권 각 책의 개요를 영상으로 쉽게 배울 수 있는 학습 페이지입니다.',
                pageKeywords='성경 개요,성경 영상,성경 요약,성경 66권 요약,성경 공부 영상'"></head>
 
 <body class="has-fixed-nav">
@@ -9,49 +10,51 @@
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main class="container content-wrapper">
-    <!-- 로딩 상태 -->
-    <div id="videoLoading" class="bible-overview-video-loading text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">로딩 중...</span>
+  <!-- 로딩 상태 -->
+  <div id="videoLoading" class="bible-overview-video-loading text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">로딩 중...</span>
+    </div>
+    <p class="mt-3 text-muted">영상 목록을 불러오는 중입니다...</p>
+  </div>
+
+  <!-- 영상 목록 -->
+  <div id="videoContent" class="d-none">
+    <!-- 책 검색 -->
+    <div class="book-search-wrapper">
+      <div class="book-search-inner">
+        <div class="book-search-input-group">
+          <svg class="book-search-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <path fill-rule="evenodd"
+                  d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z"
+                  clip-rule="evenodd"/>
+          </svg>
+          <input type="search" id="bookSearchInput" class="book-search-input"
+                 placeholder="책 이름 검색 (예: 창세기, 마태)" autocomplete="off" inputmode="search">
+          <button type="button" id="bookSearchClear" class="book-search-clear d-none" aria-label="검색어 지우기">
+            <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+              <path
+                  d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
+            </svg>
+          </button>
         </div>
-        <p class="mt-3 text-muted">영상 목록을 불러오는 중입니다...</p>
+        <div id="bookSearchEmpty" class="book-search-empty d-none">검색 결과가 없습니다.</div>
+      </div>
     </div>
 
-    <!-- 영상 목록 -->
-    <div id="videoContent" class="d-none">
-        <!-- 책 검색 -->
-        <div class="book-search-wrapper">
-            <div class="book-search-inner">
-                <div class="book-search-input-group">
-                    <svg class="book-search-icon" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
-                    </svg>
-                    <input type="search" id="bookSearchInput" class="book-search-input"
-                           placeholder="책 이름 검색 (예: 창세기, 마태)" autocomplete="off" inputmode="search">
-                    <button type="button" id="bookSearchClear" class="book-search-clear d-none" aria-label="검색어 지우기">
-                        <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                            <path d="M6.28 5.22a.75.75 0 00-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 101.06 1.06L10 11.06l3.72 3.72a.75.75 0 101.06-1.06L11.06 10l3.72-3.72a.75.75 0 00-1.06-1.06L10 8.94 6.28 5.22z"/>
-                        </svg>
-                    </button>
-                </div>
-                <div id="bookSearchEmpty" class="book-search-empty d-none">검색 결과가 없습니다.</div>
-            </div>
-        </div>
+    <section class="bible-overview-video-section" id="oldTestamentSection">
+      <h2 class="bible-overview-video-section-title">구약</h2>
+      <div class="bible-overview-video-grid" id="oldTestamentGrid"></div>
+    </section>
 
-        <section class="bible-overview-video-section" id="oldTestamentSection">
-            <h2 class="bible-overview-video-section-title">구약</h2>
-            <div class="bible-overview-video-grid" id="oldTestamentGrid"></div>
-        </section>
-
-        <section class="bible-overview-video-section" id="newTestamentSection">
-            <h2 class="bible-overview-video-section-title">신약</h2>
-            <div class="bible-overview-video-grid" id="newTestamentGrid"></div>
-        </section>
-    </div>
+    <section class="bible-overview-video-section" id="newTestamentSection">
+      <h2 class="bible-overview-video-section-title">신약</h2>
+      <div class="bible-overview-video-grid" id="newTestamentGrid"></div>
+    </section>
+  </div>
 </main>
 
 <script type="module" src="/js/book-search-sticky.js?v=1.0"></script>
 <script type="module" src="/js/study/bible-overview-video.js?v=1.4"></script>
-<div th:replace="~{fragments/section-nav :: section-nav}"></div>
 </body>
 </html>

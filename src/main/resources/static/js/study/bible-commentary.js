@@ -115,6 +115,7 @@ class BibleCommentary {
 
     initNav() {
         if (this.backButton) {
+            this.backButton.classList.remove("d-none");
             this.backButton.addEventListener("click", () => {
                 window.location.href = "/web/study";
             });
