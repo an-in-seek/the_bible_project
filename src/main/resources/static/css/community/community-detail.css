@@ -97,29 +97,37 @@ html[data-theme="dark"] .detail-badge-popular {
 }
 
 .post-menu-toggle {
-    width: 32px;
-    height: 32px;
+    width: 36px;
+    height: 36px;
     border-radius: 50%;
-    border: 0;
-    background: transparent;
-    color: var(--comm-text-sub);
-    font-size: 1.25rem;
+    border: 1px solid var(--comm-border);
+    background: var(--comm-bg-card);
+    color: var(--comm-text-main);
+    font-size: 1.5rem;
+    font-weight: 700;
     line-height: 1;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    transition: background-color 0.15s ease, color 0.15s ease;
+    transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+
+/* 다크모드: 카드 배경과 동색이 되지 않도록 한 단계 밝은 톤으로 분리 */
+html[data-theme="dark"] .post-menu-toggle {
+    background: var(--color-bg-elevated-strong);
 }
 
 @media (hover: hover) and (pointer: fine) {
     .post-menu-toggle:hover {
         background: var(--color-bg-elevated);
         color: var(--comm-text-main);
+        border-color: var(--comm-text-main);
     }
 
     html[data-theme="dark"] .post-menu-toggle:hover {
-        background: var(--color-bg-elevated-strong);
+        background: var(--color-bg-elevated-strong-hover, var(--color-bg-elevated-strong));
+        border-color: var(--comm-text-main);
     }
 }
 

@@ -481,8 +481,10 @@ const App = {
         deleteBtn.classList.add("comment-action-owner");
         actions.appendChild(deleteBtn);
 
-        const reportBtn = App.createCommentAction("report", "신고");
-        actions.appendChild(reportBtn);
+        // 신고: 본인 댓글에는 노출하지 않는다(자기 댓글 신고 불가)
+        if (!comment.isAuthor) {
+            actions.appendChild(App.createCommentAction("report", "신고"));
+        }
 
         App.applyOwnerActionVisibility(actions, comment);
         return actions;
