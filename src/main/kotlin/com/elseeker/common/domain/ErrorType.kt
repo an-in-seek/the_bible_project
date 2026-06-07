@@ -46,6 +46,7 @@ enum class ErrorType(
     COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "댓글을 찾을 수 없습니다.", LogLevel.WARN),
     REPORT_POST_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 신고한 게시글입니다.", LogLevel.WARN),
     REPORT_COMMENT_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 신고한 댓글입니다.", LogLevel.WARN),
+    REPORT_SELF_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "본인이 작성한 글은 신고할 수 없습니다.", LogLevel.WARN),
     REACTION_ALREADY_EXISTS(HttpStatus.BAD_REQUEST, "이미 반응한 게시글입니다.", LogLevel.WARN),
     REACTION_NOT_FOUND(HttpStatus.NOT_FOUND, "반응을 찾을 수 없습니다.", LogLevel.WARN),
     INVALID_STATUS_TRANSITION(HttpStatus.BAD_REQUEST, "허용되지 않는 상태 전환입니다.", LogLevel.WARN),

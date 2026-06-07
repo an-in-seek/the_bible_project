@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head
-        th:replace="~{fragments/head :: head('성경 커뮤니티 게시글 | ElSeeker', true, '/css/card.css?v=5.4,/css/community/community-detail.css?v=6.3')}"
+        th:replace="~{fragments/head :: head('성경 커뮤니티 게시글 | ElSeeker', true, '/css/card.css?v=5.4,/css/community/community-detail.css?v=6.4')}"
         th:with="pageDescription='커뮤니티 게시글 상세 보기 — 성경에 대한 질문과 나눔을 함께합니다.',
                  pageKeywords='성경 커뮤니티,성경 질문,성경 나눔,성경 토론'">
 </head>
@@ -24,7 +24,14 @@
                     <!-- 더보기 메뉴: owner는 수정/삭제, 비-owner는 신고 -->
                     <div id="postMenu" class="post-menu">
                         <button id="postMenuToggle" type="button" class="post-menu-toggle"
-                                aria-haspopup="true" aria-expanded="false" aria-label="더보기">⋮</button>
+                                aria-haspopup="true" aria-expanded="false" aria-label="더보기">
+                            <svg class="post-menu-toggle-icon" width="20" height="20" viewBox="0 0 24 24"
+                                 fill="currentColor" aria-hidden="true" focusable="false">
+                                <circle cx="12" cy="5" r="2"></circle>
+                                <circle cx="12" cy="12" r="2"></circle>
+                                <circle cx="12" cy="19" r="2"></circle>
+                            </svg>
+                        </button>
                         <div id="postMenuDropdown" class="post-menu-dropdown" role="menu" hidden>
                             <button id="btnEditPost" type="button" class="post-menu-item" role="menuitem" data-owner-only hidden>
                                 <span class="post-menu-item-icon">✏️</span><span class="post-menu-item-label">수정</span>

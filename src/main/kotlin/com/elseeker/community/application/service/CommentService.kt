@@ -220,6 +220,10 @@ class CommentService(
         ensurePostMatches(comment, postId)
         val member = getMemberOrThrow(memberUid)
         val memberId = requireNotNull(member.id)
+        // 본인이 작성한 댓글은 신고 불가 (프론트 버튼 숨김 + 서버 강제)
+        if (comment.author.id == memberId) {
+            throwError(ErrorType.REPORT_SELF_NOT_ALLOWED)
+        }
         if (communityReportRepository.existsByTargetTypeAndTargetIdAndReporterId(TargetType.COMMENT, commentId, memberId)) {
             throwError(ErrorType.REPORT_COMMENT_ALREADY_EXISTS)
         }
