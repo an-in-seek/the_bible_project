@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Q&amp;A 문의 상세 | ElSeeker</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.0" rel="stylesheet">
+</head>
+<body>
+<div class="admin-layout">
+    <aside th:replace="~{admin/fragments/admin-sidebar :: sidebar}"></aside>
+    <div class="admin-sidebar-overlay" data-admin-sidebar-close></div>
+    <main class="admin-content">
+        <div class="admin-topbar">
+            <button class="admin-sidebar-toggle" type="button" aria-label="메뉴 열기" data-admin-sidebar-toggle>
+                <span></span>
+            </button>
+            <span class="admin-topbar-title">관리자</span>
+        </div>
+        <div class="admin-breadcrumb">
+            <a href="/web/admin/qna/inquiries">문의 목록</a> &gt; <span>상세</span>
+        </div>
+        <h2>Q&amp;A 문의 상세</h2>
+
+        <!-- 문의 내용 카드 -->
+        <div class="admin-card" id="inquiryCard">
+            <div class="admin-card-title" id="inquiryTitle">불러오는 중...</div>
+            <div class="admin-card-row">
+                <span class="admin-card-label">ID</span>
+                <span class="admin-card-value" id="inquiryId"></span>
+            </div>
+            <div class="admin-card-row">
+                <span class="admin-card-label">카테고리</span>
+                <span class="admin-card-value" id="inquiryCategory"></span>
+            </div>
+            <div class="admin-card-row">
+                <span class="admin-card-label">작성자</span>
+                <span class="admin-card-value" id="inquiryAuthor"></span>
+            </div>
+            <div class="admin-card-row">
+                <span class="admin-card-label">상태</span>
+                <span class="admin-card-value" id="inquiryStatus"></span>
+            </div>
+            <div class="admin-card-row">
+                <span class="admin-card-label">작성일</span>
+                <span class="admin-card-value" id="inquiryCreatedAt"></span>
+            </div>
+            <div class="admin-card-row" style="flex-direction:column; gap:0.35rem;">
+                <span class="admin-card-label">내용</span>
+                <span class="admin-card-value" id="inquiryContent" style="white-space:pre-wrap;"></span>
+            </div>
+        </div>
+
+        <!-- 답변 영역 -->
+        <div style="margin-top:1.25rem;">
+            <h3 style="font-size:1.05rem; margin-bottom:0.75rem;">답변</h3>
+
+            <!-- 답변 없음: 작성 폼 -->
+            <div id="answerWriteSection" style="display:none;">
+                <div class="admin-form">
+                    <div class="form-group">
+                        <label for="answerContent">답변 내용</label>
+                        <textarea id="answerContent" class="form-control" rows="6" placeholder="답변을 입력하세요."></textarea>
+                    </div>
+                    <div class="admin-form-actions">
+                        <button type="button" class="btn btn-primary btn-sm" id="btnPostAnswer">답변 등록</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 답변 있음: 읽기 + 수정 폼 + 상태 토글 -->
+            <div id="answerViewSection" style="display:none;">
+                <div class="admin-card" id="answerCard">
+                    <div class="admin-card-row" style="flex-direction:column; gap:0.35rem;">
+                        <span class="admin-card-label">답변 내용</span>
+                        <span class="admin-card-value" id="answerContentView" style="white-space:pre-wrap;"></span>
+                    </div>
+                    <div class="admin-card-row">
+                        <span class="admin-card-label">답변자</span>
+                        <span class="admin-card-value" id="answerBy"></span>
+                    </div>
+                    <div class="admin-card-row">
+                        <span class="admin-card-label">답변일시</span>
+                        <span class="admin-card-value" id="answerAt"></span>
+                    </div>
+                    <div class="admin-card-actions" id="answerActions"></div>
+                </div>
+
+                <!-- 답변 수정 폼 (토글) -->
+                <div id="answerEditSection" style="display:none; margin-top:0.75rem;">
+                    <div class="admin-form">
+                        <div class="form-group">
+                            <label for="answerEditContent">답변 수정</label>
+                            <textarea id="answerEditContent" class="form-control" rows="6"></textarea>
+                        </div>
+                        <div class="admin-form-actions">
+                            <button type="button" class="btn btn-primary btn-sm" id="btnPutAnswer">수정 저장</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btnCancelEdit">취소</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 뒤로 -->
+        <div style="margin-top:1.5rem;">
+            <a href="/web/admin/qna/inquiries" class="btn btn-outline-secondary btn-sm">목록으로</a>
+        </div>
+    </main>
+</div>
+<script type="module">
+    import {fetchAdmin, initAdminSidebarToggle} from "/js/admin/admin-common.js";
+
+    initAdminSidebarToggle();
+
+    const CATEGORY_LABEL = {
+        ACCOUNT: '계정/로그인',
+        CONTENT: '성경/콘텐츠',
+        GAME: '게임',
+        BUG: '오류/버그',
+        SUGGESTION: '제안/건의',
+        ETC: '기타',
+    };
+
+    const STATUS_LABEL = {
+        RECEIVED: '접수',
+        ANSWERED: '답변완료',
+        CLOSED: '종료',
+    };
+
+    const STATUS_BADGE = {
+        RECEIVED: 'bg-secondary',
+        ANSWERED: 'bg-success',
+        CLOSED: 'bg-dark',
+    };
+
+    const inquiryId = location.pathname.split('/').at(-1);
+
+    const formatDate = (iso) => {
+        if (!iso) return '';
+        const d = new Date(iso);
+        const yy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mi = String(d.getMinutes()).padStart(2, '0');
+        return `${yy}-${mm}-${dd} ${hh}:${mi}`;
+    };
+
+    const renderDetail = (item) => {
+        const catLabel = CATEGORY_LABEL[item.category] || item.category;
+        const stLabel  = STATUS_LABEL[item.status]     || item.status;
+        const badgeCls = STATUS_BADGE[item.status]     || 'bg-secondary';
+
+        document.getElementById('inquiryTitle').textContent    = item.title;
+        document.getElementById('inquiryId').textContent       = item.id;
+        document.getElementById('inquiryCategory').textContent = catLabel;
+        document.getElementById('inquiryAuthor').textContent   = item.authorNickname || '';
+        document.getElementById('inquiryStatus').innerHTML     = `<span class="badge ${badgeCls}">${stLabel}</span>`;
+        document.getElementById('inquiryCreatedAt').textContent = formatDate(item.createdAt);
+        document.getElementById('inquiryContent').textContent  = item.content || '';
+
+        const hasAnswer = !!item.answerContent;
+
+        document.getElementById('answerWriteSection').style.display = hasAnswer ? 'none' : '';
+        document.getElementById('answerViewSection').style.display  = hasAnswer ? ''     : 'none';
+
+        if (hasAnswer) {
+            document.getElementById('answerContentView').textContent = item.answerContent;
+            document.getElementById('answerBy').textContent          = item.answeredByNickname || '';
+            document.getElementById('answerAt').textContent          = formatDate(item.answeredAt);
+
+            // 답변 수정 폼 초기값
+            document.getElementById('answerEditContent').value = item.answerContent;
+
+            // 액션 버튼 렌더링
+            const actions = document.getElementById('answerActions');
+            const isClosed = item.status === 'CLOSED';
+            actions.innerHTML = `
+                <button type="button" class="btn btn-outline-primary btn-sm" id="btnShowEdit">답변 수정</button>
+                ${isClosed
+                    ? `<button type="button" class="btn btn-outline-success btn-sm" id="btnToggleStatus" data-target="ANSWERED">재개</button>`
+                    : `<button type="button" class="btn btn-outline-danger btn-sm"  id="btnToggleStatus" data-target="CLOSED">종료</button>`
+                }
+            `;
+
+            document.getElementById('btnShowEdit').addEventListener('click', () => {
+                document.getElementById('answerEditSection').style.display = '';
+            });
+
+            document.getElementById('btnToggleStatus').addEventListener('click', async (e) => {
+                const targetStatus = e.currentTarget.dataset.target;
+                const label = targetStatus === 'CLOSED' ? '종료' : '재개';
+                if (!confirm(`이 문의를 "${label}" 처리하시겠습니까?`)) return;
+                try {
+                    await fetchAdmin(`/api/v1/admin/qna/inquiries/${inquiryId}/status`, {
+                        method: 'PATCH',
+                        body: JSON.stringify({status: targetStatus}),
+                    });
+                    alert(`${label} 처리되었습니다.`);
+                    await load();
+                } catch (e) {
+                    alert(e.message);
+                }
+            });
+        }
+    };
+
+    const load = async () => {
+        try {
+            const item = await fetchAdmin(`/api/v1/admin/qna/inquiries/${inquiryId}`);
+            renderDetail(item);
+        } catch (e) {
+            document.getElementById('inquiryTitle').textContent = `오류: ${e.message}`;
+        }
+    };
+
+    // 답변 등록 (POST)
+    document.getElementById('btnPostAnswer').addEventListener('click', async () => {
+        const content = document.getElementById('answerContent').value.trim();
+        if (!content) { alert('답변 내용을 입력해주세요.'); return; }
+        try {
+            await fetchAdmin(`/api/v1/admin/qna/inquiries/${inquiryId}/answer`, {
+                method: 'POST',
+                body: JSON.stringify({content}),
+            });
+            alert('답변이 등록되었습니다.');
+            await load();
+        } catch (e) {
+            alert(e.message);
+        }
+    });
+
+    // 답변 수정 저장 (PUT)
+    document.getElementById('btnPutAnswer').addEventListener('click', async () => {
+        const content = document.getElementById('answerEditContent').value.trim();
+        if (!content) { alert('답변 내용을 입력해주세요.'); return; }
+        try {
+            await fetchAdmin(`/api/v1/admin/qna/inquiries/${inquiryId}/answer`, {
+                method: 'PUT',
+                body: JSON.stringify({content}),
+            });
+            alert('답변이 수정되었습니다.');
+            document.getElementById('answerEditSection').style.display = 'none';
+            await load();
+        } catch (e) {
+            alert(e.message);
+        }
+    });
+
+    // 수정 취소
+    document.getElementById('btnCancelEdit').addEventListener('click', () => {
+        document.getElementById('answerEditSection').style.display = 'none';
+    });
+
+    load();
+</script>
+</body>
+</html>

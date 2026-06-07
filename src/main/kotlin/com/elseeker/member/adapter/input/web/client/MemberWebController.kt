@@ -40,6 +40,18 @@ class MemberWebController {
         return "member/my-memo"
     }
 
+    @GetMapping("/my-inquiries")
+    fun showMyInquiries(authentication: Authentication?): String {
+        redirectIfUnauthenticated(authentication, "/web/member/my-inquiries")?.let { return it }
+        return "member/my-inquiries"
+    }
+
+    @GetMapping("/my-inquiries/{id}")
+    fun showMyInquiryDetail(authentication: Authentication?): String {
+        redirectIfUnauthenticated(authentication, "/web/member/my-inquiries")?.let { return it }
+        return "member/my-inquiry-detail"
+    }
+
     @GetMapping("/withdraw/complete")
     fun showWithdrawComplete(): String {
         return "member/withdraw-complete"

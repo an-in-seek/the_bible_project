@@ -154,6 +154,12 @@
                                role="menuitem">
                                 나의 성경 메모
                             </a>
+                            <a id="topNavMyInquiryLink"
+                               href="/web/member/my-inquiries"
+                               class="top-nav-account-item d-none"
+                               role="menuitem">
+                                내 문의
+                            </a>
 
                             <!-- 2) 설정: 테마 (주요 내비와 구분) -->
                             <div class="top-nav-account-divider"
@@ -243,6 +249,7 @@
             const logoutLink = document.getElementById("topNavLogoutLink");
             const myPageLink = document.getElementById("topNavMyPageLink");
             const myMemoLink = document.getElementById("topNavMyMemoLink");
+            const myInquiryLink = document.getElementById("topNavMyInquiryLink");
             const accountDivider = document.getElementById("topNavAccountDivider");
             const accountButton = document.getElementById("topNavAccountButton");
             const accountMenu = document.getElementById("topNavAccountMenu");
@@ -263,6 +270,7 @@
                     logoutLink.classList.remove("d-none");
                     myPageLink.classList.remove("d-none");
                     myMemoLink.classList.remove("d-none");
+                    myInquiryLink?.classList.remove("d-none");
                     accountDivider.classList.remove("d-none");
                     if (notificationButton && notificationButton.dataset.showNotification === "true") {
                         notificationButton.classList.remove("d-none");

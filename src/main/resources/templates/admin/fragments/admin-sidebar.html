@@ -92,6 +92,25 @@
             </div>
         </li>
 
+        <li class="admin-sidebar-group" data-sidebar-group="qna"
+            th:classappend="${#strings.startsWith(currentPath, '/web/admin/qna/')} ? 'is-active'">
+            <button type="button" class="admin-sidebar-group-toggle"
+                    aria-expanded="false" aria-controls="admin-sidebar-group-qna">
+                <span class="admin-sidebar-group-title">Q&amp;A</span>
+                <span class="admin-sidebar-group-chevron" aria-hidden="true"></span>
+            </button>
+            <div id="admin-sidebar-group-qna" class="admin-sidebar-group-body">
+                <ul class="admin-sidebar-subnav">
+                    <li>
+                        <a href="/web/admin/qna/inquiries" class="admin-sidebar-link"
+                           th:classappend="${#strings.startsWith(currentPath, '/web/admin/qna/inquiries')} ? 'active'">
+                            Q&amp;A 문의
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </li>
+
         <li class="admin-sidebar-group" data-sidebar-group="community"
             th:classappend="${#strings.startsWith(currentPath, '/web/admin/community/')} ? 'is-active'">
             <button type="button" class="admin-sidebar-group-toggle"

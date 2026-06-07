@@ -65,6 +65,12 @@ enum class ErrorType(
     COMMENT_DISABLED(HttpStatus.BAD_REQUEST, "댓글이 비활성화된 게시글입니다.", LogLevel.WARN),
     COMMENT_ACCESS_DENIED(HttpStatus.FORBIDDEN, "댓글에 대한 접근 권한이 없습니다.", LogLevel.WARN),
 
+    // Q&A (1:1 문의)
+    INQUIRY_NOT_FOUND(HttpStatus.NOT_FOUND, "문의를 찾을 수 없습니다.", LogLevel.WARN),
+    INQUIRY_ALREADY_ANSWERED(HttpStatus.BAD_REQUEST, "이미 답변이 등록된 문의는 수정·삭제할 수 없습니다.", LogLevel.WARN),
+    INQUIRY_NOT_ANSWERED(HttpStatus.BAD_REQUEST, "아직 답변이 등록되지 않은 문의입니다.", LogLevel.WARN),
+    INQUIRY_ACCESS_DENIED(HttpStatus.FORBIDDEN, "문의에 대한 접근 권한이 없습니다.", LogLevel.WARN),
+
     // 401
     AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다. 다시 로그인해 주세요.", LogLevel.WARN),
 

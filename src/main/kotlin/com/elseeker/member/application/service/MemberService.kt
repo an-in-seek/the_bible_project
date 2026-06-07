@@ -29,6 +29,7 @@ import com.elseeker.member.domain.model.Member
 import com.elseeker.member.domain.model.MemberWithdrawalAudit
 import com.elseeker.member.domain.vo.MemberRole
 import com.elseeker.member.domain.vo.OAuthProvider
+import com.elseeker.qna.adapter.output.jpa.InquiryRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.util.*
@@ -57,6 +58,7 @@ class MemberService(
     private val memberDictionaryProgressRepository: MemberDictionaryProgressRepository,
     private val postRepository: PostRepository,
     private val commentRepository: CommentRepository,
+    private val inquiryRepository: InquiryRepository,
     private val memberWithdrawalAuditRepository: MemberWithdrawalAuditRepository,
 ) {
 
@@ -126,7 +128,11 @@ class MemberService(
         if (sentinel.id != memberId) {
             postRepository.reassignAuthor(memberId, sentinel)
             commentRepository.reassignAuthor(memberId, sentinel)
+            // Q&A: 작성한 문의는 센티넬로 보존, 답변자(관리자) 참조는 NULL 처리 (답변 본문은 보존)
+            inquiryRepository.reassignAuthor(memberId, sentinel)
         }
+        // 답변자 참조 제거는 센티넬 자기 자신 케이스와 무관하게 항상 수행
+        inquiryRepository.clearAnswerer(memberId)
         memberOAuthAccountRepository.deleteAllByMember(member)
         // 위 deleteAllByMember 들은 파생(derived) 삭제라 flush가 커밋까지 지연된다.
         // member 삭제와 같은 flush에 섞이면 Hibernate가 member를 자식보다 먼저 삭제해 FK 위반이 난다.

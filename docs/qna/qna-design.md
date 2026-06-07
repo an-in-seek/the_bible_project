@@ -418,8 +418,8 @@ fun reassignAuthor(@Param("memberId") memberId: Long, @Param("sentinel") sentine
 fun clearAnswerer(@Param("memberId") memberId: Long): Int
 ```
 
-> **enum 비교는 `:param`으로 전달**한다 — 코드베이스 JPQL 관례(`CommentRepository.findByIdAndStatusNot`의
-> `c.status <> :excludedStatus`)와 일치시키고 FQN enum 리터럴(`InquiryStatus.DELETED`)을 본문에 박지 않는다.
+> **enum 비교는 `:param`으로 전달**한다 — 코드베이스 JPQL 관례(`CommentRepository.findByIdAndStatusNotForUpdate`·
+> `PostRepository.findByIdAndStatusNot`의 `status <> :excludedStatus`)와 일치시키고 FQN enum 리터럴(`InquiryStatus.DELETED`)을 본문에 박지 않는다.
 > `findPageByAuthorId`/`findByIdAndAuthorId`의 `DELETED` 제외도 동일하게 `:excludedStatus` 파라미터로 전달한다.
 > `keyword`/`author`는 서비스에서 `"%$it%"`로 감싸 전달한다(`CommentService.getAdminComments` 패턴).
 > `Page` 반환 쿼리는 fetch join 여부와 무관하게 `countQuery`를 명시해 Spring Data JPA의 자동 count 생성 실패를

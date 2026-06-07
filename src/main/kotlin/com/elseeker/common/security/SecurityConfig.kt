@@ -122,7 +122,8 @@ class SecurityConfig(
                         "/api/v1/members/**",
                         "/api/v1/game/bible-quiz/**",
                         "/api/v1/game/ranking/me",
-                        "/api/v1/bible/reading/**"
+                        "/api/v1/bible/reading/**",
+                        "/api/v1/qna/**"
                     ).authenticated()
                     // 게임 관련 페이지는 서버 단에서 인증을 강제
                     .requestMatchers(
