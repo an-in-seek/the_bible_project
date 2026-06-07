@@ -181,9 +181,10 @@ fun findByPostIdWithAuthor(postId, status, pageable): Slice<Comment>
 > 참고: `JOIN FETCH c.author`는 `@ManyToOne`(단일값) 페치라 Slice 페이징과 함께 SQL 레벨에서 정상
 > 동작한다(컬렉션 페치가 아니므로 in-memory 페이징 경고 `HHH000104` 없음). 신규 쿼리도 동일하다.
 
-### 4-2. 신규 조회 전략 (2-쿼리, 즉시 로드)
+### 4-2. 신규 조회 전략 (bounded fanout + count, 즉시 로드)
 
-대댓글을 부모와 함께 펼쳐 보여주되 N+1을 피하기 위해 **2단계 쿼리**로 조립한다.
+대댓글을 부모와 함께 펼쳐 보여주되, **최상위 페이징 1회 + 부모당 bounded 미리보기 팬아웃 + count 1회**로 조립한다.
+(초안의 "2-쿼리" 표현은 부정확 — MVP 방식 A는 부모 수만큼 bounded 조회가 추가된다. Low 재지적 반영.)
 
 **4-2-1. 최상위 댓글만 페이징** — 대댓글을 제외하고 부모만 Slice로 가져온다.
 
@@ -193,7 +194,7 @@ JOIN FETCH c.author
 WHERE c.post.id = :postId
   AND c.parent IS NULL
   AND c.status = :status          -- PUBLISHED
-ORDER BY c.createdAt ASC
+ORDER BY c.createdAt ASC, c.id ASC   -- tie-breaker(동일 시각 안정 정렬)
 ```
 
 > **삭제된 부모 처리(C2 해결)**: MVP에서는 부모 삭제 시 자식까지 **cascade soft-delete**(7-3)하므로,
@@ -201,21 +202,27 @@ ORDER BY c.createdAt ASC
 > "삭제된 댓글입니다" 자리표시 + 자식 유지 방식은 카운트 괴리(H1)와 `EXISTS` 서브쿼리 복잡도를
 > 동반하므로 **2차로 미룬다**(9절에 정확한 JPQL 포함).
 
-**4-2-2. 해당 페이지 부모들의 대댓글 일괄 조회(부모당 상한 N)** — 위에서 얻은 부모 id 집합으로 자식을 한 번에 가져온다.
+**4-2-2. 해당 페이지 부모들의 대댓글 조회(부모당 DB-side 상한 N)** — 위에서 얻은 부모 id 집합의 자식을 가져오되, **반드시 DB 레벨에서 부모당 N개로 제한**한다.
 
-```sql
-SELECT c FROM Comment c
-JOIN FETCH c.author
-WHERE c.parent.id IN (:parentIds)
-  AND c.status = :status          -- PUBLISHED
-ORDER BY c.parent.id ASC, c.createdAt ASC
-```
-
-> **무제한 로드 방지(H5 해결)**: 부모당 대댓글이 매우 많을 수 있으므로, 위 결과를 서비스에서
-> **부모별 최대 N개(예: 20)** 까지만 잘라 응답에 담는다. 잘린 나머지는 `replyCount`로 총 개수를
-> 알리고, 4-2-4의 on-demand 엔드포인트로 더 불러온다.
-> (DB-side 윈도우 `LIMIT`이 이상적이나 JPQL 표준에 없으므로 MVP는 애플리케이션-side 컷 + count로 처리.
-> 부모 수가 페이지당 20개로 제한적이라 한 번의 `IN` 조회로 충분하다.)
+> **무제한 로드 실질 차단(High — 재지적 반영)**: 단순 `WHERE c.parent.id IN (:parentIds)`로 전량을 가져온 뒤
+> 서비스에서 자르는 방식은 **DB에서 이미 무제한 로드**가 되어 상한이 무의미하다. 부모 하나에 대댓글이
+> 수천 개면 그대로 메모리에 올라온다. 따라서 다음 둘 중 하나로 **DB-side에서 바운드**한다.
+>
+> **방식 A (MVP 기본) — 부모별 bounded Slice 팬아웃**: 페이지 부모(≤ page size, 예 20개) 각각에 대해
+> `findRepliesByParentId(parentId, PUBLISHED, PageRequest.of(0, N))`를 `createdAt ASC, id ASC`로 호출한다. 쿼리 수는
+> 페이지당 부모 수로 **상한이 보장**되고(≤ 20회), 각 쿼리는 `idx_comment_parent_created_at`로 `LIMIT N`만 읽어 저렴하다.
+>
+> ```kotlin
+> val repliesByParent: Map<Long, List<Comment>> = parentIds.associateWith { pid ->
+>     commentRepository.findRepliesByParentId(pid, PUBLISHED, PageRequest.of(0, REPLY_PREVIEW_SIZE)).content
+> }
+> ```
+>
+> **방식 B (최적화) — 윈도우 함수 단일 native 쿼리**: `ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY created_at)`로
+> 부모당 N개를 한 번에 뽑는다. 단일 왕복이라 효율적이나 native SQL이며 author 매핑을 별도 처리해야 한다.
+> 부모/자식 규모가 커지면 B로 전환한다(9절).
+>
+> 어느 방식이든 **잘린 나머지는 `replyCount`(4-2-3)로 총 개수를 알리고 4-2-4 on-demand로 더 불러온다.**
 
 **4-2-3. 대댓글 수 집계** — 각 부모의 총 PUBLISHED 대댓글 수를 한 번에 구한다.
 
@@ -229,32 +236,46 @@ GROUP BY c.parent.id
 → `replyCount`의 **권위 출처는 이 count 결과(서버)** 다(Med3). 프론트는 표시된 `replies.length`가 아니라
 이 값으로 "답글 N개"를 렌더한다.
 
-**4-2-4. 대댓글 추가 로드(on-demand, 상한 초과분)**
+**4-2-4. 대댓글 추가 로드(on-demand, "더 보기")** — **keyset(cursor) 방식**으로 중복/누락을 방지한다.
 
 ```sql
 SELECT c FROM Comment c
 JOIN FETCH c.author
 WHERE c.parent.id = :parentId
   AND c.status = :status          -- PUBLISHED
-ORDER BY c.createdAt ASC
--- Slice pageable
+  AND (c.createdAt > :afterCreatedAt
+       OR (c.createdAt = :afterCreatedAt AND c.id > :afterId))   -- (createdAt, id) keyset
+ORDER BY c.createdAt ASC, c.id ASC
+-- LIMIT pageSize
 ```
+
+> **offset 대신 keyset 사용(Med 재지적 #4)**: "이미 표시된 대댓글 수"를 offset으로 쓰면, 사용자가 그 사이
+> **새 대댓글을 작성(append)** 했을 때 offset이 한 칸 밀려 **기존 서버 행 하나를 건너뛴다.** 따라서 클라이언트가
+> 보유한 **마지막 대댓글의 `(createdAt, id)` 커서**를 보내 그 이후만 가져온다. 정렬에 `id` tie-breaker를 넣어
+> 동일 시각에서도 안정적이다. 커서 파라미터는 쿼리스트링(`?afterCreatedAt=..&afterId=..`)으로 전달한다.
 
 **4-2-5. 서비스에서 조립**
 
 ```kotlin
 val parents = commentRepository.findTopLevelByPostId(postId, PUBLISHED, pageable)   // Slice
 val parentIds = parents.content.mapNotNull { it.id }
-val replies = commentRepository.findRepliesByParentIds(parentIds, PUBLISHED)        // 4-2-2
-    .groupBy { it.parent?.id }
+if (parentIds.isEmpty()) {                                                          // 빈 목록 short-circuit(Med-3)
+    return CommentSliceResponse(content = emptyList(), hasNext = parents.hasNext())
+}
+// 부모별 미리보기 N개(DB-side 바운드, 4-2-2 방식 A)
+val repliesByParent = parentIds.associateWith { pid ->
+    commentRepository.findRepliesByParentId(pid, PUBLISHED, PageRequest.of(0, REPLY_PREVIEW_SIZE)).content
+}
 val counts = commentRepository.countRepliesByParentIds(parentIds, PUBLISHED)        // 4-2-3
-// parents 각각에: replies[id]를 "가장 오래된 N개"(createdAt ASC 기준 앞에서 N개)만,
-// replyCount=counts[id]로 매핑하여 중첩 응답 구성
+// parents 각각에: repliesByParent[id](가장 오래된 N개) + replyCount=counts[id]로 매핑하여 중첩 응답 구성
 ```
 
-> **컷 기준 명시(Med-B)**: 4-2-2 정렬이 `createdAt ASC`이므로 "앞에서 N개"는 **가장 오래된 N개**다.
-> 4-2-4 "더 보기"도 `createdAt ASC`로 일관되며, **이미 로드된 개수 이후부터**(offset = 현재 표시된
-> 대댓글 수) 이어서 조회해 초기 N개와 중복되지 않게 한다.
+> **빈 부모 목록 처리(Med-3)**: `parentIds`가 비면 `IN ()`/count/preview 쿼리를 호출하지 않고 즉시
+> 빈 응답을 반환한다(불필요·오류 가능 쿼리 차단).
+>
+> **컷 기준 명시(Med-B)**: 미리보기 N개는 `createdAt ASC, id ASC` 기준 **가장 오래된 N개**다.
+> "더 보기"는 클라이언트가 보유한 **마지막 대댓글의 `(createdAt, id)` 커서** 이후를 가져온다(4-2-4 keyset).
+> offset 방식은 그 사이 새 대댓글 append 시 행을 건너뛸 수 있어 채택하지 않는다(Med 재지적 #4).
 
 > **대안 비교**: 부모+자식을 단일 쿼리로 가져와 메모리에서 그룹핑하는 방법도 있으나, Slice 페이징
 > 경계를 최상위 댓글 기준으로 잘라야 하므로 자식이 페이지 수에 섞여 경계 계산이 복잡해진다.
@@ -264,11 +285,15 @@ val counts = commentRepository.countRepliesByParentIds(parentIds, PUBLISHED)    
 
 | 메서드 | 용도 | 비고 |
 |--------|------|------|
-| `findTopLevelByPostId(postId, status, pageable): Slice<Comment>` | 4-2-1 최상위 페이징 | `JOIN FETCH c.author`, `c.parent IS NULL` |
-| `findRepliesByParentIds(parentIds, status): List<Comment>` | 4-2-2 자식 일괄 조회 | `JOIN FETCH c.author` |
+| `findTopLevelByPostId(postId, status, pageable): Slice<Comment>` | 4-2-1 최상위 페이징 | `JOIN FETCH c.author`, `c.parent IS NULL`, `ORDER BY createdAt, id` |
+| `findRepliesByParentId(parentId, status, pageable): Slice<Comment>` | 4-2-2 미리보기(부모당 N) | `JOIN FETCH c.author`, DB-side `LIMIT`, `ORDER BY createdAt, id` |
+| `findRepliesByParentIdAfter(parentId, status, afterCreatedAt, afterId, pageable): Slice<Comment>` | 4-2-4 "더 보기" keyset | `(createdAt, id)` 커서 이후 |
+| `findRepliesByParentIds(parentIds, status): List<Comment>` | cascade hide(7-3)용 PUBLISHED 자식 전량 | `JOIN FETCH c.author`. **목록 조회엔 미사용** |
+| `findRepliesByParentIdAndStatusNot(parentId, excluded): List<Comment>` | cascade delete(7-3)용 비-DELETED 자식 전량 | Med #3 — 삭제 전이 대상 |
 | `countRepliesByParentIds(parentIds, status): List<ReplyCount>` | 4-2-3 자식 수 집계 | projection(parentId, cnt) |
-| `findRepliesByParentId(parentId, status, pageable): Slice<Comment>` | 4-2-4 추가 로드 | on-demand |
 | `findByIdWithParentAndPost(id): Comment?` | **신규 — C1 대체** | 대댓글 작성 가드용. 아래 참고 |
+| `PostRepository.findCommentCountByPostId(postId): Long` | 5-2-1 변이 후 fresh 카운트 | **벌크 UPDATE 후** scalar 조회(High stale 방지) |
+| `PostRepository.decrementCommentCountBy(postId, n): Int` | 7-3 벌크 차감 | `GREATEST(.. - n, 0)` |
 
 **C1 해결** — 문서 초안이 참조하던 `findByIdWithPost`는 실존하지 않는다. 대댓글 작성 가드(7-1)는
 부모의 `parent`(평탄화 판정)와 `post`(소속 검증)가 모두 필요하므로, 두 연관을 함께 페치하는 메서드를 신설한다.
@@ -310,12 +335,12 @@ fun findByIdWithParentAndPost(@Param("id") id: Long): Comment?
 | 동작 | 메서드 · 경로 | 인증 | 요청 본문 | 응답 |
 |------|---------------|------|-----------|------|
 | 댓글 목록(대댓글 동봉) | `GET /api/v1/community/posts/{postId}/comments` | 선택 | — | `CommentSliceResponse` (각 항목에 `replies`/`replyCount`) |
-| **대댓글 작성(신규)** | `POST /api/v1/community/posts/{postId}/comments/{parentId}/replies` | 필수 | `{ content }` | `201` + `CommentResponse` |
-| **대댓글 추가 조회(신규)** | `GET /api/v1/community/posts/{postId}/comments/{parentId}/replies?page=..&size=..` | 선택 | — | `CommentSliceResponse` |
-| 댓글 작성(기존) | `POST /api/v1/community/posts/{postId}/comments` | 필수 | `{ content }` | `201` + `CommentResponse` |
-| 수정(부모·자식 공통) | `PUT /api/v1/community/posts/{postId}/comments/{commentId}` | 필수 | `{ content }` | `CommentResponse` |
-| 삭제(부모·자식 공통) | `DELETE /api/v1/community/posts/{postId}/comments/{commentId}` | 필수 | — | `204` |
-| 신고(부모·자식 공통) | `POST /api/v1/community/posts/{postId}/comments/{commentId}/reports` | 필수 | `{ reason }` | `201` |
+| **대댓글 작성(신규)** | `POST /api/v1/community/posts/{postId}/comments/{parentId}/replies` | 필수 | `{ content }` | `201` + `CommentMutationResponse` |
+| **대댓글 추가 조회(신규)** | `GET /api/v1/community/posts/{postId}/comments/{parentId}/replies?afterCreatedAt=..&afterId=..&size=..` | 선택 | — | `CommentSliceResponse` (keyset) |
+| 댓글 작성(기존) | `POST /api/v1/community/posts/{postId}/comments` | 필수 | `{ content }` | `201` + `CommentMutationResponse` |
+| 수정(부모·자식 공통) | `PUT /api/v1/community/posts/{postId}/comments/{commentId}` | 필수 | `{ content }` | `CommentMutationResponse` |
+| 삭제(부모·자식 공통) | `DELETE /api/v1/community/posts/{postId}/comments/{commentId}` | 필수 | — | `200` + `CommentCountResponse` |
+| 신고(부모·자식 공통) | `POST /api/v1/community/posts/{postId}/comments/{commentId}/reports` | 필수 | `{ reason }` | `200` + `CommentCountResponse` |
 
 - 작성 요청은 기존 `CreateCommentRequest`(`content`, `@Size(max=1000)`)를 재사용한다.
 - 인증은 기존 패턴(`@AuthenticationPrincipal JwtPrincipal`)을 따른다.
@@ -350,6 +375,46 @@ data class CommentResponse(
 - `replyCount > replies.size`면 프론트가 "답글 N개 더 보기"로 4-2-4 엔드포인트를 호출한다.
 - 매퍼(`CommentMapper.toResponse`)는 최상위 변환 시 `replies`/`replyCount`를 채우고, 자식 변환 시
   `parentId`만 채운다(자식의 `replies`는 비움 — 2단계 보장).
+
+### 5-2-1. 변이 응답에 서버 카운트 포함 (Med — 재지적 반영)
+
+"라벨 권위 = 서버 `Post.commentCount`"(4-4)를 실제로 지키려면, **프론트가 로컬 +1/-1로 추정하지 않고
+변이 응답에서 권위 값을 받아야** 한다. 현재 `community-detail.js`는 로컬 증감 방식이라, 특히
+**cascade 삭제/숨김(부모+자식 N건)** 시 몇 개가 빠졌는지 알 수 없어 라벨이 틀어진다.
+
+DTO 계약 모순을 피하기 위해 **본문이 있는 변이와 없는 변이를 분리**한다(Med — 재지적: `comment` non-null과
+삭제 응답 충돌 회피).
+
+```kotlin
+@Schema(description = "댓글 변이 응답 — 댓글 본문 + 게시글 최신 댓글 수 (작성/수정/대댓글 작성)")
+data class CommentMutationResponse(
+    val comment: CommentResponse,          // 항상 존재
+    val postCommentCount: Long,            // 변이 후 서버 권위 Post.commentCount
+)
+
+@Schema(description = "댓글 수 응답 — 본문 없는 변이 (삭제/신고)")
+data class CommentCountResponse(
+    val postCommentCount: Long,
+)
+```
+
+- 작성/대댓글 작성/수정 → `CommentMutationResponse`(댓글 + 카운트).
+- 삭제/신고 → `CommentCountResponse`(204 대신 200). cascade로 여러 건이 빠져도 정확한 최신 값 전달.
+- 프론트(6-2)는 응답의 `postCommentCount`로 `#commentCountLabel`을 **동기화**한다(로컬 증감 폐기).
+
+> **stale 값 방지(High — 재지적 핵심)**: `incrementCommentCount`/`decrementCommentCountBy`는 `@Modifying` **벌크
+> UPDATE라 영속성 컨텍스트(L1 캐시)를 우회**한다. 따라서 이미 로드된 managed `Post`나
+> `postRepository.findById(...).statistics.commentCount`를 읽으면 **변이 전 옛 값**이 나온다. `postCommentCount`는
+> 반드시 **벌크 UPDATE 이후 DB에서 새로 읽은 scalar 값**으로 산출한다. 신규 scalar 조회 메서드를 둔다.
+>
+> ```kotlin
+> @Query("SELECT p.statistics.commentCount FROM Post p WHERE p.id = :postId")
+> fun findCommentCountByPostId(@Param("postId") postId: Long): Long   // 벌크 UPDATE 후 호출
+> ```
+>
+> 대안: 카운트 벌크 메서드에 `@Modifying(clearAutomatically = true, flushAutomatically = true)`를 부여하고
+> Post를 재조회해도 되나, 방금 dirty-checking으로 바꾼 댓글 엔티티가 flush 순서에 영향받지 않도록
+> **scalar 조회 방식을 권장**한다(부작용 없음).
 
 ### 5-3. 관리자 영향 (H2 해결)
 
@@ -403,7 +468,8 @@ data class CommentResponse(
   `.comment-replies`에 채운다. `replyCount > replies.length`면 "답글 N개 더 보기" 버튼 노출.
 - "답글" 버튼 → 해당 댓글 아래 인라인 입력창 토글(기존 `.comment-editor` 스타일 재사용).
 - 등록 성공 시 **전체 새로고침 없이** 응답 받은 대댓글을 해당 부모의 `.comment-replies`에 append하고,
-  댓글 수 라벨(`#commentCountLabel`)을 서버 응답 기준으로 갱신한다(4-4).
+  댓글 수 라벨(`#commentCountLabel`)을 응답의 `postCommentCount`로 **동기화**한다(5-2-1). 기존 JS의 로컬
+  +1/-1 증감(`community-detail.js`)은 폐기 — cascade 삭제 시 빠진 개수를 로컬로 알 수 없기 때문(Med).
 - 대댓글에서 "답글"을 눌러도 작성 대상 `parentId`는 그 대댓글의 부모(최상위) id로 보낸다(2단계 평탄화).
 - "답글 N개 더 보기" → 4-2-4 엔드포인트를 Slice로 호출해 추가 append.
 
@@ -445,38 +511,76 @@ val reply = Comment.createReply(post = post, author = member, content = content,
   (노출되지 않는 부모로 취급). 미해결 정책이 아니라 확정 규칙이다.
 - 수정/삭제 권한은 기존 `ensureEditableBy`(작성자 또는 ADMIN) 재사용.
 
-### 7-3. 부모 삭제 시 자식 처리 — MVP: cascade soft-delete (C2·H1 해결)
+### 7-3. 최상위 부모 상태 전이 시 자식·카운트 통합 정합 (cascade)
 
-자식 대댓글이 있는 부모 댓글을 삭제할 때 **부모와 자식을 함께 soft-delete**(status=DELETED)한다.
+> 핵심 원칙: **최상위(parent == null) 댓글이 노출(PUBLISHED) ↔ 비노출(HIDDEN/DELETED) 사이를 전이할 때마다
+> PUBLISHED 자식과 `Post.commentCount`를 한 번에 정합화**한다. 이 규칙을 단일 헬퍼로 두고 **삭제·신고 자동숨김·
+> 관리자 상태변경·관리자 복원의 모든 경로**가 공유한다(High 재지적 #2 해결 — 특정 경로 누락 방지).
 
 ```kotlin
-// CommentService.deleteComment 확장
-comment.deleteBy(member)                       // 부모 soft-delete (기존)
-if (comment.parent == null) {                  // 최상위 댓글이면 자식도 함께
-    // 전량 조회(상한 없음): 4-2-2 메서드를 단일 id로 재사용 (L1 — Slice 메서드 아님)
-    val publishedChildren = commentRepository.findRepliesByParentIds(listOf(comment.id!!), PUBLISHED)
-    publishedChildren.forEach { it.delete() }  // 각각 status=DELETED
-    // 부모 1 + PUBLISHED 자식 수만큼 단일 벌크 차감 (Med-A 확정)
-    val removed = 1 + publishedChildren.size
-    postRepository.decrementCommentCountBy(postId, removed.toLong())  // 신규 메서드(4-4)
-    postRepository.updateScore(postId)
-} else {
-    applyCommentCountChange(postId, before, comment.status)  // 대댓글 단건 삭제는 기존 경로
+// CommentService 내부 헬퍼 — 모든 최상위 댓글 상태 전이의 단일 정합 지점
+private fun cascadeTopLevelTransition(parent: Comment, before: CommentStatus, after: CommentStatus) {
+    val postId = parent.post.id ?: throwError(ErrorType.POST_NOT_FOUND)
+    if (before == after) return
+    val wasCounted = before.isCountedInPost()   // 부모가 집계 대상이었나(PUBLISHED)
+    val nowCounted = after.isCountedInPost()
+
+    when {
+        // 노출/비노출 → 비노출(HIDDEN 또는 DELETED): 자식 동반 전이 + (집계됐던 부모 + PUBLISHED 자식)만 차감
+        after == CommentStatus.DELETED || after == CommentStatus.HIDDEN -> {
+            // 전이 대상 자식 집합:
+            //   삭제: status != DELETED 자식 전부(PUBLISHED+HIDDEN)를 DELETED로  ← Med 재지적 #3
+            //   숨김: PUBLISHED 자식만 HIDDEN으로 (이미 HIDDEN/DELETED는 그대로)
+            val children = if (after == CommentStatus.DELETED)
+                commentRepository.findRepliesByParentIdAndStatusNot(parent.id!!, CommentStatus.DELETED)
+            else
+                commentRepository.findRepliesByParentIds(listOf(parent.id!!), CommentStatus.PUBLISHED)
+            // 카운트 차감은 "직전에 PUBLISHED였던 자식 수"만 (이미 HIDDEN이던 자식은 미집계라 제외)
+            val publishedChildCount = children.count { it.status == CommentStatus.PUBLISHED }
+            children.forEach { if (after == CommentStatus.DELETED) it.delete() else it.hide() }
+            val removed = (if (wasCounted) 1L else 0L) + publishedChildCount   // 부모는 집계됐을 때만 +1(High #3)
+            if (removed > 0) {
+                postRepository.decrementCommentCountBy(postId, removed)
+                postRepository.updateScore(postId)
+            }
+        }
+        // 비노출 → 노출(관리자 복원): 부모만 +1. 함께 내려갔던 자식 복원은 2차(미해결 질문)
+        !wasCounted && nowCounted -> {
+            postRepository.incrementCommentCount(postId)
+            postRepository.updateScore(postId)
+        }
+    }
 }
 ```
 
-- **카운트 차감 방식 확정(Med-A)**: 자식 N개를 `applyCommentCountChange`로 루프 호출하면 N회의 개별
-  `UPDATE -1` + `updateScore`가 발생하므로, **"부모 1 + PUBLISHED 자식 수"를 1회 벌크 차감**한다.
-  이를 위해 `PostRepository`에 신규 메서드를 추가한다(4-4 참고):
-  ```kotlin
-  @Modifying
-  @Query("UPDATE Post p SET p.statistics.commentCount = GREATEST(p.statistics.commentCount - :n, 0) WHERE p.id = :postId")
-  fun decrementCommentCountBy(@Param("postId") postId: Long, @Param("n") n: Long): Int
-  ```
-- **카운트 일관성**: 부모와 PUBLISHED 자식 각각이 카운트에서 빠지므로, "화면 표시 행 수 = `Post.commentCount`"가
-  유지된다(H1 해소). 고아 대댓글도 발생하지 않는다(C2 해소 — 4-2-1을 단순 `status=PUBLISHED`로 유지 가능).
-- **트레이드오프**: 부모 삭제 시 그 아래 스레드 전체가 사라진다. 이는 대다수 커뮤니티의 통상 동작이며,
-  맥락 보존(자리표시)이 필요하면 2차에서 도입한다(9절).
+> **삭제 정책 일관성(Med 재지적 #3)**: 부모가 DELETED가 되면 **status가 DELETED가 아닌 자식 전부**(PUBLISHED·HIDDEN)가
+> DELETED가 된다("스레드 전체 삭제"). 다만 카운트 차감은 **직전 PUBLISHED 자식 수**만으로 계산해(이미 HIDDEN이던
+> 자식은 애초에 미집계) 과차감을 막는다. 숨김(HIDDEN) 전이는 PUBLISHED 자식만 내린다.
+
+**경로별 연결** — 모든 comment-scoped 변이는 "before 캡처 → 도메인 상태 변경 → 부모면 헬퍼, 자식이면 기존 단건 경로"로 통일한다.
+
+```kotlin
+// 공통 패턴
+val before = comment.status
+/* 도메인 메서드: deleteBy / registerReport / changeStatusByAdmin / restoreByAdmin */
+if (comment.parent == null) cascadeTopLevelTransition(comment, before, comment.status)
+else applyCommentCountChange(postId, before, comment.status)   // 대댓글 단건은 기존 경로
+```
+
+| 경로 | 도메인 호출 | 적용 |
+|------|-------------|------|
+| `deleteComment`(클라/관리자) | `deleteBy` (PUBLISHED·HIDDEN→DELETED) | 헬퍼. **이미 HIDDEN 부모 삭제 시 `wasCounted=false`라 부모분 차감 안 함**(High #3) |
+| `reportComment` 자동숨김 | `registerReport` (PUBLISHED→HIDDEN) | 헬퍼. 부모 HIDDEN 시 자식도 HIDDEN+차감(Med-C) |
+| `updateCommentStatus`(관리자 `PATCH /comments/{id}/status`) | `changeStatusByAdmin` | **헬퍼(High #2 해결)** — 이전엔 누락되어 부모만 빠지고 자식 잔존·카운트 불일치 발생 |
+| `restoreComment`(관리자) | `restoreByAdmin` (→PUBLISHED) | 헬퍼 — 비노출→노출이면 부모 +1 |
+
+- **벌크 차감 메서드(Med-A)**: `PostRepository.decrementCommentCountBy(postId, n)`(`GREATEST(commentCount - :n, 0)`, 4-4)로
+  "부모 + PUBLISHED 자식"을 1회 차감(루프 개별 차감 금지).
+- **`comment.parent` 로드**: 위 경로들이 쓰는 `findByIdWithAuthorAndPostForUpdate`는 `parent`를 페치하지 않으므로
+  `comment.parent == null` 판정 시 LAZY 1회 로드가 발생한다(허용). 필요 시 parent까지 페치하는 변형을 둔다.
+- **카운트 일관성**: 모든 전이 경로가 동일 헬퍼를 거치므로 "화면 표시 행 수 = `Post.commentCount`" 불변식이
+  삭제·신고·관리자 조작 전반에서 유지된다(H1·Med-C·High #2 통합 해소). 고아 대댓글도 발생하지 않는다(C2).
+- **트레이드오프**: 부모가 비노출되면 그 아래 스레드 전체가 함께 사라진다(통상 동작). 맥락 보존(자리표시)은 2차(9절).
 
 ### 7-4. 하드 삭제 / FK 시맨틱 (H3 명시)
 
@@ -486,31 +590,15 @@ if (comment.parent == null) {                  // 최상위 댓글이면 자식�
 - **주의(향후)**: 데이터 정리·GDPR·관리자 일괄 삭제 등 **물리 삭제를 추가한다면**, 자기참조 FK 때문에
   부모보다 자식을 먼저 삭제하거나 `ON DELETE CASCADE`/`SET NULL`을 의도적으로 설계해야 한다.
 
-### 7-5. 신고로 숨겨진 댓글/대댓글
+### 7-5. comment-scoped 작업의 postId 무결성 검증 (Med — 재지적 반영)
 
-- **자식 대댓글이 HIDDEN될 때**: 4-2-2의 `status=PUBLISHED` 필터로 목록에서 빠지고, `replyCount`(4-2-3)도
-  PUBLISHED만 세므로 카운트에서 제외된다(일관적). `applyCommentCountChange`가 자식 1건을 차감.
-- **부모(최상위) 댓글이 신고 누적으로 HIDDEN될 때(Med-C)**: 삭제와 동일한 비대칭 문제가 발생한다 —
-  부모가 4-2-1에서 빠지면 PUBLISHED 자식들이 4-2-2의 부모 id 집합에 들지 못해 **조용히 사라지고**,
-  자식 status는 그대로라 `Post.commentCount`에는 남아 "표시 행 수 = commentCount" 불변식(H1)이 깨진다.
-  따라서 **부모 HIDDEN 시 PUBLISHED 자식도 함께 HIDDEN(cascade) 처리**하고 그만큼 카운트를 차감한다.
+현재 클라이언트 API는 `PUT/DELETE /posts/{postId}/comments/{commentId}`처럼 경로에 `postId`를 받지만,
+서비스(`updateComment`/`deleteComment`/`reportComment`)에 **`postId`를 넘기지 않아** URL의 게시글과 실제 댓글
+소속 게시글이 달라도 `commentId`만 맞으면 처리된다(기존 코드의 잠재 결함). 대댓글 도입과 함께 정리한다.
 
-  ```kotlin
-  // CommentService.reportComment 내 자동숨김 분기 확장
-  val nowHidden = comment.registerReport(CommentReportPolicy)   // 부모가 HIDDEN로 전이됐는가
-  if (nowHidden && comment.parent == null) {
-      val publishedChildren = commentRepository.findRepliesByParentIds(listOf(comment.id!!), PUBLISHED)
-      publishedChildren.forEach { it.hide() }                   // 각각 status=HIDDEN
-      val removed = 1 + publishedChildren.size                  // 부모 + 자식
-      postRepository.decrementCommentCountBy(postId, removed.toLong())
-      postRepository.updateScore(postId)
-  } else {
-      applyCommentCountChange(postId, before, comment.status)   // 기존 단건 경로
-  }
-  ```
-
-  > 관리자 복원(`restoreByAdmin`)은 현재 단건만 PUBLISHED로 되돌린다. cascade로 함께 숨겨진 자식의
-  > 복원 정책은 자리표시(2차)와 함께 재검토한다(9절·미해결 질문).
+- 모든 comment-scoped 작업(수정/삭제/신고 + 대댓글 작성)에서 **`comment.post.id == postId`를 검증**하고
+  불일치 시 `COMMENT_NOT_FOUND`. 서비스 시그니처에 `postId`를 추가한다.
+- 자식 cascade 시에도 부모/자식이 동일 post 소속임은 작성 시 `parent.post = post`로 보장되므로 추가 검증 불필요.
 
 ---
 
@@ -521,10 +609,20 @@ if (comment.parent == null) {                  // 최상위 댓글이면 자식�
 - **통합(`IntegrationTest` 기반, Testcontainers)**:
   - 대댓글 작성 → `Post.commentCount` +1, 목록에서 부모 아래 노출.
   - 부모 삭제 시 자식까지 DELETED + commentCount가 (부모+자식) 만큼 **1회 벌크 차감**(7-3, Med-A).
+  - **이미 HIDDEN인 부모를 삭제**해도 부모분은 차감되지 않음(`wasCounted=false`) — 카운트 음수/과차감 없음(High #3).
+  - **관리자 `PATCH /comments/{id}/status`로 부모 HIDDEN/DELETED 시**에도 자식 cascade + 카운트 정합(7-3, High #2).
+  - **관리자 복원(부모 HIDDEN→PUBLISHED)** 시 부모 +1 반영(7-3).
   - 부모당 상한 N 초과 시 `replies`는 가장 오래된 N개, `replyCount`는 총 개수, 4-2-4로 나머지를 중복 없이 로드(H5·Med-B).
+  - **"더 보기" 도중 새 대댓글이 append돼도** keyset 커서로 기존 행을 건너뛰지 않음(Med 재지적 #4).
+  - **부모당 대댓글이 매우 많아도** 상세 조회가 DB-side `LIMIT N`으로 바운드됨(쿼리·페이로드 무제한 아님, High #1).
+  - **이미 HIDDEN인 자식이 있는 부모를 삭제** 시 자식도 DELETED로 전이되고, 카운트 차감은 PUBLISHED 자식 수만(Med 재지적 #3).
+  - **변이 후 `postCommentCount`가 벌크 UPDATE 직후 DB 최신값**과 일치(stale 아님, High 재지적).
   - 신고로 **부모 HIDDEN 시 PUBLISHED 자식도 cascade HIDDEN + 카운트 차감**, 표시 행 수=commentCount 유지(7-5, Med-C).
   - 신고로 자식 단건 HIDDEN 시 목록·`replyCount`에서 제외(7-5).
   - HIDDEN/DELETED 부모에 답글 작성 시 `COMMENT_NOT_FOUND` 차단(7-1·7-2, L2).
+  - **URL `postId`와 댓글 소속 게시글 불일치** 시 수정/삭제/신고/대댓글 작성 모두 `COMMENT_NOT_FOUND`(7-5 무결성).
+  - 변이 응답의 `postCommentCount`가 서버 권위 값과 일치(5-2-1, Med).
+  - 부모 목록이 빈 게시글에서 목록 조회가 `IN ()`/count 쿼리 없이 빈 응답(4-2-5, Med).
   - 관리자 목록에 대댓글이 `parentId`와 함께 노출(5-3).
 - **회귀**: 기존 평면 댓글 작성/수정/삭제/신고가 그대로 동작.
 
@@ -534,15 +632,17 @@ if (comment.parent == null) {                  // 최상위 댓글이면 자식�
 
 **1차 구현 (MVP)**
 - `community_comment.parent_id` 추가 (엔티티 자기참조 + `@Index` + DDL 마이그레이션)
-- 리포지토리: `findTopLevelByPostId`, `findRepliesByParentIds`, `countRepliesByParentIds`,
-  `findRepliesByParentId`, `findByIdWithParentAndPost`(C1)
+- 리포지토리: `findTopLevelByPostId`, `findRepliesByParentId`(바운드 미리보기),
+  `findRepliesByParentIdAfter`(keyset 더보기), `findRepliesByParentIds`(cascade hide),
+  `findRepliesByParentIdAndStatusNot`(cascade delete), `countRepliesByParentIds`, `findByIdWithParentAndPost`(C1),
+  `PostRepository.decrementCommentCountBy`(Med-A) + `findCommentCountByPostId`(High stale 방지)
 - 대댓글 작성 API + 평탄화 가드(7-1) + 부모 PUBLISHED 검증(7-2)
-- 즉시 로드 조회(상한 N) + 추가 로드 엔드포인트(4-2-4)
-- 응답 DTO 확장(`parentId`/`replyCount`/`replies`) 및 매퍼 수정
+- 즉시 로드 조회: **DB-side 부모당 상한 N**(High #1) + 빈 목록 short-circuit(Med-3) + keyset "더 보기"(4-2-4, Med #4)
+- 응답 DTO: `CommentResponse` 확장(`parentId`/`replyCount`/`replies`) + `CommentMutationResponse`/`CommentCountResponse` 분리(5-2-1, Med #2) 및 매퍼 수정
 - 관리자 `AdminCommentItem.parentId` + 매퍼(5-3)
-- 부모 삭제 시 자식 cascade soft-delete(7-3) + `decrementCommentCountBy` 벌크 차감(Med-A)
-- 부모 신고-HIDDEN 시 자식 cascade hide + 카운트 차감(7-5, Med-C)
-- 화면: "답글" 액션, 인라인 입력창, 대댓글 들여쓰기 렌더, "더 보기", 부분 갱신
+- **통합 cascade 헬퍼**(7-3): 삭제·신고숨김·관리자 상태변경·복원 전 경로 연결(High #2·#3, Med-C)
+- comment-scoped 작업에 `postId` 무결성 검증(7-5)
+- 화면: "답글" 액션, 인라인 입력창, 대댓글 들여쓰기 렌더, "더 보기", 부분 갱신, **라벨을 `postCommentCount`로 동기화**(로컬 증감 폐기)
 - 통합 테스트(8절)
 
 **2차 구현**
@@ -565,10 +665,18 @@ if (comment.parent == null) {                  // 최상위 댓글이면 자식�
 
 | 항목 | 결정 |
 |------|------|
+| 최상위 부모 상태 전이 | **통합 cascade 헬퍼**가 삭제·신고숨김·관리자 상태변경·복원 전부 처리(7-3) |
 | 삭제된 부모 처리 | **MVP: cascade soft-delete**(자리표시는 2차) |
-| 신고-HIDDEN 부모 처리 | **PUBLISHED 자식 cascade hide + 카운트 차감**(7-5) |
-| 카운트 차감 방식 | **벌크 1회 `decrementCommentCountBy(postId, n)`**(부모+자식) |
+| 신고/관리자 HIDDEN 부모 | **PUBLISHED 자식 cascade hide + 카운트 차감**(7-3·7-5) |
+| 부모 DELETE 시 자식 전이 | **status != DELETED 자식 전부 DELETED**, 차감은 PUBLISHED 자식만(Med #3) |
+| 이미 비노출 부모 재전이 | `wasCounted` 기준 → 부모분 중복 차감 안 함(High #3) |
+| 카운트 차감 방식 | **벌크 1회 `decrementCommentCountBy(postId, n)`**(부모+PUBLISHED 자식) |
+| 변이 후 카운트 산출 | **벌크 UPDATE 후 scalar `findCommentCountByPostId`**(findById는 stale, High 재지적) |
+| 변이 응답 DTO | 작성/수정=`CommentMutationResponse`, 삭제/신고=`CommentCountResponse`(Med #2) |
+| 카운트 라벨 동기화 | 변이 응답 `postCommentCount` 권위(로컬 증감 폐기, 5-2-1) |
+| 대댓글 "더 보기" | **(createdAt, id) keyset 커서**(offset 금지 — append 시 건너뜀, Med #4) |
 | HIDDEN 부모 답글 | **차단**(`COMMENT_NOT_FOUND`) |
+| postId 무결성 | 모든 comment-scoped 작업에서 `comment.post.id == postId` 검증(7-5) |
 | `replyCount` 기준 | **PUBLISHED 자식 수, 서버 count 권위** |
 | 부모 락 | 불필요(카운트만 원자적 UPDATE) |
-| 대댓글 로드 | 부모당 상한 N + on-demand 추가 로드 |
+| 대댓글 로드 | **DB-side 부모당 상한 N**(High #1) + on-demand 추가 로드 |
