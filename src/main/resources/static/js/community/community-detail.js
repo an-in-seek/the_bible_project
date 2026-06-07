@@ -468,10 +468,8 @@ const App = {
         const actions = document.createElement("div");
         actions.className = "comment-actions";
 
-        // 답글 버튼: 최상위 댓글에만 (2단계 평탄화 — 대댓글의 답글도 같은 부모로 모임)
-        if (!isReply) {
-            actions.appendChild(App.createCommentAction("reply", "답글"));
-        }
+        // 답글 버튼: 최상위·대댓글 모두 노출. 대댓글에 단 답글은 같은 부모(최상위)로 평탄화된다(2단계 고정).
+        actions.appendChild(App.createCommentAction("reply", "답글"));
 
         const editBtn = App.createCommentAction("edit", "수정");
         editBtn.classList.add("comment-action-owner");
@@ -1051,7 +1049,9 @@ const App = {
             existing.remove();
             return;
         }
-        const parentId = item.dataset.commentId;
+        // 답글 대상 부모 = 최상위 댓글 id. 대댓글이면 그 부모(최상위), 최상위면 자기 자신 → 2단계 평탄화.
+        const isReply = item.classList.contains("comment-reply-item");
+        const parentId = isReply ? item.dataset.parentId : item.dataset.commentId;
         const repliesWrap = body.querySelector(".comment-replies");
 
         const form = document.createElement("div");
@@ -1059,6 +1059,11 @@ const App = {
 
         const textarea = document.createElement("textarea");
         textarea.placeholder = "답글을 입력해주세요...";
+        // 대댓글에 답글: 평탄화되므로 누구에게 답하는지 @닉네임 멘션으로 표시
+        if (isReply) {
+            const nick = item.querySelector(".comment-author")?.textContent?.trim();
+            if (nick) textarea.value = `@${nick} `;
+        }
         form.appendChild(textarea);
 
         const actions = document.createElement("div");
@@ -1086,6 +1091,9 @@ const App = {
             body.appendChild(form);
         }
         textarea.focus();
+        // 멘션 프리픽스 뒤로 커서 이동
+        const len = textarea.value.length;
+        textarea.setSelectionRange(len, len);
     },
 
     async submitReply(parentId, rawContent, formEl) {
