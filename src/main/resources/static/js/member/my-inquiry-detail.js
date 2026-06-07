@@ -46,7 +46,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (backButton) {
         backButton.classList.remove("d-none");
         backButton.addEventListener("click", () => {
-            if (document.referrer && document.referrer.includes("/web/member/my-inquiries")) {
+            const ref = document.referrer || "";
+            // 작성/수정 폼(/new, /{id}/edit)에서 진입한 경우 폼으로 되돌아가지 않고 목록으로 이동
+            const fromForm = /\/web\/member\/my-inquiries\/(new|\d+\/edit)(\?.*)?$/.test(ref);
+            if (!fromForm && ref.includes("/web/member/my-inquiries")) {
                 history.back();
             } else {
                 window.location.href = "/web/member/my-inquiries";

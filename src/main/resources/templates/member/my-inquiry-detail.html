@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head
-        th:replace="~{fragments/head :: head('문의 상세 | ElSeeker', true, '/css/member/my-inquiries.css?v=1.1')}"
+        th:replace="~{fragments/head :: head('문의 상세 | ElSeeker', true, '/css/member/my-inquiries.css?v=1.2')}"
         th:with="robotsContent='noindex'">
 </head>
 
@@ -50,6 +50,11 @@
                 <p id="myInquiryAnsweredAt" class="my-inquiry-answered-at d-none"></p>
             </div>
 
+            <!-- 하단 내비게이션 -->
+            <div class="my-inquiry-detail-footer">
+                <a href="/web/member/my-inquiries" class="btn btn-outline-secondary btn-sm">목록으로</a>
+            </div>
+
         </div>
     </article>
 
@@ -62,7 +67,7 @@
 
 </main>
 
-<script type="module" src="/js/member/my-inquiry-detail.js?v=1.1"></script>
+<script type="module" src="/js/member/my-inquiry-detail.js?v=1.2"></script>
 </body>
 
 </html>

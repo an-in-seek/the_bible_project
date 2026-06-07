@@ -535,6 +535,14 @@ html[data-theme="dark"] .my-inquiries-form-error {
     margin-top: 1rem;
 }
 
+/* ── Detail footer (목록으로) ── */
+
+.my-inquiry-detail-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 1.5rem;
+}
+
 /* ── Divider ── */
 
 .my-inquiry-divider {

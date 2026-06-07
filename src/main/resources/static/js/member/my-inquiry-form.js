@@ -180,7 +180,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const data = await response.json().catch(() => null);
             const returnedId = data?.id ?? inquiryId;
-            window.location.href = `/web/member/my-inquiries/${returnedId}`;
+            // 작성/수정 폼은 일회성 화면이므로 히스토리에서 교체한다.
+            // → 상세에서 뒤로가기 시 폼이 아니라 목록(또는 이전 화면)으로 이동한다.
+            window.location.replace(`/web/member/my-inquiries/${returnedId}`);
         } catch {
             showFormError("요청 중 오류가 발생했습니다. 다시 시도해 주세요.");
         } finally {
