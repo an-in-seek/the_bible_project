@@ -135,6 +135,30 @@
                                     aria-label="계정 메뉴 닫기">
                                 <span aria-hidden="true">×</span>
                             </button>
+                            <!-- 1) 주요 내비: 로그인(미인증) / 마이페이지·나의 성경 메모(인증) -->
+                            <a id="topNavLoginLink"
+                               href="/web/auth/login"
+                               class="top-nav-account-item top-nav-account-primary d-none"
+                               role="menuitem">
+                                로그인
+                            </a>
+                            <a id="topNavMyPageLink"
+                               href="/web/member/mypage"
+                               class="top-nav-account-item top-nav-account-primary d-none"
+                               role="menuitem">
+                                마이페이지
+                            </a>
+                            <a id="topNavMyMemoLink"
+                               href="/web/member/my-memo"
+                               class="top-nav-account-item d-none"
+                               role="menuitem">
+                                나의 성경 메모
+                            </a>
+
+                            <!-- 2) 설정: 테마 (주요 내비와 구분) -->
+                            <div class="top-nav-account-divider"
+                                 role="separator"
+                                 aria-orientation="horizontal"></div>
                             <button id="topNavThemeMenuToggle"
                                     type="button"
                                     class="top-nav-account-item top-nav-theme-menu-toggle"
@@ -183,27 +207,8 @@
                                     <span class="top-nav-theme-check" aria-hidden="true">✓</span>
                                 </button>
                             </div>
-                            <div class="top-nav-account-divider"
-                                 role="separator"
-                                 aria-orientation="horizontal"></div>
-                            <a id="topNavLoginLink"
-                               href="/web/auth/login"
-                               class="top-nav-account-item top-nav-account-primary d-none"
-                               role="menuitem">
-                                로그인
-                            </a>
-                            <a id="topNavMyPageLink"
-                               href="/web/member/mypage"
-                               class="top-nav-account-item top-nav-account-primary d-none"
-                               role="menuitem">
-                                마이페이지
-                            </a>
-                            <a id="topNavMyMemoLink"
-                               href="/web/member/my-memo"
-                               class="top-nav-account-item d-none"
-                               role="menuitem">
-                                나의 성경 메모
-                            </a>
+
+                            <!-- 3) 로그아웃 (인증 시, 구분선과 함께 맨 아래) -->
                             <div id="topNavAccountDivider"
                                  class="top-nav-account-divider d-none"
                                  role="separator"
