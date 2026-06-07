@@ -198,6 +198,12 @@
     z-index: 1040;
 }
 
+/* 다크모드: 계정 메뉴는 떠 있는 표면이므로 페이지 배경(--color-bg-base=#0f1216)과
+   동색이 되지 않도록 elevated 표면을 적용해 구분한다. */
+html[data-theme="dark"] .top-nav-account-menu {
+    background: var(--color-bg-elevated);
+}
+
 .top-nav-account-item {
     display: block;
     width: 100%;
@@ -228,6 +234,12 @@
     outline: none;
 }
 
+/* 다크모드: 메뉴 배경이 elevated이므로 focus 항목은 한 단계 더 밝은 톤으로 대비 확보 */
+html[data-theme="dark"] .top-nav-account-item:focus,
+html[data-theme="dark"] .top-nav-account-close:focus {
+    background: var(--color-bg-elevated-strong);
+}
+
 @media (hover: hover) and (pointer: fine) {
     .top-nav-account-item:hover {
         background: var(--color-bg-elevated);
@@ -239,6 +251,12 @@
         background: var(--color-bg-elevated);
         color: var(--color-text-primary);
         outline: none;
+    }
+
+    /* 다크모드: 메뉴 배경이 elevated이므로 hover 항목은 한 단계 더 밝은 톤으로 대비 확보 */
+    html[data-theme="dark"] .top-nav-account-item:hover,
+    html[data-theme="dark"] .top-nav-account-close:hover {
+        background: var(--color-bg-elevated-strong);
     }
 }
 
