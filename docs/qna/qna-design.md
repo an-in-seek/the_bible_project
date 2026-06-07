@@ -73,7 +73,7 @@ qna/
 ```mermaid
 erDiagram
     MEMBER ||--o{ INQUIRY : "writes (author_id)"
-    MEMBER ||--o{ INQUIRY : "answers (answered_by_id)"
+    MEMBER |o--o{ INQUIRY : "answers (answered_by_id)"
 
     INQUIRY {
         bigint id PK
@@ -83,7 +83,7 @@ erDiagram
         text content
         varchar status "RECEIVED / ANSWERED / CLOSED / DELETED"
         text answer_content "답변 본문 (답변 전 NULL)"
-        bigint answered_by_id FK "답변 관리자 (답변 전 NULL)"
+        bigint answered_by_id FK "답변 관리자 (답변 전/답변자 탈퇴 후 NULL)"
         timestamp answered_at "답변 시각 (답변 전 NULL)"
         timestamp created_at
         timestamp updated_at
