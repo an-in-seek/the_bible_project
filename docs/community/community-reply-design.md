@@ -104,7 +104,7 @@ class Comment(
     indexes = [
         Index(name = "idx_comment_post_created_at",   columnList = "post_id, created_at"),
         Index(name = "idx_comment_author_created_at", columnList = "author_id, created_at"),
-        Index(name = "idx_comment_parent_created_at", columnList = "parent_id, created_at"), // 신규
+        Index(name = "idx_comment_parent_created_at", columnList = "parent_id, created_at, id"), // 신규: keyset 정렬/커서 (parent_id, created_at, id)
     ]
 )
 ```
@@ -158,7 +158,7 @@ COMMENT ON COLUMN community_comment.parent_id
 -- =====================================================================
 
 CREATE INDEX IF NOT EXISTS idx_comment_parent_created_at
-    ON community_comment (parent_id, created_at);
+    ON community_comment (parent_id, created_at, id);   -- keyset 정렬/커서 (parent_id, created_at, id) 일치
 ```
 
 - 기존 인덱스 `idx_comment_post_created_at(post_id, created_at)`는 최상위 댓글 페이징에 그대로 활용된다.
@@ -218,8 +218,8 @@ ORDER BY c.createdAt ASC, c.id ASC   -- tie-breaker(동일 시각 안정 정렬)
 > }
 > ```
 >
-> **방식 B (최적화) — 윈도우 함수 단일 native 쿼리**: `ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY created_at)`로
-> 부모당 N개를 한 번에 뽑는다. 단일 왕복이라 효율적이나 native SQL이며 author 매핑을 별도 처리해야 한다.
+> **방식 B (최적화) — 윈도우 함수 단일 native 쿼리**: `ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY created_at, id)`로
+> 부모당 N개를 한 번에 뽑는다(정렬 tie-breaker `id` 포함 — keyset 기준과 일치). 단일 왕복이라 효율적이나 native SQL이며 author 매핑을 별도 처리해야 한다.
 > 부모/자식 규모가 커지면 B로 전환한다(9절).
 >
 > 어느 방식이든 **잘린 나머지는 `replyCount`(4-2-3)로 총 개수를 알리고 4-2-4 on-demand로 더 불러온다.**
@@ -249,10 +249,21 @@ ORDER BY c.createdAt ASC, c.id ASC
 -- LIMIT pageSize
 ```
 
-> **offset 대신 keyset 사용(Med 재지적 #4)**: "이미 표시된 대댓글 수"를 offset으로 쓰면, 사용자가 그 사이
-> **새 대댓글을 작성(append)** 했을 때 offset이 한 칸 밀려 **기존 서버 행 하나를 건너뛴다.** 따라서 클라이언트가
-> 보유한 **마지막 대댓글의 `(createdAt, id)` 커서**를 보내 그 이후만 가져온다. 정렬에 `id` tie-breaker를 넣어
-> 동일 시각에서도 안정적이다. 커서 파라미터는 쿼리스트링(`?afterCreatedAt=..&afterId=..`)으로 전달한다.
+> **offset 대신 keyset 사용(Med #4) + 커서 출처 분리(High 재지적)**: "이미 표시된 대댓글 수"를 offset으로 쓰면
+> 그 사이 새 대댓글 append 시 한 칸 밀려 기존 행을 건너뛴다. 그렇다고 **DOM의 마지막 댓글**을 커서로 쓰면 더
+> 위험하다 — 미리보기는 **가장 오래된 N개**이고 새로 작성한 대댓글은 **최신**이라 DOM 끝에 붙으므로, DOM-last를
+> 커서로 삼으면 **아직 안 불러온 중간 구간(N+1 ~ 끝)을 통째로 건너뛴다.**
+>
+> 따라서 클라이언트는 커서를 **"서버에서 연속으로 로드된 마지막 대댓글"**(`nextReplyCursor`, parent별 보관)로
+> 별도 관리한다. 즉 미리보기 N개의 마지막 → 이후 "더 보기"로 받은 마지막 → … 만 커서를 전진시키고,
+> **사용자가 직접 작성한 새 대댓글은 커서를 움직이지 않는** 별도 tail로 둔다(또는 부모 스레드를 재조회).
+> 커서 파라미터는 `?afterCreatedAt=..&afterId=..`, 정렬은 `createdAt ASC, id ASC`.
+>
+> ```js
+> // parent별 상태 (community-detail.js)
+> // nextReplyCursor[parentId] = { createdAt, id }  ← 서버에서 연속 로드된 마지막. 작성한 댓글로는 갱신 안 함
+> // "더 보기" 클릭 → afterCreatedAt/afterId = nextReplyCursor[parentId] 로 조회 → 받은 마지막으로만 커서 전진
+> ```
 
 **4-2-5. 서비스에서 조립**
 
@@ -274,12 +285,12 @@ val counts = commentRepository.countRepliesByParentIds(parentIds, PUBLISHED)    
 > 빈 응답을 반환한다(불필요·오류 가능 쿼리 차단).
 >
 > **컷 기준 명시(Med-B)**: 미리보기 N개는 `createdAt ASC, id ASC` 기준 **가장 오래된 N개**다.
-> "더 보기"는 클라이언트가 보유한 **마지막 대댓글의 `(createdAt, id)` 커서** 이후를 가져온다(4-2-4 keyset).
+> "더 보기"는 클라이언트의 **`nextReplyCursor`(서버에서 연속 로드된 마지막 대댓글의 `(createdAt, id)`)** 이후를 가져온다(4-2-4 keyset). DOM-last가 아님(Low 재지적).
 > offset 방식은 그 사이 새 대댓글 append 시 행을 건너뛸 수 있어 채택하지 않는다(Med 재지적 #4).
 
 > **대안 비교**: 부모+자식을 단일 쿼리로 가져와 메모리에서 그룹핑하는 방법도 있으나, Slice 페이징
 > 경계를 최상위 댓글 기준으로 잘라야 하므로 자식이 페이지 수에 섞여 경계 계산이 복잡해진다.
-> 따라서 **2-쿼리(+count) 방식**을 채택한다.
+> 따라서 **bounded fanout + count 방식**(4-2)을 채택한다.
 
 ### 4-3. 신규/변경 리포지토리 메서드 (`CommentRepository.kt`)
 
@@ -371,7 +382,11 @@ data class CommentResponse(
 )
 ```
 
-- `CommentSliceResponse.content`에는 **최상위 댓글만** 담기고, 각 항목의 `replies`(상한 N) + `replyCount`(총 개수)가 채워진다.
+- **`CommentSliceResponse`는 범용 컨테이너**(`content: List<CommentResponse>`, `hasNext`)다(Med 재지적 #2 — 충돌 해소).
+  엔드포인트별 의미는 다음과 같다:
+  - `GET .../comments`(목록): `content`에 **최상위 댓글만** 담기고, 각 항목의 `replies`(미리보기 N) + `replyCount`(총 개수)를 채운다.
+  - `GET .../comments/{parentId}/replies`("더 보기"): `content`에 **해당 부모의 자식 대댓글**이 담긴다. 이때 항목의 `replies`는 비고 `parentId`만 채운다.
+  - "최상위만"은 컨테이너가 아니라 **목록 엔드포인트의 의미**다(이전 서술의 모순 제거).
 - `replyCount > replies.size`면 프론트가 "답글 N개 더 보기"로 4-2-4 엔드포인트를 호출한다.
 - 매퍼(`CommentMapper.toResponse`)는 최상위 변환 시 `replies`/`replyCount`를 채우고, 자식 변환 시
   `parentId`만 채운다(자식의 `replies`는 비움 — 2단계 보장).
@@ -386,21 +401,31 @@ DTO 계약 모순을 피하기 위해 **본문이 있는 변이와 없는 변이
 삭제 응답 충돌 회피).
 
 ```kotlin
-@Schema(description = "댓글 변이 응답 — 댓글 본문 + 게시글 최신 댓글 수 (작성/수정/대댓글 작성)")
+@Schema(description = "댓글 변이 응답 — 댓글 본문 + 게시글/부모 최신 카운트 (작성/수정/대댓글 작성)")
 data class CommentMutationResponse(
     val comment: CommentResponse,          // 항상 존재
     val postCommentCount: Long,            // 변이 후 서버 권위 Post.commentCount
+    val parentId: Long? = null,            // 대댓글 변이면 그 부모 id, 아니면 null
+    val parentReplyCount: Int? = null,     // 대댓글 변이면 부모의 최신 PUBLISHED 대댓글 수(서버 count)
 )
 
 @Schema(description = "댓글 수 응답 — 본문 없는 변이 (삭제/신고)")
 data class CommentCountResponse(
     val postCommentCount: Long,
+    val parentId: Long? = null,            // 대상이 대댓글이었으면 그 부모 id
+    val parentReplyCount: Int? = null,     // 대상이 대댓글이었으면 부모의 최신 PUBLISHED 대댓글 수
 )
 ```
 
 - 작성/대댓글 작성/수정 → `CommentMutationResponse`(댓글 + 카운트).
 - 삭제/신고 → `CommentCountResponse`(204 대신 200). cascade로 여러 건이 빠져도 정확한 최신 값 전달.
 - 프론트(6-2)는 응답의 `postCommentCount`로 `#commentCountLabel`을 **동기화**한다(로컬 증감 폐기).
+
+> **부모 replyCount 갱신 계약(Med 재지적)**: `replyCount`는 "서버 count 권위"인데, 대댓글을 **작성/삭제/신고**하면
+> 부모의 "답글 N개" 라벨과 "더 보기" 노출 조건(`replyCount > 로드된 수`)이 바뀐다. 따라서 **대댓글이 관련된 변이**의
+> 응답에는 `parentId` + `parentReplyCount`(= `countRepliesByParentIds(listOf(parentId), PUBLISHED)`로 재산출)를 포함해,
+> 프론트가 해당 부모의 라벨·더보기 버튼을 정확히 갱신하도록 한다. (대상이 최상위 댓글이면 두 필드는 null.)
+> 부모가 cascade로 통째로 사라지는 경우(부모 삭제/숨김)는 부모 노드 자체를 제거하므로 `parentReplyCount` 불필요.
 
 > **stale 값 방지(High — 재지적 핵심)**: `incrementCommentCount`/`decrementCommentCountBy`는 `@Modifying` **벌크
 > UPDATE라 영속성 컨텍스트(L1 캐시)를 우회**한다. 따라서 이미 로드된 managed `Post`나
@@ -470,8 +495,18 @@ data class CommentCountResponse(
 - 등록 성공 시 **전체 새로고침 없이** 응답 받은 대댓글을 해당 부모의 `.comment-replies`에 append하고,
   댓글 수 라벨(`#commentCountLabel`)을 응답의 `postCommentCount`로 **동기화**한다(5-2-1). 기존 JS의 로컬
   +1/-1 증감(`community-detail.js`)은 폐기 — cascade 삭제 시 빠진 개수를 로컬로 알 수 없기 때문(Med).
+- **부모 라벨 갱신(Med 재지적)**: 대댓글 작성/삭제/신고 응답의 `parentReplyCount`로 해당 부모의 "답글 N개" 라벨과
+  "더 보기" 버튼 노출 조건(`parentReplyCount > 로드된 대댓글 수`)을 갱신한다(로컬 추정 금지).
 - 대댓글에서 "답글"을 눌러도 작성 대상 `parentId`는 그 대댓글의 부모(최상위) id로 보낸다(2단계 평탄화).
-- "답글 N개 더 보기" → 4-2-4 엔드포인트를 Slice로 호출해 추가 append.
+- **커서 관리(High 재지적)**: parent별 `nextReplyCursor`(서버에서 연속 로드된 마지막 대댓글의 `{createdAt,id}`)를
+  보관한다. "답글 N개 더 보기" → 그 커서로 4-2-4 호출 → 받은 결과의 마지막으로만 커서 전진. **사용자가 새로 작성한
+  대댓글은 DOM 끝(최신)에 append하되 `nextReplyCursor`는 갱신하지 않는다**(미리보기=오래된 N개라 DOM-last를 커서로
+  쓰면 중간 미로딩 구간을 건너뛰기 때문).
+- **새 작성 tail과 "더 보기" 결과 병합(Med 재지적)**: 새 대댓글은 "로컬 작성 tail"로 DOM 끝에 두고, **"더 보기"
+  결과는 그 tail 앞에 insert**한다. 그래야 `1..20, (더보기)21..40, (로컬tail)51` 순서가 유지된다(끝에 append하면
+  `1..20, 51, 21..40`으로 깨짐). 또한 더 보기 결과가 이미 로컬 tail에 있던 항목과 겹칠 수 있으므로 **`commentId`
+  기준 de-dupe** 한다. **단순화 옵션(권장 가능)**: 새 대댓글 작성 성공 시 그 부모 스레드를 처음부터 재조회하면
+  병합/중복 문제가 원천 제거된다(MVP에서 채택해도 무방).
 
 ### 6-3. 스타일·모바일
 
@@ -492,19 +527,27 @@ data class CommentCountResponse(
 
 ```kotlin
 // 대댓글 작성 시 (CommentService.createReply)
+// 1) 게시글 가시성 — 기존 createComment와 동일 경로(Med 재지적 #3: 숨김/삭제 게시글 차단)
+val post = postRepository.findByIdAndStatusNot(postId, PostStatus.DELETED)
+    ?: throwError(ErrorType.POST_NOT_FOUND)
+post.ensureReadableForClient()                       // HIDDEN 등 비공개 게시글 차단
+if (!post.useReply) throwError(ErrorType.COMMENT_DISABLED)
+
+// 2) 부모 댓글 로드 + 평탄화 + 무결성/상태 가드
 val target = commentRepository.findByIdWithParentAndPost(parentId)   // 4-3 신규 메서드
     ?: throwError(ErrorType.COMMENT_NOT_FOUND)
-// 부모가 이미 대댓글이면 그 부모(최상위)로 평탄화
-val realParent = target.parent ?: target
-// realParent는 항상 최상위(parent == null) 보장
-// 부모 무결성·상태 가드(L2, 7-2와 일치) — findByIdWithParentAndPost는 status 필터가 없으므로 여기서 검증
-if (realParent.post.id != postId) throwError(ErrorType.COMMENT_NOT_FOUND)
-if (realParent.status != CommentStatus.PUBLISHED) throwError(ErrorType.COMMENT_NOT_FOUND)
+val realParent = target.parent ?: target             // 항상 최상위(parent == null) 보장
+if (realParent.post.id != postId) throwError(ErrorType.COMMENT_NOT_FOUND)          // 소속 검증(L2)
+if (realParent.status != CommentStatus.PUBLISHED) throwError(ErrorType.COMMENT_NOT_FOUND)  // 부모 가시성
+
 val reply = Comment.createReply(post = post, author = member, content = content, parent = realParent)
 ```
 
 ### 7-2. 무결성·권한 검증
 
+- **게시글 가시성**: 대댓글 작성도 기존 `createComment`처럼 `findByIdAndStatusNot(postId, DELETED)` +
+  `post.ensureReadableForClient()`를 거친다(Med 재지적 #3). 숨김/삭제 게시글에 남은 PUBLISHED 댓글 id를 알아도
+  대댓글을 달 수 없다.
 - 부모 댓글의 게시글과 경로의 `postId` 일치 검증(`realParent.post.id == postId`) — 불일치 시 `COMMENT_NOT_FOUND`.
 - 게시글 댓글 비활성(`useReply == false`)이면 대댓글도 차단(`COMMENT_DISABLED` 재사용).
 - **부모가 PUBLISHED가 아니면(HIDDEN/DELETED) 대댓글 작성 차단** — `COMMENT_NOT_FOUND`로 응답
@@ -613,7 +656,11 @@ else applyCommentCountChange(postId, before, comment.status)   // 대댓글 단�
   - **관리자 `PATCH /comments/{id}/status`로 부모 HIDDEN/DELETED 시**에도 자식 cascade + 카운트 정합(7-3, High #2).
   - **관리자 복원(부모 HIDDEN→PUBLISHED)** 시 부모 +1 반영(7-3).
   - 부모당 상한 N 초과 시 `replies`는 가장 오래된 N개, `replyCount`는 총 개수, 4-2-4로 나머지를 중복 없이 로드(H5·Med-B).
-  - **"더 보기" 도중 새 대댓글이 append돼도** keyset 커서로 기존 행을 건너뛰지 않음(Med 재지적 #4).
+  - **"더 보기" 도중 새 대댓글이 append돼도** `nextReplyCursor`(서버 연속 로드 마지막) 기준이라 중간 미로딩 구간을 건너뛰지 않음(High 재지적).
+  - `GET .../replies`가 자식 대댓글을 `CommentSliceResponse`로 반환(컨테이너 범용, Med #2).
+  - 새 대댓글 작성 후 "더 보기" 결과가 **로컬 tail 앞에 insert + commentId de-dupe**로 순서 유지·중복 없음(Med 재지적).
+  - 대댓글 작성/삭제/신고 응답의 `parentReplyCount`로 부모 "답글 N개"·더보기 노출이 정확히 갱신(Med 재지적).
+  - **숨김/삭제 게시글의 PUBLISHED 댓글에 대댓글 작성 시 차단**(`ensureReadableForClient`, Med 재지적 #3).
   - **부모당 대댓글이 매우 많아도** 상세 조회가 DB-side `LIMIT N`으로 바운드됨(쿼리·페이로드 무제한 아님, High #1).
   - **이미 HIDDEN인 자식이 있는 부모를 삭제** 시 자식도 DELETED로 전이되고, 카운트 차감은 PUBLISHED 자식 수만(Med 재지적 #3).
   - **변이 후 `postCommentCount`가 벌크 UPDATE 직후 DB 최신값**과 일치(stale 아님, High 재지적).
@@ -653,7 +700,7 @@ else applyCommentCountChange(postId, before, comment.status)   // 대댓글 단�
     AND (c.status = :published
          OR EXISTS (SELECT 1 FROM Comment ch
                     WHERE ch.parent = c AND ch.status = :published))
-  ORDER BY c.createdAt ASC
+  ORDER BY c.createdAt ASC, c.id ASC   -- tie-breaker(전역 정렬 기준 일치)
   ```
   (이때 라벨/카운트 의미 재정의 필요 — H1 재검토)
 - `reply_count` 비정규화 컬럼 + 최상위 부분 인덱스(`WHERE parent_id IS NULL`)로 조회 최적화
@@ -674,7 +721,12 @@ else applyCommentCountChange(postId, before, comment.status)   // 대댓글 단�
 | 변이 후 카운트 산출 | **벌크 UPDATE 후 scalar `findCommentCountByPostId`**(findById는 stale, High 재지적) |
 | 변이 응답 DTO | 작성/수정=`CommentMutationResponse`, 삭제/신고=`CommentCountResponse`(Med #2) |
 | 카운트 라벨 동기화 | 변이 응답 `postCommentCount` 권위(로컬 증감 폐기, 5-2-1) |
-| 대댓글 "더 보기" | **(createdAt, id) keyset 커서**(offset 금지 — append 시 건너뜀, Med #4) |
+| 대댓글 "더 보기" | **(createdAt, id) keyset 커서** + 커서는 **서버 연속 로드 마지막**(`nextReplyCursor`)에서만 전진. 새 작성 댓글로는 갱신 안 함(High 재지적·Med #4) |
+| `CommentSliceResponse` | **범용 컨테이너** — "최상위만"은 목록 엔드포인트 의미(Med #2). replies 엔드포인트는 자식 반환 |
+| 대댓글 작성 게시글 가시성 | `ensureReadableForClient()` 필수(숨김/삭제 게시글 차단, Med #3) |
+| 새 tail ↔ 더보기 병합 | 더보기 결과를 **로컬 tail 앞 insert + commentId de-dupe**(또는 작성 후 스레드 재조회) |
+| 부모 replyCount 갱신 | 대댓글 변이 응답에 `parentId`+`parentReplyCount`(서버 count) 포함 |
+| 대댓글 인덱스 | `(parent_id, created_at, id)` — keyset 정렬/커서와 일치(Low) |
 | HIDDEN 부모 답글 | **차단**(`COMMENT_NOT_FOUND`) |
 | postId 무결성 | 모든 comment-scoped 작업에서 `comment.post.id == postId` 검증(7-5) |
 | `replyCount` 기준 | **PUBLISHED 자식 수, 서버 count 권위** |
