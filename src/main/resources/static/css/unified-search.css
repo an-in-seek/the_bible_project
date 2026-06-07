@@ -77,8 +77,6 @@ html[data-theme="dark"] .us-search-wrap:focus-within {
     border: 0;
     background: transparent;
     color: var(--color-text-secondary);
-    font-size: 1.4rem;
-    line-height: 1;
     cursor: pointer;
     border-radius: 50%;
     display: flex;
@@ -87,8 +85,21 @@ html[data-theme="dark"] .us-search-wrap:focus-within {
     transition: background-color 0.15s ease;
 }
 
-.us-search-clear:hover {
-    background-color: var(--color-bg-elevated);
+.us-search-clear:focus-visible {
+    outline: none;
+    background-color: var(--color-border);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.18);
+}
+
+.us-search-clear svg {
+    width: 1rem;
+    height: 1rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .us-search-clear:hover {
+        background-color: var(--color-border);
+    }
 }
 
 /* ── 드롭다운 ─────────────────────────────────────── */

@@ -67,7 +67,7 @@
     padding: 0;
     border: none;
     border-radius: 50%;
-    background: var(--color-border);
+    background: transparent;
     color: var(--color-text-secondary);
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s;
@@ -80,12 +80,13 @@
 
 .search-clear:focus-visible {
     outline: none;
+    background-color: var(--color-border);
     box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.18);
 }
 
 @media (hover: hover) and (pointer: fine) {
     .search-clear:hover {
-        background-color: var(--color-border-control);
+        background-color: var(--color-border);
     }
 }
 
