@@ -177,11 +177,15 @@ class Inquiry(
 
     fun changeStatusByAdmin(actor: Member, target: InquiryStatus) {
         ensureAdmin(actor)
-        this.status = target          // CLOSED 종료 / 재개 등
+        // 관리자 상태 변경은 종료/재개만 허용. 답변(ANSWERED)은 answer()로, 삭제(DELETED)는 회원 경로로 일원화.
+        if (target != InquiryStatus.CLOSED && target != InquiryStatus.ANSWERED) {
+            throwError(ErrorType.INVALID_STATUS_TRANSITION)
+        }
+        this.status = target          // ANSWERED ↔ CLOSED (종료 / 재개)
     }
 
     private fun ensureModifiable() {
-        if (status != InquiryStatus.RECEIVED) throwError(ErrorType.INQUIRY_ALREADY_ANSWERED, "inquiryId=$id")
+        if (!status.isModifiable()) throwError(ErrorType.INQUIRY_ALREADY_ANSWERED, "inquiryId=$id")
     }
 
     fun ensureOwnedBy(actor: Member) {
@@ -308,7 +312,7 @@ enum class InquiryCategory(val title: String) {
     SELECT i FROM Inquiry i
     JOIN FETCH i.author
     LEFT JOIN FETCH i.answeredBy
-    WHERE i.status <> com.elseeker.qna.domain.vo.InquiryStatus.DELETED
+    WHERE i.status <> :excludedStatus
       AND (:status   IS NULL OR i.status = :status)
       AND (:category IS NULL OR i.category = :category)
       AND (:keyword  IS NULL OR i.title LIKE :keyword OR i.content LIKE :keyword)
@@ -317,7 +321,7 @@ enum class InquiryCategory(val title: String) {
     """,
     countQuery = """
     SELECT count(i) FROM Inquiry i
-    WHERE i.status <> com.elseeker.qna.domain.vo.InquiryStatus.DELETED
+    WHERE i.status <> :excludedStatus
       AND (:status   IS NULL OR i.status = :status)
       AND (:category IS NULL OR i.category = :category)
       AND (:keyword  IS NULL OR i.title LIKE :keyword OR i.content LIKE :keyword)
@@ -325,6 +329,7 @@ enum class InquiryCategory(val title: String) {
     """
 )
 fun findAdminPage(
+    @Param("excludedStatus") excludedStatus: InquiryStatus,   // 항상 InquiryStatus.DELETED 전달
     @Param("status") status: InquiryStatus?,
     @Param("category") category: InquiryCategory?,
     @Param("keyword") keyword: String?,
@@ -333,6 +338,9 @@ fun findAdminPage(
 ): Page<Inquiry>
 ```
 
+> **enum 비교는 `:param`으로 전달**한다 — 코드베이스 JPQL 관례(`CommentRepository.findByIdAndStatusNot`의
+> `c.status <> :excludedStatus`)와 일치시키고 FQN enum 리터럴(`InquiryStatus.DELETED`)을 본문에 박지 않는다.
+> `findPageByAuthorId`/`findByIdAndAuthorId`의 `DELETED` 제외도 동일하게 `:excludedStatus` 파라미터로 전달한다.
 > `keyword`/`author`는 서비스에서 `"%$it%"`로 감싸 전달한다(`CommentService.getAdminComments` 패턴).
 
 ---
@@ -412,7 +420,11 @@ class AdminInquiryService(
     fun getAdminInquiries(status: InquiryStatus?, category: InquiryCategory?, keyword: String?, author: String?, pageable: Pageable): Page<Inquiry> {
         val kw = keyword?.trim()?.takeIf { it.isNotBlank() }?.let { "%$it%" }
         val au = author?.trim()?.takeIf { it.isNotBlank() }?.let { "%$it%" }
-        return inquiryRepository.findAdminPage(status, category, kw, au, PageRequest.of(pageable.pageNumber, pageable.pageSize))
+        return inquiryRepository.findAdminPage(
+            excludedStatus = InquiryStatus.DELETED,
+            status = status, category = category, keyword = kw, author = au,
+            pageable = PageRequest.of(pageable.pageNumber, pageable.pageSize),
+        )
     }
 
     @Transactional(readOnly = true)
@@ -540,9 +552,11 @@ data class AdminInquiryItem(
 
 ### 8-2. 관리자 — Q&A 콘솔
 
-- `AdminQnaWebController` → `GET /web/admin/qna/inquiries`(목록), `GET /web/admin/qna/inquiries/{id}`(상세+답변 폼).
-- 템플릿 `admin/admin-inquiry-list.html`은 `admin/admin-bible-book-list.html` 구조
-  (topbar → breadcrumb → title → toolbar(상태/카테고리/검색 필터) → table + 반응형 카드)를 차용.
+- `AdminQnaWebController`(`@RequestMapping("/web/admin/qna")`) → `GET /inquiries`(목록), `GET /inquiries/{id}`(상세+답변 폼).
+- 템플릿은 **기능별 하위 디렉토리 관례**(`admin/community/admin-community-post-list.html`)에 맞춰
+  `admin/qna/admin-inquiry-list.html`·`admin/qna/admin-inquiry-detail.html`로 둔다. 기존 관리자 목록 화면
+  (`admin/bible/...`·`admin/community/...`)의 topbar → breadcrumb → title → toolbar(상태/카테고리/검색 필터)
+  → table + 반응형 카드 구조를 차용.
 - 상세에서 답변 작성/수정, 상태 종료/재개를 수행한다. 답변자(`answeredByNickname`)·답변 시각을 표시.
 
 ---
