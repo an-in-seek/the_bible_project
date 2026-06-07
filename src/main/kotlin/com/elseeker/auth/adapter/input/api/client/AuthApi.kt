@@ -4,7 +4,6 @@ import com.elseeker.auth.adapter.input.api.client.request.ReissueRequest
 import com.elseeker.auth.adapter.input.api.client.request.SocialLoginRequest
 import com.elseeker.auth.adapter.input.api.client.response.AuthMeResponse
 import com.elseeker.auth.adapter.input.api.client.response.ReissueResponse
-import com.elseeker.auth.adapter.input.api.client.response.SocialLoginResponse
 import com.elseeker.auth.application.service.SocialLoginService
 import com.elseeker.common.config.ElSeekerProperties
 import com.elseeker.common.domain.ErrorType
@@ -18,11 +17,7 @@ import jakarta.servlet.http.HttpServletResponse
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.annotation.AuthenticationPrincipal
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import java.util.*
 
 @RestController
@@ -36,10 +31,15 @@ class AuthApi(
 
     @GetMapping("/me")
     override fun me(
-        @AuthenticationPrincipal principal: JwtPrincipal
-    ): AuthMeResponse {
-        val member = memberService.getMemberWithOAuthAccounts(principal.memberUid)
-        return AuthMeResponse.Companion.from(member)
+        @AuthenticationPrincipal principal: JwtPrincipal,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): ResponseEntity<AuthMeResponse> {
+        // orphaned session: 토큰은 유효하나 회원이 없음(탈퇴/삭제 후 잔존 쿠키).
+        // 인증 주체가 무효이므로 404가 아니라 401 + 쿠키 삭제로 세션을 종료한다.
+        val member = memberService.findMemberWithOAuthAccounts(principal.memberUid)
+            ?: return clearAuthCookiesUnauthorized(request, response)
+        return ResponseEntity.ok(AuthMeResponse.from(member))
     }
 
     @PostMapping("/refresh")
@@ -62,7 +62,13 @@ class AuthApi(
                 CookieUtils.deleteCookie(response, JwtProvider.REFRESH_TOKEN_COOKIE_NAME, cookieSecure)
                 return ResponseEntity.status(401).build()
             }
-        val member = memberService.getMember(memberUid)
+        // orphaned session: 유효 refresh 토큰이나 회원 부재 → 쿠키 삭제 + 401 (404 대신)
+        val member = memberService.findMember(memberUid)
+            ?: run {
+                CookieUtils.deleteCookie(response, JwtProvider.ACCESS_TOKEN_COOKIE_NAME, cookieSecure)
+                CookieUtils.deleteCookie(response, JwtProvider.REFRESH_TOKEN_COOKIE_NAME, cookieSecure)
+                return ResponseEntity.status(401).build()
+            }
         val roles = listOf(member.memberRole)
         val newAccessToken = jwtProvider.generateAccessToken(member.uid.toString(), member.email, roles)
         CookieUtils.addCookie(
@@ -117,5 +123,16 @@ class AuthApi(
 
     private fun cookieSecure(request: HttpServletRequest): Boolean {
         return properties.jwt.cookieSecure ?: request.isSecure
+    }
+
+    /** orphaned session 종료: access/refresh 쿠키 삭제 + 401 응답. */
+    private fun <T> clearAuthCookiesUnauthorized(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): ResponseEntity<T> {
+        val cookieSecure = cookieSecure(request)
+        CookieUtils.deleteCookie(response, JwtProvider.ACCESS_TOKEN_COOKIE_NAME, cookieSecure)
+        CookieUtils.deleteCookie(response, JwtProvider.REFRESH_TOKEN_COOKIE_NAME, cookieSecure)
+        return ResponseEntity.status(401).build()
     }
 }

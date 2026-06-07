@@ -80,6 +80,13 @@ class MemberService(
     fun getMemberWithOAuthAccounts(memberUid: UUID) = memberRepository.findWithOAuthAccountsByUid(memberUid)
         ?: throwError(ErrorType.MEMBER_NOT_FOUND, memberUid)
 
+    /** 인증 주체 검증용 nullable 조회 — orphaned session(유효 토큰 + 없는 회원)을 401로 처리하기 위함. */
+    @Transactional(readOnly = true)
+    fun findMember(memberUid: UUID) = memberRepository.findByUid(memberUid)
+
+    @Transactional(readOnly = true)
+    fun findMemberWithOAuthAccounts(memberUid: UUID) = memberRepository.findWithOAuthAccountsByUid(memberUid)
+
     @Transactional
     fun deleteMember(memberUid: UUID, principalUid: UUID) {
         if (memberUid != principalUid) {

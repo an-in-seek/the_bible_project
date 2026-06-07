@@ -135,6 +135,15 @@ export const checkAuthStatus = async ({
             return;
         }
 
+        // 기타 4xx(403/404 등)는 무효한 세션으로 간주해 로그아웃 처리(예: orphaned session).
+        // 5xx/네트워크 오류는 일시적 장애일 수 있으므로 onError로 둔다.
+        if (response && response.status >= 400 && response.status < 500) {
+            if (typeof onUnauthenticated === "function") {
+                onUnauthenticated();
+            }
+            return;
+        }
+
         if (typeof onError === "function") {
             onError(new Error("Unexpected auth response"));
         }

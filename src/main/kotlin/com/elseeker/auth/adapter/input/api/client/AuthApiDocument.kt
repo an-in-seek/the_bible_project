@@ -16,7 +16,11 @@ import org.springframework.http.ResponseEntity
 interface AuthApiDocument {
 
     @Operation(summary = "Get current authenticated member")
-    fun me(principal: JwtPrincipal): AuthMeResponse
+    fun me(
+        principal: JwtPrincipal,
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+    ): ResponseEntity<AuthMeResponse>
 
     @Operation(summary = "Refresh access token using refresh token cookie")
     fun refresh(request: HttpServletRequest, response: HttpServletResponse): ResponseEntity<Void>
