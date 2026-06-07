@@ -145,17 +145,18 @@ class Inquiry(
                     status = InquiryStatus.RECEIVED)
     }
 
-    val isAnswered: Boolean get() = status == InquiryStatus.ANSWERED || answeredAt != null
+    val hasAnswer: Boolean get() = answeredAt != null && !answerContent.isNullOrBlank()
+    val isAnswered: Boolean get() = hasAnswer
 
     // ── 회원(작성자) 행위 ── 답변 전(RECEIVED)에만 허용
     fun updateByAuthor(actor: Member, category: InquiryCategory, title: String, content: String) {
-        ensureOwnedBy(actor)
+        ensureAuthor(actor)
         ensureModifiable()
         this.category = category; this.title = title; this.content = content
     }
 
     fun deleteByAuthor(actor: Member) {
-        ensureOwnedBy(actor)
+        ensureAuthor(actor)
         ensureModifiable()
         this.status = InquiryStatus.DELETED   // soft-delete
     }
@@ -163,6 +164,7 @@ class Inquiry(
     // ── 관리자 행위 ──
     fun answer(actor: Member, content: String) {
         ensureAdmin(actor)
+        ensureAnswerable()
         this.answerContent = content
         this.answeredBy = actor
         this.answeredAt = Instant.now()
@@ -171,16 +173,22 @@ class Inquiry(
 
     fun updateAnswer(actor: Member, content: String) {
         ensureAdmin(actor)
-        if (!isAnswered) throwError(ErrorType.INQUIRY_NOT_ANSWERED, "inquiryId=$id")
+        if (status == InquiryStatus.DELETED) throwError(ErrorType.INQUIRY_NOT_FOUND, "inquiryId=$id")
+        if (!hasAnswer) throwError(ErrorType.INQUIRY_NOT_ANSWERED, "inquiryId=$id")
         this.answerContent = content
     }
 
     fun changeStatusByAdmin(actor: Member, target: InquiryStatus) {
         ensureAdmin(actor)
-        // 관리자 상태 변경은 종료/재개만 허용. 답변(ANSWERED)은 answer()로, 삭제(DELETED)는 회원 경로로 일원화.
-        if (target != InquiryStatus.CLOSED && target != InquiryStatus.ANSWERED) {
+        // 관리자 상태 변경은 답변된 문의의 종료/재개만 허용. 최초 답변은 answer()로, 삭제는 회원 경로로 일원화.
+        if (target !in setOf(InquiryStatus.CLOSED, InquiryStatus.ANSWERED)) {
             throwError(ErrorType.INVALID_STATUS_TRANSITION)
         }
+        if (status == InquiryStatus.DELETED) throwError(ErrorType.INQUIRY_NOT_FOUND, "inquiryId=$id")
+        if (!hasAnswer || status !in setOf(InquiryStatus.ANSWERED, InquiryStatus.CLOSED)) {
+            throwError(ErrorType.INQUIRY_NOT_ANSWERED, "inquiryId=$id")
+        }
+        if (status == target) return
         this.status = target          // ANSWERED ↔ CLOSED (종료 / 재개)
     }
 
@@ -188,8 +196,14 @@ class Inquiry(
         if (!status.isModifiable()) throwError(ErrorType.INQUIRY_ALREADY_ANSWERED, "inquiryId=$id")
     }
 
-    fun ensureOwnedBy(actor: Member) {
-        if (author.id != actor.id && actor.memberRole != MemberRole.ADMIN) {
+    private fun ensureAnswerable() {
+        if (status != InquiryStatus.RECEIVED) {
+            throwError(ErrorType.INVALID_STATUS_TRANSITION, "inquiryId=$id,status=$status")
+        }
+    }
+
+    private fun ensureAuthor(actor: Member) {
+        if (author.id != actor.id) {
             throwError(ErrorType.INQUIRY_ACCESS_DENIED, "inquiryId=$id")
         }
     }
@@ -200,7 +214,7 @@ class Inquiry(
 }
 ```
 
-- **soft-delete**: 회원 삭제는 `status = DELETED`로 처리하고 목록/상세 조회에서 제외한다(커뮤니티 댓글과 일관).
+- **soft-delete**: 회원의 문의 삭제는 `status = DELETED`로 처리하고 목록/상세 조회에서 제외한다(커뮤니티 댓글과 일관).
   물리 삭제 경로는 두지 않는다.
 - **답변자(`answeredBy`)**: 어느 관리자가 답변했는지 감사·표시용으로 보관한다(관리자 콘솔에서만 노출).
 
@@ -230,7 +244,7 @@ CREATE TABLE IF NOT EXISTS qna_inquiry (
     created_at      TIMESTAMP(6) NOT NULL,
     updated_at      TIMESTAMP(6) NOT NULL,
     CONSTRAINT fk_inquiry_author      FOREIGN KEY (author_id)      REFERENCES member (id),
-    CONSTRAINT fk_inquiry_answered_by FOREIGN KEY (answered_by_id) REFERENCES member (id)
+    CONSTRAINT fk_inquiry_answered_by FOREIGN KEY (answered_by_id) REFERENCES member (id) ON DELETE SET NULL
 );
 
 COMMENT ON TABLE  qna_inquiry                 IS '1:1 문의(질의응답)';
@@ -238,7 +252,7 @@ COMMENT ON COLUMN qna_inquiry.author_id       IS '문의 작성 회원 (member.i
 COMMENT ON COLUMN qna_inquiry.category        IS '문의 카테고리 (ACCOUNT/CONTENT/GAME/BUG/SUGGESTION/ETC)';
 COMMENT ON COLUMN qna_inquiry.status          IS '상태 (RECEIVED/ANSWERED/CLOSED/DELETED)';
 COMMENT ON COLUMN qna_inquiry.answer_content  IS '관리자 답변 본문 (답변 전 NULL)';
-COMMENT ON COLUMN qna_inquiry.answered_by_id  IS '답변 관리자 (member.id, 답변 전 NULL)';
+COMMENT ON COLUMN qna_inquiry.answered_by_id  IS '답변 관리자 (member.id, 답변 전/답변자 탈퇴 후 NULL)';
 COMMENT ON COLUMN qna_inquiry.answered_at     IS '답변 시각 (답변 전 NULL)';
 
 -- =====================================================================
@@ -253,6 +267,9 @@ CREATE INDEX IF NOT EXISTS idx_inquiry_author_created_at
 CREATE INDEX IF NOT EXISTS idx_inquiry_status_created_at
     ON qna_inquiry (status, created_at);
 ```
+
+`author_id`는 문의 보존을 위해 회원 탈퇴 트랜잭션에서 탈퇴 센티넬 계정으로 재지정한다. `answered_by_id`는
+nullable 감사 필드이므로 답변자 탈퇴 시 `NULL` 처리한다(서비스 `clearAnswerer` + 운영 DB `ON DELETE SET NULL` 보조 안전장치).
 
 ---
 
@@ -280,6 +297,8 @@ enum class InquiryStatus(val title: String) {
 
 전이 규칙:
 - `RECEIVED → ANSWERED` (관리자 답변), `ANSWERED ↔ CLOSED` (관리자 종료/재개).
+- 관리자 상태 변경 API는 **이미 답변된 문의의 종료/재개만** 처리한다. 답변 없는 `RECEIVED → CLOSED`,
+  답변 작성 없이 `RECEIVED → ANSWERED`, `DELETED` 상태 변경은 모두 금지한다.
 - `RECEIVED → DELETED` (회원 삭제). **답변 후(`ANSWERED`/`CLOSED`) 회원 삭제 불가** — `INQUIRY_ALREADY_ANSWERED`.
 - 모든 목록/상세 조회는 `status <> DELETED` 조건을 적용한다.
 
@@ -300,13 +319,66 @@ enum class InquiryCategory(val title: String) {
 
 | 메서드 | 용도 | 비고 |
 |--------|------|------|
-| `findPageByAuthorId(authorId, status, pageable): Page<Inquiry>` | 내 문의 목록 | `JOIN FETCH author`, `status<>DELETED`, `(:status IS NULL OR status=:status)`, `ORDER BY createdAt DESC` |
-| `findByIdAndAuthorId(id, authorId): Inquiry?` | 내 문의 상세/소유 검증 | `JOIN FETCH author LEFT JOIN FETCH answeredBy`, `status<>DELETED` |
-| `findByIdWithAuthorAndAnswerer(id): Inquiry?` | 관리자 상세 / 변이 대상 로드 | `JOIN FETCH author LEFT JOIN FETCH answeredBy` |
-| `findAdminPage(status, category, keyword, author, pageable): Page<Inquiry>` | 관리자 목록 | 동적 필터 + `countQuery`(아래) |
+| `findPageByAuthorId(authorId, excludedStatus, status, pageable): Page<Inquiry>` | 내 문의 목록 | 목록 응답은 작성자 필드를 쓰지 않으므로 fetch join 불필요. `status<>DELETED`, `(:status IS NULL OR status=:status)`, `ORDER BY createdAt DESC`, `countQuery` 명시 |
+| `findByIdAndAuthorId(id, authorId, excludedStatus): Inquiry?` | 내 문의 상세/소유 검증 | `JOIN FETCH author LEFT JOIN FETCH answeredBy`, `status<>DELETED` |
+| `findByIdWithAuthorAndAnswerer(id, excludedStatus): Inquiry?` | 관리자 상세 / 변이 대상 로드 | `JOIN FETCH author LEFT JOIN FETCH answeredBy`, `status<>DELETED` |
+| `findAdminPage(excludedStatus, status, category, keyword, author, pageable): Page<Inquiry>` | 관리자 목록 | `DELETED` 제외 + 동적 필터 + `countQuery`(아래) |
 | `reassignAuthor(memberId, sentinel): Int` | 회원 탈퇴 시 작성자 익명 재지정 | `@Modifying`, 커뮤니티와 동일 정책(문의 보존) |
+| `clearAnswerer(memberId): Int` | 회원 탈퇴 시 답변자 참조 제거 | `@Modifying`, 답변 본문/시각은 보존하고 `answeredBy`만 `NULL` 처리 |
 
 ```kotlin
+@Query(
+    value = """
+    SELECT i FROM Inquiry i
+    WHERE i.author.id = :authorId
+      AND i.status <> :excludedStatus
+      AND (:status IS NULL OR i.status = :status)
+    ORDER BY i.createdAt DESC
+    """,
+    countQuery = """
+    SELECT count(i) FROM Inquiry i
+    WHERE i.author.id = :authorId
+      AND i.status <> :excludedStatus
+      AND (:status IS NULL OR i.status = :status)
+    """
+)
+fun findPageByAuthorId(
+    @Param("authorId") authorId: Long,
+    @Param("excludedStatus") excludedStatus: InquiryStatus,
+    @Param("status") status: InquiryStatus?,
+    pageable: Pageable,
+): Page<Inquiry>
+
+@Query(
+    """
+    SELECT i FROM Inquiry i
+    JOIN FETCH i.author
+    LEFT JOIN FETCH i.answeredBy
+    WHERE i.id = :id
+      AND i.author.id = :authorId
+      AND i.status <> :excludedStatus
+    """
+)
+fun findByIdAndAuthorId(
+    @Param("id") id: Long,
+    @Param("authorId") authorId: Long,
+    @Param("excludedStatus") excludedStatus: InquiryStatus,
+): Inquiry?
+
+@Query(
+    """
+    SELECT i FROM Inquiry i
+    JOIN FETCH i.author
+    LEFT JOIN FETCH i.answeredBy
+    WHERE i.id = :id
+      AND i.status <> :excludedStatus
+    """
+)
+fun findByIdWithAuthorAndAnswerer(
+    @Param("id") id: Long,
+    @Param("excludedStatus") excludedStatus: InquiryStatus,
+): Inquiry?
+
 @Query(
     value = """
     SELECT i FROM Inquiry i
@@ -336,12 +408,22 @@ fun findAdminPage(
     @Param("author") author: String?,
     pageable: Pageable,
 ): Page<Inquiry>
+
+@Modifying
+@Query("UPDATE Inquiry i SET i.author = :sentinel WHERE i.author.id = :memberId")
+fun reassignAuthor(@Param("memberId") memberId: Long, @Param("sentinel") sentinel: Member): Int
+
+@Modifying
+@Query("UPDATE Inquiry i SET i.answeredBy = NULL WHERE i.answeredBy.id = :memberId")
+fun clearAnswerer(@Param("memberId") memberId: Long): Int
 ```
 
 > **enum 비교는 `:param`으로 전달**한다 — 코드베이스 JPQL 관례(`CommentRepository.findByIdAndStatusNot`의
 > `c.status <> :excludedStatus`)와 일치시키고 FQN enum 리터럴(`InquiryStatus.DELETED`)을 본문에 박지 않는다.
 > `findPageByAuthorId`/`findByIdAndAuthorId`의 `DELETED` 제외도 동일하게 `:excludedStatus` 파라미터로 전달한다.
 > `keyword`/`author`는 서비스에서 `"%$it%"`로 감싸 전달한다(`CommentService.getAdminComments` 패턴).
+> `Page` 반환 쿼리는 fetch join 여부와 무관하게 `countQuery`를 명시해 Spring Data JPA의 자동 count 생성 실패를
+> 피한다. 정렬은 JPQL `ORDER BY i.createdAt DESC`로 고정한다.
 
 ---
 
@@ -371,14 +453,14 @@ class InquiryService(
     @Transactional(readOnly = true)
     fun getMyInquiries(memberUid: UUID, status: InquiryStatus?, pageable: Pageable): PageResponse<InquirySummaryResponse> {
         val member = getMemberOrThrow(memberUid)
-        val page = inquiryRepository.findPageByAuthorId(member.id!!, status, pageable)
+        val page = inquiryRepository.findPageByAuthorId(member.id!!, InquiryStatus.DELETED, status, pageable)
         return PageResponse.from(page) { it.toSummary() }
     }
 
     @Transactional(readOnly = true)
     fun getMyInquiryDetail(memberUid: UUID, inquiryId: Long): InquiryDetailResponse {
         val member = getMemberOrThrow(memberUid)
-        val inquiry = inquiryRepository.findByIdAndAuthorId(inquiryId, member.id!!)
+        val inquiry = inquiryRepository.findByIdAndAuthorId(inquiryId, member.id!!, InquiryStatus.DELETED)
             ?: throwError(ErrorType.INQUIRY_NOT_FOUND, "inquiryId=$inquiryId")
         return inquiry.toDetail(viewerId = member.id)
     }
@@ -386,7 +468,7 @@ class InquiryService(
     @Transactional
     fun updateInquiry(memberUid: UUID, inquiryId: Long, req: UpdateInquiryRequest): InquiryDetailResponse {
         val member = getMemberOrThrow(memberUid)
-        val inquiry = inquiryRepository.findByIdAndAuthorId(inquiryId, member.id!!)
+        val inquiry = inquiryRepository.findByIdAndAuthorId(inquiryId, member.id!!, InquiryStatus.DELETED)
             ?: throwError(ErrorType.INQUIRY_NOT_FOUND, "inquiryId=$inquiryId")
         inquiry.updateByAuthor(member, req.category, req.title, req.content)   // RECEIVED 가드 내장
         return inquiry.toDetail(viewerId = member.id)
@@ -395,7 +477,7 @@ class InquiryService(
     @Transactional
     fun deleteInquiry(memberUid: UUID, inquiryId: Long) {
         val member = getMemberOrThrow(memberUid)
-        val inquiry = inquiryRepository.findByIdAndAuthorId(inquiryId, member.id!!)
+        val inquiry = inquiryRepository.findByIdAndAuthorId(inquiryId, member.id!!, InquiryStatus.DELETED)
             ?: throwError(ErrorType.INQUIRY_NOT_FOUND, "inquiryId=$inquiryId")
         inquiry.deleteByAuthor(member)   // soft-delete, RECEIVED 가드 내장
     }
@@ -406,7 +488,8 @@ class InquiryService(
 ```
 
 > **소유 검증은 쿼리로 강제**한다(`findByIdAndAuthorId`). 타인 문의 id를 알아도 조회·수정·삭제 모두
-> `INQUIRY_NOT_FOUND`(존재하지 않는 것으로 취급)로 막는다. 도메인의 `ensureOwnedBy`는 2차 방어선이다.
+> `INQUIRY_NOT_FOUND`(존재하지 않는 것으로 취급)로 막는다. 도메인의 `ensureAuthor`는 2차 방어선이며,
+> 작성자 수정/삭제에 관리자 예외를 두지 않는다.
 
 ### 6-2. `AdminInquiryService` (관리자)
 
@@ -429,7 +512,7 @@ class AdminInquiryService(
 
     @Transactional(readOnly = true)
     fun getAdminInquiryDetail(inquiryId: Long): Inquiry =
-        inquiryRepository.findByIdWithAuthorAndAnswerer(inquiryId)
+        inquiryRepository.findByIdWithAuthorAndAnswerer(inquiryId, InquiryStatus.DELETED)
             ?: throwError(ErrorType.INQUIRY_NOT_FOUND, "inquiryId=$inquiryId")
 
     @Transactional
@@ -484,6 +567,8 @@ class AdminInquiryService(
 
 - 컨트롤러는 `@Validated`(클래스) + `@Valid`(본문), Swagger 애너테이션은 `InquiryApiDocument`/`AdminInquiryApiDocument`
   인터페이스로 분리한다(프로젝트 컨벤션). 회원 컨트롤러는 `CommunityApi`처럼 `principal.memberUid`를 서비스로 전달.
+- 관리자 상태 변경 API는 `ANSWERED ↔ CLOSED` 전용이다. 최초 답변 등록은 반드시 답변 작성 API(`POST /answer`)를
+  통해서만 수행한다.
 - 에러 코드: 미존재/타인 문의 → `INQUIRY_NOT_FOUND`, 답변 후 회원 수정/삭제 → `INQUIRY_ALREADY_ANSWERED`,
   비관리자 답변 시도(이중 방어) → `ADMIN_ACCESS_DENIED`.
 
@@ -548,6 +633,8 @@ data class AdminInquiryItem(
 - JS는 ES6 모듈 `js/member/my-inquiries.js`에서 `fetchWithAuthRetry`(`common-util.js`)로 API 호출.
   CSS `css/member/my-inquiries.css`. CSS/JS 수정 시 참조 템플릿의 `?v=` 쿼리 파라미터를 올린다.
 - 진입점: 헤더 계정 메뉴(`fragments/header.html`의 `#topNavAccountMenu`)에 "내 문의" 링크를 마이페이지 인근에 추가.
+  현재 헤더 스크립트가 인증 상태에 따라 `myMemoLink`만 노출하므로, `myInquiryLink`(또는 동일 역할 id)를 함께 조회하고
+  `onAuthenticated`에서 `d-none`을 제거하도록 스크립트도 같이 갱신한다.
 - 활성 메뉴 표시는 서버 주입 `currentPath`(`GlobalModelAttribute`) + `th:classappend` 방식(클라이언트 `location.pathname` 금지).
 
 ### 8-2. 관리자 — Q&A 콘솔
@@ -564,11 +651,15 @@ data class AdminInquiryItem(
 ## 9. 도메인 규칙 / 권한 / 엣지 케이스
 
 - **소유 검증(회원)**: 모든 회원 조회/수정/삭제는 `findByIdAndAuthorId`로 본인 소유만 처리. 타인 id → `INQUIRY_NOT_FOUND`.
+- **작성자 행위 제한**: 회원 수정/삭제 도메인 메서드는 작성자 본인만 허용한다. 관리자는 답변/상태 변경 전용 경로를 사용한다.
 - **답변 전 가드**: 회원 수정/삭제는 `RECEIVED`에서만. 답변 후 → `INQUIRY_ALREADY_ANSWERED`(엔티티 `ensureModifiable`).
+- **답변/상태 전이 가드**: `answer()`는 `RECEIVED`에서만 가능하고, 상태 변경은 답변이 존재하는 `ANSWERED`/`CLOSED`
+  문의의 종료/재개만 가능하다.
 - **관리자 전용 답변**: 답변/답변수정/상태변경은 `hasRole("ADMIN")`(URL 레벨) + `ensureAdmin`(도메인 레벨) 이중 방어.
 - **soft-delete 일관성**: `DELETED`는 모든 조회 쿼리에서 제외(`status <> DELETED`). 물리 삭제 경로 없음.
-- **회원 탈퇴 처리**: 커뮤니티와 동일하게 `reassignAuthor(memberId, sentinel)`로 작성자를 탈퇴 센티넬 계정으로
-  벌크 재지정해 문의를 보존한다(FK 안전, 행 미삭제). 관리자가 답변자인 경우 `answeredBy` 처리 정책은 2차에서 검토.
+- **회원 탈퇴 처리**: `MemberService.deleteMember` 트랜잭션에 Q&A 참조 정리를 포함한다. 작성자는
+  `reassignAuthor(memberId, sentinel)`로 탈퇴 센티넬 계정에 벌크 재지정해 문의를 보존하고(FK 안전, 행 미삭제),
+  답변자(`answeredBy`)는 `clearAnswerer(memberId)`로 `NULL` 처리한다. 답변 본문/답변 시각은 그대로 보존한다.
 - **빈 검색어 처리**: `keyword`/`author`가 공백이면 서비스에서 `null` 처리해 `LIKE '%%'` 전체 스캔을 회피.
 - **카운트/페이지네이션**: 관리자 목록은 `findAdminPage`의 `countQuery`로 `DELETED` 제외 총계를 정확히 계산.
 
@@ -580,6 +671,8 @@ data class AdminInquiryItem(
   ```kotlin
   .requestMatchers("/api/v1/qna/**").authenticated()
   ```
+  이 매처는 공개 API `permitAll` 묶음보다 앞에 둔다. 현재는 `anyRequest().authenticated()`가 최종 방어선이지만,
+  Q&A API의 비공개 성격을 명시하고 향후 공개 매처 확장 시 회귀를 막기 위해 별도 규칙으로 둔다.
 - 관리자 API/페이지는 기존 규칙으로 커버됨 — `"/web/admin/**", "/api/v1/admin/**"` → `hasRole("ADMIN")`
   (`/api/v1/admin/qna/**`, `/web/admin/qna/**` 포함).
 - 회원 SSR 페이지 `/web/member/my-inquiries[/**]`는 컨트롤러 `redirectIfUnauthenticated`로 보호(기존 mypage 패턴).
@@ -603,16 +696,19 @@ INQUIRY_ACCESS_DENIED(HttpStatus.FORBIDDEN, "문의에 대한 접근 권한이 �
 ## 11. 테스트 계획
 
 - **단위(도메인)**: `answer()`가 `RECEIVED→ANSWERED` + 답변 필드 설정, `RECEIVED` 외 상태에서 회원 수정/삭제 차단
-  (`INQUIRY_ALREADY_ANSWERED`), `ensureOwnedBy`/`ensureAdmin` 가드.
+  (`INQUIRY_ALREADY_ANSWERED`), `RECEIVED` 외 상태에서 `answer()` 차단, 답변 없는 `CLOSED/ANSWERED` 상태 변경 차단,
+  작성자 전용 수정/삭제(`ensureAuthor`)와 관리자 전용 답변(`ensureAdmin`) 가드.
 - **통합(`IntegrationTest` 기반, Testcontainers)**:
   - 문의 등록 → 내 목록에 `RECEIVED`로 노출, `isAnswered=false`.
   - **타인 문의 비노출** — 다른 회원이 상세/수정/삭제 시 `INQUIRY_NOT_FOUND`.
   - 관리자 답변 → 상태 `ANSWERED`, 회원 상세에서 `answerContent` 확인.
   - 답변 후 회원 수정/삭제 시 `INQUIRY_ALREADY_ANSWERED`.
-  - soft-delete(회원 삭제) 후 내 목록·관리자 목록·총계에서 제외.
+  - 회원이 문의를 삭제(soft-delete)한 뒤 내 목록·관리자 목록·총계에서 제외.
+  - soft-delete된 문의를 관리자 상세/답변/상태 변경 대상으로 조회하면 `INQUIRY_NOT_FOUND`.
+  - 답변 없는 문의를 상태 변경 API로 `CLOSED`/`ANSWERED` 처리하려 하면 실패.
   - 관리자 목록 필터(`status`/`category`/`keyword`/`author`) 동작, 페이지네이션 총계 정확성.
   - 비로그인 접근 시 `401`, 비관리자가 관리자 API 접근 시 `403`.
-  - 회원 탈퇴 시 작성자 익명 재지정(문의 보존).
+  - 회원 탈퇴 시 작성자 익명 재지정(문의 보존) + 답변자 참조 `NULL` 처리.
 - **회귀**: 커뮤니티/회원 기존 기능에 영향 없음(신규 모듈이라 격리).
 
 ---
@@ -622,6 +718,7 @@ INQUIRY_ACCESS_DENIED(HttpStatus.FORBIDDEN, "문의에 대한 접근 권한이 �
 **1차 (MVP)**
 - `qna` 모듈: `Inquiry` 엔티티, `InquiryStatus`/`InquiryCategory` VO, `InquiryRepository`.
 - 서비스 `InquiryService`(회원) / `AdminInquiryService`(관리자).
+- 회원 탈퇴 연동: `MemberService.deleteMember`에서 `InquiryRepository.reassignAuthor`/`clearAnswerer` 호출.
 - 회원 API(`/api/v1/qna/inquiries`) + 관리자 API(`/api/v1/admin/qna/inquiries`) + `*ApiDocument`.
 - DTO/매퍼, `ErrorType` 4종 추가, `SecurityConfig`에 `/api/v1/qna/**` 인증 규칙.
 - 회원 "내 문의" 화면(목록/상세/작성) + 헤더 진입점, 관리자 Q&A 콘솔.
@@ -633,7 +730,7 @@ INQUIRY_ACCESS_DENIED(HttpStatus.FORBIDDEN, "문의에 대한 접근 권한이 �
 - 답변 등록 시 회원 알림(이메일/인앱), "내 문의" 미확인 답변 배지.
 - 첨부파일(스크린샷) 업로드.
 - 자주 묻는 문의 → FAQ 자동/수동 전환.
-- 답변자(`answeredBy`) 탈퇴 시 처리 정책.
+- 답변자 변경 이력/감사 로그 강화.
 
 ---
 
@@ -646,9 +743,9 @@ INQUIRY_ACCESS_DENIED(HttpStatus.FORBIDDEN, "문의에 대한 접근 권한이 �
 | 답변 모델 | **단일 답변 임베드**(MVP). 왕복 스레드는 2차(`InquiryMessage`) |
 | 상태 | `RECEIVED/ANSWERED/CLOSED/DELETED`, 회원 수정/삭제는 `RECEIVED`에서만 |
 | 삭제 | **soft-delete**(`status=DELETED`), 조회 전부 제외 |
-| 소유 검증 | 쿼리(`findByIdAndAuthorId`)로 강제 + 도메인 `ensureOwnedBy` 2차 방어 |
+| 소유 검증 | 쿼리(`findByIdAndAuthorId`)로 강제 + 도메인 `ensureAuthor` 2차 방어(관리자 예외 없음) |
 | 관리자 권한 | `/api/v1/admin/**` `hasRole(ADMIN)` + `ensureAdmin` 이중 방어 |
 | 회원 식별 | `JwtPrincipal.memberUid` → `memberRepository.findByUid` |
 | 목록/페이징 | `PageResponse`/`AdminPageResponse.from`, 관리자 `findAdminPage(countQuery)` |
-| 탈퇴 회원 | `reassignAuthor` 센티넬 재지정(문의 보존) |
+| 탈퇴 회원 | 작성자는 `reassignAuthor` 센티넬 재지정(문의 보존), 답변자는 `clearAnswerer`로 NULL 처리 |
 | 보안 라우팅 | `/api/v1/qna/**` 인증, `/web/member/my-inquiries` 컨트롤러 가드 |
