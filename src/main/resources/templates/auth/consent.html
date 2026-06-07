@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head th:replace="~{fragments/head :: head('약관 동의 | ElSeeker', true, '/css/login.css?v=5.0,/css/auth/consent.css?v=1.0')}"
+<head th:replace="~{fragments/head :: head('약관 동의 | ElSeeker', true, '/css/login.css?v=5.0,/css/auth/consent.css?v=1.1')}"
       th:with="robotsContent='noindex'"></head>
 <body class="login-page consent-page">
 <main class="content-wrapper login-shell">
@@ -32,7 +32,8 @@
                         <input type="checkbox" class="consent-required" id="agreeTerms">
                         <span class="consent-label"><b>[필수]</b> 서비스 이용약관 동의</span>
                     </label>
-                    <a class="consent-view" href="/web/legal/terms" target="_blank" rel="noopener noreferrer">보기</a>
+                    <button type="button" class="consent-view" data-doc="terms"
+                            aria-haspopup="dialog" aria-controls="legalDialog">보기</button>
                 </div>
 
                 <div class="consent-item">
@@ -40,7 +41,8 @@
                         <input type="checkbox" class="consent-required" id="agreePrivacy">
                         <span class="consent-label"><b>[필수]</b> 개인정보 수집 및 이용 동의</span>
                     </label>
-                    <a class="consent-view" href="/web/legal/privacy" target="_blank" rel="noopener noreferrer">보기</a>
+                    <button type="button" class="consent-view" data-doc="privacy"
+                            aria-haspopup="dialog" aria-controls="legalDialog">보기</button>
                 </div>
             </div>
 
@@ -48,7 +50,18 @@
             <button type="button" id="consentCancel" class="consent-cancel">취소하고 돌아가기</button>
         </div>
     </div>
+
+    <!-- 약관 본문 모달: "보기" 클릭 시 해당 약관을 새 탭 대신 인페이지로 표시 (동의 상태 보존) -->
+    <dialog id="legalDialog" class="legal-dialog" aria-labelledby="legalDialogTitle">
+        <div class="legal-dialog-inner">
+            <header class="legal-dialog-header">
+                <h2 id="legalDialogTitle" class="legal-dialog-title">약관</h2>
+                <button type="button" class="legal-dialog-close" data-legal-close aria-label="닫기">×</button>
+            </header>
+            <div id="legalDialogBody" class="legal-dialog-body" tabindex="0"></div>
+        </div>
+    </dialog>
 </main>
-<script type="module" src="/js/auth/consent.js?v=1.0"></script>
+<script type="module" src="/js/auth/consent.js?v=1.1"></script>
 </body>
 </html>

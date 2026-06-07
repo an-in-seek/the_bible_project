@@ -8,7 +8,12 @@
  *
  * 인증은 가입 동의 대기(SIGNUP) 토큰 쿠키(HttpOnly)로 자동 전송된다.
  * SIGNUP 토큰은 Refresh 가 없으므로 만료 시 재로그인을 안내한다.
+ *
+ * 약관 "보기"는 새 탭(navigation) 대신 인페이지 모달로 표시한다.
+ * → 동의 체크 상태가 보존되고, SIGNUP 사용자가 다른 경로로 이탈해 ConsentGateFilter 403을 만나는 일도 없다.
  */
+
+import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
 
 const errorBox = document.getElementById("consentError");
 const submitBtn = document.getElementById("consentSubmit");
@@ -89,3 +94,67 @@ cancelBtn.addEventListener("click", async () => {
     }
     window.location.replace("/web/auth/login");
 });
+
+/* ── 약관 본문 모달 ───────────────────────────────────────────── */
+const legalDialog = document.getElementById("legalDialog");
+const legalTitle = document.getElementById("legalDialogTitle");
+const legalBody = document.getElementById("legalDialogBody");
+
+const LEGAL_DOCS = {
+    terms: {url: "/web/legal/terms", title: "서비스 이용약관"},
+    privacy: {url: "/web/legal/privacy", title: "개인정보 수집 및 이용"},
+};
+const legalCache = {};
+
+if (legalDialog) {
+    setupDialogScrollLock(legalDialog);
+
+    const openLegal = async (doc) => {
+        const meta = LEGAL_DOCS[doc];
+        if (!meta) return;
+        legalTitle.textContent = meta.title;
+        if (!legalDialog.open) legalDialog.showModal();
+        legalBody.scrollTop = 0;
+
+        if (legalCache[doc]) {
+            legalBody.innerHTML = legalCache[doc];
+            legalBody.scrollTop = 0;
+            return;
+        }
+
+        legalBody.innerHTML = '<p class="legal-dialog-status">불러오는 중…</p>';
+        try {
+            const res = await fetch(meta.url, {credentials: "include", headers: {Accept: "text/html"}});
+            if (!res.ok) throw new Error(String(res.status));
+            const html = await res.text();
+            // 같은 출처의 약관 페이지에서 <main> 본문만 추출(헤더/푸터/스크립트 제외). DOMParser는 스크립트를 실행하지 않는다.
+            const main = new DOMParser().parseFromString(html, "text/html").querySelector("main");
+            const content = main ? main.innerHTML : "";
+            if (!content) throw new Error("empty");
+            legalCache[doc] = content;
+            legalBody.innerHTML = content;
+            legalBody.scrollTop = 0;
+        } catch (e) {
+            legalBody.innerHTML =
+                `<p class="legal-dialog-status legal-dialog-error">약관을 불러오지 못했어요. ` +
+                `<a href="${meta.url}" target="_blank" rel="noopener noreferrer">새 탭에서 보기</a></p>`;
+        }
+    };
+
+    document.querySelectorAll(".consent-view").forEach((btn) => {
+        btn.addEventListener("click", () => openLegal(btn.dataset.doc));
+    });
+
+    legalDialog.querySelector("[data-legal-close]")?.addEventListener("click", () => legalDialog.close());
+    // 백드롭(다이얼로그 바깥) 클릭 시 닫기 (ESC는 <dialog> 기본 동작)
+    legalDialog.addEventListener("click", (e) => {
+        if (e.target === legalDialog) legalDialog.close();
+    });
+    // 약관 본문 내부의 다른 약관 링크(/web/legal/*)는 이탈 대신 모달 내에서 전환
+    legalBody.addEventListener("click", (e) => {
+        const link = e.target.closest('a[href^="/web/legal/"]');
+        if (!link) return;
+        e.preventDefault();
+        openLegal(link.getAttribute("href").includes("privacy") ? "privacy" : "terms");
+    });
+}

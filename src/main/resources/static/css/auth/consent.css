@@ -97,12 +97,18 @@
     margin: 0.5rem 0;
 }
 
+/* 버튼이지만 링크처럼 보이도록 reset */
 .consent-view {
     flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    font: inherit;
     font-size: 0.82rem;
     color: var(--ink-soft);
     text-decoration: underline;
     text-underline-offset: 2px;
+    cursor: pointer;
 }
 
 .consent-view:hover {
@@ -157,5 +163,159 @@
 @media (max-width: 576px) {
     .consent-card {
         padding: 2rem 1.5rem;
+    }
+}
+
+/* ── 약관 본문 모달 (전역 테마 토큰 사용 — 라이트/다크 자동 적응) ── */
+.legal-dialog {
+    width: min(680px, 94vw);
+    max-width: none;
+    max-height: min(86vh, 860px);
+    padding: 0;
+    border: 0;
+    border-radius: 16px;
+    background: var(--color-bg-base);
+    color: var(--color-text-primary);
+    box-shadow: 0 16px 44px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.legal-dialog::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+}
+
+.legal-dialog-inner {
+    display: flex;
+    flex-direction: column;
+    max-height: inherit;
+}
+
+/* 헤더 고정(본문만 스크롤) — 닫기 affordance 유지 */
+.legal-dialog-header {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-bg-base);
+}
+
+.legal-dialog-title {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.legal-dialog-close {
+    flex: 0 0 auto;
+    width: 2rem;
+    height: 2rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: 50%;
+    background: var(--color-bg-elevated);
+    color: var(--color-text-primary);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+}
+
+.legal-dialog-close:hover {
+    background: var(--color-border);
+}
+
+.legal-dialog-body {
+    flex: 1 1 auto;
+    padding: 1.25rem 1.5rem 1.75rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    font-size: 0.95rem;
+    line-height: 1.65;
+}
+
+/* 주입된 약관 본문 여백 정리 */
+.legal-dialog-body > :first-child {
+    margin-top: 0;
+}
+
+.legal-dialog-status {
+    color: var(--color-text-secondary);
+    text-align: center;
+    padding: 2.5rem 0;
+}
+
+.legal-dialog-error a {
+    color: var(--color-accent);
+    font-weight: 600;
+}
+
+/* 등장 애니메이션 (지원 브라우저) */
+.legal-dialog,
+.legal-dialog::backdrop {
+    opacity: 0;
+    transition: opacity 180ms ease, transform 180ms ease, overlay 180ms ease allow-discrete, display 180ms ease allow-discrete;
+}
+
+.legal-dialog {
+    transform: translateY(8px) scale(0.98);
+}
+
+.legal-dialog[open],
+.legal-dialog[open]::backdrop {
+    opacity: 1;
+}
+
+.legal-dialog[open] {
+    transform: translateY(0) scale(1);
+}
+
+@starting-style {
+    .legal-dialog[open] {
+        opacity: 0;
+        transform: translateY(8px) scale(0.98);
+    }
+
+    .legal-dialog[open]::backdrop {
+        opacity: 0;
+    }
+}
+
+/* 모바일: 하단 시트 */
+@media (max-width: 576px) {
+    .legal-dialog {
+        width: 100vw;
+        max-width: 100vw;
+        max-height: 90vh;
+        margin: auto 0 0;
+        border-radius: 16px 16px 0 0;
+    }
+
+    .legal-dialog {
+        transform: translateY(100%);
+    }
+
+    @starting-style {
+        .legal-dialog[open] {
+            transform: translateY(100%);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .legal-dialog,
+    .legal-dialog::backdrop {
+        transition: none;
+    }
+
+    .legal-dialog {
+        transform: none;
     }
 }
