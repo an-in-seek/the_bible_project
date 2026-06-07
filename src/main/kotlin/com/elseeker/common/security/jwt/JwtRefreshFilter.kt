@@ -81,7 +81,16 @@ class JwtRefreshFilter(
             filterChain.doFilter(request, response)
             return
         }
-        val member = memberService.getMember(memberUid)
+        // orphaned session: refresh 토큰은 유효하나 회원이 없음(탈퇴/삭제).
+        // 필터 내부에서 throwError(404)를 던지면 @RestControllerAdvice가 못 잡아 500이 되므로,
+        // nullable 조회로 처리 — 쿠키를 삭제해 ghost 세션을 끊고 미인증 상태로 체인을 계속한다.
+        val member = memberService.findMember(memberUid)
+        if (member == null) {
+            CookieUtils.deleteCookie(response, JwtProvider.ACCESS_TOKEN_COOKIE_NAME, cookieSecure(request))
+            CookieUtils.deleteCookie(response, JwtProvider.REFRESH_TOKEN_COOKIE_NAME, cookieSecure(request))
+            filterChain.doFilter(request, response)
+            return
+        }
         val roles = listOf(member.memberRole)
         val newAccessToken = jwtProvider.generateAccessToken(
             member.uid.toString(),

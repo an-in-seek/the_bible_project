@@ -114,18 +114,15 @@ if (nav) {
 /**
  * 상단 뒤로가기 버튼 — opt-in 페이지(body[data-show-back="true"])에서 노출.
  * 별도 페이지 JS가 없는 정적 페이지(약관/방침 등)도 back 버튼을 쓸 수 있게 한다.
- * 회원가입 약관 동의 절차에서 진입하는 케이스가 있어 홈이 아니라 직전 화면으로 복귀해야 한다.
- * 이동: 히스토리가 있으면 history.back(), 없으면(직접 진입) data-back-link(기본 "/").
+ *
+ * 중요: 돌아갈 직전 페이지가 실제로 있을 때(같은 탭 내 history)에만 노출한다.
+ * 약관/방침은 동의 화면에서 target="_blank"(새 탭, rel=noopener noreferrer)로도 열리는데,
+ * 새 탭은 history.length===1 이라 돌아갈 곳이 없다. 이때 back으로 "/" 등으로 이동시키면
+ * 가입 동의 대기(SIGNUP) 사용자가 ConsentGateFilter에 막혀 403(CONSENT_REQUIRED)이 난다.
+ * → 새 탭에서는 back 버튼을 숨기고, 사용자는 탭을 닫아 원래(동의) 탭으로 복귀하도록 둔다.
  */
 const backButton = document.getElementById('topNavBackButton');
-if (backButton && document.body.dataset.showBack === 'true') {
+if (backButton && document.body.dataset.showBack === 'true' && window.history.length > 1) {
     backButton.classList.remove('d-none');
-    backButton.addEventListener('click', () => {
-        const fallback = document.body.dataset.backLink || '/';
-        if (document.referrer && window.history.length > 1) {
-            window.history.back();
-        } else {
-            window.location.href = fallback;
-        }
-    });
+    backButton.addEventListener('click', () => window.history.back());
 }

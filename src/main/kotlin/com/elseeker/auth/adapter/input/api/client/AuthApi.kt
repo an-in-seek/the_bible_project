@@ -105,7 +105,9 @@ class AuthApi(
             ?: throwError(ErrorType.AUTHENTICATION_REQUIRED, "refresh")
         val memberUid = runCatching { UUID.fromString(claims.subject) }.getOrNull()
             ?: throwError(ErrorType.AUTHENTICATION_REQUIRED, "refresh")
-        val member = memberService.getMember(memberUid)
+        // orphaned session: 유효 refresh 토큰이나 회원 부재 → 404가 아니라 401(다른 분기와 일관)
+        val member = memberService.findMember(memberUid)
+            ?: throwError(ErrorType.AUTHENTICATION_REQUIRED, "reissue")
         if (member.isPendingConsent) {
             // 동의 미완료 회원에게는 정식 토큰을 재발급하지 않는다(소셜 재로그인 → 동의 플로우로 유도).
             throwError(ErrorType.AUTHENTICATION_REQUIRED, "consent")
