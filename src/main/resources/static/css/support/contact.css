@@ -31,14 +31,22 @@
     border-radius: 0.9rem;
 }
 
+.support-contact-required-legend {
+    font-size: 0.82rem;
+    color: var(--bs-secondary-color, #6c757d);
+    margin-bottom: 1rem;
+}
+
+.support-contact-required-legend span,
+.support-contact-required {
+    color: var(--bs-danger, #dc3545);
+    font-weight: 700;
+}
+
 /* ── Form fields ───────────────────────────────────────────── */
 
 .support-contact-field {
     margin-bottom: 1.1rem;
-}
-
-.support-contact-field:last-of-type {
-    margin-bottom: 0;
 }
 
 .support-contact-label {
@@ -65,17 +73,55 @@
     min-height: 9rem;
 }
 
-.support-contact-counter {
-    text-align: right;
-    font-size: 0.78rem;
-    color: var(--bs-secondary-color, #6c757d);
+/* 검증 실패 필드 강조 */
+.support-contact-input[aria-invalid="true"],
+.support-contact-select[aria-invalid="true"],
+.support-contact-textarea[aria-invalid="true"] {
+    border-color: var(--bs-danger, #dc3545);
+}
+
+/* 에러 + 카운터를 한 줄에 배치 (에러는 왼쪽, 카운터는 오른쪽) */
+.support-contact-field-foot {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
     margin-top: 0.25rem;
 }
 
-/* ── Error & actions ───────────────────────────────────────── */
+.support-contact-field-error {
+    font-size: 0.82rem;
+    color: var(--bs-danger-text-emphasis, #b02a37);
+}
+
+/* 단독(카운터 없는) 에러는 위 여백 부여 */
+.support-contact-field > .support-contact-field-error {
+    margin-top: 0.3rem;
+}
+
+.support-contact-counter {
+    flex: none;
+    text-align: right;
+    font-size: 0.78rem;
+    color: var(--bs-secondary-color, #6c757d);
+}
+
+.support-contact-counter.is-warning {
+    color: var(--bs-danger, #dc3545);
+    font-weight: 600;
+}
+
+/* ── Privacy / Error / actions ─────────────────────────────── */
+
+.support-contact-privacy {
+    font-size: 0.8rem;
+    line-height: 1.5;
+    color: var(--bs-secondary-color, #6c757d);
+    margin: 1.25rem 0 0;
+}
 
 .support-contact-error {
-    margin-top: 0.5rem;
+    margin-top: 0.75rem;
     padding: 0.65rem 0.85rem;
     border-radius: 0.6rem;
     background: var(--bs-danger-bg-subtle, #f8d7da);
@@ -85,9 +131,38 @@
 
 .support-contact-actions {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
+    gap: 0.75rem;
+    margin-top: 1.25rem;
+}
+
+.support-contact-cancel {
+    color: var(--bs-secondary-color, #6c757d);
+    text-decoration: none;
+}
+
+.support-contact-submit {
+    min-width: 9rem;
+    padding-inline: 1.5rem;
+}
+
+/* 모바일: 주요 CTA 풀폭, 취소는 그 아래 */
+@media (max-width: 575.98px) {
+    .support-contact-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+
+    .support-contact-submit {
+        width: 100%;
+    }
+
+    .support-contact-cancel {
+        width: 100%;
+        text-align: center;
+    }
 }
 
 /* ── Honeypot: 사람에게 보이지 않게(스크린리더 포함) 화면 밖으로 ─── */
