@@ -115,6 +115,11 @@ class SecurityConfig(
                         "/api/v1/community/posts/{postId}",
                         "/api/v1/community/posts/{postId}/comments"
                     ).permitAll()
+                    // 공개(비로그인) 문의하기 등록 — /api/v1/qna/** authenticated 규칙보다 먼저 와야 함
+                    .requestMatchers(
+                        org.springframework.http.HttpMethod.POST,
+                        "/api/v1/qna/contacts"
+                    ).permitAll()
                     .requestMatchers(
                         "/api/v1/auth/me",
                         "/api/v1/auth/consent",

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+
+<head
+        th:replace="~{fragments/head :: head('문의 접수 완료 | ElSeeker', true, '/css/support/contact.css?v=1.0')}"
+        th:with="robotsContent='noindex'">
+</head>
+
+<body class="has-fixed-nav support-contact-page">
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="container content-wrapper support-contact-shell">
+
+    <section class="support-contact-complete">
+        <div class="support-contact-complete-icon" aria-hidden="true">✅</div>
+        <h1 class="support-contact-complete-title">문의가 접수되었습니다</h1>
+        <p class="support-contact-complete-desc">
+            소중한 의견 감사합니다. 입력하신 이메일로 답변을 회신드리겠습니다.<br>
+            답변까지 다소 시간이 걸릴 수 있는 점 양해 부탁드립니다.
+        </p>
+        <div class="support-contact-complete-actions">
+            <a href="/" class="btn btn-primary btn-sm">홈으로</a>
+            <a href="/web/support/contact" class="btn btn-outline-secondary btn-sm">추가 문의하기</a>
+        </div>
+    </section>
+
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+
+</html>

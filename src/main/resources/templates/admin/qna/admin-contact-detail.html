@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>문의하기 접수 상세 | ElSeeker</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.0" rel="stylesheet">
+</head>
+<body>
+<div class="admin-layout">
+    <aside th:replace="~{admin/fragments/admin-sidebar :: sidebar}"></aside>
+    <div class="admin-sidebar-overlay" data-admin-sidebar-close></div>
+    <main class="admin-content">
+        <div class="admin-topbar">
+            <button class="admin-sidebar-toggle" type="button" aria-label="메뉴 열기" data-admin-sidebar-toggle>
+                <span></span>
+            </button>
+            <span class="admin-topbar-title">관리자</span>
+        </div>
+        <div class="admin-breadcrumb">
+            <a href="/web/admin/qna/contacts">문의하기 접수</a> &gt; <span>상세</span>
+        </div>
+        <h2>문의하기 접수 상세</h2>
+
+        <!-- 문의 내용 카드 -->
+        <div class="admin-card" id="contactCard">
+            <div class="admin-card-title" id="contactTitle">불러오는 중...</div>
+            <div class="admin-card-row">
+                <span class="admin-card-label">ID</span>
+                <span class="admin-card-value" id="contactId"></span>
+            </div>
+            <div class="admin-card-row">
+                <span class="admin-card-label">카테고리</span>
+                <span class="admin-card-value" id="contactCategory"></span>
+            </div>
+            <div class="admin-card-row">
+                <span class="admin-card-label">이름</span>
+                <span class="admin-card-value" id="contactName"></span>
+            </div>
+            <div class="admin-card-row">
+                <span class="admin-card-label">이메일</span>
+                <span class="admin-card-value" id="contactEmail"></span>
+            </div>
+            <div class="admin-card-row">
+                <span class="admin-card-label">상태</span>
+                <span class="admin-card-value" id="contactStatus"></span>
+            </div>
+            <div class="admin-card-row">
+                <span class="admin-card-label">접수일</span>
+                <span class="admin-card-value" id="contactCreatedAt"></span>
+            </div>
+            <div class="admin-card-row" style="flex-direction:column; gap:0.35rem;">
+                <span class="admin-card-label">내용</span>
+                <span class="admin-card-value" id="contactContent" style="white-space:pre-wrap;"></span>
+            </div>
+        </div>
+
+        <!-- 회신 영역 -->
+        <div style="margin-top:1.25rem;">
+            <h3 style="font-size:1.05rem; margin-bottom:0.75rem;">회신</h3>
+            <p class="text-muted" style="font-size:0.85rem;">
+                메일 발송 인프라가 없어 답변은 <strong>수동 회신</strong>입니다. 아래 “메일로 회신” 버튼으로 메일 클라이언트를 열어
+                발송한 뒤, 회신 본문을 기록해 두면 상태가 <strong>회신완료</strong>로 표시됩니다.
+            </p>
+
+            <div class="admin-form">
+                <div class="form-group">
+                    <label for="replyContent">회신 본문 (기록용)</label>
+                    <textarea id="replyContent" class="form-control" rows="6" placeholder="회신한 내용을 기록해 두세요."></textarea>
+                </div>
+                <div class="admin-form-actions">
+                    <a id="btnMailto" class="btn btn-outline-primary btn-sm" href="#">메일로 회신</a>
+                    <button type="button" class="btn btn-primary btn-sm" id="btnSaveReply">회신 기록 저장</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="btnToggleStatus" style="display:none;"></button>
+                </div>
+            </div>
+
+            <div class="admin-card" id="replyMeta" style="display:none; margin-top:0.75rem;">
+                <div class="admin-card-row">
+                    <span class="admin-card-label">회신자</span>
+                    <span class="admin-card-value" id="repliedBy"></span>
+                </div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">회신일시</span>
+                    <span class="admin-card-value" id="repliedAt"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 뒤로 -->
+        <div style="margin-top:1.5rem;">
+            <a href="/web/admin/qna/contacts" class="btn btn-outline-secondary btn-sm">목록으로</a>
+        </div>
+    </main>
+</div>
+<script type="module">
+    import {fetchAdmin, initAdminSidebarToggle} from "/js/admin/admin-common.js";
+
+    initAdminSidebarToggle();
+
+    const CATEGORY_LABEL = {
+        ACCOUNT: '계정/로그인',
+        CONTENT: '성경/콘텐츠',
+        GAME: '게임',
+        BUG: '오류/버그',
+        SUGGESTION: '제안/건의',
+        ETC: '기타',
+    };
+
+    const STATUS_LABEL = {
+        RECEIVED: '접수',
+        REPLIED: '회신완료',
+        CLOSED: '종료',
+    };
+
+    const STATUS_BADGE = {
+        RECEIVED: 'bg-secondary',
+        REPLIED: 'bg-success',
+        CLOSED: 'bg-dark',
+    };
+
+    const contactId = location.pathname.split('/').at(-1);
+
+    const formatDate = (iso) => {
+        if (!iso) return '';
+        const d = new Date(iso);
+        const yy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mi = String(d.getMinutes()).padStart(2, '0');
+        return `${yy}-${mm}-${dd} ${hh}:${mi}`;
+    };
+
+    const renderDetail = (item) => {
+        const catLabel = CATEGORY_LABEL[item.category] || item.category;
+        const stLabel  = STATUS_LABEL[item.status]     || item.status;
+        const badgeCls = STATUS_BADGE[item.status]     || 'bg-secondary';
+
+        document.getElementById('contactTitle').textContent     = item.title;
+        document.getElementById('contactId').textContent        = item.id;
+        document.getElementById('contactCategory').textContent  = catLabel;
+        document.getElementById('contactName').textContent      = item.guestName || '(미입력)';
+        document.getElementById('contactEmail').textContent     = item.guestEmail;
+        document.getElementById('contactStatus').innerHTML      = `<span class="badge ${badgeCls}">${stLabel}</span>`;
+        document.getElementById('contactCreatedAt').textContent = formatDate(item.createdAt);
+        document.getElementById('contactContent').textContent   = item.content || '';
+
+        // mailto 회신 링크
+        const subject = `[ElSeeker 문의 답변] ${item.title}`;
+        const body = `\n\n──────────\n[원본 문의]\n${item.content || ''}`;
+        document.getElementById('btnMailto').href =
+            `mailto:${encodeURIComponent(item.guestEmail)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+        // 회신 본문 기록 초기값
+        if (item.replyContent) {
+            document.getElementById('replyContent').value = item.replyContent;
+        }
+
+        // 회신 메타
+        if (item.repliedAt) {
+            document.getElementById('replyMeta').style.display = '';
+            document.getElementById('repliedBy').textContent = item.repliedByNickname || '';
+            document.getElementById('repliedAt').textContent = formatDate(item.repliedAt);
+        }
+
+        // 상태 토글 버튼 (회신완료 후에만 종료/재개 노출)
+        const toggleBtn = document.getElementById('btnToggleStatus');
+        if (item.status === 'RECEIVED') {
+            toggleBtn.style.display = 'none';
+        } else {
+            const isClosed = item.status === 'CLOSED';
+            toggleBtn.style.display = '';
+            toggleBtn.textContent = isClosed ? '재개' : '종료';
+            toggleBtn.className = isClosed
+                ? 'btn btn-outline-success btn-sm'
+                : 'btn btn-outline-danger btn-sm';
+            toggleBtn.dataset.target = isClosed ? 'REPLIED' : 'CLOSED';
+        }
+    };
+
+    const load = async () => {
+        try {
+            const item = await fetchAdmin(`/api/v1/admin/qna/contacts/${contactId}`);
+            renderDetail(item);
+        } catch (e) {
+            document.getElementById('contactTitle').textContent = `오류: ${e.message}`;
+        }
+    };
+
+    // 회신 본문 기록 저장 (POST) → 회신완료 처리
+    document.getElementById('btnSaveReply').addEventListener('click', async () => {
+        const content = document.getElementById('replyContent').value.trim();
+        if (!content) { alert('회신 본문을 입력해주세요.'); return; }
+        try {
+            await fetchAdmin(`/api/v1/admin/qna/contacts/${contactId}/reply`, {
+                method: 'POST',
+                body: JSON.stringify({content}),
+            });
+            alert('회신 기록이 저장되었습니다. (상태: 회신완료)');
+            await load();
+        } catch (e) {
+            alert(e.message);
+        }
+    });
+
+    // 상태 토글 (PATCH)
+    document.getElementById('btnToggleStatus').addEventListener('click', async (e) => {
+        const targetStatus = e.currentTarget.dataset.target;
+        const label = targetStatus === 'CLOSED' ? '종료' : '재개';
+        if (!confirm(`이 문의를 "${label}" 처리하시겠습니까?`)) return;
+        try {
+            await fetchAdmin(`/api/v1/admin/qna/contacts/${contactId}/status`, {
+                method: 'PATCH',
+                body: JSON.stringify({status: targetStatus}),
+            });
+            alert(`${label} 처리되었습니다.`);
+            await load();
+        } catch (e) {
+            alert(e.message);
+        }
+    });
+
+    load();
+</script>
+</body>
+</html>

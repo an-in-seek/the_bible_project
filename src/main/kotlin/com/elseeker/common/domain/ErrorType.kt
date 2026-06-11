@@ -71,6 +71,10 @@ enum class ErrorType(
     INQUIRY_NOT_ANSWERED(HttpStatus.BAD_REQUEST, "아직 답변이 등록되지 않은 문의입니다.", LogLevel.WARN),
     INQUIRY_ACCESS_DENIED(HttpStatus.FORBIDDEN, "문의에 대한 접근 권한이 없습니다.", LogLevel.WARN),
 
+    // 공개 문의하기
+    CONTACT_NOT_FOUND(HttpStatus.NOT_FOUND, "문의를 찾을 수 없습니다.", LogLevel.WARN),
+    CONTACT_RATE_LIMITED(HttpStatus.TOO_MANY_REQUESTS, "문의 요청이 너무 잦습니다. 잠시 후 다시 시도해 주세요.", LogLevel.WARN),
+
     // 401
     AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다. 다시 로그인해 주세요.", LogLevel.WARN),
 

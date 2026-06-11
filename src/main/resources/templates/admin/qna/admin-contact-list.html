@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>문의하기 접수 | ElSeeker</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.0" rel="stylesheet">
+</head>
+<body>
+<div class="admin-layout">
+    <aside th:replace="~{admin/fragments/admin-sidebar :: sidebar}"></aside>
+    <div class="admin-sidebar-overlay" data-admin-sidebar-close></div>
+    <main class="admin-content">
+        <div class="admin-topbar">
+            <button class="admin-sidebar-toggle" type="button" aria-label="메뉴 열기" data-admin-sidebar-toggle>
+                <span></span>
+            </button>
+            <span class="admin-topbar-title">관리자</span>
+        </div>
+        <h2>문의하기 접수 (공개 문의)</h2>
+        <div class="admin-toolbar">
+            <form method="get" action="/web/admin/qna/contacts" class="d-flex gap-2 flex-wrap">
+                <select name="status" class="form-select form-select-sm admin-search-input" style="max-width: 180px;">
+                    <option value="">전체 상태</option>
+                    <option value="RECEIVED" th:selected="${param.status != null and param.status[0] == 'RECEIVED'}">접수</option>
+                    <option value="REPLIED"  th:selected="${param.status != null and param.status[0] == 'REPLIED'}">회신완료</option>
+                    <option value="CLOSED"   th:selected="${param.status != null and param.status[0] == 'CLOSED'}">종료</option>
+                </select>
+                <select name="category" class="form-select form-select-sm admin-search-input" style="max-width: 180px;">
+                    <option value="">전체 카테고리</option>
+                    <option value="ACCOUNT"    th:selected="${param.category != null and param.category[0] == 'ACCOUNT'}">계정/로그인</option>
+                    <option value="CONTENT"    th:selected="${param.category != null and param.category[0] == 'CONTENT'}">성경/콘텐츠</option>
+                    <option value="GAME"       th:selected="${param.category != null and param.category[0] == 'GAME'}">게임</option>
+                    <option value="BUG"        th:selected="${param.category != null and param.category[0] == 'BUG'}">오류/버그</option>
+                    <option value="SUGGESTION" th:selected="${param.category != null and param.category[0] == 'SUGGESTION'}">제안/건의</option>
+                    <option value="ETC"        th:selected="${param.category != null and param.category[0] == 'ETC'}">기타</option>
+                </select>
+                <input type="text" name="keyword" class="form-control form-control-sm admin-search-input"
+                       placeholder="제목/내용/이메일" th:value="${param.keyword}" style="max-width: 220px;">
+                <button type="submit" class="btn btn-outline-secondary btn-sm admin-search-button">필터</button>
+            </form>
+        </div>
+
+        <!-- 데스크톱 테이블 -->
+        <div class="admin-table-wrapper" id="contactTableWrapper">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>카테고리</th>
+                    <th>제목</th>
+                    <th>이메일</th>
+                    <th>상태</th>
+                    <th>접수일</th>
+                </tr>
+                </thead>
+                <tbody id="contactTableBody">
+                <tr>
+                    <td colspan="6" class="text-center text-muted">불러오는 중...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- 모바일 카드 -->
+        <div class="admin-card-list" id="contactCardList">
+            <div class="admin-card text-center text-muted">불러오는 중...</div>
+        </div>
+
+        <!-- 페이지네이션 -->
+        <div class="admin-pagination" id="contactPagination"></div>
+    </main>
+</div>
+<script type="module">
+    import {fetchAdmin, initAdminSidebarToggle} from "/js/admin/admin-common.js";
+
+    initAdminSidebarToggle();
+
+    const CATEGORY_LABEL = {
+        ACCOUNT: '계정/로그인',
+        CONTENT: '성경/콘텐츠',
+        GAME: '게임',
+        BUG: '오류/버그',
+        SUGGESTION: '제안/건의',
+        ETC: '기타',
+    };
+
+    const STATUS_LABEL = {
+        RECEIVED: '접수',
+        REPLIED: '회신완료',
+        CLOSED: '종료',
+    };
+
+    const STATUS_BADGE = {
+        RECEIVED: 'bg-secondary',
+        REPLIED: 'bg-success',
+        CLOSED: 'bg-dark',
+    };
+
+    const escapeHtml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => (
+        {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]
+    ));
+
+    const params = new URLSearchParams(location.search);
+    let currentPage = parseInt(params.get('page') || '0', 10);
+    const status   = params.get('status')   || '';
+    const category = params.get('category') || '';
+    const keyword  = params.get('keyword')  || '';
+    const size     = 20;
+
+    const tableBody  = document.getElementById('contactTableBody');
+    const cardList   = document.getElementById('contactCardList');
+    const pagination = document.getElementById('contactPagination');
+
+    const buildQuery = (page) => {
+        const q = new URLSearchParams();
+        if (status)   q.set('status', status);
+        if (category) q.set('category', category);
+        if (keyword)  q.set('keyword', keyword);
+        q.set('page', page);
+        q.set('size', size);
+        return q.toString();
+    };
+
+    const buildPageQuery = (page) => {
+        const q = new URLSearchParams(location.search);
+        q.set('page', page);
+        return q.toString();
+    };
+
+    const formatDate = (iso) => {
+        if (!iso) return '';
+        const d = new Date(iso);
+        const yy = d.getFullYear();
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const dd = String(d.getDate()).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const mi = String(d.getMinutes()).padStart(2, '0');
+        return `${yy}-${mm}-${dd} ${hh}:${mi}`;
+    };
+
+    const renderPagination = (data) => {
+        if (data.totalPages <= 1) { pagination.innerHTML = ''; return; }
+        const frags = [];
+        for (let i = 0; i < data.totalPages; i++) {
+            if (i === data.page) {
+                frags.push(`<span class="active">${i + 1}</span>`);
+            } else {
+                frags.push(`<a href="?${buildPageQuery(i)}">${i + 1}</a>`);
+            }
+        }
+        pagination.innerHTML = frags.join('');
+    };
+
+    const renderTable = (items) => {
+        if (!items.length) {
+            tableBody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">데이터가 없습니다.</td></tr>';
+            cardList.innerHTML  = '<div class="admin-card text-center text-muted">데이터가 없습니다.</div>';
+            return;
+        }
+
+        const rows = items.map(item => {
+            const detailUrl = `/web/admin/qna/contacts/${item.id}`;
+            const catLabel  = CATEGORY_LABEL[item.category] || item.category;
+            const stLabel   = STATUS_LABEL[item.status]     || item.status;
+            const badgeCls  = STATUS_BADGE[item.status]     || 'bg-secondary';
+            const created   = formatDate(item.createdAt);
+            return `<tr style="cursor:pointer" onclick="location.href='${detailUrl}'">
+                <td>${item.id}</td>
+                <td>${escapeHtml(catLabel)}</td>
+                <td>${escapeHtml(item.title)}</td>
+                <td>${escapeHtml(item.guestEmail)}</td>
+                <td><span class="badge ${badgeCls}">${stLabel}</span></td>
+                <td>${created}</td>
+            </tr>`;
+        });
+        tableBody.innerHTML = rows.join('');
+
+        const cards = items.map(item => {
+            const detailUrl = `/web/admin/qna/contacts/${item.id}`;
+            const catLabel  = CATEGORY_LABEL[item.category] || item.category;
+            const stLabel   = STATUS_LABEL[item.status]     || item.status;
+            const badgeCls  = STATUS_BADGE[item.status]     || 'bg-secondary';
+            const created   = formatDate(item.createdAt);
+            return `<div class="admin-card" style="cursor:pointer" onclick="location.href='${detailUrl}'">
+                <div class="admin-card-title">${escapeHtml(item.title)}</div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">ID</span>
+                    <span class="admin-card-value">${item.id}</span>
+                </div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">카테고리</span>
+                    <span class="admin-card-value">${escapeHtml(catLabel)}</span>
+                </div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">이메일</span>
+                    <span class="admin-card-value">${escapeHtml(item.guestEmail)}</span>
+                </div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">상태</span>
+                    <span class="admin-card-value"><span class="badge ${badgeCls}">${stLabel}</span></span>
+                </div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">접수일</span>
+                    <span class="admin-card-value">${created}</span>
+                </div>
+            </div>`;
+        });
+        cardList.innerHTML = cards.join('');
+    };
+
+    const load = async () => {
+        try {
+            const data = await fetchAdmin(`/api/v1/admin/qna/contacts?${buildQuery(currentPage)}`);
+            renderTable(data.content || []);
+            renderPagination(data);
+        } catch (e) {
+            tableBody.innerHTML = `<tr><td colspan="6" class="text-center text-danger">${escapeHtml(e.message)}</td></tr>`;
+            cardList.innerHTML  = `<div class="admin-card text-center text-danger">${escapeHtml(e.message)}</div>`;
+        }
+    };
+
+    load();
+</script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+/* 공개 문의하기 페이지 스타일 */
+
+.support-contact-shell {
+    max-width: 720px;
+    margin-inline: auto;
+    padding-block: 1.5rem 3rem;
+}
+
+.support-contact-intro {
+    margin-bottom: 1.25rem;
+}
+
+.support-contact-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.support-contact-desc {
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+.support-contact-desc a {
+    font-weight: 600;
+}
+
+.support-contact-card {
+    border-radius: 0.9rem;
+}
+
+/* ── Form fields ───────────────────────────────────────────── */
+
+.support-contact-field {
+    margin-bottom: 1.1rem;
+}
+
+.support-contact-field:last-of-type {
+    margin-bottom: 0;
+}
+
+.support-contact-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.4rem;
+}
+
+.support-contact-optional {
+    font-weight: 400;
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.82rem;
+}
+
+.support-contact-select,
+.support-contact-input,
+.support-contact-textarea {
+    border-radius: 0.6rem;
+}
+
+.support-contact-textarea {
+    resize: vertical;
+    min-height: 9rem;
+}
+
+.support-contact-counter {
+    text-align: right;
+    font-size: 0.78rem;
+    color: var(--bs-secondary-color, #6c757d);
+    margin-top: 0.25rem;
+}
+
+/* ── Error & actions ───────────────────────────────────────── */
+
+.support-contact-error {
+    margin-top: 0.5rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.6rem;
+    background: var(--bs-danger-bg-subtle, #f8d7da);
+    color: var(--bs-danger-text-emphasis, #842029);
+    font-size: 0.88rem;
+}
+
+.support-contact-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+}
+
+/* ── Honeypot: 사람에게 보이지 않게(스크린리더 포함) 화면 밖으로 ─── */
+
+.support-contact-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+}
+
+/* ── Complete page ─────────────────────────────────────────── */
+
+.support-contact-complete {
+    text-align: center;
+    padding-block: 3rem;
+    max-width: 520px;
+    margin-inline: auto;
+}
+
+.support-contact-complete-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+.support-contact-complete-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+}
+
+.support-contact-complete-desc {
+    color: var(--bs-secondary-color, #6c757d);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.support-contact-complete-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
