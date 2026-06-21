@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Q&amp;A 문의 상세 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/admin/admin.css?v=5.0" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
@@ -111,6 +111,7 @@
 </div>
 <script type="module">
     import {fetchAdmin, initAdminSidebarToggle} from "/js/admin/admin-common.js";
+    import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
 
     initAdminSidebarToggle();
 
@@ -192,7 +193,7 @@
             document.getElementById('btnToggleStatus').addEventListener('click', async (e) => {
                 const targetStatus = e.currentTarget.dataset.target;
                 const label = targetStatus === 'CLOSED' ? '종료' : '재개';
-                if (!confirm(`이 문의를 "${label}" 처리하시겠습니까?`)) return;
+                if (!await showConfirm(`이 문의를 "${label}" 처리하시겠습니까?`, {title:"문의 처리", confirmText:"처리", danger:false})) return;
                 try {
                     await fetchAdmin(`/api/v1/admin/qna/inquiries/${inquiryId}/status`, {
                         method: 'PATCH',

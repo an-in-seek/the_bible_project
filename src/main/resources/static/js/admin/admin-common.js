@@ -1,4 +1,5 @@
 import {fetchWithAuthRetry} from "/js/common-util.js";
+import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
 
 export const fetchAdmin = async (url, options = {}) => {
     const defaults = {
@@ -20,10 +21,10 @@ export const fetchAdmin = async (url, options = {}) => {
     }
 };
 
-export const confirmDelete = (name) => confirm(`"${name}" 항목을 삭제하시겠습니까?`);
+export const confirmDelete = (name) => showConfirm(`"${name}" 항목을 삭제하시겠습니까?`, {title:"삭제", confirmText:"삭제", danger:true});
 
 export const handleDelete = async (url, displayName, onSuccess) => {
-    if (!confirmDelete(displayName)) return;
+    if (!await confirmDelete(displayName)) return;
     try {
         await fetchAdmin(url, {method: "DELETE"});
         if (onSuccess) onSuccess();

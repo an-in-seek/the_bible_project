@@ -1,4 +1,5 @@
 import { fetchWithAuthRetry } from '/js/common-util.js';
+import { showConfirm } from '/js/confirm-dialog.js?v=1.0';
 
 const API_BASE = '/api/v1/game/word-puzzles';
 
@@ -673,7 +674,7 @@ async function onRevealLetter() {
         return;
     }
 
-    if (!confirm('힌트를 사용하면 점수가 감점됩니다. 사용하시겠습니까?')) return;
+    if (!await showConfirm('힌트를 사용하면 점수가 감점됩니다. 사용하시겠습니까?', {title:"힌트 사용", confirmText:"사용", danger:false})) return;
 
     await flushDirtyCells();
 
@@ -722,7 +723,7 @@ async function onCheckWord() {
     const entry = getCurrentEntry();
     if (!entry) return;
 
-    if (!confirm('힌트를 사용하면 점수가 감점됩니다. 사용하시겠습니까?')) return;
+    if (!await showConfirm('힌트를 사용하면 점수가 감점됩니다. 사용하시겠습니까?', {title:"힌트 사용", confirmText:"사용", danger:false})) return;
 
     await flushDirtyCells();
 
@@ -762,7 +763,7 @@ async function onCheckWord() {
 // ── 제출 ──
 
 async function onSubmit() {
-    if (!confirm('제출하시겠습니까?')) return;
+    if (!await showConfirm('제출하시겠습니까?', {title:"제출", confirmText:"제출", danger:false})) return;
 
     await flushDirtyCells();
     submitBtn.disabled = true;

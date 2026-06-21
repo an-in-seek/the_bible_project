@@ -1,5 +1,6 @@
 import {buildLoginRedirectUrl, checkAuthStatus} from "/js/auth/auth-check.js";
 import {fetchWithAuthRetry} from "/js/common-util.js?v=2.3";
+import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
 
 const CATEGORY_LABELS = {
     ACCOUNT: "계정/로그인",
@@ -153,7 +154,7 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const handleDelete = async () => {
-        if (!confirm("문의를 삭제하시겠습니까? 삭제된 문의는 복구할 수 없습니다.")) return;
+        if (!await showConfirm("문의를 삭제하시겠습니까? 삭제된 문의는 복구할 수 없습니다.", {title:"문의 삭제", confirmText:"삭제", danger:true})) return;
 
         try {
             const response = await fetchWithAuthRetry(`/api/v1/qna/inquiries/${inquiryId}`, {

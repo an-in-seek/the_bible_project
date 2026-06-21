@@ -1,4 +1,5 @@
 import {fetchWithAuthRetry} from "/js/common-util.js?v=2.3";
+import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
 
 const apiBase = "/api/v1/bible";
 const sessionApi = "/api/v1/game/bible-typing/sessions";
@@ -446,7 +447,7 @@ const endSession = async () => {
 };
 
 const handleResetSession = async () => {
-    if (!confirm("현재 진행 중인 연습 기록을 포함해, 해당 장의 모든 기록이 삭제됩니다. 계속하시겠습니까?")) {
+    if (!await showConfirm("현재 진행 중인 연습 기록을 포함해, 해당 장의 모든 기록이 삭제됩니다. 계속하시겠습니까?", {title:"기록 삭제", confirmText:"삭제", danger:true})) {
         return;
     }
 

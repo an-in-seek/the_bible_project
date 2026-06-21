@@ -1,4 +1,5 @@
 import {fetchWithAuthRetry, formatNumberWithComma, setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
 import {buildLoginRedirectUrl, checkAuthStatus} from "/js/auth/auth-check.js";
 import { createRestoreStore, restoreScroll } from "/js/nav-restore.js?v=1.0";
 
@@ -762,7 +763,7 @@ const App = {
     },
 
     async handleDeletePost() {
-        if (!window.confirm("게시글을 삭제하시겠습니까?")) return;
+        if (!await showConfirm("게시글을 삭제하시겠습니까?", {title: "게시글 삭제", confirmText: "삭제", danger: true})) return;
 
         const allowed = await App.ensureAuth();
         if (!allowed) return;

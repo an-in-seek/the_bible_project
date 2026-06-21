@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>사전 등록/수정 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/admin/admin.css?v=5.0" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
@@ -80,6 +80,7 @@
 </script>
 <script type="module">
     import {fetchAdmin, initAdminSidebarToggle} from "/js/admin/admin-common.js";
+    import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
     initAdminSidebarToggle();
 
     const savedKeyword = sessionStorage.getItem("adminDictKeyword") || "";
@@ -170,7 +171,7 @@
                 actionTd.appendChild(deleteBtn);
                 tr.appendChild(actionTd);
                 deleteBtn.addEventListener("click", async () => {
-                    if (!confirm(`"${ref.verseLabel}" 구절을 삭제하시겠습니까?`)) return;
+                    if (!await showConfirm(`"${ref.verseLabel}" 구절을 삭제하시겠습니까?`, {title:"구절 삭제", confirmText:"삭제", danger:true})) return;
                     try {
                         await fetchAdmin(`${apiBase}/${ref.referenceId}`, {method: "DELETE"});
                         await loadReferences();

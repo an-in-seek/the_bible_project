@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Word Puzzle 관리 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/admin/admin.css?v=5.0" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
@@ -125,6 +125,7 @@
 </div>
 <script type="module">
     import {fetchAdmin, handleDelete, initAdminSidebarToggle} from "/js/admin/admin-common.js";
+    import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
     initAdminSidebarToggle();
 
     window.deletePuzzle = (btn) => {
@@ -136,7 +137,7 @@
     const STATUS_LABELS = {PUBLISHED: '게시됨', ARCHIVED: '보관됨', DRAFT: '임시저장'};
     window.changeStatus = async (btn, status) => {
         const label = STATUS_LABELS[status] || status;
-        if (!confirm(`상태를 '${label}'(으)로 변경하시겠습니까?`)) return;
+        if (!await showConfirm(`상태를 '${label}'(으)로 변경하시겠습니까?`, {title:"상태 변경", confirmText:"변경", danger:false})) return;
         try {
             await fetchAdmin(`/api/v1/admin/word-puzzles/${btn.dataset.id}/status`, {
                 method: "PATCH",

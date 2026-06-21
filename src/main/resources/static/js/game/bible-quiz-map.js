@@ -1,4 +1,5 @@
 import {fetchWithAuthRetry} from "/js/common-util.js?v=2.3";
+import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
 
 // ==========================================
 // Constants & Configuration
@@ -306,7 +307,7 @@ const DomHelper = {
         });
         if (elements.resetProgressButton) {
             elements.resetProgressButton.addEventListener("click", async () => {
-                if (!confirm("모든 스테이지 정보가 초기화됩니다. 정말 진행하시겠습니까?")) return;
+                if (!await showConfirm("모든 스테이지 정보가 초기화됩니다. 정말 진행하시겠습니까?", {title:"초기화", confirmText:"초기화", danger:true})) return;
                 const ok = await ApiService.resetProgress();
                 if (ok) window.location.href = "/web/game/bible-quiz?stage=1";
             });

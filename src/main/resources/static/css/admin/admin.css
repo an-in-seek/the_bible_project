@@ -1,3 +1,42 @@
+/* 커스텀 확인 모달 (window.confirm 대체) — admin 전용(하드코딩 라이트 컬러, theme.css 미로드) */
+.app-confirm {
+    background: #ffffff;
+    color: #212529;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    width: 90%;
+    max-width: 400px;
+    padding: 0;
+    box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.15);
+}
+
+.app-confirm::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.app-confirm-body {
+    padding: 1.25rem 1.25rem 0.5rem;
+}
+
+.app-confirm-title {
+    margin: 0 0 0.5rem;
+    font-weight: 700;
+}
+
+.app-confirm-message {
+    margin: 0;
+    line-height: 1.5;
+    color: #6c757d;
+    white-space: pre-line;
+}
+
+.app-confirm-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 1rem 1.25rem 1.25rem;
+}
+
 .admin-layout {
     display: flex;
     min-height: 100vh;

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<body>
+<!--
+  커스텀 확인 모달 (네이티브 window.confirm 대체).
+  사용법: 페이지 body 에 <div th:replace="~{fragments/confirm-dialog :: confirmDialog}"></div> 포함 후,
+         JS 에서 import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
+-->
+<dialog th:fragment="confirmDialog" id="confirmDialog" class="app-confirm"
+        aria-labelledby="confirmDialogTitle" aria-describedby="confirmDialogMessage">
+    <div class="app-confirm-body">
+        <h5 id="confirmDialogTitle" class="app-confirm-title">확인</h5>
+        <p id="confirmDialogMessage" class="app-confirm-message"></p>
+    </div>
+    <div class="app-confirm-footer">
+        <button type="button" class="btn btn-outline-secondary" id="confirmDialogCancel">취소</button>
+        <button type="button" class="btn btn-primary" id="confirmDialogConfirm">확인</button>
+    </div>
+</dialog>
+</body>
+</html>
