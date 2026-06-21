@@ -102,6 +102,12 @@
                         🔔
                         <span id="topNavNotificationBadge" class="top-nav-notification-badge d-none"></span>
                     </button>
+
+                    <!-- 게시글 더보기 메뉴 마운트 슬롯 — community-detail(showPostMenu)에서만 렌더.
+                         모바일에서만 노출되며, community-detail.js 가 #postMenu 를 여기로 이동시킨다.
+                         데스크탑에서는 카드 안에 그대로 둔다(빈 슬롯은 CSS로 숨김). -->
+                    <div id="topNavPostMenuSlot" class="top-nav-post-menu-slot" th:if="${showPostMenu}"></div>
+
                     <div class="top-nav-account" th:if="${hideTopNavAccount != true}">
                         <button id="topNavAccountButton"
                                 type="button"

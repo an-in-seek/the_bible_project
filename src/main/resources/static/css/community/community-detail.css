@@ -89,7 +89,20 @@ html[data-theme="dark"] .detail-badge-popular {
     flex-wrap: wrap;
 }
 
-/* Post Kebab Menu (Edit / Delete / Report) */
+/* 상단 앱바의 게시글 메뉴 슬롯: 데스크탑은 숨김(메뉴는 카드 안 유지), 모바일에서만 노출.
+   community-detail.js 가 #postMenu 를 뷰포트에 맞춰 이 슬롯/카드로 이동시킨다. */
+.top-nav-post-menu-slot {
+    display: none;
+}
+
+@media (max-width: 992px) {
+    .top-nav-post-menu-slot {
+        display: inline-flex;
+        align-items: center;
+    }
+}
+
+/* Post Kebab Menu (Share / Edit / Delete / Report) */
 .post-menu {
     position: relative;
     display: inline-flex;
@@ -220,6 +233,12 @@ html[data-theme="dark"] .post-menu-item-danger {
     flex: 0 0 auto;
     font-size: 1rem;
     line-height: 1;
+    display: inline-flex;
+    align-items: center;
+}
+
+.post-menu-item-icon svg {
+    display: block;
 }
 
 .post-menu-item-label {
@@ -321,26 +340,9 @@ html[data-theme="dark"] .btn-like:hover {
     opacity: 1;
 }
 
-.btn-share .icon {
-    filter: none;
-    opacity: 1;
-}
-
 .btn-action[disabled] {
     opacity: 0.6;
     cursor: not-allowed;
-}
-
-@media (hover: hover) and (pointer: fine) {
-    .btn-share:hover {
-        border-color: var(--comm-primary);
-        color: var(--comm-primary);
-        background: #eef2ff;
-    }
-}
-
-html[data-theme="dark"] .btn-share:hover {
-    background: rgba(165, 180, 252, 0.12);
 }
 
 /* Comments Section */

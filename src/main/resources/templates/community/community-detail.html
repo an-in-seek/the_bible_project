@@ -2,13 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head
-        th:replace="~{fragments/head :: head('성경 커뮤니티 게시글 | ElSeeker', true, '/css/card.css?v=5.4,/css/community/community-detail.css?v=6.4')}"
+        th:replace="~{fragments/head :: head('성경 커뮤니티 게시글 | ElSeeker', true, '/css/card.css?v=5.4,/css/community/community-detail.css?v=7.0')}"
         th:with="pageDescription='커뮤니티 게시글 상세 보기 — 성경에 대한 질문과 나눔을 함께합니다.',
                  pageKeywords='성경 커뮤니티,성경 질문,성경 나눔,성경 토론'">
 </head>
 
 <body class="has-fixed-nav" th:attr="data-post-id=${postId}, data-back-link='/web/community'">
-<header th:replace="~{fragments/header :: header(showNotificationButton=true, hideTopNavAccount=true)}"></header>
+<header th:replace="~{fragments/header :: header(showNotificationButton=true, hideTopNavAccount=true, showPostMenu=true)}"></header>
 
 <main class="container content-wrapper">
     <div class="community-layout">
@@ -21,7 +21,7 @@
                         <span id="postPopularBadge" class="detail-badge detail-badge-popular" hidden>인기</span>
                     </div>
 
-                    <!-- 더보기 메뉴: owner는 수정/삭제, 비-owner는 신고 -->
+                    <!-- 더보기 메뉴: 공유(공통) + owner는 수정/삭제, 비-owner는 신고 -->
                     <div id="postMenu" class="post-menu">
                         <button id="postMenuToggle" type="button" class="post-menu-toggle"
                                 aria-haspopup="true" aria-expanded="false" aria-label="더보기">
@@ -33,6 +33,19 @@
                             </svg>
                         </button>
                         <div id="postMenuDropdown" class="post-menu-dropdown" role="menu" hidden>
+                            <button id="btnSharePost" type="button" class="post-menu-item js-share" role="menuitem">
+                                <span class="post-menu-item-icon">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                         aria-hidden="true" focusable="false">
+                                        <circle cx="18" cy="5" r="3"></circle>
+                                        <circle cx="6" cy="12" r="3"></circle>
+                                        <circle cx="18" cy="19" r="3"></circle>
+                                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                                    </svg>
+                                </span><span class="post-menu-item-label">공유하기</span>
+                            </button>
                             <button id="btnEditPost" type="button" class="post-menu-item" role="menuitem" data-owner-only hidden>
                                 <span class="post-menu-item-icon">✏️</span><span class="post-menu-item-label">수정</span>
                             </button>
@@ -62,16 +75,12 @@
 
                 <div id="postContent" class="detail-content">내용을 불러오는 중...</div>
 
-                <!-- Action Buttons (Like/Share) — 신고는 상단 더보기 메뉴로 이동 -->
+                <!-- Action Buttons (Like) — 공유/신고는 상단 더보기 메뉴로 이동 -->
                 <div class="post-footer-actions">
                     <button id="btnLike" class="btn-action btn-like">
                         <span class="icon">❤️</span>
                         <span class="btn-action-label">좋아요</span>
                         <span id="likeCountLabel">0</span>
-                    </button>
-                    <button id="btnShare" class="btn-action btn-share">
-                        <span class="icon">📤</span>
-                        <span class="btn-action-label">공유하기</span>
                     </button>
                 </div>
             </article>
@@ -149,7 +158,7 @@
 
 </main>
 
-    <script type="module" src="/js/community/community-detail.js?v=3.9"></script>
+    <script type="module" src="/js/community/community-detail.js?v=4.2"></script>
 </body>
 
 </html>

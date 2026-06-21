@@ -76,6 +76,7 @@ const App = {
         App.bindCommentForm();
         App.bindCommentActions();
         App.bindPostMenu();
+        App.relocatePostMenu();
         App.bindReportPost();
         App.bindPostOwnerActions();
         App.loadPost();
@@ -581,6 +582,23 @@ const App = {
         });
     },
 
+    // 데스크탑(>992px): 카드 안(.detail-badges)에 유지 / 모바일(≤992px): 상단 앱바 슬롯으로 이동.
+    // 단일 엘리먼트를 옮기므로 ID 중복 없이 기존 핸들러가 그대로 동작한다.
+    relocatePostMenu() {
+        const menu = document.getElementById("postMenu");
+        const slot = document.getElementById("topNavPostMenuSlot");
+        const cardHome = document.querySelector(".detail-badges");
+        if (!menu || !slot || !cardHome) return;
+
+        const mq = window.matchMedia("(max-width: 992px)");
+        const apply = () => {
+            const target = mq.matches ? slot : cardHome;
+            if (menu.parentElement !== target) target.appendChild(menu);
+        };
+        apply();
+        mq.addEventListener("change", apply);
+    },
+
     bindReportPost() {
         const reportBtn = document.getElementById("btnReportPost");
         if (!reportBtn) return;
@@ -639,26 +657,29 @@ const App = {
     },
 
     bindShareButton() {
-        const button = document.getElementById("btnShare");
-        if (!button) return;
+        // 더보기 메뉴의 공유 항목(.js-share) 연결
+        const buttons = document.querySelectorAll(".js-share");
+        if (!buttons.length) return;
 
-        button.addEventListener("click", async () => {
-            const url = window.location.href;
-            const title = document.getElementById("postTitle")?.textContent?.trim() || "게시글 공유";
-            const text = `| 커뮤니티 | ElSeeker`;
+        buttons.forEach((button) => button.addEventListener("click", App.sharePost));
+    },
 
-            if (navigator.share) {
-                try {
-                    await navigator.share({title, text, url});
-                    return;
-                } catch (error) {
-                    // fallback to clipboard
-                }
+    async sharePost() {
+        const url = window.location.href;
+        const title = document.getElementById("postTitle")?.textContent?.trim() || "게시글 공유";
+        const text = `| 커뮤니티 | ElSeeker`;
+
+        if (navigator.share) {
+            try {
+                await navigator.share({title, text, url});
+                return;
+            } catch (error) {
+                // fallback to clipboard
             }
+        }
 
-            const copied = await App.copyToClipboard(url);
-            alert(copied ? "링크가 복사되었습니다." : "링크 복사에 실패했습니다.");
-        });
+        const copied = await App.copyToClipboard(url);
+        alert(copied ? "링크가 복사되었습니다." : "링크 복사에 실패했습니다.");
     },
 
     setLikeState(active) {
