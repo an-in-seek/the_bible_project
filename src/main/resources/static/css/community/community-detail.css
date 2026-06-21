@@ -100,6 +100,13 @@ html[data-theme="dark"] .detail-badge-popular {
         display: inline-flex;
         align-items: center;
     }
+
+    /* 상단 앱바에 있을 때: 다른 top-nav 버튼(.top-nav-btn, height 44px)과 크기 통일.
+       데스크탑 카드 안에서는 기본 36px 유지(슬롯 밖이므로 영향 없음). */
+    .top-nav-post-menu-slot .post-menu-toggle {
+        width: 44px;
+        height: 44px;
+    }
 }
 
 /* Post Kebab Menu (Share / Edit / Delete / Report) */
