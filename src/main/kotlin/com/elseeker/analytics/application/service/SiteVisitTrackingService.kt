@@ -1,6 +1,7 @@
 package com.elseeker.analytics.application.service
 
 import com.elseeker.analytics.adapter.output.jpa.SiteVisitEventRepository
+import com.elseeker.analytics.application.component.BotSignatureDetector
 import com.elseeker.analytics.domain.model.SiteVisitEvent
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -13,6 +14,7 @@ import java.util.UUID
 @Service
 class SiteVisitTrackingService(
     private val siteVisitEventRepository: SiteVisitEventRepository,
+    private val botSignatureDetector: BotSignatureDetector,
 ) {
 
     @Transactional
@@ -31,7 +33,7 @@ class SiteVisitTrackingService(
             requestUri = requestUri.take(MAX_REQUEST_URI_LENGTH),
             refererHost = extractRefererHost(referer),
             isAuthenticated = memberUid != null,
-            isBot = detectBot(userAgent),
+            isBot = botSignatureDetector.isBot(userAgent),
             visitedAt = Instant.now(),
             visitedDate = LocalDate.now(KST),
         )
@@ -43,26 +45,10 @@ class SiteVisitTrackingService(
         return runCatching { URI.create(referer).host }.getOrNull()?.take(MAX_REFERER_HOST_LENGTH)
     }
 
-    private fun detectBot(userAgent: String?): Boolean {
-        if (userAgent.isNullOrBlank()) return true
-        val lower = userAgent.lowercase()
-        return BOT_SIGNATURES.any { it in lower }
-    }
-
     companion object {
         private val KST: ZoneId = ZoneId.of("Asia/Seoul")
         private const val MAX_PAGE_KEY_LENGTH = 160
         private const val MAX_REQUEST_URI_LENGTH = 255
         private const val MAX_REFERER_HOST_LENGTH = 120
-
-        private val BOT_SIGNATURES = setOf(
-            "bot",
-            "crawler",
-            "spider",
-            "slurp",
-            "curl",
-            "wget",
-            "facebookexternalhit",
-        )
     }
 }

@@ -1,4 +1,4 @@
-import {BookStore, ChapterStore, TranslationStore} from "/js/storage-util.js?v=2.3";
+import {BookStore, ChapterStore, TranslationStore} from "/js/storage-util.js?v=2.7";
 import {checkAuthStatus} from "/js/auth/auth-check.js";
 import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
 import {bindFromBackButton} from "/js/nav-restore.js?v=1.1";

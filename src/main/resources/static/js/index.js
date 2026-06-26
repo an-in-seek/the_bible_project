@@ -1,4 +1,4 @@
-import {LastReadStore} from "/js/storage-util.js?v=2.3";
+import {LastReadStore} from "/js/storage-util.js?v=2.7";
 import {initUniverse} from "/js/home/universe-bg.js?v=1.4";
 import {initPopularSearch} from "/js/popular-search.js?v=1.3";
 

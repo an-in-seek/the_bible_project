@@ -12,7 +12,10 @@ export const STORAGE_KEYS = Object.freeze({
     VERSE_ID: "verseId",
     VERSE_NUMBER: "verseNumber",
     LAST_READ_LOCATION: "lastReadLocation",
-    THEME_PREFERENCE: "themePreference"
+    THEME_PREFERENCE: "themePreference",
+    // 앱 설치 유도 배너 — 설계: docs/googleplay/app-install-banner-prd.md (12장)
+    APP_INSTALL_BANNER_DISMISSED_AT: "elseeker_app_install_banner_dismissed_at",
+    APP_INSTALL_BANNER_SHOWN_IN_SESSION: "elseeker_app_install_banner_shown_in_session"
 });
 
 // === Local Storage Utility ===

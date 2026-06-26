@@ -1,4 +1,4 @@
-import {BibleReaderStore, BookStore, ChapterStore, LastReadStore, TranslationStore, VerseStore} from "/js/storage-util.js?v=2.4";
+import {BibleReaderStore, BookStore, ChapterStore, LastReadStore, TranslationStore, VerseStore} from "/js/storage-util.js?v=2.7";
 import {applyOAuthBackGuardIfNeeded, buildLoginRedirectUrl, checkAuthStatus, refreshAccessToken} from "/js/auth/auth-check.js";
 import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
 import {showConfirm} from "/js/confirm-dialog.js?v=1.0";

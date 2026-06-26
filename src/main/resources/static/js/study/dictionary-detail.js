@@ -1,4 +1,4 @@
-import {TranslationStore} from "/js/storage-util.js?v=2.3";
+import {TranslationStore} from "/js/storage-util.js?v=2.7";
 import {bindFromBackButton} from "/js/nav-restore.js?v=1.1";
 
 const UI_CLASSES = {

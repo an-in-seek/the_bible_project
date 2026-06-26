@@ -1,4 +1,4 @@
-import {TranslationStore} from "/js/storage-util.js?v=2.3";
+import {TranslationStore} from "/js/storage-util.js?v=2.7";
 
 const UI_CLASSES = {
     HIDDEN: "d-none"

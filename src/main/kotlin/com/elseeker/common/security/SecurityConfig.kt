@@ -120,6 +120,11 @@ class SecurityConfig(
                         org.springframework.http.HttpMethod.POST,
                         "/api/v1/qna/contacts"
                     ).permitAll()
+                    // 익명 앱 설치 배너 이벤트 로깅(비로그인 허용)
+                    .requestMatchers(
+                        org.springframework.http.HttpMethod.POST,
+                        "/api/v1/analytics/app-install-banner/events"
+                    ).permitAll()
                     .requestMatchers(
                         "/api/v1/auth/me",
                         "/api/v1/auth/consent",

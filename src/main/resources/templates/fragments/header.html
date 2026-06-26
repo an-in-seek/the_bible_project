@@ -467,4 +467,7 @@
             accountMenu.addEventListener("touchcancel", onSheetTouchEnd);
         });
     </script>
+
+    <!-- Android 앱 설치 유도 배너 (하단 고정, 전역) — 설계: docs/googleplay/app-install-banner-prd.md -->
+    <div th:replace="~{fragments/app-install-banner :: appInstallBanner}"></div>
 </header>

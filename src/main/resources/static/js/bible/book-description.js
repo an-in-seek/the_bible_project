@@ -1,4 +1,4 @@
-import {BookStore, TranslationStore} from "/js/storage-util.js?v=2.3";
+import {BookStore, TranslationStore} from "/js/storage-util.js?v=2.7";
 
 document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);

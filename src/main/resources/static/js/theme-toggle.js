@@ -1,4 +1,4 @@
-import {ThemeStore} from "/js/storage-util.js?v=2.4";
+import {ThemeStore} from "/js/storage-util.js?v=2.7";
 
 const MENU_TOGGLE_ID = "topNavThemeMenuToggle";
 const SUBMENU_ID = "topNavThemeSubmenu";

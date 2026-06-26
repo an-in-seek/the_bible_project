@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<body>
+<!--
+  Android 앱 설치 유도 배너 (하단 고정).
+  설계 문서: docs/googleplay/app-install-banner-prd.md
+  - 기본 hidden — JS(app-install-banner.js)가 노출 조건을 모두 만족할 때만 표시
+  - header 프래그먼트를 통해 전역 주입(admin 제외)
+-->
+<aside th:fragment="appInstallBanner"
+       id="appInstallBanner"
+       class="app-install-banner"
+       role="region"
+       aria-label="앱 설치 안내"
+       hidden>
+    <div class="app-install-banner-inner">
+        <img class="app-install-banner-icon"
+             src="/images/elseeker.png"
+             alt=""
+             aria-hidden="true"
+             width="44" height="44">
+        <div class="app-install-banner-text">
+            <p class="app-install-banner-title">ElSeeker 앱으로 더 편하게 이용해보세요</p>
+            <p class="app-install-banner-desc">Android 앱에서 더 안정적으로 성경 학습 서비스를 이용할 수 있습니다.</p>
+        </div>
+        <div class="app-install-banner-actions">
+            <a id="appInstallBannerInstall"
+               class="app-install-banner-install btn btn-primary"
+               href="https://play.google.com/store/apps/details?id=com.elseeker.android&amp;referrer=utm_source%3Delseeker_web%26utm_medium%3Dinstall_banner"
+               rel="noopener noreferrer">앱 설치하기</a>
+            <button id="appInstallBannerContinue"
+                    type="button"
+                    class="app-install-banner-continue btn btn-outline-secondary">웹에서 계속 보기</button>
+        </div>
+        <button id="appInstallBannerClose"
+                type="button"
+                class="app-install-banner-close"
+                aria-label="배너 닫기">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                <path d="M18.3 5.71 12 12l6.3 6.29-1.42 1.42L10.59 13.4 5.7 18.3l-1.42-1.42L9.17 12 4.29 5.71 5.7 4.29l4.89 4.89 4.88-4.89z"/>
+            </svg>
+        </button>
+    </div>
+</aside>
+</body>
+</html>

@@ -7,7 +7,7 @@
  * - 성경 탭: 최근 읽던 위치가 있으면 해당 화면으로 바로 이동
  */
 
-import {LastReadStore} from "/js/storage-util.js?v=2.3";
+import {LastReadStore} from "/js/storage-util.js?v=2.7";
 
 const nav = document.querySelector('.section-nav');
 
