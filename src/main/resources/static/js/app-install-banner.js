@@ -76,6 +76,7 @@ function trackEvent(eventType) {
 // === 배너 동작 ===
 function dismiss(banner) {
     // 먼저 숨겨 UX를 절대 막지 않는다(§16). 저장 실패는 무시.
+    banner.classList.remove("is-visible");
     banner.hidden = true;
     try {
         LocalStore.set(STORAGE_KEYS.APP_INSTALL_BANNER_DISMISSED_AT, Date.now());
@@ -86,6 +87,8 @@ function dismiss(banner) {
 
 function showBanner(banner) {
     banner.hidden = false;
+    // 다음 프레임에 .is-visible 부여 → translateY(100%)→0 슬라이드업
+    requestAnimationFrame(() => banner.classList.add("is-visible"));
     try {
         SessionStore.set(STORAGE_KEYS.APP_INSTALL_BANNER_SHOWN_IN_SESSION, true);
     } catch (e) { /* storage 차단 환경 — 무시 */ }
