@@ -2,8 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head th:replace="~{fragments/head :: head('이용약관 | ElSeeker', true, null)}"
       th:with="pageDescription='ElSeeker 서비스 이용약관 전문입니다.'"></head>
-<body class="has-fixed-nav" data-show-back="true">
-<header th:replace="~{fragments/header :: header(hideTopNavAccount=true, hideHomeButton=true)}"></header>
+<body class="has-fixed-nav">
+<header th:replace="~{fragments/header :: header(hideTopNavAccount=true, hideHomeButton=false)}"></header>
 
 <main class="container content-wrapper my-4">
   <div class="mb-5 border-bottom pb-3">
