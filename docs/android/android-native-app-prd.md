@@ -71,28 +71,17 @@
 
 ## 3. 아키텍처 결정 (의사결정 기록)
 
-> **최종 결정(2026-06-30): v1은 전부 네이티브, WebView 미사용.** 초기에는 하이브리드도 검토했으나, v1 범위를 성경·학습·마이·지원으로 좁히면서 WebView가 필요했던 게임·커뮤니티를 2차로 이월했다. 따라서 Android 앱 구현자는 이 장의 선택지 비교보다 **§4-A의 v1 범위**를 우선한다.
+> **정본은 §4-A.** 본 장은 결정 배경만 짧게 남긴다. v1 범위·근거·완료 기준은 §4-A를 따른다.
 
-### 3.1 선택지
+**최종 결정(2026-06-30): v1은 전부 네이티브, WebView 미사용.** 초기 검토한 3안 중 A를 채택했다.
 
-| 방식 | 설명 | v1 판단 | 비고 |
-|------|------|---------|------|
-| **A. 순수 네이티브** | 모든 화면을 Compose로 재구현, REST API/정적 번들 소비 | **채택** | v1 범위를 네이티브화 가능한 화면으로 한정 |
-| B. 순수 WebView 래퍼 | 기존 웹을 WebView로 감싸기만 함 | 기각 | 단순 웹래퍼 리스크와 UX 한계 |
-| C. 네이티브 셸 + 선택적 WebView | 앱 골격은 네이티브, 고비용 콘텐츠는 WebView | v1 미사용 | 2차에서 하이브리드 도입을 다시 결정할 때만 참고 |
+| 방식 | v1 판단 |
+|------|---------|
+| **A. 순수 네이티브** (Compose + REST API/정적 번들) | **채택** — 범위를 네이티브화 가능한 화면(성경·학습·마이·지원)으로 한정 |
+| B. 순수 WebView 래퍼 | 기각 — 단순 웹래퍼 리스크·UX 한계 |
+| C. 네이티브 셸 + 선택적 WebView | v1 미사용 — WebView가 필요했던 게임·커뮤니티를 2차로 이월. 하이브리드는 2차에서 재검토 |
 
-### 3.2 채택 근거: v1 범위 한정 순수 네이티브
-
-* 성경 읽기·검색·메모·하이라이트·진도, 사전, 마이페이지, 문의는 이미 클라이언트 REST API가 있어 네이티브 구현이 가능하다.
-* 학습 화면은 대부분 템플릿/정적 JS에 데이터가 있으므로 앱 리소스(JSON/문자열)로 추출해 네이티브 렌더링한다.
-* WebView가 실질적으로 필요했던 게임·커뮤니티·일부 리치 인터랙션은 v1에서 제외하고 2차로 보낸다.
-
-### 3.3 WebView ↔ 네이티브 브릿지 요구사항 (2차 검토 전용)
-
-* **인증 토큰 공유**: 네이티브가 보유한 JWT를 WebView 요청에 주입(쿠키 동기화 또는 `Authorization` 헤더 인젝션/JS 브릿지). 웹은 HttpOnly 쿠키, 앱 API는 Bearer 토큰을 쓰므로 양쪽 인증을 일관되게 맞추는 설계가 필요하다.
-* **앱 환경 식별**: WebView UA에 `ElSeekerApp/{version}` 토큰을 추가하거나 쿼리/헤더로 표시 → 서버/프론트가 앱 내부 렌더링 시 중복 헤더·앱설치배너를 숨긴다(`app-install-banner-prd.md` 노출 조건과 정합).
-* **네비게이션 위임**: 외부 링크/후원 링크는 `Custom Tabs` 또는 외부 브라우저로 위임한다. v1 소셜 로그인은 WebView가 아니라 네이티브 SDK로 처리한다.
-* **JS Bridge 계약**: 공유, 로그인 상태 요청, 토스트, 햅틱 등 최소 메서드 집합을 문서화한다.
+> 2차에서 하이브리드 화면을 도입할 경우의 브릿지 요건(WebView 토큰 주입/쿠키 동기화, 앱 UA 식별, Custom Tabs 위임, JS Bridge)은 그 시점에 별도 설계한다. v1에는 해당 없음.
 
 ---
 
@@ -399,7 +388,7 @@
 }
 ```
 
-`intent=link`는 현재 로그인 사용자의 소셜 계정 추가 연동 용도다. 이 경우 `Authorization: Bearer {정식 accessToken}`이 필수이고, 성공 응답은 토큰이 아니라 `AuthMeResponse` 계열 회원 정보다. 앱은 일반 로그인과 계정 연동 API 클라이언트를 분리해 응답 타입을 혼동하지 않는다.
+`intent=link`는 현재 로그인 사용자의 소셜 계정 추가 연동 용도다. 서버 게이트는 **인증된 사용자(principal 존재)** 를 요구하며 웹은 쿠키로도 통과하지만, **앱은 `Authorization: Bearer {정식 accessToken}`** 으로 호출한다. 성공 응답은 토큰이 아니라 `AuthMeResponse` 계열 회원 정보다. 앱은 일반 로그인과 계정 연동 API 클라이언트를 분리해 응답 타입을 혼동하지 않는다.
 
 ### 5.2 토큰 저장 및 갱신
 
@@ -411,7 +400,7 @@
   * **Refresh 토큰 회전 없음**: 응답 `refreshToken`은 입력값과 동일(서버가 회전하지 않음). 저장값 갱신 로직은 단순하나, refresh가 만료까지 장수명이라는 점을 보안상 인지한다.
   * **실패 분기 처리**: refresh 무효/회원부재 → `401`; 동의 미완료 회원 → `401`(`consent`) → 소셜 재로그인 후 동의 화면으로 라우팅.
 * 로그아웃/회원탈퇴 시 로컬 토큰 및 소셜 SDK 세션을 모두 폐기한다.
-* (2차) WebView 화면 도입 시 네이티브 토큰을 안전하게 전달(3.3 참조). v1은 WebView 미사용.
+* (2차) WebView 화면 도입 시 네이티브 토큰을 안전하게 전달(§3 말미 2차 브릿지 요건 참조). v1은 WebView 미사용.
 
 > ✅ 문서 정합성: `docs/mobile/social-login-api.md` §5를 `/reissue`(바디 기반) 기준으로 갱신 완료(2026-06-30). 회전 없음·동의 게이팅·OkHttp Authenticator 권장 구현 포함.
 
@@ -488,7 +477,11 @@
 * 에러 포맷이 **두 종류**다 — 앱 에러 매퍼는 `code`가 **있을 수도 없을 수도** 있다고 가정하고 **HTTP status를 1차 신호로** 삼아야 한다:
   * **도메인 예외(`ServiceError` → `GlobalExceptionHandler`)**: `{ "status", "code", "message" }` — `code = ErrorType.name` 포함. 이 경우 `code` 기반 분기(다국어/문구 변경에 안전).
   * **Spring Security 예외**: 인증 실패 `401`은 `sendError(401)`(컨테이너 기본 에러 바디 → `code` 없음), 접근 거부 `403`도 `code` 없이 응답한다. 이 경로는 **`code`가 없으므로 HTTP status로 처리**한다.
-* 매핑 권장: `code` 존재 시 `code` 우선, 없으면 status fallback — 예) `401` → 토큰 갱신/재로그인, `403`+`code=CONSENT_REQUIRED` → 동의 화면, `403`(code 없음) → 권한 없음 안내.
+* 매핑 권장: `code` 존재 시 `code` 우선, 없으면 status fallback — 예) `401` → 토큰 갱신/재로그인, `403`(code 없음) → 권한 없음 안내.
+* ⚠️ **`CONSENT_REQUIRED`는 status까지 함께 봐야 한다**(같은 code가 두 status로 나온다):
+  * **`403` + `CONSENT_REQUIRED`** (`ConsentGateFilter`): signup token으로 일반 API 접근 → **동의 화면으로 라우팅**.
+  * **`400` + `CONSENT_REQUIRED`** (`ErrorType` 정의=400): 동의 제출 시 3항목(`agreeTerms/agreePrivacy/ageOver14`) 미충족 → **동의 화면의 입력 검증 오류**(라우팅이 아니라 "모두 동의 필요" 안내).
+  * 즉 `code==CONSENT_REQUIRED && status==403` → 동의 플로우 진입, `&& status==400` → 동의 폼 검증 실패.
 * 주요 `code` 예: `CONSENT_REQUIRED`, `SOCIAL_LOGIN_INVALID_TOKEN`, `AUTHENTICATION_REQUIRED` 등. 정확한 코드 집합은 백엔드 `ErrorType` enum / Swagger 확인.
 * (선택) 백엔드에서 보안/validation 예외까지 `ErrorResponse`로 통일하면 앱이 전부 `code` 기반으로 처리 가능 — 2차 개선 후보.
 * 모든 요청에 앱 식별 헤더(`X-Client: android`, `X-App-Version`) 부착 권장 → 서버 로깅/분기.
@@ -609,7 +602,7 @@ Android 프로젝트는 백엔드 레포를 **심볼릭 링크로 연결**한다
 * v1에서 호출하는 엔드포인트(2026-06-30 코드 확인 — 필드 계약은 Swagger 정본). **`(public)`=비로그인 허용, `(auth)`=Bearer 필수**(`SecurityConfig` 기준). 인증 필수 엔드포인트를 토큰 없이 호출하면 `401`이므로, 앱은 호출 전 인증 상태를 확인한다:
   * 인증: `POST /api/v1/auth/social-login` (public), `POST /api/v1/auth/reissue` (public), `GET /api/v1/auth/me` (auth — signup token도 허용, §5.4), `POST /api/v1/auth/consent`·`/consent/cancel` (auth — signup token 허용)
   * 성경 기본 **(public)**: `GET /api/v1/bibles/translations`, `.../books`, `.../books/{bookOrder}`, `.../chapters`
-  * 성경 본문/이동 **(public)**: `.../chapters/{chapterNumber}/verses`, `GET .../navigate?direction=PREV|NEXT` (⚠️ 대문자 enum, 소문자 400), `GET /api/v1/bibles/daily`
+  * 성경 본문/이동 **(public)**: `.../chapters/{chapterNumber}/verses`, `GET .../navigate?direction=PREV|NEXT` (⚠️ 대문자 enum, 소문자 400), `GET /api/v1/bibles/daily?translationType=KRV` (기본값 `KRV`)
   * 장 상태 **(auth)**: `GET .../chapters/{chapterNumber}/state` (메모·하이라이트·읽음·장 메모 통합)
   * 절 검색 **(public)**: `GET /api/v1/bibles/translations/{translationId}/search?keyword=&bookOrder=&page=&size=&track=` · 인기 검색어 랭킹 **(public)**: `GET /api/v1/bibles/search-keywords/ranking?limit=`
   * 절 하이라이트 **(auth)**: `GET .../highlights`, `PUT/DELETE .../verses/{verseNumber}/highlight`
@@ -622,7 +615,7 @@ Android 프로젝트는 백엔드 레포를 **심볼릭 링크로 연결**한다
   * 메모 카운트 **(auth)**: `GET /api/v1/bibles/my-memo-counts`
   * 학습 사전 **(public)**: `GET /api/v1/study/dictionaries?keyword=&page=&size=&track=`, `.../{id}`, `.../{id}/references`, `.../search-keywords/ranking?limit=`
   * 마이 **(auth)**: `PUT /api/v1/members/{memberUid}`, `DELETE /api/v1/members/{memberUid}`, `GET/DELETE /api/v1/members/{memberUid}/oauth-accounts`, `POST /api/v1/members/{memberUid}/oauth-accounts/initialize-profile`
-  * 소셜 계정 추가 연동 **(auth)**: `POST /api/v1/auth/social-login` + body `{ provider, token, intent: "link" }` + Bearer. 성공 응답은 `AuthMeResponse`
+  * 소셜 계정 추가 연동 **(auth — 인증된 사용자; 앱은 Bearer)**: `POST /api/v1/auth/social-login` + body `{ provider, token, intent: "link" }`. 성공 응답은 `AuthMeResponse`
   * 지원: `POST /api/v1/qna/contacts` **(public)** — 공개 문의 작성. 그 외 `/api/v1/qna/**`는 **(auth)** — 내 문의 `POST/GET /api/v1/qna/inquiries`, `GET/PUT/DELETE /api/v1/qna/inquiries/{id}`
 * 인증 헤더: `Authorization: Bearer {accessToken}`. 갱신은 `/reissue`(바디 기반, 회전 없음 — 5.2 참조).
 
