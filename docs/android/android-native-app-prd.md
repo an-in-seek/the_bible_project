@@ -426,6 +426,19 @@
 * 동의 취소는 `POST /api/v1/auth/consent/cancel`로 처리하고, 앱은 로컬 signup token 및 소셜 SDK 세션을 폐기한다.
 * signup token으로 일반 API를 호출하면 `403` + `code=CONSENT_REQUIRED`가 온다. 앱 전역 에러 매퍼는 이를 세션 만료가 아니라 동의 필요 상태로 처리한다.
 
+### 5.4 콜드 스타트 세션 복원 (⚠️ /me 200만으로 메인 진입 금지)
+
+서버 `ConsentGateFilter`는 미동의(PENDING_CONSENT) 회원의 signup token에도 **`GET /api/v1/auth/me`를 허용**한다. 즉 **signup token으로도 `/me`가 `200`을 반환**하므로, 앱이 `/me` 200만 보고 메인으로 보내면 미동의 사용자가 서비스에 진입한다. 세션 복원 규칙을 다음과 같이 명시한다.
+
+1. 저장된 토큰의 **JWT `scope` 클레임이 `SIGNUP`이면**(= signup token) 즉시 **동의 화면**으로 라우팅한다(서버 호출 없이 로컬 판별 가능).
+2. 일반 access token으로 `GET /api/v1/auth/me` 호출 후 **응답 `status` 필드로 분기**:
+   * `status == "ACTIVE"` → 메인 진입.
+   * `status == "PENDING_CONSENT"` → 동의 화면으로 라우팅(메인 금지).
+   * `401`(만료) → `/reissue` 시도 → 실패 시 로그인 화면.
+3. `AuthMeResponse`에는 `memberUid/email/role/nickname/profileImageUrl/provider/**status**/createdAt`이 포함된다. `status`는 `MemberStatus` enum(`ACTIVE`/`PENDING_CONSENT`)의 이름이다.
+
+> 요지: **메인 진입 게이트 = `scope!=SIGNUP` AND `/me.status==ACTIVE`.** 둘 중 하나라도 어긋나면 동의 플로우로 보낸다.
+
 ---
 
 ## 6. 앱 고유(네이티브) 기능
@@ -472,8 +485,12 @@
   * `debug`(실기기): 백엔드 PC의 **LAN IP**(예: `http://192.168.x.x:8080`), 같은 네트워크 + `usesCleartextTraffic` 허용 필요
   * `release`: **HTTPS 운영 도메인**(`https://...`)
 * 빌드 variant: `debug`(개발 서버), `release`(운영 서버)로 BASE_URL 분리.
-* 공통 에러 포맷: **`{ "status": <int>, "code": <string>, "message": <string> }`** — 실제 `ErrorResponse`는 항상 `code`를 포함하며(`GlobalExceptionHandler`가 `code = ErrorType.name`을 채움), 앱 전역 에러 매퍼는 사람이 읽는 `message`가 아니라 **`code` 기반으로 분기**해야 한다(다국어/문구 변경에 안전).
-* 주요 `code` 예: `CONSENT_REQUIRED`(403, 동의 필요), `SOCIAL_LOGIN_INVALID_TOKEN`(401), `AUTHENTICATION_REQUIRED`(401) 등. 정확한 코드 집합은 백엔드 `ErrorType` enum / Swagger 확인.
+* 에러 포맷이 **두 종류**다 — 앱 에러 매퍼는 `code`가 **있을 수도 없을 수도** 있다고 가정하고 **HTTP status를 1차 신호로** 삼아야 한다:
+  * **도메인 예외(`ServiceError` → `GlobalExceptionHandler`)**: `{ "status", "code", "message" }` — `code = ErrorType.name` 포함. 이 경우 `code` 기반 분기(다국어/문구 변경에 안전).
+  * **Spring Security 예외**: 인증 실패 `401`은 `sendError(401)`(컨테이너 기본 에러 바디 → `code` 없음), 접근 거부 `403`도 `code` 없이 응답한다. 이 경로는 **`code`가 없으므로 HTTP status로 처리**한다.
+* 매핑 권장: `code` 존재 시 `code` 우선, 없으면 status fallback — 예) `401` → 토큰 갱신/재로그인, `403`+`code=CONSENT_REQUIRED` → 동의 화면, `403`(code 없음) → 권한 없음 안내.
+* 주요 `code` 예: `CONSENT_REQUIRED`, `SOCIAL_LOGIN_INVALID_TOKEN`, `AUTHENTICATION_REQUIRED` 등. 정확한 코드 집합은 백엔드 `ErrorType` enum / Swagger 확인.
+* (선택) 백엔드에서 보안/validation 예외까지 `ErrorResponse`로 통일하면 앱이 전부 `code` 기반으로 처리 가능 — 2차 개선 후보.
 * 모든 요청에 앱 식별 헤더(`X-Client: android`, `X-App-Version`) 부착 권장 → 서버 로깅/분기.
 * 인증 필요 API는 `Authorization: Bearer {accessToken}`만 사용한다. 웹 쿠키 기반 `/api/v1/auth/refresh`는 앱에서 사용 금지.
 * 공개 API라도 개인화가 가능한 API(예: `GET /api/v1/game/ranking`)는 Bearer가 있으면 내 랭킹을 함께 반환할 수 있다. v1 게임 제외지만 2차 구현 시 이 패턴을 따른다.
@@ -589,24 +606,24 @@ Android 프로젝트는 백엔드 레포를 **심볼릭 링크로 연결**한다
 ### B.1 API 계약 (호출 대상 — 런타임 의존)
 
 * **정본 = 백엔드 Swagger/OpenAPI**: `{EL_SEEKER_API_BASE_URL}/swagger-ui/index.html`, 스키마 JSON `{...}/v3/api-docs`.
-* v1에서 호출하는 엔드포인트(2026-06-30 코드 확인 — 필드 계약은 Swagger 정본):
-  * 인증: `POST /api/v1/auth/social-login`, `POST /api/v1/auth/reissue`, `GET /api/v1/auth/me`, `POST /api/v1/auth/consent`, `POST /api/v1/auth/consent/cancel`
-  * 성경 기본: `GET /api/v1/bibles/translations`, `GET /api/v1/bibles/translations/{translationId}/books`, `GET /api/v1/bibles/translations/{translationId}/books/{bookOrder}`, `GET /api/v1/bibles/translations/{translationId}/books/{bookOrder}/chapters`
-  * 성경 본문/이동: `GET /api/v1/bibles/translations/{translationId}/books/{bookOrder}/chapters/{chapterNumber}/verses`, `GET .../navigate?direction=PREV|NEXT` (⚠️ 대문자 enum, 소문자 400), `GET /api/v1/bibles/daily`
-  * 장 상태: `GET /api/v1/bibles/translations/{translationId}/books/{bookOrder}/chapters/{chapterNumber}/state` (메모·하이라이트·읽음·장 메모)
-  * 절 검색: `GET /api/v1/bibles/translations/{translationId}/search?keyword=&bookOrder=&page=&size=&track=` · 인기 검색어 랭킹(별개): `GET /api/v1/bibles/search-keywords/ranking?limit=`
-  * 절 하이라이트: `GET .../highlights`, `PUT .../verses/{verseNumber}/highlight`, `DELETE .../verses/{verseNumber}/highlight`
-  * 절 메모: `GET .../memos`, `PUT .../verses/{verseNumber}/memo`, `DELETE .../verses/{verseNumber}/memo`
-  * 장/책 메모: `GET/PUT/DELETE .../chapter-memo`, `GET/PUT/DELETE /api/v1/bibles/translations/{translationId}/books/{bookOrder}/book-memo`
-  * 성경 읽기 진도: `POST /api/v1/bible/reading/chapters/read`, `GET /api/v1/bible/reading/chapters/read?translationId=&bookOrder=` ⚠️ **단수형 `bible` base** (위 `bibles` 와 다름)
-  * 내 메모(절): `GET /api/v1/bibles/my-memos`(전체 목록), `GET /api/v1/bibles/my-memos/translations`(번역본별), `GET /api/v1/bibles/my-memos/books`(책별) — ⚠️ base/`/translations`/`/books` 3개 모두 존재(탭 필터). 누락 주의
-  * 내 메모(장): `GET /api/v1/bibles/my-chapter-memos` + `/translations` + `/books` (동일 패턴)
-  * 내 메모(책): `GET /api/v1/bibles/my-book-memos` + `/translations` + `/books` (동일 패턴)
-  * 메모 카운트: `GET /api/v1/bibles/my-memo-counts`
-  * 학습: `GET /api/v1/study/dictionaries?keyword=&page=&size=&track=`, `GET /api/v1/study/dictionaries/{id}`, `GET /api/v1/study/dictionaries/{id}/references`, `GET /api/v1/study/dictionaries/search-keywords/ranking?limit=`
-  * 마이: `PUT /api/v1/members/{memberUid}`, `DELETE /api/v1/members/{memberUid}`, `GET /api/v1/members/{memberUid}/oauth-accounts`, `DELETE /api/v1/members/{memberUid}/oauth-accounts?provider=&providerUserId=`, `POST /api/v1/members/{memberUid}/oauth-accounts/initialize-profile`
-  * 소셜 계정 추가 연동: `POST /api/v1/auth/social-login` + body `{ provider, token, intent: "link" }` + Bearer. 성공 응답은 `AuthMeResponse`
-  * 지원: `POST /api/v1/qna/contacts`(공개 문의 작성), `POST/GET /api/v1/qna/inquiries`, `GET/PUT/DELETE /api/v1/qna/inquiries/{id}`(내 문의)
+* v1에서 호출하는 엔드포인트(2026-06-30 코드 확인 — 필드 계약은 Swagger 정본). **`(public)`=비로그인 허용, `(auth)`=Bearer 필수**(`SecurityConfig` 기준). 인증 필수 엔드포인트를 토큰 없이 호출하면 `401`이므로, 앱은 호출 전 인증 상태를 확인한다:
+  * 인증: `POST /api/v1/auth/social-login` (public), `POST /api/v1/auth/reissue` (public), `GET /api/v1/auth/me` (auth — signup token도 허용, §5.4), `POST /api/v1/auth/consent`·`/consent/cancel` (auth — signup token 허용)
+  * 성경 기본 **(public)**: `GET /api/v1/bibles/translations`, `.../books`, `.../books/{bookOrder}`, `.../chapters`
+  * 성경 본문/이동 **(public)**: `.../chapters/{chapterNumber}/verses`, `GET .../navigate?direction=PREV|NEXT` (⚠️ 대문자 enum, 소문자 400), `GET /api/v1/bibles/daily`
+  * 장 상태 **(auth)**: `GET .../chapters/{chapterNumber}/state` (메모·하이라이트·읽음·장 메모 통합)
+  * 절 검색 **(public)**: `GET /api/v1/bibles/translations/{translationId}/search?keyword=&bookOrder=&page=&size=&track=` · 인기 검색어 랭킹 **(public)**: `GET /api/v1/bibles/search-keywords/ranking?limit=`
+  * 절 하이라이트 **(auth)**: `GET .../highlights`, `PUT/DELETE .../verses/{verseNumber}/highlight`
+  * 절 메모 **(auth)**: `GET .../memos`, `PUT/DELETE .../verses/{verseNumber}/memo`
+  * 장/책 메모 **(auth)**: `GET/PUT/DELETE .../chapter-memo`, `GET/PUT/DELETE /api/v1/bibles/translations/{translationId}/books/{bookOrder}/book-memo`
+  * 성경 읽기 진도 **(auth)**: `POST /api/v1/bible/reading/chapters/read`, `GET /api/v1/bible/reading/chapters/read?translationId=&bookOrder=` ⚠️ **단수형 `bible` base** (위 `bibles` 와 다름)
+  * 내 메모(절) **(auth)**: `GET /api/v1/bibles/my-memos`(전체), `.../my-memos/translations`(번역본별), `.../my-memos/books`(책별) — ⚠️ base/`/translations`/`/books` 3개 모두 존재(탭 필터). 누락 주의
+  * 내 메모(장) **(auth)**: `GET /api/v1/bibles/my-chapter-memos` + `/translations` + `/books` (동일 패턴)
+  * 내 메모(책) **(auth)**: `GET /api/v1/bibles/my-book-memos` + `/translations` + `/books` (동일 패턴)
+  * 메모 카운트 **(auth)**: `GET /api/v1/bibles/my-memo-counts`
+  * 학습 사전 **(public)**: `GET /api/v1/study/dictionaries?keyword=&page=&size=&track=`, `.../{id}`, `.../{id}/references`, `.../search-keywords/ranking?limit=`
+  * 마이 **(auth)**: `PUT /api/v1/members/{memberUid}`, `DELETE /api/v1/members/{memberUid}`, `GET/DELETE /api/v1/members/{memberUid}/oauth-accounts`, `POST /api/v1/members/{memberUid}/oauth-accounts/initialize-profile`
+  * 소셜 계정 추가 연동 **(auth)**: `POST /api/v1/auth/social-login` + body `{ provider, token, intent: "link" }` + Bearer. 성공 응답은 `AuthMeResponse`
+  * 지원: `POST /api/v1/qna/contacts` **(public)** — 공개 문의 작성. 그 외 `/api/v1/qna/**`는 **(auth)** — 내 문의 `POST/GET /api/v1/qna/inquiries`, `GET/PUT/DELETE /api/v1/qna/inquiries/{id}`
 * 인증 헤더: `Authorization: Bearer {accessToken}`. 갱신은 `/reissue`(바디 기반, 회전 없음 — 5.2 참조).
 
 ### B.2 정적 콘텐츠 원본 (네이티브 이식 source-of-truth — 심링크로 참조)
