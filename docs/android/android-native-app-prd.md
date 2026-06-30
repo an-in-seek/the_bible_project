@@ -192,7 +192,7 @@
 | 마이 | 회원 탈퇴 | `DELETE /api/v1/members/{memberUid}` | Play 계정삭제 정책 충족 목적 포함 |
 | 학습 | 성경 사전(목록/상세/참조/검색) | `DictionaryApi`, `DictionarySearchKeywordApi` | API 완비, 성경 읽기 보완 |
 | 학습 | 학습 홈 + 정적 콘텐츠(십계명·사도신경·주기도문·창조·성주간·12제자·12지파·공동체성경읽기·주석) | - (정적) | 텍스트/이미지 → 네이티브 화면 + 번들 데이터 |
-| 학습 | 성경 개요 영상 | - (정적 JS) | 영상 목록 네이티브화(썸네일+YouTube/ExoPlayer). 이식 공수 주의 |
+| 학습 | 성경 개요 영상 | - (정적 JS) | 영상 목록 네이티브화(썸네일 그리드+검색). 재생은 **YouTube 앱/Custom Tabs/Intent로 외부 위임**(자체 호스팅 아님 → ExoPlayer 인앱 재생 아님). 이식 공수 주의 |
 | 학습 | 족보(genealogy) | - (정적 JS) | 세로 타임라인 네이티브 재구현(분기 트리 아님 — 4-A.7) — v1 최대 공수 항목 |
 | 학습 | 성경 역사(연대/사건/상세) | - (`HistoryDummyData`, 코드 하드코딩) | 더미데이터 JSON 번들로 네이티브화 |
 | 지원 | 1:1 문의(작성/내역) | `ContactApi`, `InquiryApi` | |
@@ -419,7 +419,10 @@
 
 * 기존 `ConsentApi`/약관 동의 플로우를 앱 최초 로그인 시 처리한다. 미동의 사용자는 동의 화면으로 라우팅.
 * `POST /api/v1/auth/consent` 요청 바디는 `{ "agreeTerms": true, "agreePrivacy": true, "ageOver14": true }`이며 세 항목 모두 필수다.
-* 모바일은 signup token을 `Authorization: Bearer {signupToken}`로 보내야 한다. 서버는 **이번 호출로 동의가 신규 활성화된 경우에만**(`activated=true`) Bearer 요청 응답 body에 정식 `accessToken`/`refreshToken`을 내려준다. 이미 동의 완료된 회원의 멱등 재호출은 토큰 없이 `redirectTo`만 반환하므로(`ConsentApi.submit`), 앱은 정상 신규 가입 1회 호출에서 토큰을 수령하고, 토큰이 없으면 기존 토큰 유지 또는 `/reissue`로 확보한다.
+* 모바일은 signup token을 `Authorization: Bearer {signupToken}`로 보내야 한다. 서버는 **이번 호출로 동의가 신규 활성화된 경우에만**(`activated=true`) Bearer 요청 응답 body에 정식 `accessToken`/`refreshToken`을 내려준다. 이미 동의 완료된 회원의 멱등 재호출은 토큰 없이 `redirectTo`만 반환한다(`ConsentApi.submit`). 따라서:
+  * **정상 경로**: 신규 가입 1회 동의 호출에서 정식 `accessToken`/`refreshToken`을 수령해 저장한다.
+  * **이미 정식 토큰 보유** 상태에서 멱등 호출이면 응답에 토큰이 없어도 기존 토큰을 그대로 쓴다.
+  * **signup token만 가진 상태에서 토큰을 못 받은 경우**(예: 직전 응답 유실): refresh token이 없어 `/reissue`가 **불가능**하므로, **소셜 재로그인**으로 `consentRequired=false` 정식 토큰을 다시 발급받는다.
 * 동의 취소는 `POST /api/v1/auth/consent/cancel`로 처리하고, 앱은 로컬 signup token 및 소셜 SDK 세션을 폐기한다.
 * signup token으로 일반 API를 호출하면 `403` + `code=CONSENT_REQUIRED`가 온다. 앱 전역 에러 매퍼는 이를 세션 만료가 아니라 동의 필요 상태로 처리한다.
 
@@ -464,10 +467,13 @@
 
 ## 8. API 연동 규약
 
-* Base URL: `{EL_SEEKER_API_BASE_URL}` (기본 `http://localhost:8080`, 환경별 분리).
+* Base URL: 백엔드 기본값 `http://localhost:8080`은 **Android에서 그대로 쓰면 안 된다** — 기기/에뮬레이터 안의 localhost는 백엔드 PC에 닿지 않는다. 빌드 variant별로 분리:
+  * `debug`(에뮬레이터): **`http://10.0.2.2:8080`** (에뮬레이터 → 호스트 PC 루프백 별칭)
+  * `debug`(실기기): 백엔드 PC의 **LAN IP**(예: `http://192.168.x.x:8080`), 같은 네트워크 + `usesCleartextTraffic` 허용 필요
+  * `release`: **HTTPS 운영 도메인**(`https://...`)
 * 빌드 variant: `debug`(개발 서버), `release`(운영 서버)로 BASE_URL 분리.
-* 공통 에러 포맷: 기본은 `{ "status": <int>, "message": <string> }` (기존 `ErrorResponse` 호환) — 전역 에러 매퍼로 사용자 메시지 표준화.
-* 예외: 동의 필요 차단은 `{ "status": 403, "code": "CONSENT_REQUIRED", "message": "약관 동의가 필요합니다." }` 형태다.
+* 공통 에러 포맷: **`{ "status": <int>, "code": <string>, "message": <string> }`** — 실제 `ErrorResponse`는 항상 `code`를 포함하며(`GlobalExceptionHandler`가 `code = ErrorType.name`을 채움), 앱 전역 에러 매퍼는 사람이 읽는 `message`가 아니라 **`code` 기반으로 분기**해야 한다(다국어/문구 변경에 안전).
+* 주요 `code` 예: `CONSENT_REQUIRED`(403, 동의 필요), `SOCIAL_LOGIN_INVALID_TOKEN`(401), `AUTHENTICATION_REQUIRED`(401) 등. 정확한 코드 집합은 백엔드 `ErrorType` enum / Swagger 확인.
 * 모든 요청에 앱 식별 헤더(`X-Client: android`, `X-App-Version`) 부착 권장 → 서버 로깅/분기.
 * 인증 필요 API는 `Authorization: Bearer {accessToken}`만 사용한다. 웹 쿠키 기반 `/api/v1/auth/refresh`는 앱에서 사용 금지.
 * 공개 API라도 개인화가 가능한 API(예: `GET /api/v1/game/ranking`)는 Bearer가 있으면 내 랭킹을 함께 반환할 수 있다. v1 게임 제외지만 2차 구현 시 이 패턴을 따른다.
@@ -593,7 +599,10 @@ Android 프로젝트는 백엔드 레포를 **심볼릭 링크로 연결**한다
   * 절 메모: `GET .../memos`, `PUT .../verses/{verseNumber}/memo`, `DELETE .../verses/{verseNumber}/memo`
   * 장/책 메모: `GET/PUT/DELETE .../chapter-memo`, `GET/PUT/DELETE /api/v1/bibles/translations/{translationId}/books/{bookOrder}/book-memo`
   * 성경 읽기 진도: `POST /api/v1/bible/reading/chapters/read`, `GET /api/v1/bible/reading/chapters/read?translationId=&bookOrder=` ⚠️ **단수형 `bible` base** (위 `bibles` 와 다름)
-  * 내 메모: `/api/v1/bibles/my-memos`, `/api/v1/bibles/my-chapter-memos`, `/api/v1/bibles/my-book-memos`, `/api/v1/bibles/my-memo-counts`
+  * 내 메모(절): `GET /api/v1/bibles/my-memos`(전체 목록), `GET /api/v1/bibles/my-memos/translations`(번역본별), `GET /api/v1/bibles/my-memos/books`(책별) — ⚠️ base/`/translations`/`/books` 3개 모두 존재(탭 필터). 누락 주의
+  * 내 메모(장): `GET /api/v1/bibles/my-chapter-memos` + `/translations` + `/books` (동일 패턴)
+  * 내 메모(책): `GET /api/v1/bibles/my-book-memos` + `/translations` + `/books` (동일 패턴)
+  * 메모 카운트: `GET /api/v1/bibles/my-memo-counts`
   * 학습: `GET /api/v1/study/dictionaries?keyword=&page=&size=&track=`, `GET /api/v1/study/dictionaries/{id}`, `GET /api/v1/study/dictionaries/{id}/references`, `GET /api/v1/study/dictionaries/search-keywords/ranking?limit=`
   * 마이: `PUT /api/v1/members/{memberUid}`, `DELETE /api/v1/members/{memberUid}`, `GET /api/v1/members/{memberUid}/oauth-accounts`, `DELETE /api/v1/members/{memberUid}/oauth-accounts?provider=&providerUserId=`, `POST /api/v1/members/{memberUid}/oauth-accounts/initialize-profile`
   * 소셜 계정 추가 연동: `POST /api/v1/auth/social-login` + body `{ provider, token, intent: "link" }` + Bearer. 성공 응답은 `AuthMeResponse`
