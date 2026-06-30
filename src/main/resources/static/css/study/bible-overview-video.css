@@ -175,3 +175,15 @@
 html[data-theme="dark"] .bible-overview-video-card.is-spotlight-target .bible-overview-video-book-name {
     color: #1f2933;
 }
+
+/* 스포트라이트 진행 중 상단 검색창 임시 숨김 — 어두운 오버레이 위로 떠 보이는
+   sticky 검색창(z-index:1020 > overlay:998)을 페이드아웃해 포커스 효과를 강조.
+   opacity 전환을 추가로 선언해 페이드 인/아웃을 모두 부드럽게 처리. */
+.book-search-wrapper {
+    transition: top 300ms ease, box-shadow 200ms ease, border-color 200ms ease, opacity 300ms ease;
+}
+
+.book-search-wrapper.is-spotlight-hidden {
+    opacity: 0;
+    pointer-events: none;
+}

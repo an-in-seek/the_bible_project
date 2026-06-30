@@ -225,12 +225,18 @@ class PublicReadingOfScripture {
         const targetCard = document.querySelector(`.prs-card[data-book-order="${bookOrder}"]`);
         if (!targetCard) return;
 
+        const searchWrapper = document.querySelector(".book-search-wrapper");
+
         setTimeout(() => {
             const overlay = document.createElement("div");
             overlay.className = "prs-spotlight-overlay";
             document.body.appendChild(overlay);
 
             targetCard.classList.add("is-spotlight-target");
+            // 스포트라이트 진행 중에는 상단 검색창을 잠시 숨겨 포커스 효과를 강조
+            if (searchWrapper) {
+                searchWrapper.classList.add("is-spotlight-hidden");
+            }
 
             requestAnimationFrame(() => {
                 overlay.classList.add("is-active");
@@ -243,6 +249,10 @@ class PublicReadingOfScripture {
                 dismissed = true;
                 overlay.classList.remove("is-active");
                 targetCard.classList.remove("is-spotlight-target");
+                // 스포트라이트 종료 시 상단 검색창 다시 노출
+                if (searchWrapper) {
+                    searchWrapper.classList.remove("is-spotlight-hidden");
+                }
                 overlay.addEventListener("transitionend", () => overlay.remove(), {once: true});
             };
 
