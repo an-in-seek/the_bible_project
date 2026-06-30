@@ -108,7 +108,7 @@
 | 책 목록 | `GET /api/v1/bibles/translations/{translationId}/books` | 포함 |
 | 책 개요 | `GET /api/v1/bibles/translations/{translationId}/books/{bookOrder}` (`description` 포함) | 포함 |
 | 장 목록 | `GET /api/v1/bibles/translations/{translationId}/books/{bookOrder}/chapters` | 포함 |
-| 절 본문/장 이동 | `GET .../chapters/{chapterNumber}/verses`, `GET .../navigate?direction=prev|next` | 포함 |
+| 절 본문/장 이동 | `GET .../chapters/{chapterNumber}/verses`, `GET .../navigate?direction=PREV\|NEXT` | 포함. ⚠️ `direction`은 **대문자** `PREV`/`NEXT`(서버 `DirectionType` enum, 커스텀 컨버터 없음 → 소문자는 400) |
 | 장 상태(메모·하이라이트·읽음) | `GET .../chapters/{chapterNumber}/state` | 포함 |
 | 절 검색 | `GET /api/v1/bibles/translations/{translationId}/search`; 인기 검색어는 `GET /api/v1/bibles/search-keywords/ranking` | 포함 |
 | 하이라이트 | `GET .../highlights`, `PUT/DELETE .../verses/{verseNumber}/highlight` | 포함 |
@@ -118,7 +118,7 @@
 
 ### 4.2 학습 (study) — 전부 v1 네이티브 (4-A.4-5 확정)
 
-> 학습 화면은 모두 DB 의존 없는 정적 콘텐츠 → 정적 데이터를 앱 리소스로 번들해 네이티브 구현. WebView 미사용.
+> **사전을 제외한** 학습 화면은 DB 의존 없는 정적 콘텐츠 → 정적 데이터를 앱 리소스로 번들해 네이티브 구현. 사전은 `DictionaryApi`/DB 기반이라 REST API로 연동한다. 둘 다 WebView 미사용.
 
 | 화면 | v1 범위 | 비고 |
 |------|---------|------|
@@ -165,7 +165,7 @@
 | 항목 | 결정 | 근거 |
 |------|------|------|
 | 범위 톤 | **성경 + 학습 중심** (게임·커뮤니티만 2차) | 성경 읽기 앵커 + 학습 콘텐츠로 학습 가치 확보 |
-| 학습 | **v1 포함** (2026-06-30 디렉티브) | 전부 정적 콘텐츠라 백엔드 없이 네이티브 이식 가능 |
+| 학습 | **v1 포함** (2026-06-30 디렉티브) | 사전(API/DB)을 제외하면 정적 콘텐츠라 백엔드 신설 없이 네이티브 이식 가능 |
 | 게임 | **2차 제외** | 인터랙션 재구현 비용 큼 |
 | 커뮤니티 | **2차 제외** | UGC 신고/차단 등 운영 부담을 단계적으로 |
 | 렌더링 | **v1 전부 네이티브 (WebView 미사용)** | 성경·마이·지원은 REST API 보유, 학습은 정적 데이터 번들 → 모두 네이티브 가능 |
@@ -193,7 +193,7 @@
 | 학습 | 성경 사전(목록/상세/참조/검색) | `DictionaryApi`, `DictionarySearchKeywordApi` | API 완비, 성경 읽기 보완 |
 | 학습 | 학습 홈 + 정적 콘텐츠(십계명·사도신경·주기도문·창조·성주간·12제자·12지파·공동체성경읽기·주석) | - (정적) | 텍스트/이미지 → 네이티브 화면 + 번들 데이터 |
 | 학습 | 성경 개요 영상 | - (정적 JS) | 영상 목록 네이티브화(썸네일+YouTube/ExoPlayer). 이식 공수 주의 |
-| 학습 | 족보(genealogy) | - (정적 JS) | 인터랙티브 트리 네이티브 재구현 — v1 최대 공수 항목 |
+| 학습 | 족보(genealogy) | - (정적 JS) | 세로 타임라인 네이티브 재구현(분기 트리 아님 — 4-A.7) — v1 최대 공수 항목 |
 | 학습 | 성경 역사(연대/사건/상세) | - (`HistoryDummyData`, 코드 하드코딩) | 더미데이터 JSON 번들로 네이티브화 |
 | 지원 | 1:1 문의(작성/내역) | `ContactApi`, `InquiryApi` | |
 | 공통 | 홈/하단탭 네비게이션 | - | 4-A.4 참조 |
@@ -217,7 +217,7 @@
 2. **홈 히어로 배너 → 확정: v1 앱 정적 리소스 구성, 2차 서버화.** 배너 운영이 필요해지는 시점에 서버 API로 전환한다.
 3. **사전(Dictionary) → 확정: v1 포함.** `DictionaryApi`/검색 API가 완비되어 네이티브화가 저렴하고 성경 읽기를 직접 보완한다. (4-A.2 IN 표 반영)
 4. **통합 검색 → 확정: 2차 이월.** v1은 성경 절 검색 + 사전 검색만 제공. 전 콘텐츠 통합 검색(게임/커뮤니티 포함)은 2차.
-5. **학습(study) 전체 → 확정: v1 포함, 정적 데이터 네이티브 번들 방식.** 모든 학습 화면이 DB 의존 없는 정적 콘텐츠(템플릿 본문 + 정적 JS 배열 + `HistoryDummyData`)이므로 **백엔드 API 신설 없이** 텍스트/데이터를 앱 리소스(JSON/문자열)로 이식한다. WebView 미사용 원칙 유지. 족보 인터랙티브 트리와 개요 영상은 이식 공수가 크므로 v1 내 스프린트 순서를 후순위로 둘 수 있다.
+5. **학습(study) 전체 → 확정: v1 포함.** 사전을 제외한 학습 화면은 DB 의존 없는 정적 콘텐츠(템플릿 본문 + 정적 JS 배열 + `HistoryDummyData`)이므로 **백엔드 API 신설 없이** 텍스트/데이터를 앱 리소스(JSON/문자열)로 이식한다. 사전은 기존 `DictionaryApi`로 연동한다. WebView 미사용 원칙 유지. 족보 세로 타임라인과 개요 영상은 이식 공수가 크므로 v1 내 스프린트 순서를 후순위로 둘 수 있다.
 
 ### 4-A.5 v1 완료(Done) 기준
 
@@ -230,7 +230,7 @@
 
 ### 4-A.6 백엔드 영향
 
-* v1 화면은 기존 API로 커버되며 **신규 도메인 API는 원칙적으로 불필요**. 학습 콘텐츠도 전부 정적(템플릿/정적 JS/`HistoryDummyData`)이라 백엔드 추가 없이 앱 번들로 이식한다(단, 콘텐츠 원본을 앱 리소스로 추출하는 작업은 필요).
+* v1 화면은 기존 API로 커버되며 **신규 도메인 API는 원칙적으로 불필요**. 학습 콘텐츠는 사전(`DictionaryApi`/DB)을 제외하면 정적(템플릿/정적 JS/`HistoryDummyData`)이라 백엔드 추가 없이 앱 번들로 이식한다(단, 콘텐츠 원본을 앱 리소스로 추출하는 작업은 필요).
 * **앱용 토큰 갱신 확인됨**: `POST /api/v1/auth/reissue` (바디 기반, permitAll) 이미 구현 → v1 차단 요인 아님(5.2 참조).
 * **회원탈퇴/프로필 API의 Bearer 호출 가능 확인됨**: `MemberApi`는 `@AuthenticationPrincipal JwtPrincipal` 기반이며, `SecurityConfig`에서 `/api/v1/members/**` 인증 경로로 처리한다.
 * **프로필 조회 필드 확인됨**: `GET /api/v1/auth/me`는 `memberUid`, `email`, `role`, `nickname`, `profileImageUrl`, `provider`, `status`, `createdAt`을 반환한다. 다중 OAuth 계정 상세는 `GET /api/v1/members/{memberUid}/oauth-accounts`를 별도로 호출한다.
@@ -419,7 +419,7 @@
 
 * 기존 `ConsentApi`/약관 동의 플로우를 앱 최초 로그인 시 처리한다. 미동의 사용자는 동의 화면으로 라우팅.
 * `POST /api/v1/auth/consent` 요청 바디는 `{ "agreeTerms": true, "agreePrivacy": true, "ageOver14": true }`이며 세 항목 모두 필수다.
-* 모바일은 signup token을 `Authorization: Bearer {signupToken}`로 보내야 한다. 서버는 Bearer 요청일 때 응답 body에 정식 `accessToken`/`refreshToken`을 내려준다.
+* 모바일은 signup token을 `Authorization: Bearer {signupToken}`로 보내야 한다. 서버는 **이번 호출로 동의가 신규 활성화된 경우에만**(`activated=true`) Bearer 요청 응답 body에 정식 `accessToken`/`refreshToken`을 내려준다. 이미 동의 완료된 회원의 멱등 재호출은 토큰 없이 `redirectTo`만 반환하므로(`ConsentApi.submit`), 앱은 정상 신규 가입 1회 호출에서 토큰을 수령하고, 토큰이 없으면 기존 토큰 유지 또는 `/reissue`로 확보한다.
 * 동의 취소는 `POST /api/v1/auth/consent/cancel`로 처리하고, 앱은 로컬 signup token 및 소셜 SDK 세션을 폐기한다.
 * signup token으로 일반 API를 호출하면 `403` + `code=CONSENT_REQUIRED`가 온다. 앱 전역 에러 매퍼는 이를 세션 만료가 아니라 동의 필요 상태로 처리한다.
 
@@ -586,7 +586,7 @@ Android 프로젝트는 백엔드 레포를 **심볼릭 링크로 연결**한다
 * v1에서 호출하는 엔드포인트(2026-06-30 코드 확인 — 필드 계약은 Swagger 정본):
   * 인증: `POST /api/v1/auth/social-login`, `POST /api/v1/auth/reissue`, `GET /api/v1/auth/me`, `POST /api/v1/auth/consent`, `POST /api/v1/auth/consent/cancel`
   * 성경 기본: `GET /api/v1/bibles/translations`, `GET /api/v1/bibles/translations/{translationId}/books`, `GET /api/v1/bibles/translations/{translationId}/books/{bookOrder}`, `GET /api/v1/bibles/translations/{translationId}/books/{bookOrder}/chapters`
-  * 성경 본문/이동: `GET /api/v1/bibles/translations/{translationId}/books/{bookOrder}/chapters/{chapterNumber}/verses`, `GET .../navigate?direction=prev|next`, `GET /api/v1/bibles/daily`
+  * 성경 본문/이동: `GET /api/v1/bibles/translations/{translationId}/books/{bookOrder}/chapters/{chapterNumber}/verses`, `GET .../navigate?direction=PREV|NEXT` (⚠️ 대문자 enum, 소문자 400), `GET /api/v1/bibles/daily`
   * 장 상태: `GET /api/v1/bibles/translations/{translationId}/books/{bookOrder}/chapters/{chapterNumber}/state` (메모·하이라이트·읽음·장 메모)
   * 절 검색: `GET /api/v1/bibles/translations/{translationId}/search?keyword=&bookOrder=&page=&size=&track=` · 인기 검색어 랭킹(별개): `GET /api/v1/bibles/search-keywords/ranking?limit=`
   * 절 하이라이트: `GET .../highlights`, `PUT .../verses/{verseNumber}/highlight`, `DELETE .../verses/{verseNumber}/highlight`
