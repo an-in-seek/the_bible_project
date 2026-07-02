@@ -10,11 +10,6 @@ import org.springframework.http.ResponseEntity
 interface BibleApiDocument {
 
     /**
-     * 📌 번역본(Translation) 리스트 조회
-     */
-    fun getTranslations(): ResponseEntity<List<BibleApiResponse.Translation>>
-
-    /**
      * 📌 특정 번역본(Translation)에 해당하는 책(Book) 리스트 조회
      */
     fun getBooks(

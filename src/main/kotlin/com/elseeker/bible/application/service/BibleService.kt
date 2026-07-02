@@ -18,6 +18,9 @@ class BibleService(
     fun getTranslations(): List<BibleResult.Translation> =
         bibleReader.getTranslations()
 
+    fun getTranslation(translationId: Long): BibleResult.Translation =
+        bibleReader.getTranslation(translationId)
+
     fun getBook(translationId: Long, bookOrder: Int): BibleApiResponse.BookDetail? =
         bibleReader.getBook(translationId, bookOrder)
 

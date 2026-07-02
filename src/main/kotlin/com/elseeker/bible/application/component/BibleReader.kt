@@ -41,6 +41,11 @@ class BibleReader(
             )
         ).map(BibleResult.Translation::from)
 
+    fun getTranslation(translationId: Long): BibleResult.Translation =
+        bibleTranslationRepository.findById(translationId).orElse(null)
+            ?.let(BibleResult.Translation::from)
+            ?: throwError(ErrorType.TRANSLATION_NOT_FOUND, "translationId=$translationId")
+
     fun getBook(translationId: Long, bookOrder: Int): BibleApiResponse.BookDetail? {
         val book = bibleBookRepository.findByTranslationAndBook(translationId, bookOrder) ?: return null
         val languageCode = getTranslationLanguage(translationId) ?: return null

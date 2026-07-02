@@ -19,12 +19,6 @@ class BibleApi(
 
     private val bibleCacheControl = CacheControl.maxAge(1, TimeUnit.DAYS).cachePublic()
 
-    @GetMapping("/translations")
-    override fun getTranslations(): ResponseEntity<List<BibleApiResponse.Translation>> {
-        val response = bibleService.getTranslations().map(BibleApiResponse.Translation::from)
-        return ResponseEntity.ok().cacheControl(bibleCacheControl).body(response)
-    }
-
     @GetMapping("/translations/{translationId}/books")
     override fun getBooks(
         @PathVariable translationId: Long
