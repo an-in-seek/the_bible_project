@@ -8,7 +8,6 @@ data class EraSummary(
     val slug: String,
     val label: String,
     val period: String,
-    val keywords: List<String>,
     val figures: List<String>,
     val testament: Testament
 )
@@ -60,67 +59,56 @@ object HistoryDummyData {
     val eras: List<EraSummary> = listOf(
         EraSummary(
             "patriarchs", "창조와 족장 시대", "창조 ~ B.C. 1876",
-            listOf("창조", "언약"),
             listOf("아담", "노아", "아브라함", "야곱", "요셉"),
             Testament.OLD
         ),
         EraSummary(
             "exodus", "출애굽과 광야", "B.C. 1876~1406",
-            listOf("애굽 종살이", "해방"),
             listOf("모세", "아론", "미리암"),
             Testament.OLD
         ),
         EraSummary(
             "conquest", "가나안 정복", "B.C. 1406~1375",
-            listOf("여호수아", "정복"),
             listOf("여호수아", "갈렙"),
             Testament.OLD
         ),
         EraSummary(
             "judges", "사사 시대", "B.C. 1375~1050",
-            listOf("사사", "순환"),
             listOf("드보라", "기드온", "삼손", "사무엘"),
             Testament.OLD
         ),
         EraSummary(
             "united-kingdom", "통일 왕국 시대", "B.C. 1050~930",
-            listOf("다윗", "솔로몬"),
             listOf("사울", "다윗", "솔로몬"),
             Testament.OLD
         ),
         EraSummary(
             "divided-kingdom", "분열 왕국 시대", "B.C. 930~586",
-            listOf("북이스라엘", "남유다"),
             listOf("엘리야", "엘리사", "이사야", "히스기야", "요시야"),
             Testament.OLD
         ),
         EraSummary(
-            "exile", "바벨론 포로", "B.C. 605~538",
-            listOf("바벨론", "포로"),
+            "exile", "바벨론 포로", "B.C. 586~538",
             listOf("다니엘", "에스겔", "예레미야"),
             Testament.OLD
         ),
         EraSummary(
             "return", "귀환과 재건", "B.C. 538~400",
-            listOf("예루살렘", "성전"),
             listOf("스룹바벨", "에스라", "느헤미야", "에스더"),
             Testament.OLD
         ),
         EraSummary(
             "intertestamental", "신구약 중간사", "B.C. 400~4",
-            listOf("헬라", "로마"),
             listOf("알렉산더", "유다 마카베오"),
             Testament.BETWEEN
         ),
         EraSummary(
             "jesus", "예수 시대", "B.C. 4~A.D. 30",
-            listOf("복음", "구원"),
             listOf("예수", "세례 요한", "열두 제자"),
             Testament.NEW
         ),
         EraSummary(
             "early-church", "초대 교회", "A.D. 30~100",
-            listOf("사도", "선교"),
             listOf("베드로", "바울", "스데반", "요한"),
             Testament.NEW
         )
@@ -295,7 +283,8 @@ object HistoryDummyData {
         val background: String,
         val scriptureRange: String,
         val referenceBookOrder: Int?,
-        val referenceChapter: Int?
+        val referenceChapter: Int?,
+        val highlight: Boolean = true
     )
 
     private val eventSeeds: List<HistoryEventSeed> = listOf(
@@ -339,7 +328,7 @@ object HistoryDummyData {
             "열 가지 재앙과 홍해의 기적으로 이스라엘이 애굽에서 해방된 사건.",
             "430년의 애굽 생활 끝에 하나님은 모세를 세워 열 재앙으로 바로를 굴복시키시고 이스라엘을 이끌어 내셨습니다. " +
                 "유월절과 홍해 도하는 구약 구원의 원형으로 성경 전체에서 계속 기억됩니다. " +
-                "보수적 연대로는 B.C. 1446년, 후기설은 B.C. 1270년경으로 봅니다.",
+                "보수적 연대로는 B.C. 1446년, 후기설은 B.C. 1290~1250년경으로 봅니다.",
             "출 1-15", 2, 1
         ),
         HistoryEventSeed(
@@ -436,7 +425,7 @@ object HistoryDummyData {
         ),
         HistoryEventSeed(
             "event-elijah", "divided-kingdom",
-            "엘리야의 갈멜산 대결", "B.C. 850년경",
+            "엘리야의 갈멜산 대결", "B.C. 860년경",
             "엘리야가 바알 선지자 450명과 대결하여 여호와가 참 하나님이심을 증명한 사건.",
             "아합과 이세벨 치하에서 바알 숭배가 극에 달했을 때, 엘리야는 갈멜산에서 불로 응답하시는 여호와를 온 백성 앞에 증명했습니다. " +
                 "이 사건은 분열 왕국 시대 선지자 사역의 대표적인 장면입니다.",
@@ -506,7 +495,8 @@ object HistoryDummyData {
             "하만의 음모에서 유다 민족이 구원받고 부림절이 제정된 사건.",
             "바사 왕 아하수에로 시대에 왕후가 된 에스더는 죽음을 무릅쓰고 왕 앞에 나아가 민족을 구했습니다. " +
                 "'죽으면 죽으리이다'라는 결단은 하나님의 숨은 섭리를 보여주며, 이를 기념해 부림절이 제정되었습니다.",
-            "에 3-9", 17, 3
+            "에 3-9", 17, 3,
+            highlight = false
         ),
         HistoryEventSeed(
             "event-ezra", "return",
@@ -552,7 +542,7 @@ object HistoryDummyData {
         // 예수 시대
         HistoryEventSeed(
             "event-nativity", "jesus",
-            "예수 탄생", "B.C. 4년경",
+            "예수 탄생", "B.C. 5~4년경",
             "약속된 메시아 예수께서 베들레헴에서 나신 사건.",
             "가이사 아구스도의 호적 명령 가운데 예수님은 다윗의 동네 베들레헴에서 나셨습니다. " +
                 "헤롯 대왕 말년의 일로, 이사야와 미가의 예언이 성취된 순간이었습니다.",
@@ -563,7 +553,8 @@ object HistoryDummyData {
             "공생애 시작", "A.D. 26~27년경",
             "세례와 광야 시험 후 예수께서 하나님 나라 복음을 선포하기 시작하신 사건.",
             "예수님은 세례 요한에게 세례를 받으시고 광야 시험을 이기신 후 '하나님 나라가 가까이 왔다'고 선포하셨습니다. " +
-                "갈릴리를 중심으로 가르침과 치유, 제자 부르심의 사역이 약 3년간 이어졌습니다.",
+                "갈릴리를 중심으로 가르침과 치유, 제자 부르심의 사역이 약 3년간 이어졌습니다. " +
+                "공생애 시작 연대는 '디베료 황제 15년'(눅 3:1)의 계산 방식에 따라 A.D. 26~29년 사이로 봅니다.",
             "마 3-4, 눅 3-4", 40, 3
         ),
         HistoryEventSeed(
@@ -580,7 +571,7 @@ object HistoryDummyData {
             "event-pentecost", "early-church",
             "오순절 성령 강림", "A.D. 30년경",
             "성령이 임하여 예루살렘에서 교회가 탄생한 사건.",
-            "부활·승천 후 오순절에 성령이 마가의 다락방에 모인 제자들에게 임했고, 베드로의 설교로 하루에 3천 명이 세례를 받았습니다. " +
+            "부활·승천 후 오순절에 성령이 예루살렘의 한 다락방에 모인 제자들에게 임했고, 베드로의 설교로 하루에 3천 명이 세례를 받았습니다. " +
                 "요엘의 예언이 성취되며 교회 시대가 열렸습니다.",
             "행 2", 44, 2
         ),
@@ -630,13 +621,13 @@ object HistoryDummyData {
             timeline = seed.timeline,
             summary = seed.description,
             background = seed.background,
-            references = buildList {
+            references = listOf(
                 if (seed.referenceBookOrder != null && seed.referenceChapter != null) {
-                    add(HistoryReference(seed.scriptureRange, verseUrl(seed.referenceBookOrder, seed.referenceChapter)))
+                    HistoryReference(seed.scriptureRange, verseUrl(seed.referenceBookOrder, seed.referenceChapter))
                 } else {
-                    add(HistoryReference(seed.scriptureRange, null))
+                    HistoryReference(seed.scriptureRange, null)
                 }
-            }
+            )
         )
     }
 
@@ -652,11 +643,16 @@ object HistoryDummyData {
         }
     }
 
+    private val eventSummaryById = eventSummaries.associateBy { it.id }
+
     val timelineBlocks: List<EraTimelineBlock> = eras.mapIndexed { index, era ->
         EraTimelineBlock(
             era = era,
             dividerLabel = dividerLabelOf(index, era),
-            eventHighlights = eventSummaries.filter { it.eraSlug == era.slug }.take(3),
+            eventHighlights = eventSeeds
+                .filter { it.eraSlug == era.slug && it.highlight }
+                .take(4)
+                .mapNotNull { eventSummaryById[it.id] },
             bookGroups = eraBookGroups[era.slug].orEmpty()
         )
     }
