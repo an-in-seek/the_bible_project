@@ -17,6 +17,14 @@ const App = {
     init: () => {
         App.elements = DomHelper.getElements();
         App.initNav();
+        App.scrollToSelectedEra();
+    },
+
+    scrollToSelectedEra: () => {
+        const selected = document.querySelector(".history-row.is-selected");
+        if (selected) {
+            selected.scrollIntoView({block: "center"});
+        }
     },
 
     initNav: () => {

@@ -8,10 +8,24 @@
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main class="container content-wrapper">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small mb-0">
+      <li class="breadcrumb-item">
+        <a class="text-decoration-none" href="/web/study/history">전체 연대기</a>
+      </li>
+      <li class="breadcrumb-item" th:if="${!#strings.isEmpty(detail.eraSlug)}">
+        <a class="text-decoration-none"
+           th:href="@{/web/study/history/{era}(era=${detail.eraSlug})}"
+           th:text="${detail.eraLabel}"></a>
+      </li>
+      <li class="breadcrumb-item active" aria-current="page" th:text="${detail.title}"></li>
+    </ol>
+  </nav>
+
   <section class="mb-4">
     <div class="card border-0 shadow-sm">
       <div class="card-body">
-        <h2 class="h4 fw-semibold mb-2" th:text="${detail.title}"></h2>
+        <h1 class="h4 fw-semibold mb-2" th:text="${detail.title}"></h1>
         <p class="text-muted small mb-3" th:text="${detail.eraLabel}"></p>
         <div class="row g-2">
           <div class="col-12 col-md-4">
@@ -30,7 +44,7 @@
   <section class="mb-4">
     <div class="card border-0 shadow-sm">
       <div class="card-body">
-        <h3 class="h6 fw-semibold mb-2">역사적 배경</h3>
+        <h2 class="h6 fw-semibold mb-2">역사적 배경</h2>
         <p class="text-muted mb-0" th:text="${detail.background}"></p>
       </div>
     </div>
@@ -39,16 +53,20 @@
   <section class="mb-4">
     <div class="card border-0 shadow-sm">
       <div class="card-body">
-        <h3 class="h6 fw-semibold mb-2">관련 성경 본문</h3>
+        <h2 class="h6 fw-semibold mb-2">관련 성경 본문</h2>
         <div th:if="${#lists.isEmpty(detail.references)}" class="text-muted small">
-          준비중
+          관련 본문 정리를 준비하고 있어요.
         </div>
         <div class="d-flex flex-column gap-2" th:if="${!#lists.isEmpty(detail.references)}">
-          <a th:each="reference : ${detail.references}"
-             th:href="${reference.url}"
-             class="text-decoration-none text-primary"
-             th:text="${reference.label}">
-          </a>
+          <th:block th:each="reference : ${detail.references}">
+            <a th:if="${reference.url != null}"
+               th:href="${reference.url}"
+               class="text-decoration-none text-primary"
+               th:text="${reference.label}"></a>
+            <span th:if="${reference.url == null}"
+                  class="text-muted"
+                  th:text="${reference.label}"></span>
+          </th:block>
         </div>
       </div>
     </div>
@@ -57,11 +75,13 @@
   <section>
     <div class="card border-0 shadow-sm">
       <div class="card-body">
-        <h3 class="h6 fw-semibold mb-3">연관 학습</h3>
+        <h2 class="h6 fw-semibold mb-3">연관 학습</h2>
         <div class="d-flex flex-wrap gap-2">
-          <a class="btn btn-primary btn-sm" href="/web/study/dictionary">성경 사전</a>
-          <button class="btn btn-outline-secondary btn-sm" type="button" disabled>성경 지도</button>
-          <button class="btn btn-outline-secondary btn-sm" type="button" disabled>성경 주석</button>
+          <a class="btn btn-primary btn-sm"
+             th:if="${!#strings.isEmpty(detail.eraSlug)}"
+             th:href="@{/web/study/history/{era}(era=${detail.eraSlug})}"
+             th:text="|${detail.eraLabel} 사건 더보기|"></a>
+          <a class="btn btn-outline-secondary btn-sm" href="/web/study/dictionary">성경 사전</a>
         </div>
       </div>
     </div>
