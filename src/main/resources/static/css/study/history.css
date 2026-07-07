@@ -12,7 +12,7 @@
     align-items: center;
     gap: 0.6rem;
     margin: 0.25rem 0;
-    padding-left: 3rem;
+    padding-left: 3.5rem;
 }
 
 .testament-divider span {
@@ -71,7 +71,7 @@
 
 .era-axis {
     position: relative;
-    padding-left: 3rem;
+    padding-left: 3.5rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -295,7 +295,7 @@ html[data-theme="dark"] .history-row.is-selected .era-marker {
     }
 
     .era-axis {
-        padding-left: 2.25rem;
+        padding-left: 2.75rem;
         min-height: auto;
     }
 
@@ -308,7 +308,7 @@ html[data-theme="dark"] .history-row.is-selected .era-marker {
     }
 
     .testament-divider {
-        padding-left: 2.25rem;
+        padding-left: 2.75rem;
     }
 
     .testament-divider::before {
@@ -349,7 +349,7 @@ html[data-theme="dark"] .history-row.is-selected .era-marker {
     }
 
     .era-content {
-        padding-left: 2.25rem;
+        padding-left: 2.75rem;
         min-height: auto;
     }
 }
