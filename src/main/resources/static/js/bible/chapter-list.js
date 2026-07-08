@@ -213,7 +213,7 @@ const App = {
         }
         button.classList.remove(UI_CLASSES.HIDDEN);
         bindFromBackButton(button, {
-            backOn: ["my-memo", "search"],
+            backOn: ["my-memo", "search", "history"],
             fallback: () => {
                 window.location.href = App.state.translationId
                     ? `${ROUTES.BOOK_LIST}?translationId=${App.state.translationId}`

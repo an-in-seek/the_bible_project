@@ -246,7 +246,7 @@ function setupBackButton(button) {
     }
     button.classList.remove(UI_CLASSES.HIDDEN);
     bindFromBackButton(button, {
-        backOn: ["search", "mypage", "dictionary", "my-memo"],
+        backOn: ["search", "mypage", "dictionary", "my-memo", "history"],
         fallback: () => {
             if (state.fromHome) { window.location.href = "/"; return; }
             window.location.href = state.translationId && state.bookOrder

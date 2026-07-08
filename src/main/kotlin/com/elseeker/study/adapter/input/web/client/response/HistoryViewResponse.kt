@@ -130,10 +130,10 @@ object HistoryDummyData {
     private const val KRV_TRANSLATION_ID = 1
 
     private fun chapterUrl(bookOrder: Int): String =
-        "/web/bible/chapter?translationId=$KRV_TRANSLATION_ID&bookOrder=$bookOrder"
+        "/web/bible/chapter?translationId=$KRV_TRANSLATION_ID&bookOrder=$bookOrder&from=history"
 
     private fun verseUrl(bookOrder: Int, chapterNumber: Int): String =
-        "/web/bible/verse?translationId=$KRV_TRANSLATION_ID&bookOrder=$bookOrder&chapterNumber=$chapterNumber"
+        "/web/bible/verse?translationId=$KRV_TRANSLATION_ID&bookOrder=$bookOrder&chapterNumber=$chapterNumber&from=history"
 
     private fun bookLink(label: String, bookOrder: Int) = BookLink(label, chapterUrl(bookOrder))
 
