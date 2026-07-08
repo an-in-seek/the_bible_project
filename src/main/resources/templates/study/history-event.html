@@ -38,7 +38,7 @@
     <p class="event-detail-body mb-0" th:text="${detail.background}"></p>
   </section>
 
-  <section class="event-detail-section mb-3" aria-label="관련 성경 본문">
+  <section class="event-detail-section" aria-label="관련 성경 본문">
     <h2 class="event-detail-section-title">관련 성경 본문</h2>
     <p th:if="${#lists.isEmpty(detail.references)}" class="event-detail-empty mb-0">
       관련 본문 정리를 준비하고 있어요.
@@ -61,16 +61,6 @@
     </div>
   </section>
 
-  <section class="event-detail-section" aria-label="연관 학습">
-    <h2 class="event-detail-section-title">연관 학습</h2>
-    <div class="d-flex flex-wrap gap-2">
-      <a class="btn btn-primary btn-sm"
-         th:if="${!#strings.isEmpty(detail.eraSlug)}"
-         th:href="@{/web/study/history/{era}(era=${detail.eraSlug})}"
-         th:text="|${detail.eraLabel} 사건 더보기|"></a>
-      <a class="btn btn-outline-secondary btn-sm" href="/web/study/dictionary">성경 사전</a>
-    </div>
-  </section>
 </main>
 
 <script type="module" src="/js/study/history-event.js?v=2.2"></script>
