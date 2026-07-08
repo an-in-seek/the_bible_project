@@ -28,7 +28,12 @@ const App = {
         if (backButton) {
             backButton.classList.remove(UI_CLASSES.HIDDEN);
             backButton.addEventListener("click", () => {
-                window.location.href = "/web/study/history";
+                const eraSlug = window.location.pathname.split("/").filter(Boolean).pop();
+                const targetUrl = new URL("/web/study/history", window.location.origin);
+                if (eraSlug && eraSlug !== "history") {
+                    targetUrl.searchParams.set("selectedEra", eraSlug);
+                }
+                window.location.href = `${targetUrl.pathname}${targetUrl.search}`;
             });
         }
     }
