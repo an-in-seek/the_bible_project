@@ -1,89 +1,74 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head th:replace="~{fragments/head :: head('성경 역사 사건 상세 | ElSeeker', true, null)}"
+<head th:replace="~{fragments/head :: head('성경 역사 사건 상세 | ElSeeker', true, '/css/study/history-event.css?v=1.0')}"
       th:with="pageDescription='성경 역사 속 주요 사건의 배경, 의미와 관련 성경 구절을 상세히 확인합니다.',
                pageKeywords='성경 사건,성경 역사,성경 배경,성경 해설'"></head>
 <body class="has-fixed-nav">
 
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="container content-wrapper">
-  <nav aria-label="breadcrumb" class="mb-3">
+<main class="container content-wrapper history-event-main">
+  <nav aria-label="breadcrumb" class="event-detail-breadcrumb mb-3">
     <ol class="breadcrumb small mb-0">
       <li class="breadcrumb-item">
-        <a class="text-decoration-none" href="/web/study/history">전체 연대기</a>
+        <a href="/web/study/history">전체 연대기</a>
       </li>
       <li class="breadcrumb-item" th:if="${!#strings.isEmpty(detail.eraSlug)}">
-        <a class="text-decoration-none"
-           th:href="@{/web/study/history/{era}(era=${detail.eraSlug})}"
+        <a th:href="@{/web/study/history/{era}(era=${detail.eraSlug})}"
            th:text="${detail.eraLabel}"></a>
       </li>
       <li class="breadcrumb-item active" aria-current="page" th:text="${detail.title}"></li>
     </ol>
   </nav>
 
-  <section class="mb-4">
-    <div class="card border-0 shadow-sm">
-      <div class="card-body">
-        <h1 class="h4 fw-semibold mb-2" th:text="${detail.title}"></h1>
-        <p class="text-muted small mb-3" th:text="${detail.eraLabel}"></p>
-        <div class="row g-2">
-          <div class="col-12 col-md-4">
-            <div class="text-muted small">연대</div>
-            <div class="fw-semibold" th:text="${detail.timeline}"></div>
-          </div>
-          <div class="col-12 col-md-8">
-            <div class="text-muted small">한 문장 요약</div>
-            <div th:text="${detail.summary}"></div>
-          </div>
-        </div>
-      </div>
+  <section class="event-detail-hero mb-4">
+    <p class="event-detail-eyebrow mb-0" th:text="${detail.eraLabel}">시대</p>
+    <h1 class="event-detail-title" th:text="${detail.title}"></h1>
+    <span class="event-detail-timeline" th:if="${!#strings.isEmpty(detail.timeline)}">
+      <span aria-hidden="true">🕰️</span>
+      <span th:text="${detail.timeline}"></span>
+    </span>
+    <p class="event-detail-summary"
+       th:if="${!#strings.isEmpty(detail.summary)}"
+       th:text="${detail.summary}"></p>
+  </section>
+
+  <section class="event-detail-section mb-3" aria-label="역사적 배경">
+    <h2 class="event-detail-section-title">역사적 배경</h2>
+    <p class="event-detail-body mb-0" th:text="${detail.background}"></p>
+  </section>
+
+  <section class="event-detail-section mb-3" aria-label="관련 성경 본문">
+    <h2 class="event-detail-section-title">관련 성경 본문</h2>
+    <p th:if="${#lists.isEmpty(detail.references)}" class="event-detail-empty mb-0">
+      관련 본문 정리를 준비하고 있어요.
+    </p>
+    <div class="event-detail-refs" th:if="${!#lists.isEmpty(detail.references)}">
+      <th:block th:each="reference : ${detail.references}">
+        <a th:if="${reference.url != null}"
+           th:href="${reference.url}"
+           class="event-detail-ref-link">
+          <span aria-hidden="true">📖</span>
+          <span th:text="${reference.label}"></span>
+          <span class="event-detail-ref-chevron" aria-hidden="true">›</span>
+        </a>
+        <span th:if="${reference.url == null}"
+              class="event-detail-ref-link event-detail-ref-link--static">
+          <span aria-hidden="true">📖</span>
+          <span th:text="${reference.label}"></span>
+        </span>
+      </th:block>
     </div>
   </section>
 
-  <section class="mb-4">
-    <div class="card border-0 shadow-sm">
-      <div class="card-body">
-        <h2 class="h6 fw-semibold mb-2">역사적 배경</h2>
-        <p class="text-muted mb-0" th:text="${detail.background}"></p>
-      </div>
-    </div>
-  </section>
-
-  <section class="mb-4">
-    <div class="card border-0 shadow-sm">
-      <div class="card-body">
-        <h2 class="h6 fw-semibold mb-2">관련 성경 본문</h2>
-        <div th:if="${#lists.isEmpty(detail.references)}" class="text-muted small">
-          관련 본문 정리를 준비하고 있어요.
-        </div>
-        <div class="d-flex flex-column gap-2" th:if="${!#lists.isEmpty(detail.references)}">
-          <th:block th:each="reference : ${detail.references}">
-            <a th:if="${reference.url != null}"
-               th:href="${reference.url}"
-               class="text-decoration-none text-primary"
-               th:text="${reference.label}"></a>
-            <span th:if="${reference.url == null}"
-                  class="text-muted"
-                  th:text="${reference.label}"></span>
-          </th:block>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section>
-    <div class="card border-0 shadow-sm">
-      <div class="card-body">
-        <h2 class="h6 fw-semibold mb-3">연관 학습</h2>
-        <div class="d-flex flex-wrap gap-2">
-          <a class="btn btn-primary btn-sm"
-             th:if="${!#strings.isEmpty(detail.eraSlug)}"
-             th:href="@{/web/study/history/{era}(era=${detail.eraSlug})}"
-             th:text="|${detail.eraLabel} 사건 더보기|"></a>
-          <a class="btn btn-outline-secondary btn-sm" href="/web/study/dictionary">성경 사전</a>
-        </div>
-      </div>
+  <section class="event-detail-section" aria-label="연관 학습">
+    <h2 class="event-detail-section-title">연관 학습</h2>
+    <div class="d-flex flex-wrap gap-2">
+      <a class="btn btn-primary btn-sm"
+         th:if="${!#strings.isEmpty(detail.eraSlug)}"
+         th:href="@{/web/study/history/{era}(era=${detail.eraSlug})}"
+         th:text="|${detail.eraLabel} 사건 더보기|"></a>
+      <a class="btn btn-outline-secondary btn-sm" href="/web/study/dictionary">성경 사전</a>
     </div>
   </section>
 </main>
