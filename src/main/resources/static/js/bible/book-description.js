@@ -288,6 +288,7 @@ document.addEventListener("DOMContentLoaded", () => {
             dom.chapterSelectLink.href = `/web/bible/chapter?translationId=${state.translationId}&bookOrder=${state.bookOrder}`;
         }
         updatePrevNextState();
+        window.scrollTo({top: 0, behavior: "smooth"});
         await loadBookDetail();
     };
 
