@@ -20,21 +20,6 @@
     <p class="text-muted mb-0">선택한 시대의 주요 사건을 확인하세요.</p>
   </section>
 
-  <section class="mb-4">
-    <div class="card border-0 shadow-sm">
-      <div class="card-body">
-        <div class="d-flex flex-wrap gap-2">
-          <a th:each="era : ${eras}"
-             th:href="@{/web/study/history/{era}(era=${era.slug})}"
-             class="btn btn-sm"
-             th:classappend="${currentEraSlug == era.slug} ? ' btn-primary' : ' btn-outline-secondary'"
-             th:text="${era.label}">
-          </a>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <section>
     <div th:if="${#lists.isEmpty(events)}" class="alert alert-secondary mb-0">
       이 시대의 사건 정리를 준비하고 있어요.
