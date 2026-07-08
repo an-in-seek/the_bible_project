@@ -4,11 +4,11 @@
       th:with="pageDescription='성경 각 책의 개요, 저자, 기록 시기와 배경을 요약해 안내합니다.',
                pageKeywords='성경책 개요,성경 저자,성경 배경,성경 요약,성경 해설'"></head>
 
-<body class="has-fixed-nav has-dual-bottom-nav">
+<body class="has-fixed-nav">
 
 <header th:replace="~{fragments/header :: header}"
         th:with="pageTitle='책 개요', pageTitleVisible=true"></header>
-<main class="container content-wrapper mb-80">
+<main class="container content-wrapper">
     <div>
         <p>
             <strong id="summaryLabel"></strong><br>
@@ -38,40 +38,6 @@
     </div>
 </main>
 
-<!-- 하단 네비게이션 -->
-<div class="fixed-bottom-nav">
-    <div class="nav-container">
-        <!-- 이전 책 버튼 -->
-        <button id="prevBookBtn"
-                class="btn btn-lg btn-outline-primary prev-next"
-                type="button"
-                aria-label="이전 책으로 이동">
-            <span aria-hidden="true">⬅</span>
-            <span class="d-none d-md-inline ms-2">이전 책</span>
-        </button>
-
-        <!-- 장 선택 -->
-        <a id="bookSelectLink"
-           href="/web/bible/chapter"
-           class="btn btn-lg btn-primary"
-           aria-label="장 선택">
-            <span aria-hidden="true">📖</span>
-            <span id="chapterSelectLinkLabel" class="ms-2"></span>
-        </a>
-
-        <!-- 다음 책 버튼 -->
-        <button id="nextBookBtn"
-                class="btn btn-lg btn-outline-primary prev-next"
-                type="button"
-                aria-label="다음 책으로 이동">
-            <span class="d-none d-md-inline me-2">다음 책</span>
-            <span aria-hidden="true">➡</span>
-        </button>
-    </div>
-</div>
-
 <script type="module" src="/js/bible/book-description.js?v=2.3"></script>
-
-<div th:replace="~{fragments/section-nav :: section-nav}"></div>
 </body>
 </html>
