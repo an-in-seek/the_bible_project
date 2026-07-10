@@ -237,6 +237,37 @@ html[data-theme="dark"] .tribes-legend-item[data-mother="zilpah"] {
     padding: 0.85rem 1rem 1rem;
 }
 
+/* 상징 · 영토 */
+.tribe-card-facts {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0 0 0.85rem;
+    padding: 0.6rem 0.75rem;
+    background: var(--tribe-accent-soft);
+    border-radius: 8px;
+}
+
+.tribe-card-fact {
+    display: flex;
+    gap: 0.55rem;
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
+.tribe-card-fact-label {
+    flex-shrink: 0;
+    width: 2.4rem;
+    margin: 0;
+    font-weight: 700;
+    color: var(--tribe-accent);
+}
+
+.tribe-card-fact-value {
+    margin: 0;
+    color: var(--color-text-primary);
+}
+
 .tribe-card-blessing {
     font-size: 0.85rem;
     color: var(--color-text-primary);

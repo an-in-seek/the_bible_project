@@ -103,7 +103,7 @@ const TWELVE_DISCIPLES = [
     {
         name: "다대오",
         originalName: "유다",
-        nickname: "야고보의 아들 유다, 레배오",
+        nickname: "야고보의 아들 유다 (KJV 레배오)",
         occupation: "",
         group: "g3",
         description: "가룟 유다와 구별하여 '다대오' 또는 '야고보의 아들 유다'로 불린다. 최후의 만찬에서 예수님께 자신을 세상에 나타내시지 않는 이유를 물었다.",
