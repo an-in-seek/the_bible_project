@@ -3,11 +3,19 @@
  * 야곱의 열두 아들로부터 시작된 이스라엘의 12지파
  */
 
+const MOTHERS = {
+    leah: {label: "레아"},
+    rachel: {label: "라헬"},
+    bilhah: {label: "빌하"},
+    zilpah: {label: "실바"}
+};
+
 const TWELVE_TRIBES = [
     {
         name: "르우벤",
         ancestor: "르우벤",
         mother: "레아",
+        motherKey: "leah",
         meaning: "보라, 아들이다",
         blessing: "야곱의 장자였으나 아버지의 침상을 더럽힌 죄로 장자권을 잃었다.",
         verse: "창세기 49:3-4",
@@ -17,6 +25,7 @@ const TWELVE_TRIBES = [
         name: "시므온",
         ancestor: "시므온",
         mother: "레아",
+        motherKey: "leah",
         meaning: "들으심",
         blessing: "레위와 함께 세겜 사건에서 분노하여 학살을 행했고, 야곱에게 저주를 받았다.",
         verse: "창세기 49:5-7",
@@ -26,6 +35,7 @@ const TWELVE_TRIBES = [
         name: "레위",
         ancestor: "레위",
         mother: "레아",
+        motherKey: "leah",
         meaning: "결합",
         blessing: "제사장 지파로 선택되어 성막과 성전에서 하나님을 섬겼다. 땅의 기업 대신 하나님이 기업이 되셨다.",
         verse: "신명기 33:8-10",
@@ -35,6 +45,7 @@ const TWELVE_TRIBES = [
         name: "유다",
         ancestor: "유다",
         mother: "레아",
+        motherKey: "leah",
         meaning: "찬양",
         blessing: "왕의 지파로, 다윗 왕과 예수 그리스도가 이 지파에서 나셨다. 홀이 유다를 떠나지 않을 것이라 예언되었다.",
         verse: "창세기 49:8-10",
@@ -44,6 +55,7 @@ const TWELVE_TRIBES = [
         name: "단",
         ancestor: "단",
         mother: "빌하 (라헬의 여종)",
+        motherKey: "bilhah",
         meaning: "심판",
         blessing: "백성을 심판하는 지파로 예언되었다. 삼손이 이 지파에서 나왔다.",
         verse: "창세기 49:16-17",
@@ -53,6 +65,7 @@ const TWELVE_TRIBES = [
         name: "납달리",
         ancestor: "납달리",
         mother: "빌하 (라헬의 여종)",
+        motherKey: "bilhah",
         meaning: "나의 씨름",
         blessing: "놓인 암사슴 같이 아름다운 말을 하는 지파로 축복받았다.",
         verse: "창세기 49:21",
@@ -62,6 +75,7 @@ const TWELVE_TRIBES = [
         name: "갓",
         ancestor: "갓",
         mother: "실바 (레아의 여종)",
+        motherKey: "zilpah",
         meaning: "행운",
         blessing: "군대의 침략을 받으나 도리어 그 뒤를 추격하는 용맹한 지파로 예언되었다.",
         verse: "창세기 49:19",
@@ -71,6 +85,7 @@ const TWELVE_TRIBES = [
         name: "아셀",
         ancestor: "아셀",
         mother: "실바 (레아의 여종)",
+        motherKey: "zilpah",
         meaning: "행복",
         blessing: "기름진 음식을 산출하여 왕의 진수를 공급하는 풍요로운 지파로 축복받았다.",
         verse: "창세기 49:20",
@@ -80,6 +95,7 @@ const TWELVE_TRIBES = [
         name: "잇사갈",
         ancestor: "잇사갈",
         mother: "레아",
+        motherKey: "leah",
         meaning: "삯, 보상",
         blessing: "힘센 나귀 같이 인내하며 노동하는 지파로 묘사되었다.",
         verse: "창세기 49:14-15",
@@ -89,6 +105,7 @@ const TWELVE_TRIBES = [
         name: "스불론",
         ancestor: "스불론",
         mother: "레아",
+        motherKey: "leah",
         meaning: "거처",
         blessing: "해변에 거하며 배가 대는 해안에 사는 지파로 예언되었다.",
         verse: "창세기 49:13",
@@ -98,6 +115,7 @@ const TWELVE_TRIBES = [
         name: "요셉 (에브라임/므낫세)",
         ancestor: "요셉",
         mother: "라헬",
+        motherKey: "rachel",
         meaning: "더하심",
         blessing: "야곱의 가장 큰 축복을 받았다. 두 아들 에브라임과 므낫세가 각각 한 지파가 되었다. 전능자의 축복으로 풍성함을 누리리라 예언되었다.",
         verse: "창세기 49:22-26",
@@ -107,6 +125,7 @@ const TWELVE_TRIBES = [
         name: "베냐민",
         ancestor: "베냐민",
         mother: "라헬",
+        motherKey: "rachel",
         meaning: "오른손의 아들",
         blessing: "이리 같이 물어뜯는 용맹한 지파로 예언되었다. 사울 왕과 사도 바울이 이 지파 출신이다.",
         verse: "창세기 49:27",
@@ -168,34 +187,30 @@ class TwelveTribes {
     }
 
     createCard(tribe, order) {
-        const card = document.createElement("div");
+        const mother = MOTHERS[tribe.motherKey] || {label: tribe.mother};
+        const card = document.createElement("article");
         card.className = "tribe-card";
+        card.dataset.mother = tribe.motherKey;
+        card.style.setProperty("--i", String(order - 1));
 
         card.innerHTML = `
-            <div class="tribe-card-header">
-                <span class="tribe-card-order">${order}</span>
-                <h3 class="tribe-card-name">${tribe.name}</h3>
-            </div>
-            <div class="tribe-card-body">
-                <dl class="tribe-card-info">
-                    <div class="tribe-card-info-row">
-                        <dt>조상</dt>
-                        <dd>${tribe.ancestor}</dd>
-                    </div>
-                    <div class="tribe-card-info-row">
-                        <dt>어머니</dt>
-                        <dd>${tribe.mother}</dd>
-                    </div>
-                    <div class="tribe-card-info-row">
-                        <dt>이름 뜻</dt>
-                        <dd>${tribe.meaning}</dd>
-                    </div>
-                </dl>
-                <p class="tribe-card-blessing">${tribe.blessing}</p>
-                <div class="tribe-card-verse">
-                    <span class="tribe-card-verse-ref">${tribe.verse}</span>
-                    <p class="tribe-card-verse-text">${tribe.verseText}</p>
+            <header class="tribe-card-header">
+                <span class="tribe-card-order" aria-hidden="true">${order}</span>
+                <div class="tribe-card-heading">
+                    <h3 class="tribe-card-name">${tribe.name}</h3>
+                    <p class="tribe-card-meaning">
+                        <span class="tribe-card-meaning-label">뜻</span>
+                        <span>${tribe.meaning}</span>
+                    </p>
                 </div>
+                <span class="tribe-card-mother">${mother.label}</span>
+            </header>
+            <div class="tribe-card-body">
+                <p class="tribe-card-blessing">${tribe.blessing}</p>
+                <blockquote class="tribe-card-verse">
+                    <cite class="tribe-card-verse-ref">${tribe.verse}</cite>
+                    <p class="tribe-card-verse-text">${tribe.verseText}</p>
+                </blockquote>
             </div>
         `;
 

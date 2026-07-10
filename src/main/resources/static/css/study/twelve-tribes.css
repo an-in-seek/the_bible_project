@@ -1,138 +1,307 @@
+/* ===== 이스라엘 12지파 ===== */
+/* 테마 토큰: theme.css (--color-*) / 다크모드 자동 대응 */
+
+.tribes-main {
+    max-width: 1100px;
+}
+
+/* --- 인트로 --- */
+.tribes-intro {
+    max-width: 1100px;
+    margin: 0 auto 1.5rem;
+    padding: 1.1rem 1.25rem 1.2rem;
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--color-accent);
+    border-radius: 12px;
+    background: var(--color-bg-elevated-bright);
+    box-shadow: 0 1px 2px var(--color-shadow);
+}
+
+.tribes-intro-text {
+    margin: 0;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.75;
+}
+
+.tribes-intro-text strong {
+    color: var(--color-text-primary);
+    font-weight: 700;
+}
+
+/* --- 어머니별 범례 --- */
+.tribes-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.65rem;
+    margin: 0.9rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.tribes-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    background: var(--tribe-accent-soft);
+    border: 1px solid transparent;
+    border-radius: 999px;
+}
+
+.tribes-legend-dot {
+    width: 0.65rem;
+    height: 0.65rem;
+    border-radius: 50%;
+    background: var(--tribe-accent);
+    flex-shrink: 0;
+}
+
+.tribes-legend-meta {
+    color: var(--tribe-accent);
+    font-weight: 700;
+}
+
+.tribes-legend-note {
+    color: var(--color-text-secondary);
+    font-weight: 500;
+}
+
+/* --- 로딩 --- */
 .tribes-loading {
     max-width: 640px;
     margin: 0 auto;
 }
 
-/* Grid */
+/* --- 그리드 --- */
 .tribes-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    gap: 1.25rem;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.1rem;
     max-width: 1100px;
     margin: 0 auto;
 }
 
-/* Card */
+/* --- 어머니별 액센트 (라이트) --- */
+.tribe-card[data-mother="leah"],
+.tribes-legend-item[data-mother="leah"] {
+    --tribe-accent: #2563eb;
+    --tribe-accent-soft: rgba(37, 99, 235, 0.10);
+}
+
+.tribe-card[data-mother="rachel"],
+.tribes-legend-item[data-mother="rachel"] {
+    --tribe-accent: #db2777;
+    --tribe-accent-soft: rgba(219, 39, 119, 0.10);
+}
+
+.tribe-card[data-mother="bilhah"],
+.tribes-legend-item[data-mother="bilhah"] {
+    --tribe-accent: #0d9488;
+    --tribe-accent-soft: rgba(13, 148, 136, 0.10);
+}
+
+.tribe-card[data-mother="zilpah"],
+.tribes-legend-item[data-mother="zilpah"] {
+    --tribe-accent: #d97706;
+    --tribe-accent-soft: rgba(217, 119, 6, 0.12);
+}
+
+/* --- 어머니별 액센트 (다크: 밝은 톤 + 알파↑) --- */
+html[data-theme="dark"] .tribe-card[data-mother="leah"],
+html[data-theme="dark"] .tribes-legend-item[data-mother="leah"] {
+    --tribe-accent: #60a5fa;
+    --tribe-accent-soft: rgba(96, 165, 250, 0.16);
+}
+
+html[data-theme="dark"] .tribe-card[data-mother="rachel"],
+html[data-theme="dark"] .tribes-legend-item[data-mother="rachel"] {
+    --tribe-accent: #f472b6;
+    --tribe-accent-soft: rgba(244, 114, 182, 0.16);
+}
+
+html[data-theme="dark"] .tribe-card[data-mother="bilhah"],
+html[data-theme="dark"] .tribes-legend-item[data-mother="bilhah"] {
+    --tribe-accent: #2dd4bf;
+    --tribe-accent-soft: rgba(45, 212, 191, 0.16);
+}
+
+html[data-theme="dark"] .tribe-card[data-mother="zilpah"],
+html[data-theme="dark"] .tribes-legend-item[data-mother="zilpah"] {
+    --tribe-accent: #fbbf24;
+    --tribe-accent-soft: rgba(251, 191, 36, 0.18);
+}
+
+/* --- 카드 --- */
 .tribe-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg-elevated-bright);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--tribe-accent);
+    border-radius: 12px;
     overflow: hidden;
-    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    box-shadow: 0 1px 2px var(--color-shadow);
+    transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+    animation: tribe-fade 0.35s ease both;
+    animation-delay: calc(var(--i, 0) * 35ms);
+}
+
+@keyframes tribe-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @media (hover: hover) and (pointer: fine) {
     .tribe-card:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
+        box-shadow: 0 6px 18px var(--color-shadow);
+        transform: translateY(-3px);
     }
 }
 
-/* Card Header */
+/* --- 카드 헤더 --- */
 .tribe-card-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 0.6rem;
-    padding: 0.85rem 1rem;
-    background: linear-gradient(145deg, #eff6ff 0%, #dbeafe 100%);
-    border-bottom: 1px solid #bfdbfe;
+    padding: 0.9rem 1rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .tribe-card-order {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    font-size: 0.8rem;
+    width: 1.85rem;
+    height: 1.85rem;
+    font-size: 0.85rem;
     font-weight: 700;
-    color: #1e40af;
-    background: #ffffff;
+    color: var(--tribe-accent);
+    background: var(--tribe-accent-soft);
     border-radius: 50%;
     flex-shrink: 0;
 }
 
+.tribe-card-heading {
+    flex: 1;
+    min-width: 0;
+}
+
 .tribe-card-name {
-    font-size: 1.05rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    color: #1e293b;
+    color: var(--color-text-primary);
     margin: 0;
+    line-height: 1.3;
 }
 
-/* Card Body */
-.tribe-card-body {
-    padding: 1rem;
-}
-
-.tribe-card-info {
-    margin: 0 0 0.75rem;
-}
-
-.tribe-card-info-row {
+.tribe-card-meaning {
     display: flex;
-    gap: 0.5rem;
-    margin-bottom: 0.3rem;
-    font-size: 0.85rem;
-    line-height: 1.5;
+    align-items: baseline;
+    gap: 0.35rem;
+    margin: 0.25rem 0 0;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+    line-height: 1.4;
 }
 
-.tribe-card-info-row dt {
+.tribe-card-meaning-label {
     flex-shrink: 0;
-    width: 3.5rem;
-    font-weight: 600;
-    color: #475569;
+    font-size: 0.66rem;
+    font-weight: 700;
+    color: var(--tribe-accent);
+    background: var(--tribe-accent-soft);
+    padding: 0.05rem 0.4rem;
+    border-radius: 999px;
 }
 
-.tribe-card-info-row dd {
-    margin: 0;
-    color: #1e293b;
+.tribe-card-mother {
+    flex-shrink: 0;
+    align-self: flex-start;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--tribe-accent);
+    background: var(--tribe-accent-soft);
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+}
+
+/* --- 카드 본문 --- */
+.tribe-card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 0.85rem 1rem 1rem;
 }
 
 .tribe-card-blessing {
     font-size: 0.85rem;
-    color: #334155;
-    line-height: 1.6;
-    margin: 0 0 0.75rem;
+    color: var(--color-text-primary);
+    line-height: 1.65;
+    margin: 0 0 0.85rem;
 }
 
-/* Verse */
+/* --- 구절 --- */
 .tribe-card-verse {
-    padding: 0.65rem 0.85rem;
-    background: #f8fafc;
-    border-radius: 0.5rem;
-    border-left: 3px solid #93c5fd;
+    margin: auto 0 0;
+    padding: 0.7rem 0.9rem;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-left: 3px solid var(--tribe-accent);
+    border-radius: 8px;
 }
 
 .tribe-card-verse-ref {
     display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #1e40af;
-    margin-bottom: 0.25rem;
+    font-size: 0.74rem;
+    font-weight: 700;
+    font-style: normal;
+    color: var(--tribe-accent);
+    margin-bottom: 0.3rem;
 }
 
 .tribe-card-verse-text {
     font-size: 0.8rem;
-    color: #475569;
-    line-height: 1.5;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
     margin: 0;
 }
 
-@media (max-width: 576px) {
+/* --- 모바일 --- */
+@media (max-width: 575.98px) {
     .tribes-grid {
         grid-template-columns: 1fr;
-        gap: 1rem;
+        gap: 0.9rem;
+    }
+
+    .tribes-intro {
+        padding: 1rem 1rem 1.1rem;
     }
 
     .tribe-card-header {
-        padding: 0.75rem 0.85rem;
+        padding: 0.8rem 0.85rem 0.7rem;
     }
 
     .tribe-card-body {
-        padding: 0.85rem;
+        padding: 0.8rem 0.85rem 0.9rem;
     }
 
     .tribe-card-name {
-        font-size: 0.95rem;
+        font-size: 1.02rem;
+    }
+}
+
+/* --- Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+    .tribe-card {
+        animation: none;
+        transition: none;
+    }
+
+    .tribe-card:hover {
+        transform: none;
     }
 }
