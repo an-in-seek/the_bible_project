@@ -12,148 +12,109 @@
 
 <main class="container content-wrapper old-testament-kings-main">
 
-    <!-- Intro -->
-    <section class="otk-intro" aria-labelledby="otkIntroTitle">
-        <p class="otk-kicker">Old Testament Kings Timeline</p>
-        <h2 id="otkIntroTitle">구약 성경의 왕들 연대표</h2>
-        <p class="otk-intro-lead">
-            사울, 다윗, 솔로몬의 통일왕국부터 북이스라엘과 남유다의 왕들을
-            왕국별 흐름과 동시대 관계로 살펴봅니다.
-        </p>
-        <p class="otk-note">
-            연도는 대략적인 BCE 기준이며, 세부 연대는 자료와 해석에 따라 달라질 수 있습니다.
-            남북 왕국의 재위는 섭정(co-regency)으로 겹치기도 합니다.
-        </p>
-    </section>
+  <!-- Intro -->
+  <section class="otk-intro" aria-labelledby="otkIntroTitle">
+    <p class="otk-kicker">Old Testament Kings Timeline</p>
+    <h2 id="otkIntroTitle">구약 성경의 왕들 연대표</h2>
+    <p class="otk-intro-lead">
+      사울, 다윗, 솔로몬의 통일왕국부터 북이스라엘과 남유다의 왕들을
+      왕국별 흐름과 동시대 관계로 살펴봅니다.
+    </p>
+    <p class="otk-note">
+      연도는 대략적인 BCE 기준이며, 세부 연대는 자료와 해석에 따라 달라질 수 있습니다.
+      남북 왕국의 재위는 섭정(co-regency)으로 겹치기도 합니다.
+    </p>
+  </section>
 
-    <!-- Summary Strip -->
-    <section class="otk-summary" aria-label="왕정 시대 요약">
-        <div class="otk-summary-chip otk-summary-united">
-            <span class="otk-summary-label">통일왕국</span>
-            <span class="otk-summary-flow">사울 → 다윗 → 솔로몬</span>
-            <span class="otk-summary-desc">왕정의 시작과 성전 건축</span>
+  <!-- Filter Bar -->
+  <section class="otk-filter" aria-label="왕 연대표 필터">
+    <div class="otk-filter-row">
+      <div class="otk-filter-group">
+        <span class="otk-filter-title" id="otkKingdomLabel">왕국</span>
+        <div class="otk-segmented" id="otkKingdomFilter" role="group" aria-labelledby="otkKingdomLabel">
+          <button type="button" data-kingdom="all" class="is-active" aria-pressed="true">전체</button>
+          <button type="button" data-kingdom="united" aria-pressed="false">통일왕국</button>
+          <button type="button" data-kingdom="israel" aria-pressed="false">북이스라엘</button>
+          <button type="button" data-kingdom="judah" aria-pressed="false">남유다</button>
         </div>
-        <div class="otk-summary-chip otk-summary-split">
-            <span class="otk-summary-label">왕국 분열</span>
-            <span class="otk-summary-flow">르호보암 / 여로보암</span>
-            <span class="otk-summary-desc">솔로몬 이후 남북 분열</span>
-        </div>
-        <div class="otk-summary-chip otk-summary-israel">
-            <span class="otk-summary-label">북이스라엘</span>
-            <span class="otk-summary-flow">여로보암 1세 → 호세아</span>
-            <span class="otk-summary-desc">앗수르에 의해 멸망 (BCE 722)</span>
-        </div>
-        <div class="otk-summary-chip otk-summary-judah">
-            <span class="otk-summary-label">남유다</span>
-            <span class="otk-summary-flow">르호보암 → 시드기야</span>
-            <span class="otk-summary-desc">바벨론 포로로 이어짐 (BCE 586)</span>
-        </div>
-    </section>
+      </div>
 
-    <!-- Filter Bar -->
-    <section class="otk-filter" aria-label="왕 연대표 필터">
-        <div class="otk-filter-row">
-            <div class="otk-filter-group">
-                <span class="otk-filter-title" id="otkKingdomLabel">왕국</span>
-                <div class="otk-segmented" id="otkKingdomFilter" role="group" aria-labelledby="otkKingdomLabel">
-                    <button type="button" data-kingdom="all" class="is-active" aria-pressed="true">전체</button>
-                    <button type="button" data-kingdom="united" aria-pressed="false">통일왕국</button>
-                    <button type="button" data-kingdom="israel" aria-pressed="false">북이스라엘</button>
-                    <button type="button" data-kingdom="judah" aria-pressed="false">남유다</button>
-                </div>
-            </div>
-
-            <div class="otk-filter-group otk-filter-search">
-                <label class="otk-filter-title" for="otkSearch">검색</label>
-                <div class="otk-search-box">
-                    <input type="search" id="otkSearch" class="otk-search-input"
-                           placeholder="왕 이름, 핵심 사건 검색" autocomplete="off"
-                           aria-label="왕 이름 또는 핵심 사건 검색">
-                    <button type="button" id="otkSearchClear" class="otk-search-clear d-none"
-                            aria-label="검색어 지우기">×</button>
-                </div>
-            </div>
+      <div class="otk-filter-group otk-filter-search">
+        <label class="otk-filter-title" for="otkSearch">검색</label>
+        <div class="otk-search-box">
+          <input type="search" id="otkSearch" class="otk-search-input"
+                 placeholder="왕 이름, 핵심 사건 검색" autocomplete="off"
+                 aria-label="왕 이름 또는 핵심 사건 검색">
+          <button type="button" id="otkSearchClear" class="otk-search-clear d-none"
+                  aria-label="검색어 지우기">×
+          </button>
         </div>
-
-        <div class="otk-filter-group otk-filter-eval">
-            <span class="otk-filter-title" id="otkEvalLabel">평가</span>
-            <div class="otk-checkgroup" id="otkEvalFilter" role="group" aria-labelledby="otkEvalLabel">
-                <label class="otk-check otk-check-good">
-                    <input type="checkbox" data-evaluation="faithful"><span>선한 왕</span>
-                </label>
-                <label class="otk-check otk-check-bad">
-                    <input type="checkbox" data-evaluation="evil"><span>악한 왕</span>
-                </label>
-                <label class="otk-check otk-check-mixed">
-                    <input type="checkbox" data-evaluation="mixed"><span>혼합 평가</span>
-                </label>
-                <label class="otk-check otk-check-usurp">
-                    <input type="checkbox" data-evaluation="usurper"><span>왕위 찬탈</span>
-                </label>
-                <label class="otk-check otk-check-disputed">
-                    <input type="checkbox" data-evaluation="disputed"><span>해석 주의</span>
-                </label>
-            </div>
-        </div>
-    </section>
-
-    <!-- Legend -->
-    <section class="otk-legend" aria-label="표기 설명">
-        <span class="otk-legend-item"><span class="otk-kingdom-badge otk-kingdom-united">통일</span>통일왕국</span>
-        <span class="otk-legend-item"><span class="otk-kingdom-badge otk-kingdom-israel">북</span>북이스라엘</span>
-        <span class="otk-legend-item"><span class="otk-kingdom-badge otk-kingdom-judah">남</span>남유다</span>
-        <span class="otk-legend-sep" aria-hidden="true"></span>
-        <span class="otk-legend-item"><span class="otk-eval-badge otk-eval-good">선한 왕</span></span>
-        <span class="otk-legend-item"><span class="otk-eval-badge otk-eval-bad">악한 왕</span></span>
-        <span class="otk-legend-item"><span class="otk-eval-badge otk-eval-mixed">혼합 평가</span></span>
-        <span class="otk-legend-item"><span class="otk-eval-badge otk-eval-usurp">왕위 찬탈</span></span>
-        <span class="otk-legend-item"><span class="otk-eval-badge otk-eval-disputed">해석 주의</span></span>
-        <span class="otk-legend-sep" aria-hidden="true"></span>
-        <span class="otk-legend-item"><span class="otk-tag otk-tag-dynasty">왕조 교체</span></span>
-        <span class="otk-legend-item"><span class="otk-tag otk-tag-end">멸망/포로</span></span>
-    </section>
-
-    <!-- 모바일 왕국 탭 -->
-    <div class="otk-mobile-tabs" id="otkMobileTabs" role="group" aria-label="왕국 선택 (모바일)">
-        <button type="button" data-kingdom="all" class="is-active" aria-pressed="true">전체</button>
-        <button type="button" data-kingdom="united" aria-pressed="false">통일</button>
-        <button type="button" data-kingdom="israel" aria-pressed="false">북이스라엘</button>
-        <button type="button" data-kingdom="judah" aria-pressed="false">남유다</button>
+      </div>
     </div>
 
-    <!-- Timeline (위 → 아래 연대기) -->
-    <section class="otk-timeline" aria-label="구약 왕들 연대표">
-        <div class="otk-vtimeline" id="otkVTimeline">
-            <!-- 통일왕국: 중앙 정렬 -->
-            <ol class="otk-vtrack otk-vtrack-united" id="otkUnitedTrack" aria-label="통일왕국"></ol>
+    <div class="otk-filter-group otk-filter-eval">
+      <span class="otk-filter-title" id="otkEvalLabel">평가</span>
+      <div class="otk-checkgroup" id="otkEvalFilter" role="group" aria-labelledby="otkEvalLabel">
+        <label class="otk-check otk-check-good">
+          <input type="checkbox" data-evaluation="faithful"><span>선한 왕</span>
+        </label>
+        <label class="otk-check otk-check-bad">
+          <input type="checkbox" data-evaluation="evil"><span>악한 왕</span>
+        </label>
+        <label class="otk-check otk-check-mixed">
+          <input type="checkbox" data-evaluation="mixed"><span>혼합 평가</span>
+        </label>
+        <label class="otk-check otk-check-usurp">
+          <input type="checkbox" data-evaluation="usurper"><span>왕위 찬탈</span>
+        </label>
+        <label class="otk-check otk-check-disputed">
+          <input type="checkbox" data-evaluation="disputed"><span>해석 주의</span>
+        </label>
+      </div>
+    </div>
+  </section>
 
-            <!-- 왕국 분열 마커 -->
-            <div class="otk-era otk-era-split" id="otkEraSplit" data-era="split">
-                <span class="otk-era-title">왕국 분열</span>
-                <span class="otk-era-year">BCE 931</span>
-            </div>
+  <!-- 모바일 왕국 탭 -->
+  <div class="otk-mobile-tabs" id="otkMobileTabs" role="group" aria-label="왕국 선택 (모바일)">
+    <button type="button" data-kingdom="all" class="is-active" aria-pressed="true">전체</button>
+    <button type="button" data-kingdom="united" aria-pressed="false">통일</button>
+    <button type="button" data-kingdom="israel" aria-pressed="false">북이스라엘</button>
+    <button type="button" data-kingdom="judah" aria-pressed="false">남유다</button>
+  </div>
 
-            <!-- 분열왕국: 북이스라엘(좌) · 남유다(우), 즉위 연도순 병합 -->
-            <ol class="otk-vtrack otk-vtrack-divided" id="otkDividedTrack"
-                aria-label="분열왕국 (북이스라엘 좌측 · 남유다 우측)"></ol>
-        </div>
+  <!-- Timeline (위 → 아래 연대기) -->
+  <section class="otk-timeline" aria-label="구약 왕들 연대표">
+    <div class="otk-vtimeline" id="otkVTimeline">
+      <!-- 통일왕국: 중앙 정렬 -->
+      <ol class="otk-vtrack otk-vtrack-united" id="otkUnitedTrack" aria-label="통일왕국"></ol>
 
-        <p id="otkEmpty" class="otk-empty d-none" role="status">조건에 맞는 왕이 없습니다. 필터를 줄여보세요.</p>
-    </section>
+      <!-- 왕국 분열 마커 -->
+      <div class="otk-era otk-era-split" id="otkEraSplit" data-era="split">
+        <span class="otk-era-title">왕국 분열</span>
+        <span class="otk-era-year">BCE 931</span>
+      </div>
 
-    <!-- Related Study Links -->
-    <section class="otk-related" aria-label="관련 학습">
-        <h3 class="otk-related-title">이어서 살펴보기</h3>
-        <div class="otk-related-links">
-            <a href="/web/study/history">📜 성경 역사</a>
-            <a href="/web/bible/translation">📖 성경 읽기</a>
-            <a href="/web/study/dictionary">📕 성경 사전</a>
-        </div>
-    </section>
+      <!-- 분열왕국: 북이스라엘(좌) · 남유다(우), 즉위 연도순 병합 -->
+      <ol class="otk-vtrack otk-vtrack-divided" id="otkDividedTrack"
+          aria-label="분열왕국 (북이스라엘 좌측 · 남유다 우측)"></ol>
+    </div>
 
-    <dialog id="otkDetailDialog" class="otk-detail-dialog" aria-labelledby="otkDetailTitle">
-        <div id="otkDetail" class="otk-detail" aria-live="polite"></div>
-    </dialog>
+    <p id="otkEmpty" class="otk-empty d-none" role="status">조건에 맞는 왕이 없습니다. 필터를 줄여보세요.</p>
+  </section>
+
+  <!-- Related Study Links -->
+  <section class="otk-related" aria-label="관련 학습">
+    <h3 class="otk-related-title">이어서 살펴보기</h3>
+    <div class="otk-related-links">
+      <a href="/web/study/history">📜 성경 역사</a>
+      <a href="/web/bible/translation">📖 성경 읽기</a>
+      <a href="/web/study/dictionary">📕 성경 사전</a>
+    </div>
+  </section>
+
+  <dialog id="otkDetailDialog" class="otk-detail-dialog" aria-labelledby="otkDetailTitle">
+    <div id="otkDetail" class="otk-detail" aria-live="polite"></div>
+  </dialog>
 </main>
 
 <script type="module" src="/js/study/old-testament-kings.js?v=1.2"></script>
