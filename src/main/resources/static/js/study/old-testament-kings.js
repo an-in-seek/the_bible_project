@@ -8,6 +8,8 @@
  * - bookOrder: 사무엘상=9, 사무엘하=10, 열왕기상=11, 열왕기하=12, 역대상=13, 역대하=14
  */
 
+import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+
 const KINGDOMS = {
     united: {label: "통일왕국", short: "통일"},
     israel: {label: "북이스라엘", short: "북"},
@@ -833,6 +835,7 @@ class OldTestamentKingsTimeline {
 
     init() {
         this.cacheElements();
+        setupDialogScrollLock(this.detailDialog);
         this.renderTimeline();
         this.bindEvents();
     }
@@ -844,6 +847,7 @@ class OldTestamentKingsTimeline {
         this.searchInput = document.getElementById("otkSearch");
         this.searchClear = document.getElementById("otkSearchClear");
         this.emptyEl = document.getElementById("otkEmpty");
+        this.detailDialog = document.getElementById("otkDetailDialog");
         this.detailEl = document.getElementById("otkDetail");
         this.vtimeline = document.getElementById("otkVTimeline");
         this.unitedTrack = document.getElementById("otkUnitedTrack");
@@ -956,7 +960,7 @@ class OldTestamentKingsTimeline {
                 ${endTag}
             </div>
             <button type="button" class="otk-detail-button"
-                    aria-expanded="false" aria-controls="otkDetail">
+                    aria-haspopup="dialog" aria-expanded="false" aria-controls="otkDetailDialog">
                 자세히 보기
             </button>
         `;
@@ -1006,7 +1010,7 @@ class OldTestamentKingsTimeline {
                     <span class="otk-kingdom-badge otk-kingdom-${king.kingdom}">${kingdomMeta.label}</span>
                     <span class="otk-eval-badge otk-eval-${evalMeta.tone}">${evalMeta.label}</span>
                 </div>
-                <h2 class="otk-detail-name">${king.name}
+                <h2 id="otkDetailTitle" class="otk-detail-name">${king.name}
                     <span class="otk-detail-en">${king.englishName}</span>
                 </h2>
                 <p class="otk-detail-reign">${king.reignLabel} · ${king.dynasty}</p>
@@ -1149,12 +1153,19 @@ class OldTestamentKingsTimeline {
             this.searchInput.focus();
         });
 
-        // 카드 선택 / 상세 열기
+        // 카드 선택 / 상세 다이얼로그 열기
         this.root.addEventListener("click", (e) => {
             const detailBtn = e.target.closest(".otk-detail-button");
             if (detailBtn) {
                 const card = detailBtn.closest(".otk-king-card");
                 this.toggleDetail(card.dataset.kingId, detailBtn);
+                return;
+            }
+        });
+
+        this.detailDialog.addEventListener("click", (e) => {
+            if (e.target === this.detailDialog) {
+                this.closeDetail();
                 return;
             }
             const closeBtn = e.target.closest(".otk-detail-close");
@@ -1168,9 +1179,9 @@ class OldTestamentKingsTimeline {
             }
         });
 
-        // ESC 로 상세 닫기
-        document.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" && this.state.selectedKingId) this.closeDetail();
+        this.detailDialog.addEventListener("cancel", (e) => {
+            e.preventDefault();
+            this.closeDetail();
         });
     }
 
@@ -1187,7 +1198,7 @@ class OldTestamentKingsTimeline {
         sync(this.mobileTabs);
     }
 
-    toggleDetail(kingId, button, {scrollToDetail = true} = {}) {
+    toggleDetail(kingId, button) {
         if (this.state.selectedKingId === kingId) {
             this.closeDetail();
             return;
@@ -1206,8 +1217,8 @@ class OldTestamentKingsTimeline {
         this.markContemporaries(king);
         this.renderDetail(king);
 
-        if (scrollToDetail) {
-            this.scrollTo(this.detailEl, "nearest");
+        if (this.detailDialog && !this.detailDialog.open) {
+            this.detailDialog.showModal();
         }
     }
 
@@ -1216,6 +1227,9 @@ class OldTestamentKingsTimeline {
         this.state.selectedKingId = null;
         this.detailEl.classList.remove("is-open");
         this.detailEl.innerHTML = "";
+        if (this.detailDialog && this.detailDialog.open) {
+            this.detailDialog.close();
+        }
         // 키보드 사용자 포커스가 body 로 유실되지 않도록 트리거로 되돌린다.
         if (this.lastTrigger && document.contains(this.lastTrigger)) {
             this.lastTrigger.focus();
@@ -1250,7 +1264,7 @@ class OldTestamentKingsTimeline {
         }
 
         const detailBtn = card.querySelector(".otk-detail-button");
-        this.toggleDetail(kingId, detailBtn, {scrollToDetail: false});
+        this.toggleDetail(kingId, detailBtn);
 
         this.scrollTo(card, "center");
         card.classList.add("is-flash");

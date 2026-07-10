@@ -3,7 +3,7 @@
 <head th:replace="~{fragments/head :: head(
         '구약 왕들 연대표 - 통일왕국, 북이스라엘, 남유다 왕정 정리 | ElSeeker',
         true,
-        '/css/study/old-testament-kings.css?v=1.0')}"
+        '/css/study/old-testament-kings.css?v=1.1')}"
       th:with="pageDescription='사울, 다윗, 솔로몬의 통일왕국부터 북이스라엘과 남유다의 왕들을 연대표로 정리한 성경 학습 페이지입니다.',
                pageKeywords='구약 왕들,성경 왕 연대표,이스라엘 왕,유다 왕,통일왕국,북이스라엘,남유다,성경 연대기'">
 </head>
@@ -142,9 +142,6 @@
         <p id="otkEmpty" class="otk-empty d-none" role="status">조건에 맞는 왕이 없습니다. 필터를 줄여보세요.</p>
     </section>
 
-    <!-- Detail Panel -->
-    <section class="otk-detail" id="otkDetail" aria-live="polite"></section>
-
     <!-- Related Study Links -->
     <section class="otk-related" aria-label="관련 학습">
         <h3 class="otk-related-title">이어서 살펴보기</h3>
@@ -154,9 +151,13 @@
             <a href="/web/study/dictionary">📕 성경 사전</a>
         </div>
     </section>
+
+    <dialog id="otkDetailDialog" class="otk-detail-dialog" aria-labelledby="otkDetailTitle">
+        <div id="otkDetail" class="otk-detail" aria-live="polite"></div>
+    </dialog>
 </main>
 
-<script type="module" src="/js/study/old-testament-kings.js?v=1.0"></script>
+<script type="module" src="/js/study/old-testament-kings.js?v=1.1"></script>
 <div th:replace="~{fragments/section-nav :: section-nav}"></div>
 </body>
 </html>

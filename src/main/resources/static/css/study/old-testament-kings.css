@@ -557,23 +557,41 @@
     font-size: 0.9rem;
 }
 
-/* ---------- Detail Panel ---------- */
+/* ---------- Detail Dialog ---------- */
+.otk-detail-dialog {
+    width: min(720px, calc(100vw - 2rem));
+    max-height: min(82vh, 760px);
+    margin: auto;
+    padding: 0;
+    border: none;
+    border-radius: var(--otk-radius);
+    background: transparent;
+    color: inherit;
+    overflow: hidden;
+}
+.otk-detail-dialog::backdrop {
+    background: rgba(15, 23, 42, 0.48);
+    backdrop-filter: blur(2px);
+}
+.otk-detail-dialog[open] {
+    display: flex;
+}
 .otk-detail:not(.is-open) {
     display: none;
 }
 .otk-detail.is-open {
-    margin-bottom: 1.5rem;
-    scroll-margin-top: 90px;
+    width: 100%;
+    max-height: inherit;
+    overflow-y: auto;
 }
 .otk-detail-card {
     position: relative;
     background: var(--otk-card-bg);
     border: 1px solid var(--otk-card-border);
     border-radius: var(--otk-radius);
-    padding: 1.25rem;
-    max-width: 720px;
-    margin: 0 auto;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+    padding: 1.4rem;
+    width: 100%;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.2);
 }
 .otk-detail-close {
     position: absolute;
@@ -585,6 +603,9 @@
     font-size: 1.5rem;
     line-height: 1;
     cursor: pointer;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
 }
 .otk-detail-head {
     display: flex;
