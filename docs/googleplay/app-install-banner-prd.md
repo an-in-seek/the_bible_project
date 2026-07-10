@@ -111,9 +111,10 @@ User-Agent Client Hints가 지원되는 브라우저에서는 보조 판단 정�
 
 ElSeeker 하이브리드 앱 내부 WebView 접속은 배너 노출 대상에서 제외하므로, 다음 기준으로 일반 브라우저와 구분한다.
 
-* 1차: 하이브리드 앱이 주입하는 브릿지 객체 존재 여부로 판별한다(예: `window.AppBridge`). 브릿지가 존재하면 앱 내부 WebView로 간주하고 배너를 노출하지 않는다.
-* 2차(보조): User-Agent의 Android WebView 토큰(`; wv)`) 포함 여부를 확인한다.
-* 본 WebView 감지 기준은 `donation-prd.md`의 브릿지 규약(`window.AppBridge`)과 동일한 메커니즘을 사용하여 두 기능이 일관된 환경 판별을 하도록 한다.
+* 1차: 하이브리드 앱이 주입하는 공통 WebView marker(`window.ElSeekerWebView`) 존재 여부로 판별한다. marker가 존재하면 앱 내부 WebView로 간주하고 배너를 노출하지 않는다.
+* 2차(호환): 기존 네이티브 브릿지 객체(`window.AppBridge`) 존재 여부로 판별한다. 브릿지가 존재하면 앱 내부 WebView로 간주하고 배너를 노출하지 않는다.
+* 3차(보조): User-Agent의 Android WebView 토큰(`; wv)`) 포함 여부를 확인한다.
+* 본 WebView 감지 기준은 `donation-prd.md`의 공통 marker 규약(`window.ElSeekerWebView`)과 동일한 메커니즘을 사용하여 두 기능이 일관된 환경 판별을 하도록 한다.
 
 ### 봇 판별
 

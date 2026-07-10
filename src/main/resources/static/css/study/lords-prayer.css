@@ -1,127 +1,176 @@
+/* ===== 주기도문 ===== */
+/* 테마 토큰: theme.css (--color-*) / 다크모드 자동 대응 */
+/* 이 파일은 주기도문 페이지에서만 로드되므로 페이지 액센트를 :root 에 둔다 */
+
+:root {
+    --lp-accent: #7c3aed;
+    --lp-accent-soft: rgba(124, 58, 237, 0.10);
+}
+
+html[data-theme="dark"] {
+    --lp-accent: #a78bfa;
+    --lp-accent-soft: rgba(167, 139, 250, 0.16);
+}
+
 .lords-prayer-loading {
     max-width: 640px;
     margin: 0 auto;
 }
 
-/* Full Prayer Text */
+/* --- 히어로: 주기도문 전문 --- */
 .lords-prayer-full-text {
     max-width: 720px;
-    margin: 0 auto 2rem;
+    margin: 0 auto 1.5rem;
 }
 
-.lords-prayer-full-text-inner {
-    background: linear-gradient(145deg, #ede9fe 0%, #e0e7ff 100%);
-    border: 1px solid #c7d2fe;
-    border-radius: 0.75rem;
-    padding: 1.75rem 2rem;
+.lords-prayer-hero {
+    padding: 1.9rem 2rem 1.7rem;
     text-align: center;
+    background: var(--color-bg-elevated-bright);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--lp-accent);
+    border-radius: 14px;
+    box-shadow: 0 1px 3px var(--color-shadow);
 }
 
-.lords-prayer-full-text-title {
-    font-size: 1.25rem;
+.lords-prayer-hero-eyebrow {
+    margin: 0 0 1rem;
+    padding-left: 0.35em;
+    font-size: 0.72rem;
     font-weight: 700;
-    color: #312e81;
-    margin: 0 0 0.25rem;
+    letter-spacing: 0.35em;
+    color: var(--lp-accent);
 }
 
-.lords-prayer-full-text-ref {
-    font-size: 0.8rem;
-    color: #6366f1;
-    margin: 0 0 1.25rem;
+.lords-prayer-hero-body {
+    font-size: 1.02rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 2.1;
 }
 
-.lords-prayer-full-text-body {
-    font-size: 0.95rem;
-    color: #1e1b4b;
-    line-height: 2;
+.lords-prayer-hero-ref {
+    margin: 1.1rem 0 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
 }
 
-/* History */
+.lords-prayer-hero-ref::before {
+    content: "";
+    display: block;
+    width: 2rem;
+    height: 2px;
+    margin: 0 auto 0.8rem;
+    background: var(--lp-accent);
+    border-radius: 2px;
+    opacity: 0.6;
+}
+
+/* --- 유래와 역사 --- */
 .lords-prayer-history {
     max-width: 720px;
-    margin: 0 auto 2rem;
+    margin: 0 auto 1.5rem;
 }
 
 .lords-prayer-history-inner {
-    background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
-    border: 1px solid #f59e0b;
-    border-radius: 0.75rem;
-    padding: 1.75rem 2rem;
+    padding: 1.5rem 1.75rem;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
 }
 
 .lords-prayer-history-title {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #78350f;
     margin: 0 0 1.25rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
     text-align: center;
 }
 
-.lords-prayer-history-section {
-    margin-bottom: 0.85rem;
+.lords-prayer-history-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--color-border);
 }
 
-.lords-prayer-history-section:last-child {
-    margin-bottom: 0;
+.lords-prayer-history-item:first-of-type {
+    padding-top: 0;
+    border-top: none;
 }
 
-.lords-prayer-history-section-title {
-    font-size: 0.85rem;
+.lords-prayer-history-item:last-of-type {
+    padding-bottom: 0;
+}
+
+.lords-prayer-history-num {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.65rem;
+    height: 1.65rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    color: #92400e;
-    margin: 0 0 0.25rem;
+    color: var(--lp-accent);
+    background: var(--lp-accent-soft);
+    border-radius: 50%;
 }
 
-.lords-prayer-history-section-body {
-    font-size: 0.85rem;
-    color: #451a03;
-    line-height: 1.7;
+.lords-prayer-history-item-title {
+    margin: 0.15rem 0 0.3rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.lords-prayer-history-item-body {
     margin: 0;
+    font-size: 0.83rem;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
 }
 
-@media (max-width: 576px) {
-    .lords-prayer-history-inner {
-        padding: 1.25rem 1rem;
-    }
-
-    .lords-prayer-history-title {
-        font-size: 1.05rem;
-    }
-}
-
-/* Grid */
+/* --- 구절별 묵상 카드 --- */
 .lords-prayer-grid {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem;
     max-width: 720px;
     margin: 0 auto;
 }
 
-/* Card */
 .lords-prayer-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
+    background: var(--color-bg-elevated-bright);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--lp-accent);
+    border-radius: 12px;
     overflow: hidden;
-    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    box-shadow: 0 1px 2px var(--color-shadow);
+    transition: box-shadow 0.18s ease, transform 0.18s ease;
+    animation: lp-fade 0.35s ease both;
+    animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+@keyframes lp-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @media (hover: hover) and (pointer: fine) {
     .lords-prayer-card:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
+        box-shadow: 0 6px 18px var(--color-shadow);
+        transform: translateY(-3px);
     }
 }
 
-/* Card Header */
 .lords-prayer-card-header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.85rem 1rem;
-    background: linear-gradient(145deg, #ede9fe 0%, #ddd6fe 100%);
-    border-bottom: 1px solid #c4b5fd;
+    gap: 0.6rem;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .lords-prayer-card-order {
@@ -132,92 +181,98 @@
     height: 1.75rem;
     font-size: 0.8rem;
     font-weight: 700;
-    color: #4c1d95;
-    background: #ffffff;
+    color: var(--lp-accent);
+    background: var(--lp-accent-soft);
     border-radius: 50%;
     flex-shrink: 0;
 }
 
 .lords-prayer-card-theme {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #4c1d95;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--lp-accent);
 }
 
-/* Card Body */
 .lords-prayer-card-body {
-    padding: 1rem;
+    padding: 0.95rem 1rem 1rem;
 }
 
 .lords-prayer-card-text {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #1e293b;
-    line-height: 1.6;
-    margin: 0 0 0.85rem;
+    margin: 0 0 0.7rem;
     padding-left: 0.85rem;
-    border-left: 3px solid #8b5cf6;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    border-left: 3px solid var(--lp-accent);
+}
+
+.lords-prayer-card-ref {
+    display: inline-block;
+    margin: 0 0 0.85rem;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--lp-accent);
+    background: var(--lp-accent-soft);
+    border-radius: 999px;
 }
 
 .lords-prayer-card-meaning {
-    font-size: 0.85rem;
-    color: #334155;
-    line-height: 1.7;
-    margin: 0 0 0.75rem;
+    margin: 0 0 0.85rem;
+    font-size: 0.86rem;
+    color: var(--color-text-secondary);
+    line-height: 1.75;
 }
 
-/* Verse Reference */
-.lords-prayer-card-ref {
-    padding: 0.5rem 0.85rem;
-    background: #f5f3ff;
-    border-radius: 0.5rem;
-    margin-bottom: 0.75rem;
-}
-
-.lords-prayer-card-ref-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #6d28d9;
-}
-
-/* Related Verse */
+/* --- 함께 읽는 말씀 --- */
 .lords-prayer-card-related {
-    padding: 0.65rem 0.85rem;
-    background: #faf5ff;
-    border-radius: 0.5rem;
-    border-left: 3px solid #a78bfa;
+    padding: 0.75rem 0.9rem;
+    background: var(--lp-accent-soft);
+    border-left: 3px solid var(--lp-accent);
+    border-radius: 8px;
+}
+
+.lords-prayer-card-related-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
 }
 
 .lords-prayer-card-related-ref {
     display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #7c3aed;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--lp-accent);
 }
 
 .lords-prayer-card-related-text {
-    font-size: 0.8rem;
-    color: #475569;
-    line-height: 1.6;
     margin: 0;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+    line-height: 1.65;
 }
 
-@media (max-width: 576px) {
-    .lords-prayer-full-text-inner {
-        padding: 1.25rem 1rem;
+/* --- 모바일 --- */
+@media (max-width: 575.98px) {
+    .lords-prayer-hero {
+        padding: 1.5rem 1.15rem 1.4rem;
     }
 
-    .lords-prayer-full-text-title {
-        font-size: 1.1rem;
+    .lords-prayer-hero-body {
+        font-size: 0.95rem;
+        line-height: 2;
     }
 
-    .lords-prayer-full-text-body {
-        font-size: 0.9rem;
+    .lords-prayer-history-inner {
+        padding: 1.25rem 1.1rem;
     }
 
-    .lords-prayer-grid {
-        gap: 1rem;
+    .lords-prayer-history-title {
+        font-size: 1rem;
     }
 
     .lords-prayer-card-header {
@@ -229,6 +284,18 @@
     }
 
     .lords-prayer-card-text {
-        font-size: 0.95rem;
+        font-size: 0.98rem;
+    }
+}
+
+/* --- Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+    .lords-prayer-card {
+        animation: none;
+        transition: none;
+    }
+
+    .lords-prayer-card:hover {
+        transform: none;
     }
 }

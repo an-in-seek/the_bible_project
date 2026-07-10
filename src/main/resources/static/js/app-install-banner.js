@@ -24,10 +24,11 @@ function isMobile() {
     return /Mobile/.test(ua);
 }
 
-// 하이브리드 앱 내부 WebView 판별 (donation-prd.md 브릿지 규약과 동일 메커니즘)
+// 하이브리드 앱 내부 WebView 판별 (donation-prd.md 공통 marker 규약과 동일 메커니즘)
 function isWebView() {
-    if (typeof window.AppBridge !== "undefined") return true; // 1차: 브릿지 객체
-    return /;\s*wv\)/.test(ua); // 2차(보조): Android WebView 토큰
+    if (typeof window.ElSeekerWebView !== "undefined") return true; // 1차: 공통 marker
+    if (typeof window.AppBridge !== "undefined") return true; // 2차(호환): 브릿지 객체
+    return /;\s*wv\)/.test(ua); // 3차(보조): Android WebView 토큰
 }
 
 function isBot() {

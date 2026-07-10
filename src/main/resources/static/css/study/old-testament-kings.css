@@ -1,0 +1,773 @@
+/* =========================================================
+   구약 왕들 연대표 (Old Testament Kings Timeline)
+   - 왕국: 통일(muted gold) / 북이스라엘(teal) / 남유다(restrained blue)
+   - 평가 배지 + 왕조 교체/멸망 태그
+   - 반응형: >=992 병렬 / 768-991 2열 / <768 탭+단일열
+   ========================================================= */
+
+.old-testament-kings-main {
+    --otk-radius: 8px;
+    --otk-gap: 1rem;
+
+    --otk-united: #b08420;
+    --otk-united-soft: rgba(176, 132, 32, 0.12);
+    --otk-israel: #2f8f83;
+    --otk-israel-soft: rgba(47, 143, 131, 0.12);
+    --otk-judah: #3f6fa8;
+    --otk-judah-soft: rgba(63, 111, 168, 0.12);
+
+    --otk-good: #3f8f5b;
+    --otk-good-soft: rgba(63, 143, 91, 0.14);
+    --otk-bad: #b4534b;
+    --otk-bad-soft: rgba(180, 83, 75, 0.14);
+    --otk-mixed: #9a7b2e;
+    --otk-mixed-soft: rgba(154, 123, 46, 0.14);
+    --otk-usurp: #8a5aa8;
+    --otk-usurp-soft: rgba(138, 90, 168, 0.14);
+    --otk-disputed: #6c757d;
+    --otk-disputed-soft: rgba(108, 117, 125, 0.14);
+    --otk-end: #495057;
+
+    --otk-card-bg: #ffffff;
+    --otk-card-border: rgba(0, 0, 0, 0.09);
+    --otk-surface: #f7f6f3;
+    --otk-text-muted: #6b7280;
+
+    padding-bottom: 3rem;
+}
+
+:root[data-theme="dark"] .old-testament-kings-main {
+    --otk-united: #d6a94a;
+    --otk-united-soft: rgba(214, 169, 74, 0.16);
+    --otk-israel: #4bb5a6;
+    --otk-israel-soft: rgba(75, 181, 166, 0.16);
+    --otk-judah: #6fa0d8;
+    --otk-judah-soft: rgba(111, 160, 216, 0.16);
+
+    --otk-good: #5fbf7f;
+    --otk-good-soft: rgba(95, 191, 127, 0.18);
+    --otk-bad: #e07b72;
+    --otk-bad-soft: rgba(224, 123, 114, 0.18);
+    --otk-mixed: #d0a94a;
+    --otk-mixed-soft: rgba(208, 169, 74, 0.18);
+    --otk-usurp: #b78bd4;
+    --otk-usurp-soft: rgba(183, 139, 212, 0.18);
+    --otk-disputed: #9aa2ab;
+    --otk-disputed-soft: rgba(154, 162, 171, 0.18);
+    --otk-end: #adb5bd;
+
+    --otk-card-bg: #1e2126;
+    --otk-card-border: rgba(255, 255, 255, 0.12);
+    --otk-surface: #191c20;
+    --otk-text-muted: #9aa2ab;
+}
+
+/* ---------- Intro ---------- */
+.otk-intro {
+    margin: 0.5rem 0 1.5rem;
+}
+.otk-kicker {
+    margin: 0;
+    font-size: 0.75rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--otk-united);
+    font-weight: 700;
+}
+.otk-intro h2 {
+    margin: 0.25rem 0 0.6rem;
+    font-size: clamp(1.35rem, 3.5vw, 1.75rem);
+    font-weight: 700;
+}
+.otk-intro-lead {
+    margin: 0 0 0.5rem;
+    max-width: 60ch;
+    line-height: 1.6;
+}
+.otk-note {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--otk-text-muted);
+    line-height: 1.55;
+}
+
+/* ---------- Summary Strip ---------- */
+.otk-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(clamp(140px, 22vw, 220px), 1fr));
+    gap: 0.6rem;
+    margin-bottom: 1.5rem;
+}
+.otk-summary-chip {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.7rem 0.85rem;
+    border-radius: var(--otk-radius);
+    background: var(--otk-surface);
+    border-left: 4px solid var(--otk-disputed);
+}
+.otk-summary-united { border-left-color: var(--otk-united); }
+.otk-summary-split  { border-left-color: var(--otk-mixed); }
+.otk-summary-israel { border-left-color: var(--otk-israel); }
+.otk-summary-judah  { border-left-color: var(--otk-judah); }
+.otk-summary-label {
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+.otk-summary-flow {
+    font-size: 0.85rem;
+}
+.otk-summary-desc {
+    font-size: 0.78rem;
+    color: var(--otk-text-muted);
+}
+
+/* ---------- Filter Bar ---------- */
+.otk-filter {
+    background: var(--otk-surface);
+    border: 1px solid var(--otk-card-border);
+    border-radius: var(--otk-radius);
+    padding: 0.85rem 1rem;
+    margin-bottom: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+}
+.otk-filter-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.5rem;
+    align-items: flex-end;
+}
+.otk-filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.otk-filter-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--otk-text-muted);
+}
+.otk-filter-search {
+    flex: 1 1 220px;
+    min-width: 200px;
+}
+
+/* Segmented control */
+.otk-segmented {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+}
+.otk-segmented button {
+    border: 1px solid var(--otk-card-border);
+    background: var(--otk-card-bg);
+    color: inherit;
+    border-radius: 999px;
+    padding: 0.35rem 0.85rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.otk-segmented button.is-active {
+    background: var(--otk-judah);
+    border-color: var(--otk-judah);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* Checkbox group */
+.otk-checkgroup {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.6rem;
+}
+.otk-check {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--otk-card-border);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    user-select: none;
+}
+.otk-check input {
+    accent-color: var(--otk-judah);
+    cursor: pointer;
+}
+.otk-check-good  { border-left: 3px solid var(--otk-good); }
+.otk-check-bad   { border-left: 3px solid var(--otk-bad); }
+.otk-check-mixed { border-left: 3px solid var(--otk-mixed); }
+.otk-check-usurp { border-left: 3px solid var(--otk-usurp); }
+.otk-check-disputed { border-left: 3px solid var(--otk-disputed); }
+
+/* Search box */
+.otk-search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.otk-search-input {
+    width: 100%;
+    padding: 0.45rem 2rem 0.45rem 0.75rem;
+    border: 1px solid var(--otk-card-border);
+    border-radius: var(--otk-radius);
+    background: var(--otk-card-bg);
+    color: inherit;
+    font-size: 0.9rem;
+}
+.otk-search-input:focus {
+    outline: 2px solid var(--otk-judah);
+    outline-offset: 1px;
+}
+.otk-search-clear {
+    position: absolute;
+    right: 0.4rem;
+    border: none;
+    background: transparent;
+    color: var(--otk-text-muted);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.1rem 0.3rem;
+}
+
+/* ---------- Legend ---------- */
+.otk-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 0.75rem;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    font-size: 0.8rem;
+}
+.otk-legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--otk-text-muted);
+}
+.otk-legend-sep {
+    width: 1px;
+    align-self: stretch;
+    min-height: 1rem;
+    background: var(--otk-card-border);
+}
+
+/* ---------- Badges & Tags ---------- */
+.otk-kingdom-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.6rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--otk-disputed);
+}
+.otk-kingdom-united { background: var(--otk-united); }
+.otk-kingdom-israel { background: var(--otk-israel); }
+.otk-kingdom-judah  { background: var(--otk-judah); }
+
+.otk-eval-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1rem 0.5rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.otk-eval-good     { background: var(--otk-good-soft); color: var(--otk-good); }
+.otk-eval-bad      { background: var(--otk-bad-soft); color: var(--otk-bad); }
+.otk-eval-mixed    { background: var(--otk-mixed-soft); color: var(--otk-mixed); }
+.otk-eval-usurp    { background: var(--otk-usurp-soft); color: var(--otk-usurp); }
+.otk-eval-disputed { background: var(--otk-disputed-soft); color: var(--otk-disputed); }
+
+.otk-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.05rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.68rem;
+    font-weight: 600;
+}
+.otk-tag-dynasty {
+    background: var(--otk-usurp-soft);
+    color: var(--otk-usurp);
+}
+.otk-tag-end {
+    background: rgba(73, 80, 87, 0.16);
+    color: var(--otk-end);
+}
+
+/* ---------- Mobile tabs ---------- */
+.otk-mobile-tabs {
+    display: none;
+    gap: 0.3rem;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+.otk-mobile-tabs button {
+    flex: 0 0 auto;
+    border: 1px solid var(--otk-card-border);
+    background: var(--otk-card-bg);
+    color: inherit;
+    border-radius: 999px;
+    padding: 0.4rem 0.9rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.otk-mobile-tabs button.is-active {
+    background: var(--otk-judah);
+    border-color: var(--otk-judah);
+    color: #fff;
+    font-weight: 600;
+}
+
+/* ---------- Vertical Timeline (위 → 아래 연대기) ---------- */
+.otk-timeline {
+    margin-bottom: 1.5rem;
+}
+.otk-vtimeline {
+    position: relative;
+    --otk-spine: clamp(64px, 9vw, 108px); /* 중앙 스파인(연도 노드) 폭 */
+}
+/* 중앙 세로 스파인 라인 */
+.otk-vtimeline::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 2px;
+    transform: translateX(-1px);
+    background: var(--otk-card-border);
+}
+.otk-vtimeline.is-single::before {
+    left: calc(var(--otk-spine) / 2);
+}
+
+.otk-vtrack {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.otk-vtrack.is-hidden {
+    display: none;
+}
+
+/* 한 행: [좌 카드] [스파인 노드] [우 카드] */
+.otk-row {
+    display: grid;
+    grid-template-columns: 1fr var(--otk-spine) 1fr;
+    align-items: start;
+    margin-bottom: 0.9rem;
+}
+.otk-row.is-hidden {
+    display: none;
+}
+.otk-row-node {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding-top: 0.75rem;
+    position: relative;
+    z-index: 1;
+}
+.otk-row-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--otk-card-bg);
+    box-shadow: 0 0 0 1px var(--otk-card-border);
+}
+.otk-row-year {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--otk-text-muted);
+    white-space: nowrap;
+}
+.otk-row-card {
+    min-width: 0; /* grid 아이템 오버플로 방지 */
+}
+/* 북이스라엘 → 좌측, 남유다 → 우측 */
+.otk-row-israel .otk-row-card { grid-column: 1; }
+.otk-row-judah  .otk-row-card { grid-column: 3; }
+/* 통일왕국 → 중앙 정렬 */
+.otk-row-united .otk-row-card {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: 100%;
+    max-width: 440px;
+}
+
+/* 시대 마커 (분열 / 멸망) */
+.otk-era {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.1rem;
+    text-align: center;
+    margin: 0.25rem auto 1.1rem;
+    padding: 0.4rem 1rem;
+    width: max-content;
+    max-width: 90%;
+    position: relative;
+    z-index: 1;
+    background: var(--otk-surface);
+    border: 1px solid var(--otk-card-border);
+    border-radius: 999px;
+}
+.otk-era.is-hidden {
+    display: none;
+}
+.otk-era-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+.otk-era-year {
+    font-size: 0.72rem;
+    color: var(--otk-text-muted);
+}
+.otk-era[data-era="split"] { border-color: var(--otk-mixed); }
+.otk-era[data-era="israel-fall"] { border-color: var(--otk-israel); }
+.otk-era[data-era="judah-fall"] { border-color: var(--otk-judah); }
+
+/* 단일 왕국 선택 시: 좌측 단일 열로 접기 */
+.otk-vtimeline.is-single .otk-row {
+    grid-template-columns: var(--otk-spine) 1fr;
+}
+.otk-vtimeline.is-single .otk-row-node { grid-column: 1; }
+.otk-vtimeline.is-single .otk-row-israel .otk-row-card,
+.otk-vtimeline.is-single .otk-row-judah .otk-row-card,
+.otk-vtimeline.is-single .otk-row-united .otk-row-card {
+    grid-column: 2;
+    justify-self: stretch;
+    max-width: none;
+}
+.otk-vtimeline.is-single .otk-era {
+    margin-left: 0;
+    margin-right: auto;
+}
+
+/* ---------- King Card ---------- */
+.otk-king-card {
+    background: var(--otk-card-bg);
+    border: 1px solid var(--otk-card-border);
+    border-left: 4px solid var(--otk-disputed);
+    border-radius: var(--otk-radius);
+    padding: 0.75rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    scroll-margin-top: 90px;
+    transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+.otk-king-card[data-kingdom="united"] { border-left-color: var(--otk-united); }
+.otk-king-card[data-kingdom="israel"] { border-left-color: var(--otk-israel); }
+.otk-king-card[data-kingdom="judah"]  { border-left-color: var(--otk-judah); }
+.otk-king-card.is-hidden { display: none; }
+
+.otk-king-card.is-selected {
+    box-shadow: 0 0 0 2px var(--otk-judah);
+    border-color: var(--otk-judah);
+}
+.otk-king-card.is-contemporary {
+    box-shadow: 0 0 0 2px var(--otk-mixed);
+}
+.otk-king-card.is-flash {
+    animation: otk-flash 1.5s ease;
+}
+@keyframes otk-flash {
+    0%, 30% { background: var(--otk-mixed-soft); }
+    100% { background: var(--otk-card-bg); }
+}
+
+.otk-king-card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+.otk-reign-range {
+    font-size: 0.72rem;
+    color: var(--otk-text-muted);
+}
+.otk-king-card-titlerow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.otk-king-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin: 0;
+}
+.otk-king-summary {
+    font-size: 0.83rem;
+    line-height: 1.5;
+    margin: 0;
+    color: var(--otk-text-muted);
+}
+.otk-king-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+}
+.otk-king-dynasty {
+    font-size: 0.72rem;
+    color: var(--otk-text-muted);
+}
+.otk-detail-button {
+    align-self: flex-start;
+    margin-top: 0.15rem;
+    border: 1px solid var(--otk-card-border);
+    background: transparent;
+    color: inherit;
+    border-radius: 6px;
+    padding: 0.25rem 0.7rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+}
+.otk-detail-button:hover {
+    border-color: var(--otk-judah);
+    color: var(--otk-judah);
+}
+
+/* ---------- Empty state ---------- */
+.otk-empty {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--otk-text-muted);
+    font-size: 0.9rem;
+}
+
+/* ---------- Detail Panel ---------- */
+.otk-detail:not(.is-open) {
+    display: none;
+}
+.otk-detail.is-open {
+    margin-bottom: 1.5rem;
+    scroll-margin-top: 90px;
+}
+.otk-detail-card {
+    position: relative;
+    background: var(--otk-card-bg);
+    border: 1px solid var(--otk-card-border);
+    border-radius: var(--otk-radius);
+    padding: 1.25rem;
+    max-width: 720px;
+    margin: 0 auto;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+}
+.otk-detail-close {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.75rem;
+    border: none;
+    background: transparent;
+    color: var(--otk-text-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+}
+.otk-detail-head {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 0.5rem;
+}
+.otk-detail-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 0.15rem;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+.otk-detail-en {
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--otk-text-muted);
+}
+.otk-detail-reign,
+.otk-detail-relation {
+    font-size: 0.82rem;
+    color: var(--otk-text-muted);
+    margin: 0 0 0.15rem;
+}
+.otk-detail-note {
+    font-size: 0.8rem;
+    color: var(--otk-usurp);
+    margin: 0.4rem 0 0;
+}
+.otk-detail-section {
+    margin-top: 1rem;
+}
+.otk-detail-subtitle {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--otk-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0 0 0.4rem;
+}
+.otk-detail-events {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.88rem;
+    line-height: 1.5;
+}
+.otk-detail-summary {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.6;
+}
+.otk-detail-refs,
+.otk-detail-contemporaries {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+}
+.otk-ref-link {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+    background: var(--otk-judah-soft);
+    color: var(--otk-judah);
+    font-size: 0.82rem;
+    text-decoration: none;
+    font-weight: 600;
+}
+.otk-ref-link:hover { text-decoration: underline; }
+.otk-contemporary-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--otk-card-border);
+    border-radius: 6px;
+    background: var(--otk-card-bg);
+    color: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+.otk-contemporary-link:hover { border-color: var(--otk-mixed); }
+.otk-detail-muted {
+    font-size: 0.82rem;
+    color: var(--otk-text-muted);
+    margin: 0;
+}
+.otk-detail-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 1rem;
+}
+.otk-detail-tag {
+    font-size: 0.72rem;
+    color: var(--otk-text-muted);
+}
+
+/* ---------- Related ---------- */
+.otk-related {
+    border-top: 1px solid var(--otk-card-border);
+    padding-top: 1.25rem;
+}
+.otk-related-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0 0 0.6rem;
+}
+.otk-related-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.otk-related-links a {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--otk-card-border);
+    border-radius: var(--otk-radius);
+    background: var(--otk-surface);
+    color: inherit;
+    text-decoration: none;
+    font-size: 0.85rem;
+}
+.otk-related-links a:hover {
+    border-color: var(--otk-judah);
+}
+
+/* =========================================================
+   반응형
+   ========================================================= */
+
+/* 모바일: 왕국 탭 + 스파인을 좌측으로 이동한 단일 세로열
+   (통일 → 북/남 즉위 연도순 병합, 각 카드에 왕국 배지) */
+@media (max-width: 767.98px) {
+    .otk-mobile-tabs {
+        display: flex;
+    }
+    /* 데스크톱 왕국 segmented는 모바일 탭으로 대체 */
+    .otk-filter-row .otk-filter-group:first-child {
+        display: none;
+    }
+    .otk-vtimeline {
+        --otk-spine: 56px;
+    }
+    .otk-vtimeline::before {
+        left: calc(var(--otk-spine) / 2);
+    }
+    .otk-row {
+        grid-template-columns: var(--otk-spine) 1fr;
+    }
+    .otk-row-node {
+        grid-column: 1;
+    }
+    .otk-row-israel .otk-row-card,
+    .otk-row-judah .otk-row-card,
+    .otk-row-united .otk-row-card {
+        grid-column: 2;
+        justify-self: stretch;
+        width: auto;
+        max-width: none;
+    }
+    .otk-era {
+        margin-left: 0;
+        margin-right: auto;
+    }
+    .otk-detail-card {
+        padding: 1rem;
+    }
+}
+
+/* 모션 최소화 */
+@media (prefers-reduced-motion: reduce) {
+    .otk-king-card,
+    .otk-segmented button {
+        transition: none;
+    }
+    .otk-king-card.is-flash {
+        animation: none;
+    }
+}

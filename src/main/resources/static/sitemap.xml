@@ -96,6 +96,13 @@
         <priority>0.7</priority>
     </url>
 
+    <!-- 구약 왕들 연대표 -->
+    <url>
+        <loc>https://elseeker.com/web/study/old-testament-kings</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
     <!-- 성경 주석 사이트 큐레이션 -->
     <url>
         <loc>https://elseeker.com/web/study/bible-commentary</loc>
