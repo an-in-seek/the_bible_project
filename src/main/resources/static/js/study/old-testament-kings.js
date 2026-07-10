@@ -874,7 +874,7 @@ class OldTestamentKingsTimeline {
             .sort((a, b) => b.reignStartBce - a.reignStartBce)
             .forEach((king) => this.unitedTrack.appendChild(this.createRow(king)));
 
-        // 분열왕국: 즉위 연도 내림차순(이른 연대 먼저), 동률이면 북이스라엘 먼저(좌측)
+        // 분열왕국: 같은 즉위 연도는 하나의 row에 좌/우로 함께 배치한다.
         const divided = this.kings
             .filter((k) => k.kingdom !== "united")
             .sort((a, b) =>
@@ -883,9 +883,9 @@ class OldTestamentKingsTimeline {
             );
         const lastIsrael = divided.filter((k) => k.kingdom === "israel").at(-1);
 
-        divided.forEach((king) => {
-            this.dividedTrack.appendChild(this.createRow(king));
-            if (lastIsrael && king.id === lastIsrael.id) {
+        this.groupKingsByStartYear(divided).forEach((group) => {
+            this.dividedTrack.appendChild(this.createRow(group));
+            if (lastIsrael && group.some((king) => king.id === lastIsrael.id)) {
                 this.dividedTrack.appendChild(
                     this.createEra("북이스라엘 멸망", "앗수르 · BCE 722", "israel-fall")
                 );
@@ -896,24 +896,56 @@ class OldTestamentKingsTimeline {
         );
     }
 
-    createRow(king) {
+    groupKingsByStartYear(kings) {
+        const groups = [];
+        let currentYear = null;
+        let currentGroup = null;
+
+        kings.forEach((king) => {
+            if (king.reignStartBce !== currentYear) {
+                currentYear = king.reignStartBce;
+                currentGroup = [];
+                groups.push(currentGroup);
+            }
+            currentGroup.push(king);
+        });
+
+        return groups.map((group) =>
+            group.sort((a, b) =>
+                (a.kingdom === "israel" ? -1 : 1) -
+                (b.kingdom === "israel" ? -1 : 1)
+            )
+        );
+    }
+
+    createRow(rowKings) {
+        const kings = Array.isArray(rowKings) ? rowKings : [rowKings];
+        const firstKing = kings[0];
+        const paired = kings.length > 1;
+
         const li = document.createElement("li");
-        li.className = `otk-row otk-row-${king.kingdom}`;
-        li.dataset.kingId = king.id;
-        li.dataset.kingdom = king.kingdom;
+        li.className = paired ? "otk-row otk-row-paired" : `otk-row otk-row-${firstKing.kingdom}`;
+        li.dataset.kingIds = kings.map((king) => king.id).join(",");
+        li.dataset.year = String(firstKing.reignStartBce);
+        if (!paired) {
+            li.dataset.kingId = firstKing.id;
+            li.dataset.kingdom = firstKing.kingdom;
+        }
 
         const node = document.createElement("div");
         node.className = "otk-row-node";
         node.innerHTML =
-            `<span class="otk-row-dot otk-kingdom-${king.kingdom}" aria-hidden="true"></span>` +
-            `<span class="otk-row-year">BCE ${king.reignStartBce}</span>`;
-
-        const cardWrap = document.createElement("div");
-        cardWrap.className = "otk-row-card";
-        cardWrap.appendChild(this.createCard(king));
+            `<span class="otk-row-dot ${paired ? "otk-row-dot-split" : `otk-kingdom-${firstKing.kingdom}`}" aria-hidden="true"></span>` +
+            `<span class="otk-row-year">BCE ${firstKing.reignStartBce}</span>`;
 
         li.appendChild(node);
-        li.appendChild(cardWrap);
+        kings.forEach((king) => {
+            const cardWrap = document.createElement("div");
+            cardWrap.className = `otk-row-card otk-row-card-${king.kingdom}`;
+            cardWrap.dataset.kingId = king.id;
+            cardWrap.appendChild(this.createCard(king));
+            li.appendChild(cardWrap);
+        });
         return li;
     }
 
@@ -1050,11 +1082,16 @@ class OldTestamentKingsTimeline {
         const visible = {united: 0, israel: 0, judah: 0};
 
         this.kings.forEach((king) => {
-            const row = this.rowEl(king.id);
-            if (!row) return;
+            const card = this.cardEl(king.id);
+            if (!card) return;
             const ok = this.matchesFilters(king, keyword);
-            row.classList.toggle("is-hidden", !ok);
+            card.closest(".otk-row-card")?.classList.toggle("is-hidden", !ok);
             if (ok) visible[king.kingdom] += 1;
+        });
+
+        this.root.querySelectorAll(".otk-row").forEach((row) => {
+            const visibleCard = row.querySelector(".otk-row-card:not(.is-hidden)");
+            row.classList.toggle("is-hidden", !visibleCard);
         });
 
         // 단일 왕국 선택 시 스파인을 좌측 단일 열로 접는다.
@@ -1286,7 +1323,7 @@ class OldTestamentKingsTimeline {
     }
 
     rowEl(kingId) {
-        return this.root.querySelector(`.otk-row[data-king-id="${kingId}"]`);
+        return this.cardEl(kingId)?.closest(".otk-row") || null;
     }
 }
 

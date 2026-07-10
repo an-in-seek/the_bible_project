@@ -405,9 +405,14 @@
     position: relative;
     z-index: 1;
 }
+.otk-row-card.is-hidden {
+    display: none;
+}
 /* 북이스라엘 → 좌측, 남유다 → 우측 */
 .otk-row-israel .otk-row-card { grid-column: 1; }
 .otk-row-judah  .otk-row-card { grid-column: 3; }
+.otk-row-card-israel { grid-column: 1; }
+.otk-row-card-judah  { grid-column: 3; }
 /* 통일왕국 → 중앙 정렬 */
 .otk-row-united .otk-row-card {
     grid-column: 1 / -1;
@@ -448,6 +453,7 @@
 .otk-era[data-era="split"] { border-color: var(--otk-mixed); }
 .otk-era[data-era="israel-fall"] { border-color: var(--otk-israel); }
 .otk-era[data-era="judah-fall"] { border-color: var(--otk-judah); }
+.otk-row-dot-split { background: var(--otk-mixed); }
 
 /* 단일 왕국 선택 시: 좌측 단일 열로 접기 */
 .otk-vtimeline.is-single .otk-row {
@@ -456,6 +462,7 @@
 .otk-vtimeline.is-single .otk-row-node { grid-column: 1; }
 .otk-vtimeline.is-single .otk-row-israel .otk-row-card,
 .otk-vtimeline.is-single .otk-row-judah .otk-row-card,
+.otk-vtimeline.is-single .otk-row-paired .otk-row-card,
 .otk-vtimeline.is-single .otk-row-united .otk-row-card {
     grid-column: 2;
     justify-self: stretch;
@@ -771,6 +778,7 @@
     }
     .otk-row-israel .otk-row-card,
     .otk-row-judah .otk-row-card,
+    .otk-row-paired .otk-row-card,
     .otk-row-united .otk-row-card {
         grid-column: 2;
         justify-self: stretch;

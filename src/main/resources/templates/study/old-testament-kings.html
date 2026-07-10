@@ -3,13 +3,12 @@
 <head th:replace="~{fragments/head :: head(
         '구약 왕들 연대표 - 통일왕국, 북이스라엘, 남유다 왕정 정리 | ElSeeker',
         true,
-        '/css/study/old-testament-kings.css?v=1.2')}"
+        '/css/study/old-testament-kings.css?v=1.3')}"
       th:with="pageDescription='사울, 다윗, 솔로몬의 통일왕국부터 북이스라엘과 남유다의 왕들을 연대표로 정리한 성경 학습 페이지입니다.',
                pageKeywords='구약 왕들,성경 왕 연대표,이스라엘 왕,유다 왕,통일왕국,북이스라엘,남유다,성경 연대기'">
 </head>
 <body class="has-fixed-nav study-page" data-show-back="true">
-<header th:replace="~{fragments/header :: header}"
-        th:with="pageTitle='구약 왕들 연대표', pageTitleVisible=true"></header>
+<header th:replace="~{fragments/header :: header(pageTitle='구약 왕들 연대표', pageTitleVisible=true)}"></header>
 
 <main class="container content-wrapper old-testament-kings-main">
 
@@ -157,7 +156,7 @@
     </dialog>
 </main>
 
-<script type="module" src="/js/study/old-testament-kings.js?v=1.1"></script>
+<script type="module" src="/js/study/old-testament-kings.js?v=1.2"></script>
 <div th:replace="~{fragments/section-nav :: section-nav}"></div>
 </body>
 </html>
