@@ -339,6 +339,7 @@
 }
 .otk-vtimeline {
     position: relative;
+    isolation: isolate;
     --otk-spine: clamp(64px, 9vw, 108px); /* 중앙 스파인(연도 노드) 폭 */
 }
 /* 중앙 세로 스파인 라인 */
@@ -351,6 +352,7 @@
     width: 2px;
     transform: translateX(-1px);
     background: var(--otk-card-border);
+    z-index: 0;
 }
 .otk-vtimeline.is-single::before {
     left: calc(var(--otk-spine) / 2);
@@ -383,7 +385,7 @@
     gap: 0.2rem;
     padding-top: 0.75rem;
     position: relative;
-    z-index: 1;
+    z-index: 2;
 }
 .otk-row-dot {
     width: 12px;
@@ -400,6 +402,8 @@
 }
 .otk-row-card {
     min-width: 0; /* grid 아이템 오버플로 방지 */
+    position: relative;
+    z-index: 1;
 }
 /* 북이스라엘 → 좌측, 남유다 → 우측 */
 .otk-row-israel .otk-row-card { grid-column: 1; }
@@ -425,7 +429,7 @@
     width: max-content;
     max-width: 90%;
     position: relative;
-    z-index: 1;
+    z-index: 2;
     background: var(--otk-surface);
     border: 1px solid var(--otk-card-border);
     border-radius: 999px;
