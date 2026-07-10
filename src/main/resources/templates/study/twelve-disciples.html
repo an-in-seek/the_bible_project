@@ -1,14 +1,34 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head
-    th:replace="~{fragments/head :: head('예수님의 12제자 - 이름, 별명, 활동 정리 | ElSeeker', true, '/css/search.css?v=5.0,/css/card.css?v=5.4,/css/study/twelve-disciples.css?v=5.0')}"
+    th:replace="~{fragments/head :: head('예수님의 12제자 - 이름, 별명, 활동 정리 | ElSeeker', true, '/css/search.css?v=5.0,/css/card.css?v=5.4,/css/study/twelve-disciples.css?v=5.1')}"
     th:with="pageDescription='예수님이 부르신 12제자의 이름, 별명, 성경 구절과 주요 활동을 한눈에 정리한 학습 페이지입니다.',
                pageKeywords='예수님 12제자,12사도,제자 이름,베드로,바울,요한,성경 제자'"></head>
 <body class="has-fixed-nav has-dual-bottom-nav">
 
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="container content-wrapper">
+<main class="container content-wrapper disciples-main">
+  <!-- 인트로 -->
+  <section class="disciples-intro">
+    <p class="disciples-intro-text">
+      예수님이 열두 사도로 세우신 <strong>제자들</strong>입니다.
+      복음서와 사도행전의 사도 명단은 언제나 <strong>네 명씩 세 그룹</strong>으로 기록되며,
+      각 그룹의 첫 인물(베드로·빌립·작은 야고보)은 항상 동일합니다.
+    </p>
+    <ul class="disciples-legend" aria-label="그룹별 제자 분류">
+      <li class="disciples-legend-item" data-group="g1">
+        <span class="disciples-legend-dot" aria-hidden="true"></span>그룹 1 <span class="disciples-legend-meta">베드로·안드레·야고보·요한</span>
+      </li>
+      <li class="disciples-legend-item" data-group="g2">
+        <span class="disciples-legend-dot" aria-hidden="true"></span>그룹 2 <span class="disciples-legend-meta">빌립·바돌로매·마태·도마</span>
+      </li>
+      <li class="disciples-legend-item" data-group="g3">
+        <span class="disciples-legend-dot" aria-hidden="true"></span>그룹 3 <span class="disciples-legend-meta">작은 야고보·다대오·시몬·가룟 유다</span>
+      </li>
+    </ul>
+  </section>
+
   <!-- 로딩 상태 -->
   <div id="disciplesLoading" class="disciples-loading text-center py-5">
     <div class="spinner-border text-primary" role="status">
@@ -25,6 +45,6 @@
 
 <button id="scrollToTopBtn" class="scroll-to-top-btn" type="button" aria-label="맨 위로 이동">↑</button>
 
-<script type="module" src="/js/study/twelve-disciples.js?v=1.0"></script>
+<script type="module" src="/js/study/twelve-disciples.js?v=1.1"></script>
 </body>
 </html>
