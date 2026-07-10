@@ -40,7 +40,6 @@ const state = {
     chapterNumber: null,
     verseNumber: null,
     fromSearch: false,
-    fromHome: false,
     fromMypage: false,
     fromMyMemo: false
 };
@@ -175,7 +174,6 @@ function resolveInitialState() {
 
     const fromValue = params.get("from");
     state.fromSearch = fromValue === "search";
-    state.fromHome = fromValue === "home";
     state.fromMypage = fromValue === "mypage";
     state.fromDictionary = fromValue === "dictionary";
     state.fromMyMemo = fromValue === "my-memo";
@@ -247,8 +245,8 @@ function setupBackButton(button) {
     button.classList.remove(UI_CLASSES.HIDDEN);
     bindFromBackButton(button, {
         backOn: ["search", "mypage", "dictionary", "my-memo", "history"],
+        // 기본 동작: 장(chapter) 리스트로 이동. backOn 의 특수 케이스만 history.back() 유지.
         fallback: () => {
-            if (state.fromHome) { window.location.href = "/"; return; }
             window.location.href = state.translationId && state.bookOrder
                 ? `${ROUTES.CHAPTER_LIST}?translationId=${state.translationId}&bookOrder=${state.bookOrder}`
                 : ROUTES.TRANSLATION_LIST;
