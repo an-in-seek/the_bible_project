@@ -11,7 +11,7 @@
  */
 
 import { BIBLE_BOOKS } from "./bible-book-index.js";
-import { MENU_INDEX } from "./menu-index.js";
+import { MENU_INDEX } from "./menu-index.js?v=1.1";
 import { TranslationStore } from "../storage-util.js";
 
 const TRANSLATION_ID_KRV_FALLBACK = 1;

@@ -1,0 +1,737 @@
+/* ===== 성경 역사 지도 ===== */
+/* 설계: docs/study/bible-history-map.md §7 화면 구성 */
+/* 테마 토큰: theme.css (--color-*) / 다크모드 자동 대응 */
+
+:root {
+    --bhm-accent: #0d9488;
+    --bhm-accent-soft: rgba(13, 148, 136, 0.12);
+    --bhm-nav-h: 52px;
+    --bhm-timebar-h: 92px;
+    --bhm-infobar-h: 44px;
+}
+
+html[data-theme="dark"] {
+    --bhm-accent: #2dd4bf;
+    --bhm-accent-soft: rgba(45, 212, 191, 0.16);
+}
+
+/* 지도 페이지는 페이지 스크롤을 갖지 않는다 (§7.1 모바일 원칙) */
+body:has(.bhm-main) {
+    overflow: hidden;
+}
+
+.bhm-main {
+    position: fixed;
+    top: var(--bhm-nav-h);
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg-base);
+}
+
+/* ---------- 시간 영역 ---------- */
+.bhm-timebar {
+    flex-shrink: 0;
+    padding: 0.4rem 0.75rem 0.45rem;
+    background: var(--color-bg-elevated-bright);
+    border-bottom: 1px solid var(--color-border);
+    z-index: 20;
+}
+
+.bhm-timebar-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.bhm-timebar-row + .bhm-timebar-row {
+    margin-top: 0.25rem;
+}
+
+.bhm-icon-btn {
+    flex-shrink: 0;
+    width: 1.9rem;
+    height: 1.9rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    color: var(--bhm-accent);
+    background: var(--bhm-accent-soft);
+    border: none;
+    border-radius: 50%;
+}
+
+.bhm-era-buttons {
+    display: flex;
+    gap: 0.3rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+}
+
+.bhm-era-buttons::-webkit-scrollbar {
+    display: none;
+}
+
+.bhm-era-btn {
+    flex-shrink: 0;
+    padding: 0.22rem 0.6rem;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    white-space: nowrap;
+}
+
+.bhm-era-btn.is-active {
+    color: var(--color-accent-fg);
+    background: var(--bhm-accent);
+    border-color: var(--bhm-accent);
+}
+
+.bhm-era-btn.is-empty {
+    opacity: 0.55;
+}
+
+.bhm-year-slider {
+    flex: 1;
+    accent-color: var(--bhm-accent);
+}
+
+.bhm-year-label {
+    flex-shrink: 0;
+    min-width: 13rem;
+    margin: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    text-align: right;
+}
+
+/* ---------- 지도 영역 ---------- */
+.bhm-map-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+}
+
+.bhm-map {
+    position: absolute;
+    inset: 0;
+}
+
+/* MapLibre 기본 UI 톤 정리 */
+.bhm-map .maplibregl-ctrl-attrib {
+    font-size: 0.62rem;
+    background: var(--color-bg-overlay, rgba(255, 255, 255, 0.6));
+}
+
+/* ---------- 좌측 컨트롤 (§7.5) ---------- */
+.bhm-controls {
+    position: absolute;
+    top: 0.6rem;
+    left: 0.6rem;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    width: 15rem;
+    max-height: calc(100% - 4.5rem);
+    overflow-y: auto;
+}
+
+.bhm-control-card {
+    background: var(--color-bg-elevated-bright);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px var(--color-shadow);
+    padding: 0.5rem 0.65rem;
+}
+
+.bhm-control-card summary {
+    cursor: pointer;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    list-style: none;
+}
+
+.bhm-control-card summary::-webkit-details-marker {
+    display: none;
+}
+
+.bhm-control-card summary::after {
+    content: "▾";
+    float: right;
+    color: var(--color-text-secondary);
+}
+
+.bhm-control-card[open] summary::after {
+    content: "▴";
+}
+
+.bhm-search-card {
+    position: relative;
+    padding: 0.35rem;
+}
+
+/* 텍스트 목록 진입 버튼 — 데스크톱은 하단 정보 바에서 제공하므로 모바일에서만 노출 */
+.bhm-list-btn-mobile {
+    display: none;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--bhm-accent);
+    text-align: center;
+}
+
+.bhm-search-input {
+    width: 100%;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.82rem;
+    color: var(--color-text-primary);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border-control, var(--color-border));
+    border-radius: 7px;
+}
+
+.bhm-search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    margin: 0;
+    padding: 0.25rem;
+    list-style: none;
+    background: var(--color-bg-elevated-bright);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    box-shadow: 0 6px 18px var(--color-shadow);
+    max-height: 16rem;
+    overflow-y: auto;
+    z-index: 30;
+}
+
+.bhm-search-results li button {
+    display: block;
+    width: 100%;
+    padding: 0.35rem 0.5rem;
+    font-size: 0.78rem;
+    color: var(--color-text-primary);
+    text-align: left;
+    background: none;
+    border: none;
+    border-radius: 6px;
+}
+
+.bhm-search-results li button:hover,
+.bhm-search-results li button:focus-visible {
+    background: var(--bhm-accent-soft);
+}
+
+.bhm-search-result-meta {
+    display: block;
+    font-size: 0.68rem;
+    color: var(--color-text-secondary);
+}
+
+.bhm-layer-toggles {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin-top: 0.45rem;
+}
+
+.bhm-layer-toggles label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+}
+
+.bhm-layer-toggles input {
+    accent-color: var(--bhm-accent);
+}
+
+.bhm-route-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--color-border);
+}
+
+.bhm-chip-btn {
+    padding: 0.2rem 0.55rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--bhm-accent);
+    background: var(--bhm-accent-soft);
+    border: 1px solid transparent;
+    border-radius: 999px;
+}
+
+.bhm-chip-btn.is-active {
+    color: var(--color-accent-fg);
+    background: var(--bhm-accent);
+}
+
+/* ---------- 범례 ---------- */
+.bhm-legend {
+    margin-top: 0.45rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    font-size: 0.72rem;
+    color: var(--color-text-secondary);
+}
+
+.bhm-legend-row {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.bhm-legend-swatch {
+    flex-shrink: 0;
+    width: 1.4rem;
+    height: 0.85rem;
+    border-radius: 3px;
+}
+
+.bhm-legend-swatch--polity {
+    background: var(--bhm-accent-soft);
+    border: 1px dashed var(--bhm-accent);
+}
+
+.bhm-legend-swatch--route {
+    height: 0;
+    border-top: 3px solid var(--bhm-accent);
+    border-radius: 0;
+}
+
+.bhm-legend-swatch--route-disputed {
+    height: 0;
+    border-top: 3px dashed var(--bhm-accent);
+    border-radius: 0;
+}
+
+/* ---------- 지도 마커 ---------- */
+.bhm-marker {
+    display: flex;
+    align-items: center;
+    gap: 0.22rem;
+    cursor: pointer;
+}
+
+.bhm-marker-dot {
+    width: 0.62rem;
+    height: 0.62rem;
+    border-radius: 50%;
+    background: var(--bhm-accent);
+    border: 2px solid var(--color-bg-elevated-bright);
+    box-shadow: 0 1px 3px var(--color-shadow);
+}
+
+.bhm-marker--event .bhm-marker-dot {
+    background: #d97706;
+    border-radius: 3px;
+}
+
+.bhm-marker--disputed .bhm-marker-dot {
+    background: repeating-linear-gradient(45deg, #9ca3af 0 2px, #6b7280 2px 4px);
+}
+
+.bhm-marker-label {
+    padding: 0.05rem 0.3rem;
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    background: var(--color-bg-overlay, rgba(255, 255, 255, 0.75));
+    border-radius: 5px;
+    white-space: nowrap;
+    text-shadow: none;
+}
+
+.bhm-marker--polity .bhm-marker-label {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--color-text-secondary);
+    background: none;
+}
+
+.bhm-marker.is-selected .bhm-marker-dot {
+    outline: 3px solid var(--bhm-accent);
+    outline-offset: 1px;
+}
+
+/* ---------- 스냅샷 안내 · 토스트 · 빈 상태 (§7.3, §7.5, §7.6) ---------- */
+.bhm-snapshot-notice {
+    position: absolute;
+    bottom: 0.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 0.28rem 0.75rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-elevated-bright);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    box-shadow: 0 2px 8px var(--color-shadow);
+    z-index: 10;
+    max-width: min(92%, 34rem);
+    text-align: center;
+}
+
+.bhm-toast {
+    position: absolute;
+    top: 0.7rem;
+    left: 50%;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 0.35rem 0.9rem;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--color-accent-fg);
+    background: var(--bhm-accent);
+    border-radius: 999px;
+    box-shadow: 0 4px 14px var(--color-shadow);
+    z-index: 25;
+}
+
+.bhm-empty-state {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 1rem 1.25rem;
+    text-align: center;
+    background: var(--color-bg-elevated-bright);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    box-shadow: 0 6px 20px var(--color-shadow);
+    z-index: 15;
+    max-width: min(90%, 22rem);
+}
+
+.bhm-empty-state p {
+    margin: 0 0 0.6rem;
+    font-size: 0.82rem;
+    color: var(--color-text-primary);
+    line-height: 1.6;
+}
+
+/* ---------- 상세 패널 (§7.4) ---------- */
+.bhm-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 22.5rem;
+    max-width: 88%;
+    background: var(--color-bg-elevated-bright);
+    border-left: 1px solid var(--color-border);
+    box-shadow: -6px 0 18px var(--color-shadow);
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+}
+
+.bhm-panel-grip {
+    display: none;
+}
+
+.bhm-panel-close {
+    position: absolute;
+    top: 0.45rem;
+    right: 0.55rem;
+    width: 1.8rem;
+    height: 1.8rem;
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: 50%;
+    z-index: 2;
+}
+
+.bhm-panel-body {
+    padding: 1rem 1.05rem 1.25rem;
+    overflow-y: auto;
+}
+
+.bhm-panel-kicker {
+    margin: 0 0 0.15rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--bhm-accent);
+}
+
+.bhm-panel-title {
+    margin: 0 0 0.15rem;
+    padding-right: 1.8rem;
+    font-size: 1.12rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+}
+
+.bhm-panel-sub {
+    margin: 0 0 0.6rem;
+    font-size: 0.76rem;
+    color: var(--color-text-secondary);
+}
+
+.bhm-badge {
+    display: inline-block;
+    margin: 0 0.25rem 0.6rem 0;
+    padding: 0.14rem 0.5rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    border-radius: 999px;
+    color: var(--color-text-secondary);
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+}
+
+.bhm-badge--type {
+    color: var(--bhm-accent);
+    background: var(--bhm-accent-soft);
+    border-color: transparent;
+}
+
+.bhm-badge--warn {
+    color: #b45309;
+    background: rgba(217, 119, 6, 0.12);
+    border-color: transparent;
+}
+
+html[data-theme="dark"] .bhm-badge--warn {
+    color: #fbbf24;
+    background: rgba(251, 191, 36, 0.14);
+}
+
+.bhm-panel-desc {
+    margin: 0 0 0.8rem;
+    font-size: 0.84rem;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
+}
+
+.bhm-panel-section-title {
+    margin: 0.9rem 0 0.4rem;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
+}
+
+.bhm-ref-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.bhm-ref-list a {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    text-decoration: none;
+    background: var(--bhm-accent-soft);
+    border-radius: 8px;
+}
+
+.bhm-ref-list a::after {
+    content: "성경에서 읽기 →";
+    flex-shrink: 0;
+    font-size: 0.68rem;
+    color: var(--bhm-accent);
+}
+
+.bhm-viewpoint-switch {
+    display: flex;
+    gap: 0.3rem;
+    flex-wrap: wrap;
+}
+
+.bhm-panel-source {
+    margin: 1rem 0 0;
+    padding-top: 0.6rem;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.68rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+}
+
+/* ---------- 텍스트 목록 보기 (§7.6, §19.2) ---------- */
+.bhm-listview {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    background: var(--color-bg-overlay, rgba(0, 0, 0, 0.35));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+}
+
+.bhm-listview-inner {
+    position: relative;
+    width: min(100%, 46rem);
+    max-height: 100%;
+    overflow-y: auto;
+    padding: 1.1rem 1.2rem;
+    background: var(--color-bg-elevated-bright);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+}
+
+.bhm-listview-inner h2 {
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--color-text-primary);
+    margin: 0 0 0.75rem;
+}
+
+.bhm-listview-inner table {
+    width: 100%;
+    font-size: 0.78rem;
+    border-collapse: collapse;
+}
+
+.bhm-listview-inner th,
+.bhm-listview-inner td {
+    padding: 0.4rem 0.5rem;
+    text-align: left;
+    color: var(--color-text-secondary);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.bhm-listview-inner th {
+    color: var(--color-text-primary);
+    font-weight: 700;
+}
+
+/* ---------- 정보 영역 ---------- */
+.bhm-infobar {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.4rem 0.9rem;
+    background: var(--color-bg-elevated-bright);
+    border-top: 1px solid var(--color-border);
+    z-index: 20;
+}
+
+.bhm-infobar-era {
+    margin: 0;
+    font-size: 0.76rem;
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.bhm-infobar-meta {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.68rem;
+    color: var(--color-text-secondary);
+}
+
+/* ---------- 모바일 (§7.1) ---------- */
+@media (max-width: 991.98px) {
+    /* 시간 막대: 하단 고정 (엄지 조작 범위) */
+    .bhm-main {
+        flex-direction: column-reverse;
+    }
+
+    .bhm-timebar {
+        border-bottom: none;
+        border-top: 1px solid var(--color-border);
+        padding-bottom: max(0.45rem, env(safe-area-inset-bottom));
+    }
+
+    .bhm-year-label {
+        min-width: 0;
+        flex: 1;
+    }
+
+    /* 정보 바는 메뉴로 대체 — 텍스트 목록 버튼만 유지 */
+    .bhm-infobar {
+        display: none;
+    }
+
+    .bhm-controls {
+        width: auto;
+        right: 0.6rem;
+        max-height: 45%;
+    }
+
+    .bhm-control-card {
+        width: 13rem;
+        margin-left: auto;
+    }
+
+    .bhm-list-btn-mobile {
+        display: block;
+    }
+
+    /* 상세 패널: 2단 바텀 시트 */
+    .bhm-panel {
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        max-width: 100%;
+        height: 42%;
+        border-left: none;
+        border-top: 1px solid var(--color-border);
+        border-radius: 14px 14px 0 0;
+        box-shadow: 0 -6px 18px var(--color-shadow);
+        transition: height 0.2s ease;
+    }
+
+    .bhm-panel.is-expanded {
+        height: 85%;
+    }
+
+    .bhm-panel-grip {
+        display: block;
+        width: 2.6rem;
+        height: 4px;
+        margin: 0.45rem auto 0.2rem;
+        background: var(--color-border);
+        border-radius: 2px;
+        cursor: grab;
+    }
+}
+
+/* ---------- Reduced Motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+    .bhm-panel {
+        transition: none;
+    }
+}

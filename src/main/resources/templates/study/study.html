@@ -2,8 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head
-        th:replace="~{fragments/head :: head('성경 학습 - 사전, 족보, 역사, 개요 영상, 십계명, 성주간, 성경 주석 | ElSeeker', true, '/css/hero.css?v=5.1,/css/card.css?v=5.4,/css/study/study.css?v=5.2')}"
-        th:with="pageDescription='성경 사전, 족보, 역사 연대기, 개요 영상, 십계명, 성주간 타임라인, 성경 주석 사이트 큐레이션 등 다양한 성경 학습 콘텐츠를 한 곳에서 이용할 수 있습니다.',
+    th:replace="~{fragments/head :: head('성경 학습 - 사전, 족보, 역사, 개요 영상, 십계명, 성주간, 성경 주석 | ElSeeker', true, '/css/hero.css?v=5.1,/css/card.css?v=5.4,/css/study/study.css?v=5.2')}"
+    th:with="pageDescription='성경 사전, 족보, 역사 연대기, 개요 영상, 십계명, 성주간 타임라인, 성경 주석 사이트 큐레이션 등 다양한 성경 학습 콘텐츠를 한 곳에서 이용할 수 있습니다.',
                  pageKeywords='성경 학습,성경 공부,성경 사전,성경 족보,성경 역사,성경 개요,성경 해설,십계명,성주간,고난주간,부활절,성경 주석'">
 </head>
 
@@ -13,219 +13,217 @@
         th:with="pageTitle='학습', pageTitleVisible=true"></header>
 
 <main class="container content-wrapper">
-    <div class="row g-3">
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/creation">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">✨</span>7일 창조 체험</h3>
-                        <p class="text-muted small mb-0">창세기 1장의 창조 이야기를 스크롤로 체험합니다.</p>
-                    </div>
-                </div>
-            </a>
+  <div class="row g-3">
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/creation">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">✨</span>7일 창조 체험</h3>
+            <p class="text-muted small mb-0">창세기 1장의 창조 이야기를 스크롤로 체험합니다.</p>
+          </div>
         </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/dictionary">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1">
-                            <img src="/images/icon/dictionary.svg?v=1.1" class="me-2" width="24" height="24" alt="Dictionary Icon" loading="lazy" decoding="async">
-                            성경 사전</h3>
-                        <p class="text-muted small mb-0">성경 용어를 빠르게 검색합니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/history">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">📜</span>성경 역사</h3>
-                        <p class="text-muted small mb-0">성경 시대와 사건을 한눈에 살펴봅니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/old-testament-kings">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">👑</span>구약 왕들 연대표</h3>
-                        <p class="text-muted small mb-0">통일왕국부터 남북 왕국까지 왕들의 흐름을 한눈에 봅니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/bible-overview-video">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1">
-                            <img src="/images/icon/youtube.svg" class="me-2" width="24" height="24" alt="YouTube Icon" loading="lazy" decoding="async">
-                            성경 개요</h3>
-                        <p class="text-muted small mb-0">성경 66권 개요 영상을 시청합니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/public-reading-of-scripture">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1">
-                            <img src="/images/icon/youtube.svg" class="me-2" width="24" height="24" alt="YouTube Icon" loading="lazy" decoding="async">
-                            공동체성경읽기</h3>
-                        <p class="text-muted small mb-0">드라마바이블로 성경을 함께 듣습니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/bible-genealogy">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">👪</span>성경 족보</h3>
-                        <p class="text-muted small mb-0">성경 족보를 살펴봅니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/twelve-tribes">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1">
-                            <img src="/images/icon/12-tribes.svg?v=1.1" class="me-2" width="24" height="24" alt="12 Tribes Icon" loading="lazy" decoding="async">
-                            이스라엘 12지파
-                        </h3>
-                        <p class="text-muted small mb-0">야곱의 열두 아들과 이스라엘 12지파를 살펴봅니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/twelve-disciples">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1">
-                            <img src="/images/icon/12-disciples.svg" class="me-2" width="24" height="24" alt="12 Disciples Icon" loading="lazy" decoding="async">
-                            예수님의 12제자
-                        </h3>
-                        <p class="text-muted small mb-0">예수님이 선택하신 열두 제자를 살펴봅니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/lords-prayer">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">🙏</span>주기도문</h3>
-                        <p class="text-muted small mb-0">주기도문을 함께 묵상합니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/apostles-creed">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">✝️</span>사도신경</h3>
-                        <p class="text-muted small mb-0">사도신경 12조항을 함께 묵상합니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/ten-commandments">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1">
-                            <img src="/images/icon/stone-tablet.svg" class="me-2" width="24" height="24" alt="Ten Commandments Icon" loading="lazy" decoding="async">
-                            십계명</h3>
-                        <p class="text-muted small mb-0">출애굽기 20장의 십계명을 설명합니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/holy-week">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1">
-                            <img src="/images/icon/cross.svg?v=1.2" class="me-2" width="24" height="24" alt="Holy Week Icon" loading="lazy" decoding="async">
-                            성주간 타임라인</h3>
-                        <p class="text-muted small mb-0">성주간 시간표를 살펴봅니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <a class="text-decoration-none study-card-link card-lift" href="/web/study/bible-commentary">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">📝</span>성경 주석</h3>
-                        <p class="text-muted small mb-0">권위 있는 성경 주석·연구 사이트를 한 곳에서 비교합니다.</p>
-                    </div>
-                </div>
-            </a>
-        </div>
-
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="study-card-link card-lift coming-soon">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h3 class="h6 fw-semibold mb-0"><span class="me-2" aria-hidden="true">📄</span>성경 논문
-                            </h3>
-                            <span class="badge text-bg-warning text-uppercase small">준비중</span>
-                        </div>
-                        <p class="text-muted small mb-0">준비중</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="study-card-link card-lift coming-soon">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h3 class="h6 fw-semibold mb-0"><span class="me-2" aria-hidden="true">🗺️</span>성경 지도
-                            </h3>
-                            <span class="badge text-bg-warning text-uppercase small">준비중</span>
-                        </div>
-                        <p class="text-muted small mb-0">준비중</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-12 col-md-6 col-lg-4">
-            <div class="study-card-link card-lift coming-soon">
-                <div class="card card-panel card-soft">
-                    <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <h3 class="h6 fw-semibold mb-0"><span class="me-2" aria-hidden="true">🎓</span>성경 강의
-                            </h3>
-                            <span class="badge text-bg-warning text-uppercase small">준비중</span>
-                        </div>
-                        <p class="text-muted small mb-0">준비중</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+      </a>
     </div>
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/dictionary">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1">
+              <img src="/images/icon/dictionary.svg?v=1.1" class="me-2" width="24" height="24" alt="Dictionary Icon" loading="lazy" decoding="async">
+              성경 사전</h3>
+            <p class="text-muted small mb-0">성경 용어를 빠르게 검색합니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/history">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">📜</span>성경 역사</h3>
+            <p class="text-muted small mb-0">성경 시대와 사건을 한눈에 살펴봅니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/old-testament-kings">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">👑</span>구약 왕들 연대표</h3>
+            <p class="text-muted small mb-0">통일왕국부터 남북 왕국까지 왕들의 흐름을 한눈에 봅니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/bible-history-map">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">🗺️</span>성경 역사 지도</h3>
+            <p class="text-muted small mb-0">시간 막대를 움직이며 성경 시대의 지도와 사건을 탐색합니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/bible-overview-video">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1">
+              <img src="/images/icon/youtube.svg" class="me-2" width="24" height="24" alt="YouTube Icon" loading="lazy" decoding="async">
+              성경 개요</h3>
+            <p class="text-muted small mb-0">성경 66권 개요 영상을 시청합니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/public-reading-of-scripture">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1">
+              <img src="/images/icon/youtube.svg" class="me-2" width="24" height="24" alt="YouTube Icon" loading="lazy" decoding="async">
+              공동체성경읽기</h3>
+            <p class="text-muted small mb-0">드라마바이블로 성경을 함께 듣습니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/bible-genealogy">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">👪</span>성경 족보</h3>
+            <p class="text-muted small mb-0">성경 족보를 살펴봅니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/twelve-tribes">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1">
+              <img src="/images/icon/12-tribes.svg?v=1.1" class="me-2" width="24" height="24" alt="12 Tribes Icon" loading="lazy" decoding="async">
+              이스라엘 12지파
+            </h3>
+            <p class="text-muted small mb-0">야곱의 열두 아들과 이스라엘 12지파를 살펴봅니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/twelve-disciples">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1">
+              <img src="/images/icon/12-disciples.svg" class="me-2" width="24" height="24" alt="12 Disciples Icon" loading="lazy" decoding="async">
+              예수님의 12제자
+            </h3>
+            <p class="text-muted small mb-0">예수님이 선택하신 열두 제자를 살펴봅니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/lords-prayer">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">🙏</span>주기도문</h3>
+            <p class="text-muted small mb-0">주기도문을 함께 묵상합니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/apostles-creed">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">✝️</span>사도신경</h3>
+            <p class="text-muted small mb-0">사도신경 12조항을 함께 묵상합니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/ten-commandments">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1">
+              <img src="/images/icon/stone-tablet.svg" class="me-2" width="24" height="24" alt="Ten Commandments Icon" loading="lazy"
+                   decoding="async">
+              십계명</h3>
+            <p class="text-muted small mb-0">출애굽기 20장의 십계명을 설명합니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/holy-week">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1">
+              <img src="/images/icon/cross.svg?v=1.2" class="me-2" width="24" height="24" alt="Holy Week Icon" loading="lazy" decoding="async">
+              성주간 타임라인</h3>
+            <p class="text-muted small mb-0">성주간 시간표를 살펴봅니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <a class="text-decoration-none study-card-link card-lift" href="/web/study/bible-commentary">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <h3 class="h6 fw-semibold mb-1"><span class="me-2" aria-hidden="true">📝</span>성경 주석</h3>
+            <p class="text-muted small mb-0">권위 있는 성경 주석·연구 사이트를 한 곳에서 비교합니다.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="study-card-link card-lift coming-soon">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h3 class="h6 fw-semibold mb-0"><span class="me-2" aria-hidden="true">📄</span>성경 논문
+              </h3>
+              <span class="badge text-bg-warning text-uppercase small">준비중</span>
+            </div>
+            <p class="text-muted small mb-0">준비중</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="study-card-link card-lift coming-soon">
+        <div class="card card-panel card-soft">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <h3 class="h6 fw-semibold mb-0"><span class="me-2" aria-hidden="true">🎓</span>성경 강의
+              </h3>
+              <span class="badge text-bg-warning text-uppercase small">준비중</span>
+            </div>
+            <p class="text-muted small mb-0">준비중</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
 </main>
 
 <script type="module" src="/js/study/study.js?v=2.2"></script>

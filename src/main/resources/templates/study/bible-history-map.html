@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head
+    th:replace="~{fragments/head :: head('성경 역사 지도 - 시대별 국가, 도시, 이동 경로 | ElSeeker', true, '/vendor/maplibre/maplibre-gl.css,/css/study/bible-history-map.css?v=1.1')}"
+    th:with="pageDescription='성경에 등장하는 국가, 도시, 사건, 이동 경로를 시간 막대와 함께 지도에서 탐색하는 학습 페이지입니다.',
+               pageKeywords='성경 지도,성경 역사 지도,출애굽 경로,바울 전도여행,바벨론 포로,성경 지리'"></head>
+<body class="has-fixed-nav">
+
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="bhm-main" aria-label="성경 역사 지도">
+  <!-- 시간 영역 (데스크톱: 상단 / 모바일: 하단 고정) -->
+  <section class="bhm-timebar" aria-label="시간 탐색">
+    <div class="bhm-timebar-row">
+      <button type="button" id="bhmPrevEra" class="bhm-icon-btn" aria-label="이전 시대">◀</button>
+      <div class="bhm-era-buttons" id="bhmEraButtons" role="group" aria-label="시대 선택"></div>
+      <button type="button" id="bhmNextEra" class="bhm-icon-btn" aria-label="다음 시대">▶</button>
+    </div>
+    <div class="bhm-timebar-row">
+      <input type="range" id="bhmYearSlider" class="bhm-year-slider"
+             min="-2000" max="100" step="5" value="-950" aria-label="연도 선택">
+      <p class="bhm-year-label" id="bhmYearLabel" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- 지도 영역 -->
+  <div class="bhm-map-wrap">
+    <div id="bhmMap" class="bhm-map" aria-label="지도 캔버스"></div>
+
+    <!-- 좌측 컨트롤 오버레이 -->
+    <div class="bhm-controls" id="bhmControls">
+      <div class="bhm-control-card bhm-search-card">
+        <input type="search" id="bhmSearch" class="bhm-search-input"
+               placeholder="장소, 사건, 경로 검색" autocomplete="off" aria-label="장소, 사건, 경로 검색">
+        <ul id="bhmSearchResults" class="bhm-search-results" hidden></ul>
+      </div>
+      <details class="bhm-control-card" id="bhmLayerCard" open>
+        <summary>레이어</summary>
+        <div id="bhmLayerToggles" class="bhm-layer-toggles"></div>
+        <div id="bhmRouteChips" class="bhm-route-chips" aria-label="이동 경로 선택"></div>
+      </details>
+      <details class="bhm-control-card" id="bhmLegendCard">
+        <summary>범례</summary>
+        <div id="bhmLegend" class="bhm-legend"></div>
+      </details>
+      <button type="button" id="bhmListOpenMobile" class="bhm-control-card bhm-list-btn-mobile">텍스트 목록 보기</button>
+    </div>
+
+    <!-- 스냅샷 안내 배지 -->
+    <p id="bhmSnapshotNotice" class="bhm-snapshot-notice" role="status"></p>
+
+    <!-- 시대 전환 토스트 -->
+    <p id="bhmToast" class="bhm-toast" role="status" hidden></p>
+
+    <!-- 빈 시대 안내 -->
+    <div id="bhmEmptyState" class="bhm-empty-state" hidden>
+      <p id="bhmEmptyText"></p>
+      <button type="button" id="bhmEmptyJump" class="bhm-chip-btn"></button>
+    </div>
+
+    <!-- 상세 패널 (데스크톱: 우측 / 모바일: 바텀 시트) -->
+    <aside id="bhmPanel" class="bhm-panel" aria-label="상세 정보" hidden>
+      <div class="bhm-panel-grip" id="bhmPanelGrip" aria-hidden="true"></div>
+      <button type="button" id="bhmPanelClose" class="bhm-panel-close" aria-label="상세 정보 닫기">×</button>
+      <div id="bhmPanelBody" class="bhm-panel-body"></div>
+    </aside>
+
+    <!-- 텍스트 목록 보기 (지도 대체 정보) -->
+    <div id="bhmListView" class="bhm-listview" role="dialog" aria-label="현재 시대 텍스트 목록" hidden>
+      <div class="bhm-listview-inner">
+        <button type="button" id="bhmListClose" class="bhm-panel-close" aria-label="목록 닫기">×</button>
+        <div id="bhmListBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 정보 영역 (데스크톱 하단 바) -->
+  <section class="bhm-infobar" aria-label="시대 설명과 데이터 상태">
+    <p class="bhm-infobar-era" id="bhmEraDesc"></p>
+    <div class="bhm-infobar-meta">
+      <span id="bhmDataStatus"></span>
+      <button type="button" id="bhmListOpen" class="bhm-chip-btn">텍스트 목록 보기</button>
+    </div>
+  </section>
+</main>
+
+<script src="/vendor/maplibre/maplibre-gl.js"></script>
+<script type="module" src="/js/study/bible-history-map.js?v=1.2"></script>
+</body>
+</html>

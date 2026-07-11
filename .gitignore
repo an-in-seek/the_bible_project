@@ -57,16 +57,4 @@ out/
 /.codex
 
 ### omc ###
-/docs/policy/.omc/
-/src/main/resources/templates/legal/.omc/
-/src/main/resources/static/css/.omc/
-/docs/policy/.omc/
-/src/main/resources/templates/legal/.omc/
-/src/main/resources/templates/.omc/
-/src/main/resources/templates/bible/.omc/
-/src/main/resources/static/js/community/.omc/
-/src/main/resources/static/js/.omc/state/agent-replay-b54b24dd-401c-42be-8ccb-77e841b2d3e8.jsonl
-/src/main/resources/static/js/.omc/state/subagent-tracking.json
-/src/main/resources/.omc/state/agent-replay-b54b24dd-401c-42be-8ccb-77e841b2d3e8.jsonl
-/src/main/resources/.omc/state/subagent-tracking.json
-/src/main/resources/static/js/.omc/state/mission-state.json
+.omc

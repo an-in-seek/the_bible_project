@@ -114,6 +114,17 @@ export const MENU_INDEX = Object.freeze([
         requiresAuth: false,
     },
     {
+        id: "study-bible-history-map",
+        title: "성경 역사 지도",
+        titleEn: "Bible History Map",
+        category: "학습",
+        icon: "🗺️",
+        keywords: ["map", "지도", "역사 지도", "성경 지도", "지리"],
+        url: "/web/study/bible-history-map",
+        description: "시간 막대를 움직이며 성경 시대의 지도와 사건을 탐색합니다.",
+        requiresAuth: false,
+    },
+    {
         id: "study-overview-video",
         title: "성경 개요 영상",
         titleEn: "Bible Overview Video",

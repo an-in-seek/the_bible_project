@@ -11,7 +11,7 @@
  *  - 페이지네이션: 구절 탭만 적용 ("더보기" append)
  */
 
-import {searchBibleBooks, searchBibleVerses, searchDictionary, searchMenus,} from "./search-sources.js?v=1.2";
+import {searchBibleBooks, searchBibleVerses, searchDictionary, searchMenus,} from "./search-sources.js?v=1.3";
 import {parseBibleReference} from "./bible-reference-parser.js?v=1.1";
 import {createRestoreStore, restoreScroll} from "/js/nav-restore.js?v=1.0";
 

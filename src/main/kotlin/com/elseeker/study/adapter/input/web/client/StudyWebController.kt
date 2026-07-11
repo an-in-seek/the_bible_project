@@ -72,4 +72,9 @@ class StudyWebController {
     fun showOldTestamentKings(): String {
         return "study/old-testament-kings"
     }
+
+    @GetMapping("/bible-history-map")
+    fun showBibleHistoryMap(): String {
+        return "study/bible-history-map"
+    }
 }

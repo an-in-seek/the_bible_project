@@ -151,6 +151,8 @@ class SecurityConfig(
                         "/js/**",
                         "/images/**",
                         "/webjars/**",
+                        "/vendor/**",
+                        "/data/**",
                     ).permitAll()
                     // 공개 SSR 페이지
                     .requestMatchers("/web/**").permitAll()
