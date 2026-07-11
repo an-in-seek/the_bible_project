@@ -7,7 +7,8 @@ const DomHelper = {
         const get = id => document.getElementById(id);
         return {
             backButton: get("topNavBackButton"),
-            pageTitleLabel: get("pageTitleLabel")
+            pageTitleLabel: get("pageTitleLabel"),
+            scrollToTopBtn: get("scrollToTopBtn")
         };
     }
 };
@@ -17,7 +18,21 @@ const App = {
     init: () => {
         App.elements = DomHelper.getElements();
         App.initNav();
+        App.initScrollToTop();
         App.scrollToSelectedEra();
+    },
+
+    initScrollToTop: () => {
+        const {scrollToTopBtn} = App.elements;
+        if (!scrollToTopBtn) {
+            return;
+        }
+        scrollToTopBtn.addEventListener("click", () => {
+            window.scrollTo({top: 0, behavior: "smooth"});
+        });
+        window.addEventListener("scroll", () => {
+            scrollToTopBtn.classList.toggle("is-visible", window.scrollY >= 300);
+        }, {passive: true});
     },
 
     scrollToSelectedEra: () => {
