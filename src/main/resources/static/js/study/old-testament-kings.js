@@ -838,6 +838,7 @@ class OldTestamentKingsTimeline {
     setupDialogScrollLock(this.detailDialog);
     this.renderTimeline();
     this.bindEvents();
+    this.bindScrollToTop();
   }
 
   cacheElements() {
@@ -854,6 +855,21 @@ class OldTestamentKingsTimeline {
     this.dividedTrack = document.getElementById("otkDividedTrack");
     this.eraSplit = document.getElementById("otkEraSplit");
     this.mobileTabs = document.getElementById("otkMobileTabs");
+    this.scrollToTopBtn = document.getElementById("scrollToTopBtn");
+  }
+
+  // ---------- 맨 위로 이동 ----------
+
+  bindScrollToTop() {
+    if (!this.scrollToTopBtn) return;
+    this.scrollToTopBtn.addEventListener("click", () => {
+      const mq = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)");
+      const reduce = mq ? mq.matches : false;
+      window.scrollTo({top: 0, behavior: reduce ? "auto" : "smooth"});
+    });
+    window.addEventListener("scroll", () => {
+      this.scrollToTopBtn.classList.toggle("is-visible", window.scrollY >= 300);
+    }, {passive: true});
   }
 
   // ---------- 렌더 ----------
