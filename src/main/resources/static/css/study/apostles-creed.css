@@ -1,127 +1,158 @@
+/* ===== 사도신경 ===== */
+/* 테마 토큰: theme.css (--color-*) / 다크모드 자동 대응 */
+/* 이 파일은 사도신경 페이지에서만 로드되므로 페이지 액센트를 :root 에 둔다 */
+
+:root {
+    --ac-accent: #4f46e5;
+    --ac-accent-soft: rgba(79, 70, 229, 0.10);
+}
+
+html[data-theme="dark"] {
+    --ac-accent: #a5b4fc;
+    --ac-accent-soft: rgba(129, 140, 248, 0.16);
+}
+
 .apostles-creed-loading {
     max-width: 640px;
     margin: 0 auto;
 }
 
-/* Full Creed Text */
+/* --- 히어로: 사도신경 전문 --- */
 .apostles-creed-full-text {
     max-width: 720px;
-    margin: 0 auto 2rem;
+    margin: 0 auto 1.5rem;
 }
 
-.apostles-creed-full-text-inner {
-    background: linear-gradient(145deg, #e0e7ff 0%, #dbeafe 100%);
-    border: 1px solid #a5b4fc;
-    border-radius: 0.75rem;
-    padding: 1.75rem 2rem;
+.apostles-creed-hero {
+    padding: 1.9rem 2rem 1.7rem;
     text-align: center;
+    background: var(--color-bg-elevated-bright);
+    border: 1px solid var(--color-border);
+    border-top: 3px solid var(--ac-accent);
+    border-radius: 14px;
+    box-shadow: 0 1px 3px var(--color-shadow);
 }
 
-.apostles-creed-full-text-title {
-    font-size: 1.25rem;
+.apostles-creed-hero-eyebrow {
+    margin: 0 0 1rem;
+    padding-left: 0.35em;
+    font-size: 0.72rem;
     font-weight: 700;
-    color: #1e3a5f;
-    margin: 0 0 0.25rem;
+    letter-spacing: 0.35em;
+    color: var(--ac-accent);
 }
 
-.apostles-creed-full-text-ref {
-    font-size: 0.8rem;
-    color: #4f46e5;
-    margin: 0 0 1.25rem;
+.apostles-creed-hero-body {
+    font-size: 1.02rem;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 2.1;
 }
 
-.apostles-creed-full-text-body {
-    font-size: 0.95rem;
-    color: #1e293b;
-    line-height: 2;
-}
-
-/* History */
+/* --- 유래와 역사 --- */
 .apostles-creed-history {
     max-width: 720px;
-    margin: 0 auto 2rem;
+    margin: 0 auto 1.5rem;
 }
 
 .apostles-creed-history-inner {
-    background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
-    border: 1px solid #f59e0b;
-    border-radius: 0.75rem;
-    padding: 1.75rem 2rem;
+    padding: 1.5rem 1.75rem;
+    background: var(--color-bg-elevated);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
 }
 
 .apostles-creed-history-title {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: #78350f;
     margin: 0 0 1.25rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
     text-align: center;
 }
 
-.apostles-creed-history-section {
-    margin-bottom: 0.85rem;
+.apostles-creed-history-item {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.85rem 0;
+    border-top: 1px solid var(--color-border);
 }
 
-.apostles-creed-history-section:last-child {
-    margin-bottom: 0;
+.apostles-creed-history-item:first-of-type {
+    padding-top: 0;
+    border-top: none;
 }
 
-.apostles-creed-history-section-title {
-    font-size: 0.85rem;
+.apostles-creed-history-item:last-of-type {
+    padding-bottom: 0;
+}
+
+.apostles-creed-history-num {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.65rem;
+    height: 1.65rem;
+    font-size: 0.8rem;
     font-weight: 700;
-    color: #92400e;
-    margin: 0 0 0.25rem;
+    color: var(--ac-accent);
+    background: var(--ac-accent-soft);
+    border-radius: 50%;
 }
 
-.apostles-creed-history-section-body {
-    font-size: 0.85rem;
-    color: #451a03;
-    line-height: 1.7;
+.apostles-creed-history-item-title {
+    margin: 0.15rem 0 0.3rem;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+}
+
+.apostles-creed-history-item-body {
     margin: 0;
+    font-size: 0.83rem;
+    color: var(--color-text-secondary);
+    line-height: 1.7;
 }
 
-@media (max-width: 576px) {
-    .apostles-creed-history-inner {
-        padding: 1.25rem 1rem;
-    }
-
-    .apostles-creed-history-title {
-        font-size: 1.05rem;
-    }
-}
-
-/* Grid */
+/* --- 조항별 묵상 카드 --- */
 .apostles-creed-grid {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1rem;
     max-width: 720px;
     margin: 0 auto;
 }
 
-/* Card */
 .apostles-creed-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 0.75rem;
+    background: var(--color-bg-elevated-bright);
+    border: 1px solid var(--color-border);
+    border-left: 4px solid var(--ac-accent);
+    border-radius: 12px;
     overflow: hidden;
-    transition: box-shadow 0.15s ease, transform 0.15s ease;
+    box-shadow: 0 1px 2px var(--color-shadow);
+    transition: box-shadow 0.18s ease, transform 0.18s ease;
+    animation: ac-fade 0.35s ease both;
+    animation-delay: calc(var(--i, 0) * 40ms);
+}
+
+@keyframes ac-fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 @media (hover: hover) and (pointer: fine) {
     .apostles-creed-card:hover {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        transform: translateY(-2px);
+        box-shadow: 0 6px 18px var(--color-shadow);
+        transform: translateY(-3px);
     }
 }
 
-/* Card Header */
 .apostles-creed-card-header {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
-    padding: 0.85rem 1rem;
-    background: linear-gradient(145deg, #e0e7ff 0%, #c7d2fe 100%);
-    border-bottom: 1px solid #a5b4fc;
+    gap: 0.6rem;
+    padding: 0.8rem 1rem;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .apostles-creed-card-order {
@@ -132,78 +163,87 @@
     height: 1.75rem;
     font-size: 0.8rem;
     font-weight: 700;
-    color: #312e81;
-    background: #ffffff;
+    color: var(--ac-accent);
+    background: var(--ac-accent-soft);
     border-radius: 50%;
     flex-shrink: 0;
 }
 
 .apostles-creed-card-theme {
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: #312e81;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ac-accent);
 }
 
-/* Card Body */
 .apostles-creed-card-body {
-    padding: 1rem;
+    padding: 0.95rem 1rem 1rem;
 }
 
 .apostles-creed-card-text {
-    font-size: 1.05rem;
-    font-weight: 600;
-    color: #1e293b;
-    line-height: 1.6;
-    margin: 0 0 0.85rem;
+    margin: 0 0 0.7rem;
     padding-left: 0.85rem;
-    border-left: 3px solid #6366f1;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    border-left: 3px solid var(--ac-accent);
 }
 
 .apostles-creed-card-meaning {
-    font-size: 0.85rem;
-    color: #334155;
-    line-height: 1.7;
-    margin: 0 0 0.75rem;
+    margin: 0 0 0.85rem;
+    font-size: 0.86rem;
+    color: var(--color-text-secondary);
+    line-height: 1.75;
 }
 
-/* Related Verse */
+/* --- 함께 읽는 말씀 --- */
 .apostles-creed-card-related {
-    padding: 0.65rem 0.85rem;
-    background: #eef2ff;
-    border-radius: 0.5rem;
-    border-left: 3px solid #818cf8;
+    padding: 0.75rem 0.9rem;
+    background: var(--ac-accent-soft);
+    border-left: 3px solid var(--ac-accent);
+    border-radius: 8px;
+}
+
+.apostles-creed-card-related-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--color-text-secondary);
 }
 
 .apostles-creed-card-related-ref {
     display: block;
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #4338ca;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.3rem;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ac-accent);
 }
 
 .apostles-creed-card-related-text {
-    font-size: 0.8rem;
-    color: #475569;
-    line-height: 1.6;
     margin: 0;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+    line-height: 1.65;
 }
 
-@media (max-width: 576px) {
-    .apostles-creed-full-text-inner {
-        padding: 1.25rem 1rem;
+/* --- 모바일 --- */
+@media (max-width: 575.98px) {
+    .apostles-creed-hero {
+        padding: 1.5rem 1.15rem 1.4rem;
     }
 
-    .apostles-creed-full-text-title {
-        font-size: 1.1rem;
+    .apostles-creed-hero-body {
+        font-size: 0.95rem;
+        line-height: 2;
     }
 
-    .apostles-creed-full-text-body {
-        font-size: 0.9rem;
+    .apostles-creed-history-inner {
+        padding: 1.25rem 1.1rem;
     }
 
-    .apostles-creed-grid {
-        gap: 1rem;
+    .apostles-creed-history-title {
+        font-size: 1rem;
     }
 
     .apostles-creed-card-header {
@@ -215,6 +255,18 @@
     }
 
     .apostles-creed-card-text {
-        font-size: 0.95rem;
+        font-size: 0.98rem;
+    }
+}
+
+/* --- Reduced Motion --- */
+@media (prefers-reduced-motion: reduce) {
+    .apostles-creed-card {
+        animation: none;
+        transition: none;
+    }
+
+    .apostles-creed-card:hover {
+        transform: none;
     }
 }
