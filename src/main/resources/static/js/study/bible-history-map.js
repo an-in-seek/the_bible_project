@@ -26,11 +26,11 @@ const CERTAINTY = {
 
 /* ---------- 시대 (§8) ---------- */
 const PERIODS = [
-    {id: "patriarch", name: "족장 시대", from: -2000, to: -1600, mvp: false,
+    {id: "patriarch", name: "족장 시대", from: -2000, to: -1600, mvp: true,
         desc: "아브라함, 이삭, 야곱의 이주와 가나안 정착 — 연대는 대략적인 범위입니다."},
     {id: "exodus", name: "출애굽·정착", from: -1600, to: -1200, mvp: true,
         desc: "애굽 탈출과 광야 여정, 가나안 정착 — 연대와 경로에 복수 견해가 있습니다."},
-    {id: "judges", name: "사사 시대", from: -1200, to: -1020, mvp: false,
+    {id: "judges", name: "사사 시대", from: -1200, to: -1020, mvp: true,
         desc: "이스라엘 지파 연맹과 사사들의 시대 — 블레셋, 모압, 암몬과의 갈등기입니다."},
     {id: "united", name: "통일 왕국", from: -1020, to: -930, mvp: true,
         desc: "사울, 다윗, 솔로몬의 통일 왕국 시대입니다."},
@@ -38,9 +38,9 @@ const PERIODS = [
         desc: "북이스라엘(–722 사마리아 함락)과 남유다(–587/586 예루살렘 함락)의 분열 시대입니다."},
     {id: "exile", name: "바벨론 포로기", from: -597, to: -538, mvp: true,
         desc: "BC 597년 1차 포로 이주로 시작되어 539/538년 페르시아의 귀환 허용까지 이어집니다."},
-    {id: "persia", name: "페르시아 시대", from: -538, to: -332, mvp: true,
+    {id: "persia", name: "페르시아 시대", from: -538, to: -333, mvp: true,
         desc: "고레스 칙령 이후 귀환과 예루살렘 성전·성벽 재건의 시대입니다."},
-    {id: "hellenistic", name: "헬레니즘 시대", from: -332, to: -63, mvp: false,
+    {id: "hellenistic", name: "헬레니즘 시대", from: -332, to: -63, mvp: true,
         desc: "알렉산더 제국과 후계 왕조(프톨레마이오스·셀레우코스)의 지배기입니다."},
     {id: "roman", name: "로마·신약 시대", from: -63, to: 30, mvp: true,
         desc: "로마의 유대 지배와 예수님의 탄생·공생애 시대입니다."},
@@ -50,8 +50,12 @@ const PERIODS = [
 
 /* ---------- 역사 스냅샷 (§7.3, §15.2) ---------- */
 const SNAPSHOTS = [
+    {id: "s-patriarch", periodId: "patriarch", baseYear: -1800, certainty: "DISPUTED",
+        label: "족장 시대의 고대 근동 배경 (전통적 BC 1800년경)"},
     {id: "s-exodus", periodId: "exodus", baseYear: -1300, certainty: "DISPUTED",
         label: "출애굽 시대(연대 견해 상이)"},
+    {id: "s-judges", periodId: "judges", baseYear: -1100, certainty: "DISPUTED",
+        label: "사사 시대의 남부 레반트 배경 (BC 1100년경)"},
     {id: "s-united", periodId: "united", baseYear: -970, certainty: "APPROXIMATE",
         label: "통일 왕국 전성기 (BC 970년경)"},
     {id: "s-divided-early", periodId: "divided", baseYear: -930, certainty: "APPROXIMATE",
@@ -60,8 +64,20 @@ const SNAPSHOTS = [
         label: "북이스라엘 멸망·앗수르 전성 (BC 722년 이후)"},
     {id: "s-exile", periodId: "exile", baseYear: -586, certainty: "APPROXIMATE",
         label: "신바벨론 제국 (BC 586년경)"},
-    {id: "s-persia", periodId: "persia", baseYear: -500, certainty: "APPROXIMATE",
-        label: "페르시아 제국 (BC 500년경)"},
+    {id: "s-persia-cyrus", periodId: "persia", baseYear: -535, from: -538, to: -526,
+        certainty: "APPROXIMATE", label: "고레스 이후 초기 페르시아 제국 (BC 538~526년)"},
+    {id: "s-persia-imperial", periodId: "persia", baseYear: -500, from: -525, to: -405,
+        certainty: "APPROXIMATE", label: "애굽을 포함한 페르시아 제국 전성기 (BC 525~405년)"},
+    {id: "s-persia-egypt-independent", periodId: "persia", baseYear: -390, from: -404, to: -344,
+        certainty: "APPROXIMATE", label: "애굽 독립기의 페르시아 제국 (BC 390년경)"},
+    {id: "s-persia-late", periodId: "persia", baseYear: -340, from: -343, to: -333,
+        certainty: "APPROXIMATE", label: "애굽 재정복 이후 후기 페르시아 제국 (BC 340년경)"},
+    {id: "s-hellenistic-ptolemaic", periodId: "hellenistic", baseYear: -280, certainty: "APPROXIMATE",
+        label: "프톨레마이오스·셀레우코스 왕조 초기 (BC 280년경)"},
+    {id: "s-hellenistic-seleucid", periodId: "hellenistic", baseYear: -190, certainty: "APPROXIMATE",
+        label: "셀레우코스의 유대 지배 (BC 190년경)"},
+    {id: "s-hellenistic-hasmonean", periodId: "hellenistic", baseYear: -100, certainty: "APPROXIMATE",
+        label: "하스몬 왕국과 후기 헬레니즘 세계 (BC 100년경)"},
     {id: "s-rome-nt", periodId: "roman", baseYear: 30, certainty: "APPROXIMATE",
         label: "로마 제국과 유대 (AD 30년경)"},
     {id: "s-apostolic", periodId: "apostolic", baseYear: 60, certainty: "APPROXIMATE",
@@ -149,7 +165,7 @@ const PLACES = [
         refs: [{label: "요나 3장", bookOrder: 32, chapter: 3}, {label: "나훔 1장", bookOrder: 34, chapter: 1}]},
     {id: "babylon", name: "바벨론", en: "Babylon", modern: "이라크 힐라 인근", type: "도시",
         lngLat: [44.42, 32.54], from: -2000, to: -100, importance: 1, certainty: "CONFIRMED",
-        desc: "유다를 멸망시키고 포로를 끌어간 신바벨론 제국의 수도입니다.",
+        desc: "신바벨론 제국의 수도였으며, 페르시아 시대에도 왕실과 행정의 주요 중심지였습니다.",
         refs: [{label: "열왕기하 25장", bookOrder: 12, chapter: 25}, {label: "다니엘 1장", bookOrder: 27, chapter: 1}]},
     {id: "ur", name: "우르", en: "Ur", modern: "이라크 텔 엘무카이야르(남부설)", type: "도시",
         lngLat: [46.10, 30.96], from: -2100, to: -500, importance: 2, certainty: "PROBABLE",
@@ -163,6 +179,10 @@ const PLACES = [
         lngLat: [48.25, 32.19], from: -600, to: -300, importance: 2, certainty: "CONFIRMED",
         desc: "페르시아의 겨울 수도로, 에스더와 느헤미야 이야기의 무대입니다.",
         refs: [{label: "에스더 1장", bookOrder: 17, chapter: 1}, {label: "느헤미야 1장", bookOrder: 16, chapter: 1}]},
+    {id: "ecbatana", name: "악메다(엑바타나)", en: "Ecbatana", modern: "이란 하마단", type: "도시",
+        lngLat: [48.52, 34.80], from: -700, to: 100, importance: 2, certainty: "CONFIRMED",
+        desc: "메대와 페르시아의 왕도 가운데 하나로, 에스라서에서는 고레스의 성전 재건 칙령 문서가 발견된 곳입니다.",
+        refs: [{label: "에스라 6장", bookOrder: 15, chapter: 6}]},
     {id: "memphis", name: "멤피스(놉)", en: "Memphis", modern: "이집트 미트 라히나", type: "도시",
         lngLat: [31.25, 29.85], from: -2100, to: -300, importance: 2, certainty: "CONFIRMED",
         desc: "고대 애굽의 중심 도시로, 선지서에 '놉'으로 등장합니다.",
@@ -264,10 +284,26 @@ const PLACES = [
 /* ---------- 국가·제국 (스냅샷별 대략적 세력권, §10.3) ---------- */
 /* 원형 반투명 면 = 대략적인 세력권. 정밀한 국경이 아니다. */
 const POLITIES = {
+    "s-patriarch": [
+        {name: "애굽 (중왕국 말기)", center: [31.2, 28.8], radiusKm: 430, color: "#d97706"},
+        {name: "가나안 도시국가들", center: [35.2, 32.0], radiusKm: 170, color: "#059669"},
+        {name: "마리와 아모리계 왕국들", center: [40.6, 35.1], radiusKm: 300, color: "#8b5cf6"},
+        {name: "고바빌로니아 왕국", center: [44.4, 32.7], radiusKm: 300, color: "#2563eb"},
+        {name: "엘람", center: [48.2, 32.2], radiusKm: 320, color: "#dc2626"}
+    ],
     "s-exodus": [
         {name: "애굽 (신왕국)", center: [31.5, 29.8], radiusKm: 420, color: "#d97706"},
         {name: "가나안 성읍들", center: [35.2, 32.0], radiusKm: 150, color: "#059669"},
         {name: "미디안", center: [35.5, 29.0], radiusKm: 160, color: "#8b5cf6"}
+    ],
+    "s-judges": [
+        {name: "이스라엘 산지 정착 집단", center: [35.25, 32.0], radiusKm: 105, color: "#2563eb"},
+        {name: "블레셋 해안 도시들", center: [34.62, 31.65], radiusKm: 75, color: "#dc2626"},
+        {name: "잔존 가나안 도시국가들", center: [35.05, 32.65], radiusKm: 95, color: "#059669"},
+        {name: "암몬 고원 집단", center: [35.9, 31.95], radiusKm: 65, color: "#8b5cf6"},
+        {name: "모압 고원 집단", center: [35.75, 31.35], radiusKm: 80, color: "#d97706"},
+        {name: "에돔·세일 집단", center: [35.5, 30.45], radiusKm: 105, color: "#a16207"},
+        {name: "애굽 (신왕국 말기)", center: [31.2, 28.8], radiusKm: 390, color: "#78716c"}
     ],
     "s-united": [
         {name: "통일 이스라엘", center: [35.3, 31.9], radiusKm: 180, color: "#2563eb"},
@@ -293,8 +329,52 @@ const POLITIES = {
         {name: "메대", center: [47.5, 35.5], radiusKm: 420, color: "#8b5cf6"},
         {name: "애굽", center: [31.3, 29.9], radiusKm: 320, color: "#d97706"}
     ],
-    "s-persia": [
-        {name: "페르시아 제국", center: [45.0, 33.0], radiusKm: 1700, color: "#7c3aed"}
+    "s-persia-cyrus": [
+        {name: "페르시아 제국 (서아시아)", center: [45.0, 34.0], radiusKm: 1250, color: "#7c3aed"},
+        {name: "페르시아령 소아시아", center: [31.5, 39.0], radiusKm: 550, color: "#8b5cf6"},
+        {name: "애굽 제26왕조 (독립)", center: [31.0, 28.5], radiusKm: 430, color: "#d97706"},
+        {name: "예후드", center: [35.2, 31.75], radiusKm: 55, color: "#2563eb"},
+        {name: "사마리아 속주", center: [35.2, 32.35], radiusKm: 60, color: "#059669"},
+        {name: "페니키아 도시권", center: [35.3, 33.75], radiusKm: 100, color: "#0d9488"}
+    ],
+    "s-persia-imperial": [
+        {name: "아케메네스 페르시아 제국", center: [45.0, 33.0], radiusKm: 1700, color: "#7c3aed"},
+        {name: "예후드", center: [35.2, 31.75], radiusKm: 55, color: "#2563eb"},
+        {name: "사마리아 속주", center: [35.2, 32.35], radiusKm: 60, color: "#059669"},
+        {name: "페니키아 도시권", center: [35.3, 33.75], radiusKm: 100, color: "#0d9488"}
+    ],
+    "s-persia-egypt-independent": [
+        {name: "페르시아 제국 (서아시아)", center: [47.0, 34.0], radiusKm: 1350, color: "#7c3aed"},
+        {name: "페르시아령 소아시아", center: [31.5, 39.0], radiusKm: 550, color: "#8b5cf6"},
+        {name: "애굽 후기 왕조 (독립)", center: [31.0, 28.5], radiusKm: 500, color: "#d97706"},
+        {name: "예후드", center: [35.2, 31.75], radiusKm: 55, color: "#2563eb"},
+        {name: "사마리아 속주", center: [35.2, 32.35], radiusKm: 60, color: "#059669"},
+        {name: "페니키아 도시권", center: [35.3, 33.75], radiusKm: 100, color: "#0d9488"}
+    ],
+    "s-persia-late": [
+        {name: "후기 아케메네스 페르시아 제국", center: [45.0, 33.0], radiusKm: 1650, color: "#7c3aed"},
+        {name: "예후드", center: [35.2, 31.75], radiusKm: 55, color: "#2563eb"},
+        {name: "사마리아 속주", center: [35.2, 32.35], radiusKm: 60, color: "#059669"},
+        {name: "페니키아 도시권", center: [35.3, 33.75], radiusKm: 100, color: "#0d9488"}
+    ],
+    "s-hellenistic-ptolemaic": [
+        {name: "프톨레마이오스 왕국", center: [31.0, 28.5], radiusKm: 820, color: "#d97706"},
+        {name: "셀레우코스 왕국", center: [43.0, 34.5], radiusKm: 1450, color: "#7c3aed"},
+        {name: "안티고노스 왕국", center: [22.5, 40.2], radiusKm: 480, color: "#2563eb"}
+    ],
+    "s-hellenistic-seleucid": [
+        {name: "셀레우코스 제국", center: [40.5, 34.0], radiusKm: 1100, color: "#7c3aed"},
+        {name: "프톨레마이오스 왕국", center: [31.0, 28.5], radiusKm: 650, color: "#d97706"},
+        {name: "안티고노스 왕국", center: [22.5, 40.2], radiusKm: 480, color: "#2563eb"},
+        {name: "페르가몬 왕국", center: [27.2, 39.1], radiusKm: 280, color: "#059669"},
+        {name: "파르티아", center: [54.0, 36.0], radiusKm: 480, color: "#78716c"}
+    ],
+    "s-hellenistic-hasmonean": [
+        {name: "하스몬 왕국", center: [35.2, 31.8], radiusKm: 120, color: "#2563eb"},
+        {name: "셀레우코스 왕국 잔존 세력", center: [36.5, 34.5], radiusKm: 330, color: "#7c3aed"},
+        {name: "프톨레마이오스 왕국", center: [31.0, 28.5], radiusKm: 600, color: "#d97706"},
+        {name: "나바테아 왕국", center: [35.5, 30.0], radiusKm: 250, color: "#059669"},
+        {name: "파르티아 제국", center: [50.0, 34.0], radiusKm: 900, color: "#78716c"}
     ],
     "s-rome-nt": [
         {name: "로마 제국", center: [18.0, 38.5], radiusKm: 2100, color: "#dc2626"},
@@ -321,12 +401,24 @@ const EVENTS = [
     {id: "ev-jerusalem-fall", title: "예루살렘 함락과 성전 파괴", year: -586, placeId: "jerusalem", certainty: "CONFIRMED",
         desc: "느부갓네살이 예루살렘과 성전을 무너뜨리고 남유다가 멸망했습니다.",
         refs: [{label: "열왕기하 25장", bookOrder: 12, chapter: 25}]},
-    {id: "ev-cyrus-edict", title: "고레스 칙령과 1차 귀환", year: -538, placeId: "babylon", certainty: "CONFIRMED",
-        desc: "고레스가 유다 포로의 귀환과 성전 재건을 허용했습니다.",
+    {id: "ev-cyrus-edict", title: "고레스 칙령과 1차 귀환", year: -538, placeId: "babylon", certainty: "PROBABLE",
+        desc: "에스라서는 고레스가 유다 포로의 귀환과 성전 재건을 허용했다고 전합니다. 페르시아의 귀환 정책은 확인되지만 칙령의 구체적 문구는 성경 기록을 따릅니다.",
         refs: [{label: "에스라 1장", bookOrder: 15, chapter: 1}]},
+    {id: "ev-temple-work-resumed", title: "성전 재건 재개", year: -520, placeId: "jerusalem", certainty: "APPROXIMATE",
+        desc: "다리오 1세 때 학개와 스가랴의 권면으로 중단되었던 성전 재건이 다시 시작되었습니다.",
+        refs: [{label: "에스라 5장", bookOrder: 15, chapter: 5}, {label: "학개 1장", bookOrder: 37, chapter: 1}]},
     {id: "ev-temple-rebuilt", title: "성전 재건 완료", year: -516, placeId: "jerusalem", certainty: "CONFIRMED",
         desc: "스룹바벨의 지휘로 두 번째 성전이 완공되었습니다.",
         refs: [{label: "에스라 6장", bookOrder: 15, chapter: 6}]},
+    {id: "ev-esther", title: "에스더 이야기의 배경", year: -480, placeId: "susa", certainty: "DISPUTED",
+        desc: "에스더서는 아하수에로 왕의 수산 궁정을 배경으로 합니다. 일반적으로 크세르크세스 1세 시대와 연결하지만 역사적 세부에는 논쟁이 있습니다.",
+        refs: [{label: "에스더 1장", bookOrder: 17, chapter: 1}, {label: "에스더 8장", bookOrder: 17, chapter: 8}]},
+    {id: "ev-ezra-return", title: "에스라의 귀환과 율법 교육", year: -458, placeId: "jerusalem", certainty: "DISPUTED",
+        desc: "전통 연대에 따르면 에스라는 아닥사스다 1세 제7년인 BC 458년경 예루살렘에 왔습니다. BC 398년경으로 보는 대안 연대도 있습니다.",
+        refs: [{label: "에스라 7장", bookOrder: 15, chapter: 7}, {label: "에스라 8장", bookOrder: 15, chapter: 8}]},
+    {id: "ev-nehemiah-wall", title: "느헤미야의 귀환과 성벽 재건", year: -445, placeId: "jerusalem", certainty: "APPROXIMATE",
+        desc: "느헤미야가 아닥사스다 1세 제20년경 예루살렘에 와서 무너진 성벽을 재건했습니다.",
+        refs: [{label: "느헤미야 2장", bookOrder: 16, chapter: 2}, {label: "느헤미야 6장", bookOrder: 16, chapter: 6}]},
     {id: "ev-nativity", title: "예수님의 탄생", year: -4, placeId: "bethlehem", certainty: "APPROXIMATE",
         desc: "예수님이 베들레헴에서 나셨습니다. 연대는 BC 6~4년경으로 봅니다.",
         refs: [{label: "마태복음 2장", bookOrder: 40, chapter: 2}, {label: "누가복음 2장", bookOrder: 42, chapter: 2}]},
@@ -361,11 +453,21 @@ const ROUTES = [
         desc: "사막을 가로지르지 않고 비옥한 초승달 지대를 따라 북상한 뒤 유프라테스를 따라 내려간 것으로 봅니다.",
         coords: [[35.23, 31.78], [36.31, 33.51], [37.15, 34.80], [38.28, 36.10], [39.03, 36.86], [40.90, 35.90], [42.10, 34.80], [43.30, 33.80], [44.42, 32.54]],
         refs: [{label: "열왕기하 25장", bookOrder: 12, chapter: 25}, {label: "예레미야 39장", bookOrder: 24, chapter: 39}]},
-    {id: "route-return", routeGroupId: "return-route", viewpoint: "", name: "포로 귀환",
+    {id: "route-return", routeGroupId: "zerubbabel-return", viewpoint: "", name: "1차 포로 귀환",
         jumpYear: -538, certainty: "APPROXIMATE", color: "#0d9488",
-        desc: "스룹바벨과 에스라의 귀환 행렬이 같은 초승달 지대 길을 따라 예루살렘으로 돌아왔습니다.",
+        desc: "세스바살과 스룹바벨로 대표되는 초기 귀환 공동체가 비옥한 초승달 지대의 육로를 따라 예루살렘으로 돌아온 경로를 근사했습니다.",
         coords: [[44.42, 32.54], [43.30, 33.80], [42.10, 34.80], [40.90, 35.90], [39.03, 36.86], [38.28, 36.10], [37.15, 34.80], [36.31, 33.51], [35.23, 31.78]],
-        refs: [{label: "에스라 1장", bookOrder: 15, chapter: 1}, {label: "에스라 8장", bookOrder: 15, chapter: 8}]},
+        refs: [{label: "에스라 1장", bookOrder: 15, chapter: 1}, {label: "에스라 2장", bookOrder: 15, chapter: 2}]},
+    {id: "route-ezra-return", routeGroupId: "ezra-return", viewpoint: "", name: "에스라의 귀환",
+        jumpYear: -458, certainty: "DISPUTED", color: "#2563eb",
+        desc: "전통 연대에 따른 에스라 일행의 바벨론-예루살렘 귀환로입니다. 실제 경유지는 전해지지 않아 비옥한 초승달 지대의 통상 육로로 근사했습니다.",
+        coords: [[44.42, 32.54], [43.30, 33.80], [42.10, 34.80], [40.90, 35.90], [39.03, 36.86], [38.28, 36.10], [37.15, 34.80], [36.31, 33.51], [35.23, 31.78]],
+        refs: [{label: "에스라 7장", bookOrder: 15, chapter: 7}, {label: "에스라 8장", bookOrder: 15, chapter: 8}]},
+    {id: "route-nehemiah-return", routeGroupId: "nehemiah-return", viewpoint: "", name: "느헤미야의 수산-예루살렘 여정",
+        jumpYear: -445, certainty: "APPROXIMATE", color: "#d97706",
+        desc: "수산에서 출발한 느헤미야가 페르시아 왕의 허가를 받아 예루살렘으로 향한 여정을 주요 육로에 따라 근사했습니다.",
+        coords: [[48.25, 32.19], [44.42, 32.54], [43.30, 33.80], [42.10, 34.80], [40.90, 35.90], [39.03, 36.86], [38.28, 36.10], [37.15, 34.80], [36.31, 33.51], [35.23, 31.78]],
+        refs: [{label: "느헤미야 1장", bookOrder: 16, chapter: 1}, {label: "느헤미야 2장", bookOrder: 16, chapter: 2}]},
     {id: "route-paul-1", routeGroupId: "paul-1", viewpoint: "", name: "바울 1차 전도여행",
         jumpYear: 47, certainty: "APPROXIMATE", color: "#2563eb",
         desc: "안디옥에서 구브로를 거쳐 갈라디아 남부의 도시들을 순회한 여정입니다(행 13-14장). 항로는 단순화된 근사입니다.",
@@ -461,6 +563,7 @@ class BibleHistoryMap {
             listOpenMobile: document.getElementById("bhmListOpenMobile"),
             layerCard: document.getElementById("bhmLayerCard"),
             listView: document.getElementById("bhmListView"),
+            listTitle: document.getElementById("bhmListTitle"),
             listBody: document.getElementById("bhmListBody"),
             listClose: document.getElementById("bhmListClose")
         };
@@ -544,7 +647,10 @@ class BibleHistoryMap {
         const periods = this.periodsAt(year);
         const candidates = SNAPSHOTS.filter(s => periods.some(p => p.id === s.periodId));
         if (!candidates.length) return null;
-        return candidates.reduce((best, s) =>
+        const bounded = candidates.filter(s =>
+            Number.isFinite(s.from) && Number.isFinite(s.to) && year >= s.from && year <= s.to);
+        const pool = bounded.length ? bounded : candidates;
+        return pool.reduce((best, s) =>
             Math.abs(s.baseYear - year) < Math.abs(best.baseYear - year) ? s : best);
     }
 
@@ -1078,8 +1184,8 @@ class BibleHistoryMap {
         const snap = this.state.snapshot;
         const polities = (snap && POLITIES[snap.id]) || [];
         const certaintyText = c => CERTAINTY[c] && CERTAINTY[c].label ? CERTAINTY[c].label : "확인됨";
+        this.el.listTitle.textContent = `${this.formatYear(this.state.year)} — 현재 화면의 정보`;
         this.el.listBody.innerHTML = `
-            <h2>${this.formatYear(this.state.year)} — 현재 화면의 정보</h2>
             <p class="bhm-panel-sub">${snap ? snap.label : "적용 중인 역사 스냅샷 없음"}</p>
             <p class="bhm-panel-section-title">국가·제국 (대략적인 세력권)</p>
             <table><thead><tr><th>이름</th></tr></thead>
@@ -1093,6 +1199,7 @@ class BibleHistoryMap {
             <tbody>${events.map(e =>
                 `<tr><td>${e.title}</td><td>${this.formatYear(e.year)}</td><td>${certaintyText(e.certainty)}</td></tr>`).join("") || "<tr><td colspan=3>-</td></tr>"}</tbody></table>
         `;
+        this.el.listBody.scrollTop = 0;
         this.el.listView.hidden = false;
     }
 

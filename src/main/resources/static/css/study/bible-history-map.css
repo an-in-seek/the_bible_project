@@ -594,20 +594,45 @@ html[data-theme="dark"] .bhm-badge--warn {
 
 .bhm-listview-inner {
     position: relative;
+    display: flex;
+    flex-direction: column;
     width: min(100%, 46rem);
     max-height: 100%;
-    overflow-y: auto;
-    padding: 1.1rem 1.2rem;
+    overflow: hidden;
     background: var(--color-bg-elevated-bright);
     border: 1px solid var(--color-border);
     border-radius: 12px;
 }
 
-.bhm-listview-inner h2 {
+.bhm-listview-header {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.9rem 1rem;
+    background: var(--color-bg-elevated-bright);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.bhm-listview-header h2 {
+    min-width: 0;
+    margin: 0;
     font-size: 1rem;
     font-weight: 800;
     color: var(--color-text-primary);
-    margin: 0 0 0.75rem;
+}
+
+.bhm-listview-header .bhm-panel-close {
+    position: static;
+    flex-shrink: 0;
+}
+
+.bhm-listview-body {
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0.75rem 1.2rem 1.1rem;
+    scrollbar-gutter: stable;
 }
 
 .bhm-listview-inner table {

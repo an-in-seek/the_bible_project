@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head
-    th:replace="~{fragments/head :: head('성경 역사 지도 - 시대별 국가, 도시, 이동 경로 | ElSeeker', true, '/vendor/maplibre/maplibre-gl.css,/css/study/bible-history-map.css?v=1.1')}"
+    th:replace="~{fragments/head :: head('성경 역사 지도 - 시대별 국가, 도시, 이동 경로 | ElSeeker', true, '/vendor/maplibre/maplibre-gl.css,/css/study/bible-history-map.css?v=1.2')}"
     th:with="pageDescription='성경에 등장하는 국가, 도시, 사건, 이동 경로를 시간 막대와 함께 지도에서 탐색하는 학습 페이지입니다.',
                pageKeywords='성경 지도,성경 역사 지도,출애굽 경로,바울 전도여행,바벨론 포로,성경 지리'"></head>
 <body class="has-fixed-nav">
@@ -66,10 +66,13 @@
     </aside>
 
     <!-- 텍스트 목록 보기 (지도 대체 정보) -->
-    <div id="bhmListView" class="bhm-listview" role="dialog" aria-label="현재 시대 텍스트 목록" hidden>
+    <div id="bhmListView" class="bhm-listview" role="dialog" aria-modal="true" aria-labelledby="bhmListTitle" hidden>
       <div class="bhm-listview-inner">
-        <button type="button" id="bhmListClose" class="bhm-panel-close" aria-label="목록 닫기">×</button>
-        <div id="bhmListBody"></div>
+        <header class="bhm-listview-header">
+          <h2 id="bhmListTitle"></h2>
+          <button type="button" id="bhmListClose" class="bhm-panel-close" aria-label="목록 닫기">×</button>
+        </header>
+        <div id="bhmListBody" class="bhm-listview-body"></div>
       </div>
     </div>
   </div>
@@ -85,6 +88,6 @@
 </main>
 
 <script src="/vendor/maplibre/maplibre-gl.js"></script>
-<script type="module" src="/js/study/bible-history-map.js?v=1.2"></script>
+<script type="module" src="/js/study/bible-history-map.js?v=1.7"></script>
 </body>
 </html>

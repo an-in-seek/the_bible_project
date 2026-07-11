@@ -646,12 +646,15 @@ id
 periodId
 label
 baseYear
+validFromYear
+validToYear
 description
 reviewStatus
 displayOrder
 ```
 
 * `baseYear`: 이 스냅샷이 근거로 삼는 대표 연도. 사용자가 임의 연도를 선택하면 해당 연도를 포함하는 시대에서 가장 적합한 스냅샷을 선택하고, 화면에 `기원전 930년경의 역사 자료 기준` 형태로 안내한다.
+* `validFromYear`/`validToYear`: 스냅샷을 적용할 수 있는 연도 범위. 범위가 지정된 스냅샷이 있으면 단순히 대표 연도가 가까운 자료보다 우선한다.
 
 ### 15.3 HistoricalPlace
 
