@@ -3,28 +3,27 @@
 <head th:replace="~{fragments/head :: head('성경 번역본 - 개역한글, KJV 온라인 읽기 | ElSeeker', true, '/css/bible/translation-list.css?v=5.0')}"
       th:with="pageDescription='개역한글, KJV 등 다양한 성경 번역본을 선택해 온라인으로 읽을 수 있습니다.', schemaType='CollectionPage',
                pageKeywords='성경 번역본,개역한글,개역개정,KJV,온라인 성경 읽기,한글 성경,영어 성경'"></head>
-<body class="has-fixed-nav">
+<body class="has-fixed-nav" data-show-back="true">
 
 <header th:replace="~{fragments/header :: header}"
         th:with="pageTitle='성경 번역본', pageTitleVisible=true"></header>
 
 <main class="container content-wrapper">
-    <div id="translationSections" class="translation-sections" aria-label="성경 번역본 목록"></div>
-    <div class="list-group" id="translationList">
-        <button type="button"
-                class="list-group-item list-group-item-action text-start"
-                th:each="translation : ${translations}"
-                th:data-translation-id="${translation.translationId}"
-                th:data-translation-name="${translation.translationName}"
-                th:data-translation-type="${translation.translationType}"
-                th:data-translation-language="${translation.translationLanguage}">
-            <div class="fw-semibold" th:text="${translation.translationName}"></div>
-            <div class="small text-muted" th:text="${translation.translationType}"></div>
-        </button>
-    </div>
+  <div id="translationSections" class="translation-sections" aria-label="성경 번역본 목록"></div>
+  <div class="list-group" id="translationList">
+    <button type="button"
+            class="list-group-item list-group-item-action text-start"
+            th:each="translation : ${translations}"
+            th:data-translation-id="${translation.translationId}"
+            th:data-translation-name="${translation.translationName}"
+            th:data-translation-type="${translation.translationType}"
+            th:data-translation-language="${translation.translationLanguage}">
+      <div class="fw-semibold" th:text="${translation.translationName}"></div>
+      <div class="small text-muted" th:text="${translation.translationType}"></div>
+    </button>
+  </div>
 </main>
 
 <script type="module" src="/js/bible/translation-list.js?v=2.3"></script>
-<div th:replace="~{fragments/section-nav :: section-nav}"></div>
 </body>
 </html>
