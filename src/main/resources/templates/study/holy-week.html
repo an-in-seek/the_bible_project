@@ -1,14 +1,25 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head
-    th:replace="~{fragments/head :: head('성주간 타임라인 - 십자가에서 승천까지 | ElSeeker', true, '/css/search.css?v=5.0,/css/card.css?v=5.4,/css/study/holy-week.css?v=5.0')}"
+    th:replace="~{fragments/head :: head('성주간 타임라인 - 십자가에서 승천까지 | ElSeeker', true, '/css/search.css?v=5.0,/css/card.css?v=5.4,/css/study/holy-week.css?v=6.0')}"
     th:with="pageDescription='예수님의 성주간 타임라인을 날짜, 요일, 시간별로 정리한 학습 페이지입니다. 십자가, 죽음, 부활, 승천의 순서를 살펴봅니다.',
                pageKeywords='성주간,고난주간,예수님 십자가,예수님 부활,예수님 승천,부활절,종려주일,최후의 만찬,겟세마네'"></head>
 <body class="has-fixed-nav has-dual-bottom-nav">
 
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="container content-wrapper">
+<main class="container content-wrapper holy-week-main">
+  <!-- 히어로 -->
+  <section class="holy-week-hero">
+    <p class="holy-week-hero-kicker">Holy Week · 고난주간</p>
+    <h2 class="holy-week-hero-title">성주간 타임라인</h2>
+    <p class="holy-week-hero-subtitle">예루살렘 입성부터 십자가 · 부활 · 승천까지, 예수님의 마지막 한 주간</p>
+    <div class="holy-week-legend">
+      <span class="holy-week-legend-item holy-week-legend-item--passion">고난 단계 · 1~10</span>
+      <span class="holy-week-legend-item holy-week-legend-item--glory">영광 단계 · 11~13</span>
+    </div>
+  </section>
+
   <!-- 로딩 상태 -->
   <div id="holyWeekLoading" class="holy-week-loading text-center py-5">
     <div class="spinner-border text-primary" role="status">
@@ -26,6 +37,6 @@
 
 <button id="scrollToTopBtn" class="scroll-to-top-btn" type="button" aria-label="맨 위로 이동">↑</button>
 
-<script type="module" src="/js/study/holy-week.js?v=2.0"></script>
+<script type="module" src="/js/study/holy-week.js?v=3.0"></script>
 </body>
 </html>
