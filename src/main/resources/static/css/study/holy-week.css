@@ -284,50 +284,108 @@
     }
 }
 
-/* ---------- Grid + Timeline Connector ---------- */
+/* ---------- Timeline (top → down) ---------- */
 .holy-week-grid {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 1.1rem;
     max-width: 720px;
     margin: 0 auto;
     position: relative;
-    padding-left: 2.5rem;
 }
 
+/* 세로 스파인: 레일(첫 열) 중앙을 위→아래로 관통 */
 .holy-week-grid::before {
     content: '';
     position: absolute;
-    left: 0.85rem;
-    top: 1rem;
-    bottom: 1rem;
+    top: 1.6rem;
+    bottom: 1.6rem;
+    left: 1.25rem;
     width: 2px;
+    transform: translateX(-1px);
     background: linear-gradient(
         to bottom,
         var(--hw-passion-head-border) 0%,
-        var(--hw-passion) 60%,
-        var(--hw-glory) 80%,
+        var(--hw-passion) 55%,
+        var(--hw-glory) 78%,
         var(--hw-glory-border) 100%
     );
     border-radius: 2px;
 }
 
-@media (max-width: 576px) {
-    .holy-week-grid {
-        gap: 1rem;
-        padding-left: 0;
-    }
+/* 한 사건 = 레일(노드) + 카드 */
+.holy-week-row {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr;
+    column-gap: 0.6rem;
+    align-items: start;
+}
 
-    .holy-week-grid::before {
-        display: none;
-    }
+.holy-week-rail {
+    position: relative;
+    display: flex;
+    justify-content: center;
+}
+
+/* 스파인 위의 노드 */
+.holy-week-node {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.9rem;
+    height: 1.9rem;
+    margin-top: 0.7rem;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border-radius: 50%;
+    background: var(--color-bg-base);
+    border: 2px solid var(--hw-passion-head-border);
+    color: var(--hw-passion-strong);
+}
+
+/* 노드 → 카드 연결 가지 */
+.holy-week-node::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    width: 0.9rem;
+    height: 2px;
+    transform: translateY(-1px);
+    background: currentColor;
+    opacity: 0.45;
+}
+
+.holy-week-row--passion .holy-week-node {
+    border-color: var(--hw-passion);
+    color: var(--hw-passion-strong);
+}
+
+.holy-week-row--glory .holy-week-node {
+    border-color: var(--hw-glory-border);
+    color: var(--hw-glory-strong);
+}
+
+.holy-week-node--sabbath {
+    width: 2rem;
+    height: 2rem;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+    border-color: var(--hw-sab-border);
+    color: var(--hw-sab-text);
+}
+
+.holy-week-node--sabbath::after {
+    opacity: 0.3;
 }
 
 /* ---------- Phase Divider (안식일의 침묵) ---------- */
 .holy-week-divider {
     position: relative;
-    margin: 0.5rem 0;
-    padding: 1.5rem 1rem;
+    margin: 0;
+    padding: 1.25rem 1rem;
     text-align: center;
     background: linear-gradient(135deg,
         var(--hw-sab-bg-1) 0%,
@@ -371,44 +429,10 @@
     }
 }
 
-/* Timeline node on connector line */
-.holy-week-card-order {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 1.75rem;
-    height: 1.75rem;
-    font-size: 0.8rem;
-    font-weight: 700;
-    background: var(--hw-card-bg);
-    border-radius: 50%;
-    flex-shrink: 0;
-}
-
-@media (min-width: 577px) {
-    .holy-week-card-order {
-        position: absolute;
-        left: -2.15rem;
-        top: 0.85rem;
-        box-shadow: 0 0 0 3px var(--hw-node-ring);
-        z-index: 1;
-    }
-}
-
 /* Card Header — Passion (1~10) */
 .holy-week-card--passion .holy-week-card-header {
     background: linear-gradient(145deg, var(--hw-passion-head-1) 0%, var(--hw-passion-head-2) 100%);
     border-bottom: 1px solid var(--hw-passion-head-border);
-}
-
-.holy-week-card--passion .holy-week-card-order {
-    color: var(--hw-passion-strong);
-}
-
-@media (min-width: 577px) {
-    .holy-week-card--passion .holy-week-card-order {
-        border: 2px solid var(--hw-passion-head-border);
-    }
 }
 
 .holy-week-card--passion .holy-week-card-day {
@@ -445,16 +469,6 @@
 
 .holy-week-card--glory .holy-week-card-body {
     background: linear-gradient(to bottom, var(--hw-glory-body-1) 0%, var(--hw-card-bg) 100%);
-}
-
-.holy-week-card--glory .holy-week-card-order {
-    color: var(--hw-glory-strong);
-}
-
-@media (min-width: 577px) {
-    .holy-week-card--glory .holy-week-card-order {
-        border: 2px solid var(--hw-glory-border);
-    }
 }
 
 .holy-week-card--glory .holy-week-card-day {
@@ -558,6 +572,29 @@
 @media (max-width: 576px) {
     .holy-week-hero {
         padding: 1rem 0 1.25rem;
+    }
+
+    .holy-week-row {
+        grid-template-columns: 2.1rem 1fr;
+        column-gap: 0.5rem;
+    }
+
+    .holy-week-node {
+        width: 1.7rem;
+        height: 1.7rem;
+    }
+
+    .holy-week-node--sabbath {
+        width: 1.8rem;
+        height: 1.8rem;
+    }
+
+    .holy-week-node::after {
+        width: 0.7rem;
+    }
+
+    .holy-week-grid::before {
+        left: 1.05rem;
     }
 
     .holy-week-card-header {

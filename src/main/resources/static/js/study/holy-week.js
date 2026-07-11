@@ -250,52 +250,63 @@ class HolyWeek {
     renderCards() {
         HOLY_WEEK_EVENTS.forEach((event) => {
             if (event.order === 11) {
-                const divider = document.createElement("div");
-                divider.className = "holy-week-divider";
-                divider.innerHTML = `
-                    <span class="holy-week-divider-text">안식일의 침묵</span>
-                    <span class="holy-week-divider-sub">토요일 (니산월 15일) — 무덤 속의 고요</span>
-                `;
-                this.gridEl.appendChild(divider);
+                this.gridEl.appendChild(this.createSabbathRow());
             }
-
-            const card = this.createCard(event);
-            this.gridEl.appendChild(card);
+            this.gridEl.appendChild(this.createRow(event));
         });
     }
 
-    createCard(event) {
-        const card = document.createElement("div");
-        card.className = `holy-week-card holy-week-card--${event.phase}`;
-        card.id = `event-${event.order}`;
-        card.dataset.phase = event.phase;
+    createSabbathRow() {
+        const row = document.createElement("div");
+        row.className = "holy-week-row holy-week-row--sabbath";
+        row.innerHTML = `
+            <div class="holy-week-rail">
+                <span class="holy-week-node holy-week-node--sabbath" aria-hidden="true">🌑</span>
+            </div>
+            <div class="holy-week-divider">
+                <span class="holy-week-divider-text">안식일의 침묵</span>
+                <span class="holy-week-divider-sub">토요일 (니산월 15일) — 무덤 속의 고요</span>
+            </div>
+        `;
+        return row;
+    }
+
+    createRow(event) {
+        const row = document.createElement("div");
+        row.className = `holy-week-row holy-week-row--${event.phase}`;
+        row.id = `event-${event.order}`;
+        row.dataset.phase = event.phase;
 
         const phaseLabel = event.phase === "glory" ? "영광 단계" : "고난 단계";
         const timeHtml = event.time
             ? `<span class="holy-week-card-time">${event.time}</span>`
             : "";
 
-        card.innerHTML = `
-            <div class="holy-week-card-header" role="group" aria-label="${event.title}">
-                <span class="visually-hidden">${phaseLabel}, ${event.order}번째 사건</span>
-                <span class="holy-week-card-order">${event.order}</span>
-                <span class="holy-week-card-day">${event.day}</span>
-                ${timeHtml}
+        row.innerHTML = `
+            <div class="holy-week-rail">
+                <span class="holy-week-node" aria-hidden="true">${event.order}</span>
             </div>
-            <div class="holy-week-card-body">
-                <h3 class="holy-week-card-title">
-                    <span class="holy-week-card-title-emoji" aria-hidden="true">${event.emoji}</span>${event.title}
-                </h3>
-                <p class="holy-week-card-desc">${event.description}</p>
-                <div class="holy-week-card-verse">
-                    <span class="holy-week-card-verse-label">함께 읽는 말씀</span>
-                    <span class="holy-week-card-verse-ref">${event.verse}</span>
-                    <p class="holy-week-card-verse-text">${event.verseText}</p>
+            <article class="holy-week-card holy-week-card--${event.phase}">
+                <div class="holy-week-card-header" role="group" aria-label="${event.title}">
+                    <span class="visually-hidden">${phaseLabel}, ${event.order}번째 사건</span>
+                    <span class="holy-week-card-day">${event.day}</span>
+                    ${timeHtml}
                 </div>
-            </div>
+                <div class="holy-week-card-body">
+                    <h3 class="holy-week-card-title">
+                        <span class="holy-week-card-title-emoji" aria-hidden="true">${event.emoji}</span>${event.title}
+                    </h3>
+                    <p class="holy-week-card-desc">${event.description}</p>
+                    <div class="holy-week-card-verse">
+                        <span class="holy-week-card-verse-label">함께 읽는 말씀</span>
+                        <span class="holy-week-card-verse-ref">${event.verse}</span>
+                        <p class="holy-week-card-verse-text">${event.verseText}</p>
+                    </div>
+                </div>
+            </article>
         `;
 
-        return card;
+        return row;
     }
 }
 
