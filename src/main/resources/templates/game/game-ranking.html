@@ -2,8 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head
-        th:replace="~{fragments/head :: head('게임 랭킹 - 순위 확인 | ElSeeker', true, '/css/game/game-ranking.css?v=5.0')}"
-        th:with="pageDescription='O/X 퀴즈, 객관식 퀴즈, 단어 퍼즐, 성경 타이핑 게임의 랭킹을 확인하세요.',
+    th:replace="~{fragments/head :: head('게임 랭킹 - 순위 확인 | ElSeeker', true, '/css/game/game-ranking.css?v=5.0')}"
+    th:with="pageDescription='O/X 퀴즈, 객관식 퀴즈, 단어 퍼즐, 성경 타이핑 게임의 랭킹을 확인하세요.',
                  pageKeywords='성경 게임 랭킹,성경 퀴즈 순위,게임 점수,ElSeeker 랭킹'">
 </head>
 
@@ -14,63 +14,61 @@
 
 <main class="container content-wrapper">
 
-    <!-- 게임 탭 -->
-    <div class="ranking-tabs" role="tablist">
-        <button class="ranking-tab active" data-game-type="OX_QUIZ" role="tab" aria-selected="true">O/X 퀴즈</button>
-        <button class="ranking-tab" data-game-type="MULTIPLE_CHOICE" role="tab" aria-selected="false">객관식</button>
-        <button class="ranking-tab" data-game-type="WORD_PUZZLE" role="tab" aria-selected="false">퍼즐</button>
-        <button class="ranking-tab" data-game-type="TYPING" role="tab" aria-selected="false">타이핑</button>
-    </div>
+  <!-- 게임 탭 -->
+  <div class="ranking-tabs" role="tablist">
+    <button class="ranking-tab active" data-game-type="OX_QUIZ" role="tab" aria-selected="true">O/X 퀴즈</button>
+    <button class="ranking-tab" data-game-type="MULTIPLE_CHOICE" role="tab" aria-selected="false">객관식</button>
+    <button class="ranking-tab" data-game-type="WORD_PUZZLE" role="tab" aria-selected="false">퍼즐</button>
+    <button class="ranking-tab" data-game-type="TYPING" role="tab" aria-selected="false">타이핑</button>
+  </div>
 
-    <!-- 내 순위 카드 -->
-    <div class="my-ranking-card" id="myRankingCard" style="display:none;">
-        <div class="my-ranking-header">내 순위</div>
-        <div class="my-ranking-body">
-            <div class="my-ranking-rank">
-                <span class="my-rank-number" id="myRankNumber">-</span>
-                <span class="my-rank-suffix">위</span>
-                <span class="my-rank-total" id="myRankTotal">/ -명</span>
-            </div>
-            <div class="my-ranking-stats">
-                <div class="my-stat">
-                    <span class="my-stat-label">점수</span>
-                    <span class="my-stat-value" id="myRankScore">-</span>
-                </div>
-                <div class="my-stat">
-                    <span class="my-stat-label">상위</span>
-                    <span class="my-stat-value" id="myRankPercent">-%</span>
-                </div>
-            </div>
+  <!-- 내 순위 카드 -->
+  <div class="my-ranking-card" id="myRankingCard" style="display:none;">
+    <div class="my-ranking-header">내 순위</div>
+    <div class="my-ranking-body">
+      <div class="my-ranking-rank">
+        <span class="my-rank-number" id="myRankNumber">-</span>
+        <span class="my-rank-suffix">위</span>
+        <span class="my-rank-total" id="myRankTotal">/ -명</span>
+      </div>
+      <div class="my-ranking-stats">
+        <div class="my-stat">
+          <span class="my-stat-label">점수</span>
+          <span class="my-stat-value" id="myRankScore">-</span>
         </div>
+        <div class="my-stat">
+          <span class="my-stat-label">상위</span>
+          <span class="my-stat-value" id="myRankPercent">-%</span>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <!-- 랭킹 목록 -->
-    <div class="ranking-list-wrapper">
-        <div class="ranking-list-header">
-            <span class="rh-rank">순위</span>
-            <span class="rh-nickname">닉네임</span>
-            <span class="rh-score">점수</span>
-        </div>
-        <div class="ranking-list" id="rankingList">
-            <!-- JS에서 렌더링 -->
-        </div>
+  <!-- 랭킹 목록 -->
+  <div class="ranking-list-wrapper">
+    <div class="ranking-list-header">
+      <span class="rh-rank">순위</span>
+      <span class="rh-nickname">닉네임</span>
+      <span class="rh-score">점수</span>
     </div>
+    <div class="ranking-list" id="rankingList">
+      <!-- JS에서 렌더링 -->
+    </div>
+  </div>
 
-    <!-- 빈 상태 -->
-    <div class="ranking-empty" id="rankingEmpty" style="display:none;">
-        <p>아직 참여자가 없습니다.</p>
-        <a href="/web/game" class="btn btn-outline-secondary btn-sm">게임하러 가기</a>
-    </div>
+  <!-- 빈 상태 -->
+  <div class="ranking-empty" id="rankingEmpty" style="display:none;">
+    <p>아직 참여자가 없습니다.</p>
+    <a href="/web/game" class="btn btn-outline-secondary btn-sm">게임하러 가기</a>
+  </div>
 
-    <!-- 로딩 -->
-    <div class="ranking-loading" id="rankingLoading">
-        <div class="spinner-border spinner-border-sm text-secondary" role="status">
-            <span class="visually-hidden">로딩 중...</span>
-        </div>
+  <!-- 로딩 -->
+  <div class="ranking-loading" id="rankingLoading">
+    <div class="spinner-border spinner-border-sm text-secondary" role="status">
+      <span class="visually-hidden">로딩 중...</span>
     </div>
+  </div>
 </main>
-
-<footer th:replace="~{fragments/footer :: footer}"></footer>
 
 <script type="module" src="/js/game/game-ranking.js?v=1.2"></script>
 <div th:replace="~{fragments/section-nav :: section-nav}"></div>
