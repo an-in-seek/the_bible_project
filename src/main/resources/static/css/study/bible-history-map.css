@@ -128,7 +128,17 @@ body:has(.bhm-main) {
 /* MapLibre 기본 UI 톤 정리 */
 .bhm-map .maplibregl-ctrl-attrib {
     font-size: 0.62rem;
+    color: var(--color-text-secondary);
     background: var(--color-bg-overlay, rgba(255, 255, 255, 0.6));
+}
+
+.bhm-map .maplibregl-ctrl-attrib a {
+    color: var(--color-text-secondary);
+}
+
+/* 다크 모드: 저작권 접힘 토글 버튼 아이콘(검정 SVG)이 어두운 배경에 묻히지 않게 반전 */
+html[data-theme="dark"] .bhm-map .maplibregl-ctrl-attrib-button {
+    filter: invert(0.85);
 }
 
 /* ---------- 좌측 컨트롤 (§7.5) ---------- */
@@ -712,6 +722,13 @@ html[data-theme="dark"] .bhm-badge--warn {
         width: auto;
         right: 0.6rem;
         max-height: 45%;
+    }
+
+    /* 확대/축소 버튼: 우상단 컨트롤 카드와 겹치지 않게 우하단으로 이동
+       (스냅샷 배지·저작권 표시 위에 배치) */
+    .bhm-map .maplibregl-ctrl-top-right {
+        top: auto;
+        bottom: 3.2rem;
     }
 
     .bhm-control-card {

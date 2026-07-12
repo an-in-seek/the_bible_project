@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head
-    th:replace="~{fragments/head :: head('성경 역사 지도 - 시대별 국가, 도시, 이동 경로 | ElSeeker', true, '/vendor/maplibre/maplibre-gl.css,/css/study/bible-history-map.css?v=1.2')}"
+    th:replace="~{fragments/head :: head('성경 역사 지도 - 시대별 국가, 도시, 이동 경로 | ElSeeker', true, '/vendor/maplibre/maplibre-gl.css,/css/study/bible-history-map.css?v=1.4')}"
     th:with="pageDescription='성경에 등장하는 국가, 도시, 사건, 이동 경로를 시간 막대와 함께 지도에서 탐색하는 학습 페이지입니다.',
                pageKeywords='성경 지도,성경 역사 지도,출애굽 경로,바울 전도여행,바벨론 포로,성경 지리'"></head>
 <body class="has-fixed-nav">
@@ -88,6 +88,6 @@
 </main>
 
 <script src="/vendor/maplibre/maplibre-gl.js"></script>
-<script type="module" src="/js/study/bible-history-map.js?v=1.7"></script>
+<script type="module" src="/js/study/bible-history-map.js?v=1.8"></script>
 </body>
 </html>

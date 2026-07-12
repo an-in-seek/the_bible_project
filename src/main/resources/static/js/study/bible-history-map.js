@@ -735,15 +735,23 @@ class BibleHistoryMap {
 
         if (snap) {
             this.el.emptyState.hidden = true;
-            this.el.snapshotNotice.textContent =
-                `현재 지도는 ${this.formatYear(snap.baseYear)}경의 역사 자료를 기준으로 표시하고 있습니다`
-                + (year !== snap.baseYear ? ` (선택: ${this.formatYear(year)})` : "");
+            // 선택 연도와 지도 기준 연도가 다를 때만 근사 고지 배지 표시
+            // (같으면 상단 연도 라벨과 중복이므로 숨김)
+            if (year !== snap.baseYear) {
+                this.el.snapshotNotice.textContent =
+                    `현재 지도는 ${this.formatYear(snap.baseYear)}경의 역사 자료를 기준으로 표시하고 있습니다`
+                    + ` (선택: ${this.formatYear(year)})`;
+                this.el.snapshotNotice.hidden = false;
+            } else {
+                this.el.snapshotNotice.hidden = true;
+            }
             if (!opts.silent && (!prevSnapshot || prevSnapshot.id !== snap.id)) {
                 this.showToast(snap.label);
             }
         } else {
             const nearest = this.nearestSnapshot(year);
             this.el.snapshotNotice.textContent = "이 시대의 지도 데이터는 아직 준비 중입니다";
+            this.el.snapshotNotice.hidden = false;
             this.el.emptyText.textContent =
                 `${names} 시대의 국가 경계 데이터는 아직 준비 중입니다. 가장 가까운 스냅샷으로 이동해 보세요.`;
             this.el.emptyJump.textContent = `${nearest.label}로 이동`;
@@ -984,7 +992,6 @@ class BibleHistoryMap {
         });
 
         this.rebuildMarkers(polities);
-        this.el.snapshotNotice.hidden = false;
     }
 
     rebuildMarkers(polities) {
