@@ -489,6 +489,7 @@ function highlightVerse(verseNumber) {
             return;
         }
         const targetTd = targetVerse.closest("td");
+        const targetRow = targetVerse.closest("tr");
 
         // 오버레이 생성 + 스포트라이트 대상 즉시 설정
         const overlay = document.createElement("div");
@@ -498,6 +499,10 @@ function highlightVerse(verseNumber) {
         targetVerse.classList.add("verse-spotlight-target");
         if (targetTd) {
             targetTd.classList.add("verse-spotlight-target-td");
+        }
+        // 구절 번호 칸까지 함께 강조되도록 행(tr) 전체에 카드 스타일 적용
+        if (targetRow) {
+            targetRow.classList.add("verse-spotlight-target-row");
         }
 
         // 오버레이 페이드인 + 스크롤 이동 동시 실행
@@ -516,6 +521,9 @@ function highlightVerse(verseNumber) {
             targetVerse.classList.remove("verse-spotlight-target");
             if (targetTd) {
                 targetTd.classList.remove("verse-spotlight-target-td");
+            }
+            if (targetRow) {
+                targetRow.classList.remove("verse-spotlight-target-row");
             }
             overlay.addEventListener("transitionend", () => overlay.remove(), {once: true});
         };

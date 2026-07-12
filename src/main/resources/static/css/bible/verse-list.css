@@ -418,17 +418,56 @@ html[data-theme="dark"] .verse-text.text-body.verse-spotlight-target {
 .verse-spotlight-target {
     position: relative;
     z-index: 999;
-    background: #fff;
-    border-radius: 12px;
-    padding: 10px 12px;
-    box-shadow: 0 0 0 4px rgba(255, 255, 255, 1),
-                0 4px 24px rgba(0, 0, 0, 0.25);
-    transition: box-shadow 0.4s ease, background 0.4s ease;
+    color: #1f2933;
+    transition: color 0.4s ease;
 }
 
 .verse-spotlight-target-td {
     position: relative;
     z-index: 999;
+}
+
+/* 스포트라이트 대상 행 — 구절 번호 칸 + 본문 칸을 하나의 흰 카드로 함께 강조 */
+.verse-table tr.verse-spotlight-target-row td {
+    position: relative;
+    z-index: 999;
+    background: #fff;
+    color: #1f2933;
+    border-color: transparent;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
+    transition: box-shadow 0.4s ease, background 0.4s ease;
+}
+
+/* 카드 좌측 끝(구절 번호) — 왼쪽 모서리 둥글게 + 좌측 그림자.
+   clip-path 로 오른쪽(이음새) 방향 그림자 번짐을 차단해 세로 구분선이 생기지 않도록 함. */
+.verse-table tr.verse-spotlight-target-row td:first-child {
+    border-top-left-radius: 12px;
+    border-bottom-left-radius: 12px;
+    box-shadow: -6px 4px 24px rgba(0, 0, 0, 0.25);
+    clip-path: inset(-40px 0 -40px -40px);
+}
+
+/* 카드 우측 끝(본문) — 오른쪽 모서리 둥글게 + 우측 그림자.
+   첫 번째 그림자(blur 0, 흰색 솔리드)를 왼쪽으로 12px 확장해 셀 이음새를 흰색으로 덮음.
+   모바일 DPR 서브픽셀 렌더링 시 셀 사이 hairline 틈으로 어두운 오버레이가
+   비쳐 세로 구분선처럼 보이는 문제 방지. clip-path 왼쪽 여유(-12px)는 이 솔리드
+   확장분만 통과시키고 blur 그림자의 이음새 번짐은 흰 솔리드가 위에서 가림. */
+.verse-table tr.verse-spotlight-target-row td:last-child {
+    border-top-right-radius: 12px;
+    border-bottom-right-radius: 12px;
+    box-shadow: -12px 0 0 0 #fff, 6px 4px 24px rgba(0, 0, 0, 0.25);
+    clip-path: inset(-40px -40px -40px -12px);
+}
+
+/* 다크 모드 — 흰 카드 위 텍스트/번호 가독성 확보 (기본 흰색 번호를 어둡게 덮어씀).
+   다크 모드 td border-color 규칙보다 우선순위를 높여 카드 내부 가로 구분선을 숨김. */
+html[data-theme="dark"] .verse-table tr.verse-spotlight-target-row td,
+html[data-theme="dark"] .verse-table tr.verse-spotlight-target-row td:first-child {
+    background: #fff;
+    color: #1f2933;
+    border-color: transparent;
 }
 
 .verse-table td {
@@ -451,9 +490,10 @@ html[data-theme="dark"] .verse-table tbody tr:first-child td {
 }
 
 .verse-table td:first-child {
-    width: 2.5rem;
+    width: 1.75rem;
     text-align: right;
-    padding-right: 0.6rem;
+    padding-left: 0;
+    padding-right: 0.4rem;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
 }
