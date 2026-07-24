@@ -420,8 +420,14 @@ body.bible-story-page .site-header {
 
 .story-backdrop[data-theme="sea"] .story-backdrop-art {
     background:
-        linear-gradient(0deg, #7a643f 0%, #3d3421 18%, transparent 30%),
-        linear-gradient(180deg, #1c3350 0%, #0d2138 60%, #071627 100%);
+        linear-gradient(90deg, rgba(3, 12, 24, 0.42), rgba(3, 12, 24, 0.08) 56%, rgba(3, 12, 24, 0.2)),
+        #071627 url("/images/game/bible-story-egyptian-army.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="sea"][data-sea="open"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(3, 12, 24, 0.08), rgba(3, 12, 24, 0.24)),
+        #0d4058 url("/images/game/bible-story-red-sea.jpg") center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="desert"] .story-backdrop-art {
@@ -490,7 +496,7 @@ body.bible-story-page .site-header {
 }
 
 .story-backdrop[data-theme="sea"] .story-backdrop-wall {
-    opacity: 1;
+    opacity: 0;
 }
 
 .story-backdrop-wall-left {
@@ -669,6 +675,14 @@ body.bible-story-page .site-header {
     background:
         repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.14) 0 2px, transparent 2px 26px),
         linear-gradient(160deg, #7a5a33, #5a3f22);
+    transition: filter 0.8s ease;
+}
+
+.story-door.is-sealed .story-door-leaf {
+    background:
+        linear-gradient(rgba(25, 12, 8, 0.08), rgba(25, 12, 8, 0.32)),
+        #3f2819 url("/images/game/bible-story-passover-blood.jpg") center / cover no-repeat;
+    filter: saturate(0.88);
 }
 
 .story-door-spot {
@@ -741,6 +755,26 @@ body.bible-story-page .site-header {
     border-color: var(--story-gold);
     background: rgba(199, 155, 82, 0.3);
     box-shadow: 0 0 24px rgba(242, 200, 121, 0.25);
+}
+
+.story-table-item.has-image {
+    display: flex;
+    min-height: 116px;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.35rem;
+}
+
+.story-table-item-image {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 0.55rem;
+    object-fit: cover;
+    animation: story-pop 0.45s ease;
+}
+
+.story-table-item-label {
+    display: block;
 }
 
 .story-table-item.is-wrong {
