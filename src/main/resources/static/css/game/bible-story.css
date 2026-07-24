@@ -44,8 +44,8 @@ body.bible-story-page {
 
 .story-intro {
     position: relative;
-    min-height: calc(100vh - 64px);
-    min-height: calc(100dvh - 64px);
+    min-height: 100vh;
+    min-height: 100dvh;
     display: grid;
     align-items: end;
     overflow: hidden;
@@ -236,25 +236,40 @@ body.bible-story-page {
 
 /* ---------------------------------------------------------------- HUD */
 
-/* 플레이 중에는 사이트 상단 내비를 숨기고 무대에 몰입 — 나가기는 HUD 버튼이 담당 */
-body.is-story-playing .site-header {
+/* 이 페이지에서는 사이트 헤더 전체(내비·타이틀·설치 배너)를 숨기고 게임에 몰입 —
+   목록 복귀는 인트로·엔딩의 back 링크와 플레이 HUD의 나가기 버튼이 담당 */
+body.bible-story-page .site-header {
     display: none;
+}
+
+.story-page-back {
+    position: absolute;
+    top: calc(0.9rem + env(safe-area-inset-top));
+    left: 0.9rem;
+    z-index: 10;
+    width: 42px;
+    height: 42px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: 50%;
+    background: rgba(5, 16, 29, 0.55);
+    color: #fff;
+    font-size: 1.1rem;
+    text-decoration: none;
+    backdrop-filter: blur(8px);
+}
+
+.story-page-back:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 3px;
 }
 
 .story-play {
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 64px);
-    min-height: calc(100dvh - 64px);
-}
-
-.is-story-playing .story-play {
     min-height: 100vh;
     min-height: 100dvh;
-}
-
-.is-story-playing .story-hud {
-    top: 0;
 }
 
 .story-exit-button {
@@ -278,7 +293,7 @@ body.is-story-playing .site-header {
 
 .story-hud {
     position: sticky;
-    top: 64px;
+    top: 0;
     z-index: 20;
     display: flex;
     align-items: center;
@@ -1112,8 +1127,8 @@ body.is-story-playing .site-header {
 
 .story-ending {
     position: relative;
-    min-height: calc(100vh - 64px);
-    min-height: calc(100dvh - 64px);
+    min-height: 100vh;
+    min-height: 100dvh;
     overflow: hidden;
     background:
         radial-gradient(circle at 50% 8%, rgba(244, 208, 140, 0.44), transparent 19rem),
@@ -1551,15 +1566,6 @@ html[data-theme="dark"] .story-badge,
     .story-ending-actions {
         align-items: stretch;
         flex-direction: column;
-    }
-
-    .story-hud {
-        top: 56px;
-    }
-
-    .story-play {
-        min-height: calc(100vh - 56px);
-        min-height: calc(100dvh - 56px);
     }
 
     .story-hud-scene {

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head
-        th:replace="~{fragments/head :: head('어린양의 약속 | ElSeeker', true, '/css/game/bible-story.css?v=2.2')}"
+        th:replace="~{fragments/head :: head('어린양의 약속 | ElSeeker', true, '/css/game/bible-story.css?v=2.4')}"
         th:with="robotsContent='noindex',
                  pageDescription='유월절의 밤을 직접 준비하고, 바다를 건너고, 만나를 거두며 십자가와 부활에서 그 의미를 발견하는 성경 스토리 체험입니다.'">
 </head>
@@ -10,6 +10,7 @@
 
 <main class="story-main">
     <section class="story-intro" id="storyIntro" aria-labelledby="storyIntroTitle">
+        <a class="story-page-back" href="/web/game" aria-label="게임 목록으로 돌아가기" title="게임 목록">←</a>
         <div class="story-intro-backdrop" aria-hidden="true"></div>
         <div class="story-intro-shade" aria-hidden="true"></div>
         <div class="story-intro-content">
@@ -76,6 +77,7 @@
     </section>
 
     <section class="story-ending d-none" id="storyEnding" aria-labelledby="storyEndingTitle">
+        <a class="story-page-back" href="/web/game" aria-label="게임 목록으로 돌아가기" title="게임 목록">←</a>
         <div class="story-ending-glow" aria-hidden="true"></div>
         <div class="story-ending-content">
             <span class="story-eyebrow">기록의 재해석</span>
@@ -180,6 +182,6 @@
 </dialog>
 
 <div class="visually-hidden" id="storyLiveRegion" aria-live="polite" aria-atomic="true"></div>
-<script type="module" src="/js/game/bible-story.js?v=2.3"></script>
+<script type="module" src="/js/game/bible-story.js?v=2.4"></script>
 </body>
 </html>
