@@ -102,11 +102,23 @@ const scenes = [
                 prompt: '유월절 규례에 맞는 세 가지를 골라 상에 올려 주세요.',
                 ref: '출애굽기 12:8–11',
                 items: [
-                    {label: '불에 구운 어린양', ok: true},
+                    {
+                        label: '불에 구운 어린양',
+                        ok: true,
+                        image: '/images/game/bible-story-passover-lamb.jpg'
+                    },
                     {label: '누룩을 넣어 부풀린 빵', ok: false, note: '누룩을 넣지 않은 떡과 함께 먹으라고 하셨어요. (출 12:8)'},
-                    {label: '무교병', ok: true},
+                    {
+                        label: '무교병',
+                        ok: true,
+                        image: '/images/game/bible-story-unleavened-bread.jpg'
+                    },
                     {label: '아침까지 남겨 둘 몫', ok: false, note: '아침까지 남겨 두지 말라고 하셨어요. (출 12:10)'},
-                    {label: '쓴 나물', ok: true},
+                    {
+                        label: '쓴 나물',
+                        ok: true,
+                        image: '/images/game/bible-story-bitter-herbs.jpg'
+                    },
                     {label: '느긋한 잔치 차림', ok: false, note: '허리에 띠를 띠고 급히 먹으라고 하셨어요. (출 12:11)'}
                 ],
                 doneLine: {who: '기록자', text: '식탁은 잔치가 아니라 떠날 준비였다. 이 밤의 모든 것이 말씀을 향해 있었다.'}
@@ -798,10 +810,23 @@ function renderTableBeat(beat) {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = 'story-table-item';
-        button.textContent = item.label;
+        const label = document.createElement('span');
+        label.className = 'story-table-item-label';
+        label.textContent = item.label;
+        button.appendChild(label);
         button.addEventListener('click', () => {
             if (button.classList.contains('is-picked')) return;
             if (item.ok) {
+                if (item.image) {
+                    const image = document.createElement('img');
+                    image.className = 'story-table-item-image';
+                    image.src = item.image;
+                    image.alt = '';
+                    image.width = 320;
+                    image.height = 180;
+                    button.prepend(image);
+                    button.classList.add('has-image');
+                }
                 button.classList.add('is-picked');
                 button.disabled = true;
                 pickedCount += 1;
