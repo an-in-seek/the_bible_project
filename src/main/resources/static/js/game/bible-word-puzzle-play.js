@@ -41,6 +41,10 @@ const submitBtn = $('wpSubmitBtn');
 const saveBanner = $('wpSaveBanner');
 const errorEl = $('wpError');
 
+const KEYBOARD_OPEN_THRESHOLD = 150;
+const KEYBOARD_VIEWPORT_GAP = 16;
+let keyboardLayoutFrame = null;
+
 // 상단 내비게이션
 const backButton = $('topNavBackButton');
 const pageTitleLabel = $('pageTitleLabel');
@@ -49,8 +53,76 @@ const pageTitleLabel = $('pageTitleLabel');
 document.addEventListener('DOMContentLoaded', () => {
     initNav();
     setupPlayListeners();
+    setupMobileKeyboardHandling();
     initPuzzle();
 });
+
+function setupMobileKeyboardHandling() {
+    if (!window.visualViewport) return;
+
+    window.visualViewport.addEventListener('resize', scheduleMobileKeyboardLayout);
+    window.visualViewport.addEventListener('scroll', scheduleMobileKeyboardLayout);
+}
+
+function scheduleMobileKeyboardLayout() {
+    if (!window.visualViewport) return;
+    if (keyboardLayoutFrame != null) cancelAnimationFrame(keyboardLayoutFrame);
+
+    keyboardLayoutFrame = requestAnimationFrame(() => {
+        keyboardLayoutFrame = null;
+        updateMobileKeyboardLayout();
+    });
+}
+
+function updateMobileKeyboardLayout() {
+    const viewport = window.visualViewport;
+    if (!viewport || playSection.classList.contains('d-none')) {
+        clearMobileKeyboardInset();
+        return;
+    }
+
+    const keyboardInset = Math.max(
+        0,
+        window.innerHeight - (viewport.height + viewport.offsetTop)
+    );
+    const editableCellFocused = document.activeElement?.classList.contains('wp-cell-input');
+    const nearDefaultScale = Math.abs((viewport.scale ?? 1) - 1) < 0.05;
+    const keyboardOpen = editableCellFocused
+        && nearDefaultScale
+        && keyboardInset > KEYBOARD_OPEN_THRESHOLD;
+
+    playSection.style.paddingBottom = keyboardOpen
+        ? `${keyboardInset + KEYBOARD_VIEWPORT_GAP}px`
+        : '';
+
+    if (keyboardOpen) keepSelectedCellVisible();
+}
+
+function keepSelectedCellVisible() {
+    const viewport = window.visualViewport;
+    if (!viewport || state.selectedRow == null || state.selectedCol == null) return;
+
+    const selectedCell = getCellElement(state.selectedRow, state.selectedCol);
+    if (!selectedCell) return;
+
+    const rect = selectedCell.getBoundingClientRect();
+    const visibleTop = viewport.offsetTop + KEYBOARD_VIEWPORT_GAP;
+    const visibleBottom = viewport.offsetTop + viewport.height - KEYBOARD_VIEWPORT_GAP;
+
+    if (rect.bottom > visibleBottom) {
+        window.scrollBy({ top: rect.bottom - visibleBottom, behavior: 'auto' });
+    } else if (rect.top < visibleTop) {
+        window.scrollBy({ top: rect.top - visibleTop, behavior: 'auto' });
+    }
+}
+
+function clearMobileKeyboardInset() {
+    if (keyboardLayoutFrame != null) {
+        cancelAnimationFrame(keyboardLayoutFrame);
+        keyboardLayoutFrame = null;
+    }
+    playSection.style.paddingBottom = '';
+}
 
 function initNav() {
     if (backButton) {
@@ -593,7 +665,10 @@ function focusCellInput(row, col) {
     const cellEl = getCellElement(row, col);
     if (!cellEl) return;
     const input = cellEl.querySelector('.wp-cell-input');
-    if (input) input.focus({ preventScroll: true });
+    if (!input) return;
+
+    input.focus();
+    if (window.visualViewport) scheduleMobileKeyboardLayout();
 }
 
 // ── 타이머 ──
@@ -871,6 +946,12 @@ function showResult(data) {
 // ── 유틸리티 ──
 
 function showSection(name) {
+    if (name !== 'play') {
+        const activeElement = document.activeElement;
+        if (activeElement?.classList.contains('wp-cell-input')) activeElement.blur();
+        clearMobileKeyboardInset();
+    }
+
     playLoading.classList.add('d-none');
     playSection.classList.toggle('d-none', name !== 'play');
     resultSection.classList.toggle('d-none', name !== 'result');
