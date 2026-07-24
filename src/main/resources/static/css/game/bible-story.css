@@ -202,6 +202,17 @@ body.bible-story-page {
     outline-offset: 3px;
 }
 
+.story-line-tappable,
+.story-choice-button,
+.story-door-spot:not(:disabled),
+.story-table-item:not(:disabled),
+.story-manna-piece:not(:disabled),
+.story-match-card:not(.is-linked),
+.story-sheet-tab,
+.story-text-button {
+    cursor: pointer;
+}
+
 .story-creative-notice {
     max-width: 620px;
     display: flex;
@@ -225,11 +236,44 @@ body.bible-story-page {
 
 /* ---------------------------------------------------------------- HUD */
 
+/* 플레이 중에는 사이트 상단 내비를 숨기고 무대에 몰입 — 나가기는 HUD 버튼이 담당 */
+body.is-story-playing .site-header {
+    display: none;
+}
+
 .story-play {
     display: flex;
     flex-direction: column;
     min-height: calc(100vh - 64px);
     min-height: calc(100dvh - 64px);
+}
+
+.is-story-playing .story-play {
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+.is-story-playing .story-hud {
+    top: 0;
+}
+
+.story-exit-button {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: inline-grid;
+    place-items: center;
+    border: 1px solid var(--story-line);
+    border-radius: 50%;
+    background: var(--color-bg-elevated);
+    color: var(--story-muted);
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.story-exit-button:focus-visible {
+    outline: 3px solid var(--color-accent);
+    outline-offset: 3px;
 }
 
 .story-hud {
@@ -688,6 +732,12 @@ body.bible-story-page {
     animation: story-shake 0.4s ease;
 }
 
+.story-table-item.is-rejected {
+    opacity: 0.45;
+    text-decoration: line-through;
+    text-decoration-color: rgba(255, 255, 255, 0.6);
+}
+
 .story-table-note {
     min-height: 1.4em;
     margin: 0;
@@ -729,6 +779,7 @@ body.bible-story-page {
     touch-action: none;
     -webkit-user-select: none;
     user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .story-vigil-caption {
@@ -1053,9 +1104,9 @@ body.bible-story-page {
 }
 
 .story-finale-gem-1 { top: 10%; left: 8%; }
-.story-finale-gem-2 { top: 16%; right: 6%; animation-delay: 0.25s; }
-.story-finale-gem-3 { bottom: 14%; left: 14%; animation-delay: 0.5s; }
-.story-finale-gem-4 { bottom: 8%; right: 12%; animation-delay: 0.75s; }
+.story-finale-gem-2 { top: 16%; left: 86%; animation-delay: 0.25s; }
+.story-finale-gem-3 { top: 78%; left: 14%; animation-delay: 0.5s; }
+.story-finale-gem-4 { top: 84%; left: 80%; animation-delay: 0.75s; }
 
 /* ---------------------------------------------------------------- ending */
 
@@ -1114,6 +1165,52 @@ body.bible-story-page {
     color: rgba(255, 251, 240, 0.92);
     font-size: 0.95rem;
     line-height: 1.85;
+}
+
+.story-ending-journal {
+    max-width: 720px;
+    margin-top: 2.2rem;
+}
+
+.story-ending-journal h2 {
+    margin: 0 0 0.9rem;
+    color: var(--story-gold-bright);
+    font-size: 1rem;
+    letter-spacing: 0.06em;
+}
+
+.story-ending-journal ol {
+    display: grid;
+    gap: 0.7rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.story-ending-journal li {
+    position: relative;
+    padding-left: 1rem;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.83rem;
+    line-height: 1.7;
+}
+
+.story-ending-journal li::before {
+    content: "";
+    position: absolute;
+    top: 0.55rem;
+    left: 0;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background: var(--story-gold-bright);
+}
+
+.story-ending-journal strong {
+    display: block;
+    color: rgba(255, 251, 240, 0.95);
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
 }
 
 .story-connection-timeline {
@@ -1425,7 +1522,8 @@ html[data-theme="dark"] .story-badge,
     .story-choice-button:hover,
     .story-table-item:not(:disabled):hover,
     .story-match-card:not(.is-linked):hover,
-    .story-fragment-button:hover {
+    .story-fragment-button:hover,
+    .story-exit-button:hover {
         border-color: var(--story-gold-bright);
     }
 }
@@ -1620,14 +1718,12 @@ html[data-theme="dark"] .story-badge,
 }
 
 @keyframes story-converge {
-    0% { opacity: 0; }
+    0% { opacity: 0; transform: translate(0, 0) scale(1); }
     20% { opacity: 1; }
     80% { opacity: 1; }
     100% {
         opacity: 0;
         top: 45%;
-        right: auto;
-        bottom: auto;
         left: 50%;
         transform: translate(-50%, -50%) scale(0.4);
     }

@@ -19,25 +19,25 @@ const FRAGMENTS = {
 const TESTIMONIES = [
     {
         id: 'bread',
-        text: '나는 생명의 떡이니 내게 오는 자는 결코 주리지 아니할 것이요',
+        text: '내가 곧 생명의 떡이니 내게 오는 자는 결코 주리지 아니할 터이요',
         ref: '요한복음 6:35',
         href: '/web/bible/verse?translationId=1&bookOrder=43&chapterNumber=6&verseNumber=35'
     },
     {
         id: 'blood',
-        text: '보라 세상 죄를 지고 가는 하나님의 어린양이로다',
+        text: '보라 세상 죄를 지고 가는 하나님의 어린 양이로다',
         ref: '요한복음 1:29',
         href: '/web/bible/verse?translationId=1&bookOrder=43&chapterNumber=1&verseNumber=29'
     },
     {
         id: 'path',
-        text: '우리 조상들이 다 바다 가운데로 지나며 모세에게 속하여 세례를 받고',
+        text: '우리 조상들이 다 구름 아래 있고 바다 가운데로 지나며 모세에게 속하여 구름과 바다에서 세례를 받고',
         ref: '고린도전서 10:1–2',
         href: '/web/bible/verse?translationId=1&bookOrder=46&chapterNumber=10&verseNumber=1'
     },
     {
         id: 'promise',
-        text: '이 잔은 너희를 위하여 흘리는 내 피로 세우는 새 언약이니라',
+        text: '이 잔은 내 피로 세우는 새 언약이니 곧 너희를 위하여 붓는 것이라',
         ref: '누가복음 22:20',
         href: '/web/bible/verse?translationId=1&bookOrder=42&chapterNumber=22&verseNumber=20'
     }
@@ -80,32 +80,32 @@ const scenes = [
                 lines: [
                     {text: '고센 땅의 저녁. 열 번째 재앙이 예고된 밤이 다가오고 있다.'},
                     {who: '기록자', text: '나는 기록자다. 오늘 밤, 한 가정이 말씀을 어떻게 붙드는지 곁에서 기록한다.'},
-                    {who: '아버지', text: '어린양은 잡았네. 이제 말씀하신 대로, 문에 피를 발라야 하네.'}
+                    {who: '아버지', text: '어린양은 잡아 두었어요. 이제 말씀하신 대로 문에 피를 발라야 해요.'}
                 ]
             },
             {
                 type: 'door',
-                prompt: '그릇의 피에 우슬초를 적셔, 좌우 문설주와 인방 세 곳에 바르십시오.',
+                prompt: '그릇의 피에 우슬초를 적셔서 좌우 문설주와 인방, 세 곳에 발라 주세요.',
                 ref: '출애굽기 12:7, 22',
-                doneLine: {who: '말씀', text: '내가 피를 볼 때에 너희를 넘어가리니 멸하는 재앙이 너희에게 내리지 아니하리라.', ref: '출애굽기 12:13'}
+                doneLine: {who: '말씀', text: '내가 피를 볼 때에 너희를 넘어가리니 재앙이 너희에게 내려 멸하지 아니하리라.', ref: '출애굽기 12:13'}
             },
             {
                 type: 'say',
                 lines: [
-                    {who: '아버지', text: '이제 식탁이네. 규례에 맞는 것만 상에 올려 주게.'}
+                    {who: '아버지', text: '이제 식탁 차례예요. 규례에 맞는 것만 상에 올려 주세요.'}
                 ]
             },
             {
                 type: 'table',
-                prompt: '유월절 규례에 맞는 세 가지를 골라 상에 올리십시오.',
+                prompt: '유월절 규례에 맞는 세 가지를 골라 상에 올려 주세요.',
                 ref: '출애굽기 12:8–11',
                 items: [
                     {label: '불에 구운 어린양', ok: true},
-                    {label: '누룩을 넣어 부풀린 빵', ok: false, note: '누룩 없는 떡과 함께 먹으라 하셨다. (출 12:8)'},
+                    {label: '누룩을 넣어 부풀린 빵', ok: false, note: '누룩을 넣지 않은 떡과 함께 먹으라고 하셨어요. (출 12:8)'},
                     {label: '무교병', ok: true},
-                    {label: '아침까지 남겨 둘 몫', ok: false, note: '아침까지 남겨 두지 말라 하셨다. (출 12:10)'},
+                    {label: '아침까지 남겨 둘 몫', ok: false, note: '아침까지 남겨 두지 말라고 하셨어요. (출 12:10)'},
                     {label: '쓴 나물', ok: true},
-                    {label: '느긋한 잔치 차림', ok: false, note: '허리에 띠를 띠고 급히 먹으라 하셨다. (출 12:11)'}
+                    {label: '느긋한 잔치 차림', ok: false, note: '허리에 띠를 띠고 급히 먹으라고 하셨어요. (출 12:11)'}
                 ],
                 doneLine: {who: '기록자', text: '식탁은 잔치가 아니라 떠날 준비였다. 이 밤의 모든 것이 말씀을 향해 있었다.'}
             },
@@ -143,14 +143,14 @@ const scenes = [
             {
                 type: 'say',
                 lines: [
-                    {text: '문이 닫혔다. 창작된 인물인 어린 미리암이 등불 곁에서 기록자를 올려다본다.'},
+                    {text: '문이 닫혔다. 어린 미리암이 등불 곁에서 기록자를 올려다본다.'},
                     {who: '미리암', text: '기록자님, 바깥에서 소리가 나면 어떡해요. 문을 열어 보면 안 돼요?'}
                 ]
             },
             {
                 type: 'choice',
                 id: 'fear',
-                prompt: '두려워하는 아이에게 무엇이라 답할까.',
+                prompt: '두려워하는 아이에게 뭐라고 답할까요?',
                 options: [
                     {
                         value: 'promise',
@@ -167,34 +167,34 @@ const scenes = [
             {
                 type: 'say',
                 lines: [
-                    {who: '아버지', text: '기록자여, 자네는 이 밤을 무엇이라 적겠는가.'}
+                    {who: '아버지', text: '기록자님, 오늘 밤을 뭐라고 기록하실 건가요?'}
                 ]
             },
             {
                 type: 'choice',
                 id: 'record',
-                prompt: '일지의 첫 줄을 고르십시오.',
+                prompt: '일지의 첫 줄을 골라 주세요.',
                 options: [
                     {
                         value: 'obedience',
                         label: '두려움 속에서도 지킨 순종의 밤',
-                        reply: {who: '아버지', text: '그래. 우리는 떨면서도 말씀대로 했네.'}
+                        reply: {who: '아버지', text: '맞아요. 우리는 떨면서도 말씀대로 했지요.'}
                     },
                     {
                         value: 'faithfulness',
                         label: '약속하신 분이 지키시는 밤',
-                        reply: {who: '아버지', text: '그래. 이 문을 지키는 것은 결국 우리가 아니지.'}
+                        reply: {who: '아버지', text: '맞아요. 이 문을 지키는 건 결국 우리가 아니지요.'}
                     }
                 ]
             },
             {
                 type: 'vigil',
-                prompt: '누르고 있는 동안 밤이 깊어 갑니다. 놓지 말고 밤을 지새우십시오.',
+                prompt: '누르고 있는 동안 밤이 깊어 가요. 손을 떼지 말고 밤을 지새워 주세요.',
                 stages: [
                     '한밤중 — 애굽 온 땅에 큰 부르짖음이 일었다.',
                     '그러나 이 집의 문 안은 고요했다.'
                 ],
-                doneLine: {text: '새벽 — 바로가 사람을 보내 외쳤다. “일어나 내 백성 가운데에서 떠나라.”', ref: '출애굽기 12:30–31'}
+                doneLine: {text: '새벽 — 바로가 사람을 보내 외쳤다. “일어나 내 백성 가운데서 떠나라.”', ref: '출애굽기 12:30–31'}
             },
             {
                 type: 'say',
@@ -230,24 +230,24 @@ const scenes = [
                 type: 'say',
                 lines: [
                     {text: '앞은 바다, 뒤는 애굽의 병거. 길이 끊겼다.'},
-                    {who: '백성', text: '애굽에 매장지가 없어서 우리를 광야로 끌어냈느냐!'}
+                    {who: '백성', text: '애굽에 묻힐 곳이 없어서 우리를 이 광야까지 끌고 온 겁니까!'}
                 ]
             },
             {
                 type: 'seaChoice',
                 id: 'sea',
-                prompt: '기록자도 막힌 바다 앞에 섰다. 무엇을 하겠는가.',
+                prompt: '기록자도 막힌 바다 앞에 섰다. 무엇을 할까요?',
                 options: [
                     {value: 'back', label: '돌아갈 길을 찾는다', reply: '뒤를 보았다. 병거의 흙먼지가 이미 지평선을 덮고 있었다. 돌아갈 길은 없다.'},
                     {value: 'fight', label: '싸울 준비를 한다', reply: '지팡이와 막대기뿐인 행렬이 병거와 싸울 수는 없었다.'},
                     {value: 'cry', label: '부르짖는다', reply: '백성의 부르짖음이 바닷가에 가득했다. 사람이 할 수 있는 일은 거기까지였다.'}
                 ],
-                wordLine: {who: '말씀', text: '두려워하지 말고 가만히 서서 여호와께서 오늘 너희를 위하여 행하시는 구원을 보라.', ref: '출애굽기 14:13'},
+                wordLine: {who: '말씀', text: '너희는 두려워 말고 가만히 서서 여호와께서 오늘날 너희를 위하여 행하시는 구원을 보라.', ref: '출애굽기 14:13'},
                 openLine: {text: '그때 큰 동풍이 불기 시작했다. 바다가 갈라져 물이 좌우에 벽이 되었다.'}
             },
             {
                 type: 'seaCross',
-                prompt: '구름 기둥을 따라, 마른 땅을 밟아 건너십시오.',
+                prompt: '구름 기둥을 따라 마른 땅을 밟고 건너 주세요.',
                 steps: [
                     '물 벽 사이로 첫걸음을 내디뎠다.',
                     '아이들과 노인들, 양 떼까지 마른 땅을 밟았다.',
@@ -289,12 +289,12 @@ const scenes = [
                 type: 'say',
                 lines: [
                     {text: '광야에 들어선 지 한 달. 양식이 떨어지자 원망이 시작되었다.'},
-                    {who: '말씀', text: '보라 내가 너희를 위하여 하늘에서 양식을 비같이 내리리니, 백성이 나가서 일용할 것을 날마다 거둘 것이라.', ref: '출애굽기 16:4'}
+                    {who: '말씀', text: '볼지어다 내가 너희를 위하여 하늘에서 양식을 비같이 내리리니 백성이 나가서 일용할 것을 날마다 거둘 것이라.', ref: '출애굽기 16:4'}
                 ]
             },
             {
                 type: 'manna',
-                prompt: '한 사람에 한 오멜씩, 식구에게 필요한 만큼만 거두십시오.',
+                prompt: '한 사람에 한 오멜씩, 식구에게 필요한 만큼만 거둬 주세요.',
                 doneLine: {who: '기록자', text: '나는 배웠다. 이 양식은 쌓아 두는 재산이 아니라, 날마다 다시 의지하는 공급이었다.'}
             },
             {
@@ -358,7 +358,7 @@ const scenes = [
             },
             {
                 type: 'match',
-                prompt: '조각을 먼저 고른 뒤, 그 약속이 성취되는 증언에 이으십시오.',
+                prompt: '조각을 먼저 고른 다음, 그 약속이 이루어지는 증언에 이어 주세요.',
                 doneLine: {who: '기록자', text: '네 개의 선이 한 이름 위에서 만났다. 조각들이 그분을 만든 것이 아니다. 처음부터 그분이 계셨고, 조각들이 그분을 가리키고 있었다.'}
             }
         ]
@@ -394,7 +394,7 @@ const scenes = [
                     {phase: 'cross', who: '기록자', text: '이번에는 확인할 준비물도, 건널 바다도 없었다. 나는 다만 보았고, 기록했다.'},
                     {phase: 'dark', text: '낮 열두 시부터 어둠이 온 땅을 덮었다.'},
                     {phase: 'tomb', text: '사흘째 되던 날 이른 새벽, 여자들이 무덤에 갔다. 무덤은 비어 있었다.'},
-                    {phase: 'risen', who: '말씀', text: '어찌하여 살아 있는 자를 죽은 자 가운데서 찾느냐. 여기 계시지 않고 살아나셨느니라.', ref: '누가복음 24:5–6'}
+                    {phase: 'risen', who: '말씀', text: '어찌하여 산 자를 죽은 자 가운데서 찾느냐 여기 계시지 않고 살아나셨느니라.', ref: '누가복음 24:5–6'}
                 ]
             },
             {type: 'finale'}
@@ -425,12 +425,12 @@ function initialize() {
 function cacheElements() {
     [
         'storyIntro', 'storyGame', 'storyEnding', 'storyStartButton', 'storyResumeButton',
-        'storyDots', 'storyHudScene', 'storySheetButton', 'storyFragmentCount',
+        'storyExitButton', 'storyDots', 'storyHudScene', 'storySheetButton', 'storyFragmentCount',
         'storyBackdrop', 'storySceneEra', 'storySceneRef', 'storyPlayArea', 'storyDialogue',
         'storySheet', 'storySheetClose', 'storyTabJournal', 'storyTabArchive',
         'storyJournalPanel', 'storyArchivePanel', 'storyJournalList', 'storyJournalEmpty',
         'storyArchiveRecords', 'storyResetButton', 'storyEndingTitle', 'storyEpilogue',
-        'storyEndingSheetButton', 'storyRestartButton', 'storyLiveRegion'
+        'storyEndingJournal', 'storyEndingSheetButton', 'storyRestartButton', 'storyLiveRegion'
     ].forEach((id) => {
         elements[id] = document.getElementById(id);
     });
@@ -438,7 +438,6 @@ function cacheElements() {
 
 function setupNavigation() {
     const backButton = document.getElementById('topNavBackButton');
-    const pageTitleLabel = document.getElementById('pageTitleLabel');
 
     if (backButton) {
         backButton.classList.remove('d-none');
@@ -446,15 +445,12 @@ function setupNavigation() {
             window.location.href = document.body.dataset.backLink || '/web/game';
         };
     }
-    if (pageTitleLabel) {
-        pageTitleLabel.textContent = '어린양의 약속';
-        pageTitleLabel.classList.remove('d-none');
-    }
 }
 
 function setupListeners() {
     elements.storyStartButton.addEventListener('click', startNewStory);
     elements.storyResumeButton.addEventListener('click', resumeStory);
+    elements.storyExitButton.addEventListener('click', exitToIntro);
     elements.storySheetButton.addEventListener('click', openSheet);
     elements.storyEndingSheetButton.addEventListener('click', openSheet);
     elements.storySheetClose.addEventListener('click', closeSheet);
@@ -564,7 +560,18 @@ function showGame() {
     elements.storyIntro.classList.add('d-none');
     elements.storyEnding.classList.add('d-none');
     elements.storyGame.classList.remove('d-none');
+    document.body.classList.add('is-story-playing');
     enterScene(state.sceneIndex);
+}
+
+function exitToIntro() {
+    elements.storyGame.classList.add('d-none');
+    elements.storyEnding.classList.add('d-none');
+    elements.storyIntro.classList.remove('d-none');
+    document.body.classList.remove('is-story-playing');
+    updateResumeButton();
+    window.scrollTo({top: 0, behavior: 'auto'});
+    announce('처음 화면으로 나왔습니다. 진행은 장면 단위로 저장돼요.');
 }
 
 function enterScene(index) {
@@ -800,8 +807,8 @@ function renderTableBeat(beat) {
                     announce('식탁이 규례대로 준비되었습니다.');
                 }
             } else {
-                button.classList.remove('is-wrong');
-                requestAnimationFrame(() => button.classList.add('is-wrong'));
+                button.classList.add('is-wrong', 'is-rejected');
+                button.disabled = true;
                 note.textContent = item.note;
                 announce(item.note);
             }
@@ -822,7 +829,7 @@ function renderVigilBeat(beat) {
             <div class="story-vigil-ring" id="vigilRing" aria-hidden="true">
                 <button type="button" class="story-vigil-hold" id="vigilHold">밤을<br>지새운다</button>
             </div>
-            <p class="story-vigil-caption" id="vigilCaption" aria-live="polite">문 안의 밤은 길다. 손을 떼지 마십시오.</p>
+            <p class="story-vigil-caption" id="vigilCaption" aria-live="polite">문 안의 밤은 길어요. 손을 떼지 마세요.</p>
         </div>
     `;
 
@@ -871,7 +878,7 @@ function renderVigilBeat(beat) {
     const stop = () => {
         holding = false;
         cancelAnimationFrame(rafId);
-        if (!finished && progress > 0) caption.textContent = '아직 밤입니다. 다시 누르고 기다리십시오.';
+        if (!finished && progress > 0) caption.textContent = '아직 밤이에요. 다시 누르고 기다려 주세요.';
     };
 
     hold.addEventListener('pointerdown', (event) => {
@@ -965,9 +972,9 @@ function renderSeaCrossBeat(beat) {
 // ---------------------------------------------------------------- scene 4: manna
 
 const MANNA_ROUNDS = [
-    {label: '첫째 날 아침', need: 4, hint: '한 오멜은 네 움큼입니다.'},
-    {label: '둘째 날 아침', need: 4, hint: '어제의 양식은 어제로 끝났습니다.'},
-    {label: '여섯째 날 아침', need: 8, hint: '내일은 안식일입니다. 오늘은 두 배를 거두십시오. (출 16:22–23)'}
+    {label: '첫째 날 아침', need: 4, hint: '한 오멜은 네 움큼이에요.'},
+    {label: '둘째 날 아침', need: 4, hint: '어제의 양식은 어제로 끝났어요.'},
+    {label: '여섯째 날 아침', need: 8, hint: '내일은 안식일이에요. 오늘은 두 배를 거둬 주세요. (출 16:22–23)'}
 ];
 
 const MANNA_SPOTS = [
@@ -1068,7 +1075,7 @@ function renderMatchBeat(beat) {
             <div class="story-match-column story-match-fragments" id="matchFragments"></div>
             <div class="story-match-column story-match-testimonies" id="matchTestimonies"></div>
         </div>
-        <p class="story-match-note" id="matchNote" aria-live="polite">먼저 왼쪽에서 조각을 고르십시오.</p>
+        <p class="story-match-note" id="matchNote" aria-live="polite">먼저 왼쪽에서 조각을 골라 주세요.</p>
     `;
 
     const board = elements.storyPlayArea.querySelector('#matchBoard');
@@ -1112,7 +1119,7 @@ function renderMatchBeat(beat) {
             button.classList.add('is-selected');
             button.setAttribute('aria-pressed', 'true');
             selected = button;
-            note.textContent = `‘${fragment.title}’ — 이 약속이 성취되는 증언을 고르십시오.`;
+            note.textContent = `‘${fragment.title}’ — 이 약속이 이루어지는 증언을 골라 주세요.`;
         });
         fragmentsCol.appendChild(button);
     });
@@ -1126,7 +1133,7 @@ function renderMatchBeat(beat) {
         button.addEventListener('click', () => {
             if (button.classList.contains('is-linked')) return;
             if (!selected) {
-                note.textContent = '먼저 왼쪽에서 조각을 고르십시오.';
+                note.textContent = '먼저 왼쪽에서 조각을 골라 주세요.';
                 return;
             }
             if (selected.dataset.matchId === testimony.id) {
@@ -1142,8 +1149,8 @@ function renderMatchBeat(beat) {
             } else {
                 button.classList.remove('is-wrong');
                 requestAnimationFrame(() => button.classList.add('is-wrong'));
-                note.textContent = '이 증언은 다른 조각을 가리킵니다. 다시 살펴보십시오.';
-                announce('이 증언은 다른 조각을 가리킵니다.');
+                note.textContent = '이 증언은 다른 조각을 가리키고 있어요. 다시 살펴봐 주세요.';
+                announce('이 증언은 다른 조각을 가리키고 있어요.');
             }
         });
         testimoniesCol.appendChild(button);
@@ -1159,11 +1166,11 @@ function finishMatch(beat, board, note) {
     capstone.className = 'story-match-capstone';
     capstone.innerHTML = `
         <span class="story-badge story-badge-direct">성경의 직접 연결</span>
-        <blockquote>“우리의 유월절 양 곧 그리스도께서 희생되셨느니라”</blockquote>
+        <blockquote>“우리의 유월절 양 곧 그리스도께서 희생이 되셨느니라”</blockquote>
         <small>고린도전서 5:7</small>
     `;
     board.after(capstone);
-    announce('모든 조각이 이어졌습니다. 우리의 유월절 양 곧 그리스도께서 희생되셨느니라. 고린도전서 5장 7절.');
+    announce('모든 조각이 이어졌습니다. 우리의 유월절 양 곧 그리스도께서 희생이 되셨느니라. 고린도전서 5장 7절.');
     renderLine(beat.doneLine, () => {
         redrawMatchLines = null;
         nextBeat();
@@ -1192,7 +1199,10 @@ function renderFragmentBeat(scene, beat) {
         saveState();
         renderSheet();
         updateFragmentCount(true);
-        announce(`약속의 조각, ${fragment.title}을 기록에 담았습니다.`);
+        const firstHint = state.fragments.length === 1
+            ? ' 화면 위 조각 버튼에서 일지와 기록을 언제든 볼 수 있어요.'
+            : '';
+        announce(`약속의 조각, ${fragment.title}을 기록에 담았습니다.${firstHint}`);
         nextBeat();
     }, {once: true});
     elements.storyPlayArea.querySelector('#fragmentTakeButton').focus({preventScroll: true});
@@ -1230,7 +1240,14 @@ function showEnding() {
     elements.storyIntro.classList.add('d-none');
     elements.storyGame.classList.add('d-none');
     elements.storyEnding.classList.remove('d-none');
+    document.body.classList.remove('is-story-playing');
     elements.storyEpilogue.textContent = buildEpilogue();
+    elements.storyEndingJournal.innerHTML = state.journal.map((entry) => `
+        <li>
+            <strong>${entry.sceneTitle}</strong>
+            <span>${entry.text}</span>
+        </li>
+    `).join('');
     renderSheet();
     window.scrollTo({top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth'});
     requestAnimationFrame(() => elements.storyEndingTitle.focus?.());

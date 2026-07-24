@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head
-        th:replace="~{fragments/head :: head('어린양의 약속 | ElSeeker', true, '/css/game/bible-story.css?v=2.0')}"
+        th:replace="~{fragments/head :: head('어린양의 약속 | ElSeeker', true, '/css/game/bible-story.css?v=2.2')}"
         th:with="robotsContent='noindex',
                  pageDescription='유월절의 밤을 직접 준비하고, 바다를 건너고, 만나를 거두며 십자가와 부활에서 그 의미를 발견하는 성경 스토리 체험입니다.'">
 </head>
@@ -17,7 +17,7 @@
             <p class="story-kicker">언약의 길</p>
             <h1 id="storyIntroTitle">어린양의 약속</h1>
             <p class="story-intro-lead">
-                문설주에 피를 바르고, 밤을 지새우고, 바다를 건너고, 만나를 거두십시오.
+                문설주에 피를 바르고, 밤을 지새우고, 바다를 건너고, 만나를 거둬 보세요.
                 당신의 손으로 모은 조각들이 십자가와 빈 무덤 앞에서 하나로 이어집니다.
             </p>
             <div class="story-intro-meta" aria-label="게임 정보">
@@ -44,6 +44,8 @@
 
     <section class="story-play d-none" id="storyGame" aria-label="어린양의 약속 플레이 화면">
         <div class="story-hud">
+            <button type="button" class="story-exit-button" id="storyExitButton"
+                    aria-label="게임을 나가고 처음 화면으로" title="나가기">✕</button>
             <div class="story-hud-progress">
                 <ol class="story-dots" id="storyDots" aria-hidden="true"></ol>
                 <span class="story-hud-scene" id="storyHudScene">장면 1 / 6 · 문 앞에서</span>
@@ -85,6 +87,11 @@
             </p>
 
             <blockquote class="story-epilogue" id="storyEpilogue"></blockquote>
+
+            <section class="story-ending-journal" aria-labelledby="storyEndingJournalTitle">
+                <h2 id="storyEndingJournalTitle">기록자의 일지 회고</h2>
+                <ol id="storyEndingJournal"></ol>
+            </section>
 
             <ol class="story-connection-timeline" aria-label="유월절과 그리스도의 연결">
                 <li>
@@ -173,6 +180,6 @@
 </dialog>
 
 <div class="visually-hidden" id="storyLiveRegion" aria-live="polite" aria-atomic="true"></div>
-<script type="module" src="/js/game/bible-story.js?v=2.0"></script>
+<script type="module" src="/js/game/bible-story.js?v=2.3"></script>
 </body>
 </html>
