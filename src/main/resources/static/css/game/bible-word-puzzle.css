@@ -629,6 +629,11 @@ html[data-theme="dark"] body.bible-word-puzzle-page {
     padding: 0.4rem 0.6rem;
     font-size: 0.75rem;
   }
+
+  /* JS의 paddingBottom 덮어쓰기를 무시하고 강제로 여유 공간 생성 */
+  #wpPlaySection {
+    padding-bottom: 60vh !important;
+  }
 }
 
 /* Small mobile (≤360px) */

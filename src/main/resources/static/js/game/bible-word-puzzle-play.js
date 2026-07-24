@@ -106,26 +106,24 @@ function updateMobileKeyboardLayout() {
   }
 }
 
+// 기존 keepSelectedCellVisible 함수 전체를 아래 코드로 교체하세요.
 function keepSelectedCellVisible() {
-  const viewport = window.visualViewport;
-  if (!viewport || state.selectedRow == null || state.selectedCol == null) {
+  if (state.selectedRow == null || state.selectedCol == null) {
     return;
-  } //[cite: 2]
+  }
 
-  const selectedCell = getCellElement(state.selectedRow, state.selectedCol); //[cite: 2]
+  const selectedCell = getCellElement(state.selectedRow, state.selectedCol);
   if (!selectedCell) {
     return;
-  } //[cite: 2]
+  }
 
-  // 뷰포트 중앙과 셀 중앙의 위치를 계산하여 화면 중앙으로 부드럽게 스크롤
-  const rect = selectedCell.getBoundingClientRect();
-  const viewportCenter = viewport.offsetTop + (viewport.height / 2);
-  const cellCenter = rect.top + (rect.height / 2);
-
-  window.scrollBy({
-    top: cellCenter - viewportCenter,
-    behavior: 'smooth'
-  });
+  // OS 키보드 애니메이션이 올라오는 시간(약 300ms)을 기다렸다가 중앙으로 부드럽게 스크롤
+  setTimeout(() => {
+    selectedCell.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+  }, 300);
 }
 
 function clearMobileKeyboardInset() {
