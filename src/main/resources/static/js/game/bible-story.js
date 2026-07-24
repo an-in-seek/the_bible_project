@@ -214,7 +214,16 @@ const scenes = [
                 type: 'say',
                 lines: [
                     {text: '백성은 급히 일어나 애굽을 떠났다. 사백삼십 년 만의 새벽이었다.', ref: '출애굽기 12:40–41'},
-                    {text: '낮에는 구름 기둥이, 밤에는 불 기둥이 백성 앞에서 길을 인도했다. 광야 길은 그 기둥을 따라 이어졌다.', ref: '출애굽기 13:21–22'}
+                    {
+                        phase: 'cloud',
+                        text: '낮에는 구름 기둥이 백성 앞에서 광야의 길을 인도했다.',
+                        ref: '출애굽기 13:21–22'
+                    },
+                    {
+                        phase: 'fire',
+                        text: '밤에는 불 기둥이 길을 비추었다. 광야 길은 그 기둥을 따라 이어졌다.',
+                        ref: '출애굽기 13:21–22'
+                    }
                 ]
             },
             {
@@ -883,6 +892,7 @@ function renderVigilBeat(beat) {
         const nextStage = Math.min(beat.stages.length - 1, Math.floor(progress * (beat.stages.length + 1)) - 1);
         if (nextStage > stageIndex && nextStage >= 0) {
             stageIndex = nextStage;
+            if (stageIndex === 0) elements.storyBackdrop.dataset.phase = 'plague';
             caption.textContent = beat.stages[stageIndex];
         }
 
@@ -991,7 +1001,7 @@ function renderSeaCrossBeat(beat) {
         announce(beat.steps[step - 1]);
         if (step >= beat.steps.length) {
             stepButton.disabled = true;
-            delete elements.storyBackdrop.dataset.sea;
+            elements.storyBackdrop.dataset.sea = 'closed';
             renderLine(beat.doneLine, nextBeat);
         }
     });

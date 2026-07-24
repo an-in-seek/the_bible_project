@@ -418,6 +418,24 @@ body.bible-story-page .site-header {
         linear-gradient(180deg, #030a15 0%, #081426 55%, #142338 100%);
 }
 
+.story-backdrop[data-theme="night"][data-phase="cloud"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(3, 10, 21, 0.08), rgba(3, 10, 21, 0.42)),
+        #7d9bb1 url("/images/game/bible-story-cloud-pillar.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="night"][data-phase="fire"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(3, 8, 18, 0.06), rgba(3, 8, 18, 0.38)),
+        #071426 url("/images/game/bible-story-fire-pillar.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="night"][data-phase="plague"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(2, 7, 15, 0.08), rgba(2, 7, 15, 0.46)),
+        #030b15 url("/images/game/bible-story-final-plague.jpg") center / cover no-repeat;
+}
+
 .story-backdrop[data-theme="sea"] .story-backdrop-art {
     background:
         linear-gradient(90deg, rgba(3, 12, 24, 0.42), rgba(3, 12, 24, 0.08) 56%, rgba(3, 12, 24, 0.2)),
@@ -430,10 +448,16 @@ body.bible-story-page .site-header {
         #0d4058 url("/images/game/bible-story-red-sea.jpg") center / cover no-repeat;
 }
 
+.story-backdrop[data-theme="sea"][data-sea="closed"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(3, 12, 24, 0.04), rgba(3, 12, 24, 0.38)),
+        #0b2639 url("/images/game/bible-story-egyptian-army-drowned.jpg") center / cover no-repeat;
+}
+
 .story-backdrop[data-theme="desert"] .story-backdrop-art {
     background:
-        radial-gradient(ellipse at 50% 18%, rgba(244, 214, 150, 0.4), transparent 38%),
-        linear-gradient(180deg, #3f5a78 0%, #8f7343 55%, #5d4527 100%);
+        linear-gradient(180deg, rgba(15, 24, 36, 0.06), rgba(15, 24, 36, 0.4)),
+        #7b684e url("/images/game/bible-story-wilderness.jpg") center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="link"] .story-backdrop-art {
@@ -896,8 +920,8 @@ body.bible-story-page .site-header {
     border-radius: 1rem;
     border: 1px solid rgba(255, 255, 255, 0.16);
     background:
-        radial-gradient(ellipse at 50% 0, rgba(255, 240, 200, 0.2), transparent 55%),
-        linear-gradient(180deg, rgba(146, 117, 68, 0.55), rgba(94, 72, 40, 0.65));
+        linear-gradient(180deg, rgba(45, 34, 20, 0.08), rgba(45, 34, 20, 0.28)),
+        #9d825f url("/images/game/bible-story-manna-field.jpg") center / cover no-repeat;
     backdrop-filter: blur(2px);
     transition: filter 0.6s ease;
 }
