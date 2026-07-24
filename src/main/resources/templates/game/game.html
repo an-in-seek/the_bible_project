@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
-<head th:replace="~{fragments/head :: head('성경 게임 - 퀴즈, 타자, 단어 퍼즐 | ElSeeker', true, '/css/hero.css?v=5.1,/css/card.css?v=5.4,/css/game/game.css?v=5.3')}"
-      th:with="pageDescription='성경 O/X 퀴즈, 객관식 퀴즈, 성경 타자, 단어 퍼즐 등 재미있는 게임으로 말씀을 학습합니다.',
-               pageKeywords='성경 퀴즈,성경 게임,성경 OX퀴즈,성경 타자,성경 단어 퍼즐,성경 학습 게임'"></head>
+<head th:replace="~{fragments/head :: head('성경 게임 - 스토리, 퀴즈, 타자, 단어 퍼즐 | ElSeeker', true, '/css/hero.css?v=5.1,/css/card.css?v=5.4,/css/game/game.css?v=5.3')}"
+      th:with="pageDescription='성경 스토리, O/X 퀴즈, 객관식 퀴즈, 성경 타자, 단어 퍼즐 등 재미있는 게임으로 말씀을 학습합니다.',
+               pageKeywords='성경 스토리,성경 퀴즈,성경 게임,성경 OX퀴즈,성경 타자,성경 단어 퍼즐,성경 학습 게임'"></head>
 <body class="has-fixed-nav game-page">
 <header th:replace="~{fragments/header :: header}"
         th:with="pageTitle='게임', pageTitleVisible=true"></header>
@@ -66,6 +66,20 @@
                         <h2 class="h5 fw-bold game-card-title mb-0">성경 타자</h2>
                     </div>
                     <p class="game-card-description small mb-0">말씀을 타이핑하며 암송과 집중력을 함께 높입니다.</p>
+                </div>
+            </article>
+        </div>
+
+        <!-- 성경 스토리 (Active) -->
+        <div class="col-12 col-md-6 col-lg-4">
+            <article class="card card-panel card-soft card-lift card-clickable h-100" data-game-key="bible-story"
+                     data-game-route="/web/game/bible-story" tabindex="0" role="button" aria-label="성경 스토리 게임 시작하기">
+                <div class="card-body d-flex flex-column p-4">
+                    <div class="game-card-header mb-3">
+                        <div class="game-card-icon" aria-hidden="true">📜</div>
+                        <h2 class="h5 fw-bold game-card-title mb-0">성경 스토리</h2>
+                    </div>
+                    <p class="game-card-description small mb-0">유월절에서 십자가까지, 어린양의 약속을 따라가 보세요.</p>
                 </div>
             </article>
         </div>
