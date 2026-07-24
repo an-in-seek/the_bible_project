@@ -2,8 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head
-        th:replace="~{fragments/head :: head('성경 단어 퍼즐 | ElSeeker', true, '/css/game/bible-word-puzzle.css?v=5.2')}"
-        th:with="robotsContent='noindex'">
+    th:replace="~{fragments/head :: head('성경 단어 퍼즐 | ElSeeker', true, '/css/game/bible-word-puzzle.css?v=5.2')}"
+    th:with="robotsContent='noindex'">
 </head>
 
 <body class="has-fixed-nav" data-back-link="/web/game/bible-word-puzzle">
@@ -11,100 +11,106 @@
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main class="container content-wrapper">
-    <!-- 에러 메시지 영역 -->
-    <div id="wpError" class="alert alert-danger d-none" role="alert"></div>
+  <!-- 에러 메시지 영역 -->
+  <div id="wpError" class="alert alert-danger d-none" role="alert"></div>
 
-    <!-- 저장 실패 배너 -->
-    <div id="wpSaveBanner" class="alert alert-warning d-none" role="alert">
-        저장 실패 — 네트워크를 확인해 주세요
+  <!-- 저장 실패 배너 -->
+  <div id="wpSaveBanner" class="alert alert-warning d-none" role="alert">
+    저장 실패 — 네트워크를 확인해 주세요
+  </div>
+
+  <!-- 로딩 -->
+  <div id="wpPlayLoading" class="text-center py-5">
+    <div class="spinner-container">
+      <div class="custom-spinner"></div>
+      <p class="mt-3 text-muted fw-medium">퍼즐을 불러오는 중입니다...</p>
+    </div>
+  </div>
+
+  <!-- ── 퍼즐 플레이 화면 ── -->
+  <section id="wpPlaySection" class="d-none">
+    <!-- Top Bar -->
+    <div class="wp-play-topbar">
+      <h2 class="wp-play-title" id="wpPlayTitle">퍼즐</h2>
+      <span class="wp-play-timer" id="wpTimer">00:00</span>
     </div>
 
-    <!-- 로딩 -->
-    <div id="wpPlayLoading" class="text-center py-5">
-        <div class="spinner-container">
-            <div class="custom-spinner"></div>
-            <p class="mt-3 text-muted fw-medium">퍼즐을 불러오는 중입니다...</p>
-        </div>
+    <!-- Clue Bar -->
+    <div class="wp-clue-bar" id="wpClueBar">
+      <span class="wp-clue-number" id="wpClueNumber"></span>
+      <span class="wp-clue-text" id="wpClueText">칸을 선택하세요</span>
     </div>
 
-    <!-- ── 퍼즐 플레이 화면 ── -->
-    <section id="wpPlaySection" class="d-none">
-        <!-- Top Bar -->
-        <div class="wp-play-topbar">
-            <h2 class="wp-play-title" id="wpPlayTitle">퍼즐</h2>
-            <span class="wp-play-timer" id="wpTimer">00:00</span>
+    <!-- Puzzle Board -->
+    <div class="wp-board-wrapper">
+      <div class="wp-board" id="wpBoard" aria-label="낱말 퍼즐 보드"></div>
+    </div>
+
+    <!-- Action Toolbar -->
+    <div class="wp-action-bar">
+      <button type="button" class="btn btn-sm btn-outline-primary wp-hint-btn" id="wpRevealBtn" title="글자 공개 (감점 -50)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path
+              d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/>
+        </svg>
+        글자 공개
+      </button>
+      <button type="button" class="btn btn-sm btn-outline-primary wp-hint-btn" id="wpCheckWordBtn" title="단어 확인 (감점 -50)">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+          <path
+              d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/>
+        </svg>
+        단어 확인
+      </button>
+      <button type="button" class="btn btn-sm btn-primary wp-submit-btn" id="wpSubmitBtn" disabled>
+        제출하기
+      </button>
+    </div>
+  </section>
+
+  <!-- ── 퍼즐 결과 화면 ── -->
+  <section id="wpResultSection" class="d-none">
+    <div class="wp-result-card card card-panel card-soft">
+      <div class="card-body text-center">
+        <div class="wp-result-icon" aria-hidden="true">&#127881;</div>
+        <h3 class="h5 fw-semibold mb-2">퍼즐 완료!</h3>
+
+        <div class="wp-score-display">
+          <span class="wp-score-value" id="wpResultScore">0</span>
+          <span class="wp-score-label">점</span>
         </div>
 
-        <!-- Clue Bar -->
-        <div class="wp-clue-bar" id="wpClueBar">
-            <span class="wp-clue-number" id="wpClueNumber"></span>
-            <span class="wp-clue-text" id="wpClueText">칸을 선택하세요</span>
+        <div class="wp-result-stats">
+          <div class="wp-result-stat">
+            <span class="wp-result-stat-label">소요 시간</span>
+            <span class="wp-result-stat-value" id="wpResultTime">-</span>
+          </div>
+          <div class="wp-result-stat">
+            <span class="wp-result-stat-label">힌트 사용</span>
+            <span class="wp-result-stat-value" id="wpResultHints">-</span>
+          </div>
+          <div class="wp-result-stat">
+            <span class="wp-result-stat-label">오답 제출</span>
+            <span class="wp-result-stat-value" id="wpResultWrong">-</span>
+          </div>
         </div>
 
-        <!-- Puzzle Board -->
-        <div class="wp-board-wrapper">
-            <div class="wp-board" id="wpBoard" aria-label="낱말 퍼즐 보드"></div>
+        <!-- 단어 학습 영역 -->
+        <div class="wp-word-study" id="wpWordStudy">
+          <h4 class="h6 fw-semibold mb-3 text-start">학습 단어</h4>
+          <div id="wpWordList" class="accordion"></div>
         </div>
 
-        <!-- Action Toolbar -->
-        <div class="wp-action-bar">
-            <button type="button" class="btn btn-sm btn-outline-primary wp-hint-btn" id="wpRevealBtn" title="글자 공개 (감점 -50)">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>
-                글자 공개
-            </button>
-            <button type="button" class="btn btn-sm btn-outline-primary wp-hint-btn" id="wpCheckWordBtn" title="단어 확인 (감점 -50)">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M10.97 4.97a.75.75 0 0 1 1.07 1.05l-3.99 4.99a.75.75 0 0 1-1.08.02L4.324 8.384a.75.75 0 1 1 1.06-1.06l2.094 2.093 3.473-4.425a.267.267 0 0 1 .02-.022z"/></svg>
-                단어 확인
-            </button>
-            <button type="button" class="btn btn-sm btn-primary wp-submit-btn" id="wpSubmitBtn" disabled>
-                제출하기
-            </button>
+        <div class="wp-result-actions mt-4">
+          <button type="button" class="btn btn-primary" id="wpBackToListBtn">다른 퍼즐 풀기</button>
         </div>
-    </section>
-
-    <!-- ── 퍼즐 결과 화면 ── -->
-    <section id="wpResultSection" class="d-none">
-        <div class="wp-result-card card card-panel card-soft">
-            <div class="card-body text-center">
-                <div class="wp-result-icon" aria-hidden="true">&#127881;</div>
-                <h3 class="h5 fw-semibold mb-2">퍼즐 완료!</h3>
-
-                <div class="wp-score-display">
-                    <span class="wp-score-value" id="wpResultScore">0</span>
-                    <span class="wp-score-label">점</span>
-                </div>
-
-                <div class="wp-result-stats">
-                    <div class="wp-result-stat">
-                        <span class="wp-result-stat-label">소요 시간</span>
-                        <span class="wp-result-stat-value" id="wpResultTime">-</span>
-                    </div>
-                    <div class="wp-result-stat">
-                        <span class="wp-result-stat-label">힌트 사용</span>
-                        <span class="wp-result-stat-value" id="wpResultHints">-</span>
-                    </div>
-                    <div class="wp-result-stat">
-                        <span class="wp-result-stat-label">오답 제출</span>
-                        <span class="wp-result-stat-value" id="wpResultWrong">-</span>
-                    </div>
-                </div>
-
-                <!-- 단어 학습 영역 -->
-                <div class="wp-word-study" id="wpWordStudy">
-                    <h4 class="h6 fw-semibold mb-3 text-start">학습 단어</h4>
-                    <div id="wpWordList" class="accordion"></div>
-                </div>
-
-                <div class="wp-result-actions mt-4">
-                    <button type="button" class="btn btn-primary" id="wpBackToListBtn">다른 퍼즐 풀기</button>
-                </div>
-            </div>
-        </div>
-    </section>
+      </div>
+    </div>
+  </section>
 </main>
 
 <div th:replace="~{fragments/confirm-dialog :: confirmDialog}"></div>
-<script type="module" src="/js/game/bible-word-puzzle-play.js?v=5.5"></script>
+<script type="module" src="/js/game/bible-word-puzzle-play.js?v=5.6"></script>
 </body>
 
 </html>
