@@ -741,10 +741,13 @@ function renderLine(line, onAdvance, hint = '탭하여 계속') {
   }
   elements.storyDialogue.innerHTML = '';
 
+  // 성경 인용 표시(word)와 화자 초상화는 별개다. 모세·세례 요한·천사의 말도 성경 본문이지만
+  // 하나님이 직접 하신 말씀이 아니므로 하나님 초상화가 붙어서는 안 된다.
+  const isWord = line.word === true || line.who === '말씀';
   const portrait = line.who ? CHARACTER_PORTRAITS[line.who] : null;
   if (portrait) {
     const figure = document.createElement('div');
-    figure.className = `story-portrait${line.who === '말씀' ? ' story-portrait-word' : ''}`;
+    figure.className = `story-portrait${isWord ? ' story-portrait-word' : ''}`;
     figure.setAttribute('aria-hidden', 'true');
     figure.innerHTML = `<img src="${portrait}" alt="" width="132" height="132">`;
     elements.storyDialogue.appendChild(figure);
@@ -752,7 +755,7 @@ function renderLine(line, onAdvance, hint = '탭하여 계속') {
 
   const button = document.createElement('button');
   button.type = 'button';
-  button.className = `story-line story-line-tappable${line.who === '말씀' ? ' story-line-word' : ''}`;
+  button.className = `story-line story-line-tappable${isWord ? ' story-line-word' : ''}`;
   button.innerHTML = `${lineMarkup(line)}<span class="story-line-hint" aria-hidden="true">${hint} ▸</span>`;
   button.addEventListener('click', onAdvance);
   elements.storyDialogue.appendChild(button);
@@ -1118,6 +1121,7 @@ function renderMannaBeat(scene, beat) {
     needMark.style.left = `${(config.need / max) * 100}%`;
 
     let collected = 0;
+    let settled = false;
     const pickedStack = [];
 
     const updateBar = () => {
@@ -1140,7 +1144,7 @@ function renderMannaBeat(scene, beat) {
       piece.style.top = `${y}%`;
       piece.setAttribute('aria-label', '만나를 줍는다');
       piece.addEventListener('click', () => {
-        if (piece.classList.contains('is-picked')) {
+        if (settled || piece.classList.contains('is-picked')) {
           return;
         }
         piece.classList.add('is-picked');
@@ -1156,7 +1160,7 @@ function renderMannaBeat(scene, beat) {
     });
 
     putBackButton.addEventListener('click', () => {
-      const piece = pickedStack.pop();
+      const piece = settled ? null : pickedStack.pop();
       if (!piece) {
         return;
       }
@@ -1168,6 +1172,18 @@ function renderMannaBeat(scene, beat) {
     });
 
     doneButton.addEventListener('click', () => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+
+      // 거두기를 마치면 조작 UI를 걷어내고 자막으로 시선을 넘긴다
+      elements.storyPlayArea.querySelector('.story-manna-actions').remove();
+      field.classList.add('is-settled');
+      field.querySelectorAll('.story-manna-piece').forEach((piece) => {
+        piece.disabled = true;
+      });
+
       const lastRound = round === MANNA_ROUNDS.length - 1;
       const morning = lastRound
           ? '안식일 아침 — 들에는 만나가 없었다. 여섯째 날 두 배로 거둔 양식은 상하지 않았고, 백성은 그 양식으로 쉬었다. (출 16:24–26)'

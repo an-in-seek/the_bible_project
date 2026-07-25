@@ -994,6 +994,15 @@ body.bible-story-page .site-header {
     transition: filter 0.6s ease;
 }
 
+/* 거두기를 마친 뒤: 들판을 뒤로 물리고 시선을 자막으로 넘긴다 */
+.story-manna-field.is-settled {
+    filter: saturate(0.85) brightness(0.72);
+}
+
+.story-manna-field.is-settled .story-manna-piece {
+    opacity: 0.35;
+}
+
 .story-manna-piece {
     position: absolute;
     width: 30px;
