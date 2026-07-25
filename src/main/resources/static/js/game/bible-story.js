@@ -297,7 +297,7 @@ const scenes = [
       },
       {
         type: 'seaCross',
-        prompt: '물 벽 사이로 열린 마른 땅을 밟고 건너 주세요.',
+        prompt: '병거가 뒤쫓아 옵니다. 버튼을 빠르게 연타해 물 벽 사이 마른 땅을 달려 건너 주세요!',
         steps: [
           '물 벽 사이로 첫걸음을 내디뎠다.',
           '아이들과 노인들, 양 떼까지 마른 땅을 밟았다.',
@@ -1053,33 +1053,91 @@ function renderSeaCrossBeat(beat) {
   elements.storyPlayArea.innerHTML = `
         <div class="story-sea-corridor" aria-hidden="true">
             <div class="story-sea-pillar"></div>
+            <div class="story-sea-army" id="seaArmy">
+                <span></span><span></span><span></span><span></span>
+            </div>
             <div class="story-sea-procession" id="seaProcession">
                 <span></span><span></span><span></span><span></span><span></span>
             </div>
         </div>
-        <p class="story-sea-caption" id="seaCaption" aria-live="polite">물 벽 사이의 마른 땅이 열려 있다.</p>
-        <button type="button" class="story-btn story-btn-primary story-sea-step" id="seaStepButton">
-            구름 기둥을 따라 나아간다
+        <p class="story-sea-caption" id="seaCaption" aria-live="polite">뒤에서 병거 소리가 울린다. 서둘러 건너야 한다!</p>
+        <button type="button" class="story-btn story-btn-primary story-sea-run" id="seaRunButton">
+            달린다!
+            <small>빠르게 연타할수록 빨리 달려요</small>
         </button>
     `;
 
   const procession = elements.storyPlayArea.querySelector('#seaProcession');
+  const army = elements.storyPlayArea.querySelector('#seaArmy');
   const caption = elements.storyPlayArea.querySelector('#seaCaption');
-  const stepButton = elements.storyPlayArea.querySelector('#seaStepButton');
-  let step = 0;
+  const runButton = elements.storyPlayArea.querySelector('#seaRunButton');
 
-  stepButton.addEventListener('click', () => {
-    step += 1;
-    procession.style.setProperty('--step', String(step));
-    caption.textContent = beat.steps[step - 1];
-    announce(beat.steps[step - 1]);
-    if (step >= beat.steps.length) {
-      stepButton.disabled = true;
-      elements.storyBackdrop.dataset.sea = 'closed';
-      renderLine(beat.doneLine, nextBeat);
+  const TAP_GAIN = 3.5; // 한 번 탭에 나아가는 거리
+  const GAP_START = 30; // 병거와의 시작 간격
+  const GAP_MIN = 6; // 병거는 여기까지만 좁혀 온다 — 결말은 바뀌지 않는다
+  const GAP_MAX = 40;
+  const TAP_GAP_PUSH = 1.1; // 탭 한 번이 병거를 떼어 놓는 정도
+  const CHASE_DECAY = 0.9; // 틱마다 병거가 좁혀 오는 정도
+
+  let progress = 0;
+  let gap = GAP_START;
+  let stage = -1;
+  let warned = false;
+  let finished = false;
+
+  const render = () => {
+    procession.style.setProperty('--run', String(progress / 100));
+    army.style.setProperty('--run', String(Math.max(0, progress - gap) / 100));
+    army.classList.toggle('is-near', gap <= 12);
+  };
+
+  const updateCaption = () => {
+    const next = progress >= 100 ? 2 : progress >= 50 ? 1 : progress > 0 ? 0 : -1;
+    if (next > stage) {
+      stage = next;
+      caption.textContent = beat.steps[stage];
+      announce(beat.steps[stage]);
+    }
+  };
+
+  const chase = window.setInterval(() => {
+    if (finished || !procession.isConnected || elements.storyGame.classList.contains('d-none')) {
+      window.clearInterval(chase);
+      return;
+    }
+    gap = Math.max(GAP_MIN, gap - CHASE_DECAY);
+    render();
+    if (gap <= GAP_MIN + 1 && !warned) {
+      warned = true;
+      caption.textContent = '병거 소리가 등 뒤까지 닥쳤다. 더 빨리!';
+    }
+  }, 260);
+
+  const finish = () => {
+    finished = true;
+    window.clearInterval(chase);
+    runButton.disabled = true;
+    elements.storyBackdrop.dataset.sea = 'closed';
+    army.classList.add('is-swept');
+    renderLine(beat.doneLine, nextBeat);
+  };
+
+  runButton.addEventListener('click', () => {
+    if (finished) {
+      return;
+    }
+    progress = Math.min(100, progress + TAP_GAIN);
+    gap = Math.min(GAP_MAX, gap + TAP_GAP_PUSH);
+    if (warned && gap > GAP_MIN + 4) {
+      warned = false;
+    }
+    render();
+    updateCaption();
+    if (progress >= 100) {
+      finish();
     }
   });
-  stepButton.focus({preventScroll: true});
+  runButton.focus({preventScroll: true});
 }
 
 // ---------------------------------------------------------------- scene 4: manna

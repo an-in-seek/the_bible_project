@@ -936,7 +936,7 @@ body.bible-story-page .site-header {
 .story-sea-corridor {
     position: relative;
     width: min(300px, 74vw);
-    height: 200px;
+    height: 230px;
 }
 
 .story-sea-pillar {
@@ -954,12 +954,12 @@ body.bible-story-page .site-header {
 
 .story-sea-procession {
     position: absolute;
-    bottom: 0;
+    bottom: 38px;
     left: 50%;
     display: flex;
     gap: 0.45rem;
-    transform: translate(-50%, calc(var(--step, 0) * -44px)) scale(calc(1 - var(--step, 0) * 0.14));
-    transition: transform 0.9s ease;
+    transform: translate(-50%, calc(var(--run, 0) * -150px)) scale(calc(1 - var(--run, 0) * 0.35));
+    transition: transform 0.22s ease-out;
 }
 
 .story-sea-procession span {
@@ -968,6 +968,58 @@ body.bible-story-page .site-header {
     border-radius: 50%;
     background: #e8dcbf;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+/* 뒤쫓는 애굽 병거 부대 — 이동은 부모 transform(--run), 질주 들썩임은 자식에게만 */
+.story-sea-army {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    display: flex;
+    gap: 0.5rem;
+    transform: translate(-50%, calc(var(--run, 0) * -150px)) scale(calc(1 - var(--run, 0) * 0.3));
+    transition: transform 0.3s linear;
+}
+
+.story-sea-army span {
+    width: 0.85rem;
+    height: 0.85rem;
+    border-radius: 0.2rem;
+    background: linear-gradient(160deg, #8f5b33, #5c2f1f);
+    box-shadow: 0 0 10px rgba(216, 108, 62, 0.55);
+    animation: story-army-charge 0.45s ease-in-out infinite;
+}
+
+.story-sea-army span:nth-child(2n) {
+    animation-delay: 0.15s;
+}
+
+.story-sea-army.is-near span {
+    box-shadow: 0 0 18px rgba(233, 105, 66, 0.9);
+}
+
+.story-sea-army.is-swept {
+    animation: story-army-swept 1s ease forwards;
+}
+
+.story-sea-run {
+    width: min(340px, 92%);
+    min-height: 60px;
+    flex-direction: column;
+    gap: 0.1rem;
+    touch-action: manipulation;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.story-sea-run small {
+    font-size: 0.68rem;
+    font-weight: 600;
+    opacity: 0.75;
+}
+
+.story-sea-run:not(:disabled):active {
+    transform: scale(0.96);
 }
 
 .story-sea-caption {
@@ -2020,6 +2072,7 @@ html[data-theme="dark"] .story-badge,
     .story-door-spot,
     .story-table-item-image,
     .story-sea-pillar,
+    .story-sea-army span,
     .story-fragment-gem-large,
     .story-finale-gem,
     .story-finale-beam,
@@ -2036,6 +2089,7 @@ html[data-theme="dark"] .story-badge,
 
     .story-backdrop-wall,
     .story-sea-procession,
+    .story-sea-army,
     .story-btn {
         transition: none;
     }
@@ -2094,6 +2148,20 @@ html[data-theme="dark"] .story-badge,
 @keyframes story-pillar-glow {
     0%, 100% { box-shadow: 0 0 44px rgba(242, 200, 121, 0.55); }
     50% { box-shadow: 0 0 70px rgba(242, 200, 121, 0.85); }
+}
+
+/* 이동 transform(--run)을 덮지 않도록 질주 들썩임은 자식 span에만 건다 */
+@keyframes story-army-charge {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+}
+
+/* 부모에는 transform 없이 opacity/filter만 — 휩쓸려 가라앉는 연출 */
+@keyframes story-army-swept {
+    to {
+        opacity: 0;
+        filter: blur(4px) brightness(0.6);
+    }
 }
 
 @keyframes story-manna-pick {
