@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head
-        th:replace="~{fragments/head :: head('어린양의 약속 | ElSeeker', true, '/css/game/bible-story.css?v=3.7')}"
+        th:replace="~{fragments/head :: head('어린양의 약속 | ElSeeker', true, '/css/game/bible-story.css?v=3.9')}"
         th:with="robotsContent='noindex',
                  pageDescription='유월절의 밤을 직접 준비하고, 바다를 건너고, 만나를 거두며 십자가와 부활에서 그 의미를 발견하는 성경 스토리 체험입니다.'">
 </head>
@@ -90,11 +90,6 @@
 
             <blockquote class="story-epilogue" id="storyEpilogue"></blockquote>
 
-            <section class="story-ending-journal" aria-labelledby="storyEndingJournalTitle">
-                <h2 id="storyEndingJournalTitle">기록자의 일지 회고</h2>
-                <ol id="storyEndingJournal"></ol>
-            </section>
-
             <ol class="story-connection-timeline" aria-label="유월절과 그리스도의 연결">
                 <li>
                     <span>출애굽기 12장</span>
@@ -118,13 +113,10 @@
                 </li>
             </ol>
 
-            <div class="story-ending-note">
+            <p class="story-ending-caption">
                 <span class="story-badge story-badge-direct">성경의 직접 연결</span>
-                <p>
-                    이 연결은 게임이 만들어 낸 결말이 아닙니다. 유월절 사건을 먼저 체험하고,
-                    신약이 밝히는 의미를 당신의 손으로 이어 확인하도록 구성했습니다.
-                </p>
-            </div>
+                이 연결은 게임이 만든 결말이 아니라, 신약이 직접 증언하는 결말입니다.
+            </p>
 
             <div class="story-ending-actions">
                 <button type="button" class="story-btn story-btn-primary" id="storyEndingSheetButton">
@@ -182,6 +174,6 @@
 </dialog>
 
 <div class="visually-hidden" id="storyLiveRegion" aria-live="polite" aria-atomic="true"></div>
-<script type="module" src="/js/game/bible-story.js?v=3.3"></script>
+<script type="module" src="/js/game/bible-story.js?v=3.4"></script>
 </body>
 </html>

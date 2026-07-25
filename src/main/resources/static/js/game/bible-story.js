@@ -483,7 +483,7 @@ function cacheElements() {
     'storySheet', 'storySheetClose', 'storyTabJournal', 'storyTabArchive',
     'storyJournalPanel', 'storyArchivePanel', 'storyJournalList', 'storyJournalEmpty',
     'storyArchiveRecords', 'storyResetButton', 'storyEndingTitle', 'storyEpilogue',
-    'storyEndingJournal', 'storyEndingSheetButton', 'storyRestartButton', 'storyLiveRegion'
+    'storyEndingSheetButton', 'storyRestartButton', 'storyLiveRegion'
   ].forEach((id) => {
     elements[id] = document.getElementById(id);
   });
@@ -1391,12 +1391,6 @@ function showEnding() {
   elements.storyEnding.classList.remove('d-none');
   document.body.classList.remove('is-story-playing');
   elements.storyEpilogue.textContent = buildEpilogue();
-  elements.storyEndingJournal.innerHTML = state.journal.map((entry) => `
-        <li>
-            <strong>${entry.sceneTitle}</strong>
-            <span>${entry.text}</span>
-        </li>
-    `).join('');
   renderSheet();
   window.scrollTo({top: 0, behavior: prefersReducedMotion() ? 'auto' : 'smooth'});
   requestAnimationFrame(() => elements.storyEndingTitle.focus?.());

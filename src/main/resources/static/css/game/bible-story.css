@@ -1500,68 +1500,31 @@ body.bible-story-page .site-header {
     line-height: 1.85;
 }
 
-.story-ending-journal {
-    max-width: 720px;
-    margin-top: 2.2rem;
-}
-
-.story-ending-journal h2 {
-    margin: 0 0 0.9rem;
-    color: var(--story-gold-bright);
-    font-size: 1rem;
-    letter-spacing: 0.06em;
-}
-
-.story-ending-journal ol {
-    display: grid;
-    gap: 0.7rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.story-ending-journal li {
-    position: relative;
-    padding-left: 1rem;
-    color: rgba(255, 255, 255, 0.78);
-    font-size: 0.83rem;
-    line-height: 1.7;
-}
-
-.story-ending-journal li::before {
-    content: "";
-    position: absolute;
-    top: 0.55rem;
-    left: 0;
-    width: 0.4rem;
-    height: 0.4rem;
-    border-radius: 50%;
-    background: var(--story-gold-bright);
-}
-
-.story-ending-journal strong {
-    display: block;
-    color: rgba(255, 251, 240, 0.95);
-    font-size: 0.74rem;
-    letter-spacing: 0.04em;
-}
-
+/* 연결 타임라인: 박스 나열 대신 숫자·상단 괘선의 가벼운 스텝으로 시선 흐름만 남긴다 */
 .story-connection-timeline {
+    counter-reset: story-step;
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 1px;
+    gap: 1.4rem;
+    margin: 2.6rem 0 0;
     padding: 0;
-    margin: 2.5rem 0 0;
-    border-radius: 1rem;
-    overflow: hidden;
-    background: rgba(255, 255, 255, 0.14);
     list-style: none;
 }
 
 .story-connection-timeline li {
-    min-height: 190px;
-    padding: 1rem;
-    background: rgba(6, 18, 34, 0.72);
+    counter-increment: story-step;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(255, 235, 185, 0.3);
+}
+
+.story-connection-timeline li::before {
+    content: counter(story-step, decimal-leading-zero);
+    display: block;
+    margin-bottom: 0.45rem;
+    color: rgba(255, 235, 185, 0.5);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
 }
 
 .story-connection-timeline span {
@@ -1572,33 +1535,26 @@ body.bible-story-page .site-header {
 
 .story-connection-timeline strong {
     display: block;
-    margin-top: 0.7rem;
+    margin-top: 0.35rem;
     font-family: "Noto Serif KR", Georgia, serif;
     font-size: 0.95rem;
 }
 
 .story-connection-timeline p {
-    margin: 0.45rem 0 0;
-    color: rgba(255, 255, 255, 0.62);
-    font-size: 0.75rem;
+    margin: 0.4rem 0 0;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.74rem;
     line-height: 1.55;
 }
 
-.story-ending-note {
+.story-ending-caption {
     display: flex;
-    align-items: flex-start;
-    gap: 0.8rem;
-    margin-top: 1rem;
-    padding: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 0.8rem;
-    background: rgba(6, 18, 34, 0.45);
-}
-
-.story-ending-note p {
-    margin: 0;
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.76rem;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 1.6rem 0 0;
+    color: rgba(255, 255, 255, 0.66);
+    font-size: 0.78rem;
     line-height: 1.6;
 }
 
@@ -1651,7 +1607,7 @@ body.bible-story-page .site-header {
 
 html[data-theme="dark"] .story-badge,
 .story-match-capstone .story-badge,
-.story-ending-note .story-badge {
+.story-ending-caption .story-badge {
     color: var(--story-gold-bright);
 }
 
@@ -1908,13 +1864,32 @@ html[data-theme="dark"] .story-badge,
         padding: 0.65rem;
     }
 
+    /* 모바일: 연결 카드를 '제목 ↔ 출처' 한 줄 요약으로 압축 — 4장이 쌓여도 스크롤이 생기지 않게.
+       인용문 전문은 선택 다이얼로그·캡스톤·기록관에서 확인 가능 */
     .story-match-pair {
-        flex-wrap: wrap;
-        row-gap: 0.35rem;
+        gap: 0.5rem;
+        padding: 0.5rem 0.65rem;
+    }
+
+    .story-match-pair-fragment {
+        font-size: 0.76rem;
     }
 
     .story-match-pair-testimony {
-        flex: 1 1 100%;
+        flex: 0 1 auto;
+        margin-left: auto;
+        text-align: right;
+    }
+
+    .story-match-pair-testimony .story-match-quote {
+        display: none;
+    }
+
+    .story-match-pair-testimony .story-match-ref {
+        margin-top: 0;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 0.7rem;
+        white-space: nowrap;
     }
 
     .story-match-dialog {
@@ -1960,15 +1935,8 @@ html[data-theme="dark"] .story-badge,
     }
 
     .story-connection-timeline {
-        grid-template-columns: 1fr;
-    }
-
-    .story-connection-timeline li {
-        min-height: 0;
-    }
-
-    .story-ending-note {
-        flex-direction: column;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1.1rem;
     }
 
     .story-ending-content {
