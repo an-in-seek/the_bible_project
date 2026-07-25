@@ -132,7 +132,7 @@ const scenes = [
           {phase: 'early-plagues', text: '그 한마디 뒤로 재앙이 시작됐다. 나일강이 피로 변했고, 개구리와 이와 파리 떼가 온 땅을 뒤덮었다.', ref: '출애굽기 7–8장'},
           {phase: 'later-plagues', text: '가축이 쓰러지고 사람 몸에 악성 종기가 퍼졌다. 우박이 곡식을 때렸고, 메뚜기가 남은 이삭까지 갉아먹었다.', ref: '출애굽기 9–10장'},
           {phase: 'darkness', text: '아홉 번째로 사흘 동안 짙은 어둠이 이집트를 덮었다. 그런데도 바로는 요지부동, 고집을 꺾지 않았다.', ref: '출애굽기 10:21–23'},
-          {phase: 'plague', text: '이제 남은 것은 열 번째, 마지막 재앙. 이집트의 모든 장자가 죽는 밤이다.', ref: '출애굽기 11:4–5'},
+          {text: '이제 남은 것은 열 번째, 마지막 재앙. 이집트의 모든 장자가 죽는 밤이다.', ref: '출애굽기 11:4–5'},
           {phase: 'father-welcome', who: '기록자', text: '나는 기록자다. 심판이 예고된 이 때, 하나님이 자기 백성에게 미리 열어 두신 구원의 길을 기록하러 왔다.'},
           {phase: 'father-welcome', who: '기록자', text: '그 길은 군대도, 성벽도, 도망칠 국경도 아니었다. 모세를 통해 내려온 지시는 뜻밖에도 집집마다 준비할 어린양 한 마리였다.', ref: '출애굽기 12:3'},
           {phase: 'father-welcome', who: '기록자', text: '이 달 열흘에 흠 없는 일 년 된 수컷을 골라 두었다가, 열나흘 저녁 해 질 때에 잡으라 하셨다. 오늘이 바로 그 열나흘이다.', ref: '출애굽기 12:5–6'},
@@ -183,7 +183,7 @@ const scenes = [
           {
             phase: 'anna-lamp',
             who: '안나',
-            text: '기록자님! 저는 안나예요. 우리 오빠 지금 손 떨고 있는 거, 저만 본 거 아니죠?'
+            text: '안녕하세요, 기록자님! 저는 안나예요. 혹시 우리 오빠 손 떨고 있는 거 보셨어요?, 저만 본 거 아니죠?'
           },
           {
             phase: 'lamb-ready',
@@ -1068,6 +1068,8 @@ function renderVigilBeat(beat) {
     if (nextStage > stageIndex && nextStage >= 0) {
       stageIndex = nextStage;
       if (stageIndex === 0) {
+        // 대응하는 CSS 규칙이 없는 phase다. 앞 장면의 배경 이미지를 걷어내고
+        // night 기본 그라데이션(순수한 어둠)만 남기려는 의도적 폴백이다.
         elements.storyBackdrop.dataset.phase = 'plague';
       }
       caption.textContent = beat.stages[stageIndex];

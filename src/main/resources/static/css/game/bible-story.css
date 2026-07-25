@@ -462,12 +462,6 @@ body.bible-story-page .site-header {
         #01060b url("/images/game/bible-story-ninth-plague-darkness.jpg") center / cover no-repeat;
 }
 
-.story-backdrop[data-theme="door"][data-phase="plague"] .story-backdrop-art {
-    background:
-        linear-gradient(180deg, rgba(2, 7, 15, 0.04), rgba(2, 7, 15, 0.42)),
-        #030b15 url("/images/game/bible-story-final-plague.jpg") center / cover no-repeat;
-}
-
 .story-backdrop[data-theme="door"][data-phase="father-welcome"] .story-backdrop-art {
     background:
         linear-gradient(180deg, rgba(13, 8, 4, 0.02), rgba(8, 5, 3, 0.4)),
@@ -534,11 +528,7 @@ body.bible-story-page .site-header {
         #071426 url("/images/game/bible-story-fire-pillar.jpg") center / cover no-repeat;
 }
 
-.story-backdrop[data-theme="night"][data-phase="plague"] .story-backdrop-art {
-    background:
-        linear-gradient(180deg, rgba(2, 7, 15, 0.08), rgba(2, 7, 15, 0.46)),
-        #030b15 url("/images/game/bible-story-final-plague.jpg") center / cover no-repeat;
-}
+/* 심판의 순간은 그림 없이 어둠만 남긴다 — plague phase는 night 기본 그라데이션으로 폴백된다 */
 
 .story-backdrop[data-theme="night"][data-phase="mourning"] .story-backdrop-art {
     background:
@@ -2079,8 +2069,7 @@ html[data-theme="dark"] .story-badge,
 
     .story-backdrop[data-theme="door"][data-phase="cries"] .story-backdrop-art,
     .story-backdrop[data-theme="door"][data-phase="early-plagues"] .story-backdrop-art,
-    .story-backdrop[data-theme="door"][data-phase="later-plagues"] .story-backdrop-art,
-    .story-backdrop[data-theme="door"][data-phase="plague"] .story-backdrop-art {
+    .story-backdrop[data-theme="door"][data-phase="later-plagues"] .story-backdrop-art {
         background-position: center;
     }
 
