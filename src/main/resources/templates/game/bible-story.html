@@ -1,179 +1,197 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 <head
-        th:replace="~{fragments/head :: head('어린양의 약속 | ElSeeker', true, '/css/game/bible-story.css?v=4.6')}"
-        th:with="robotsContent='noindex',
+    th:replace="~{fragments/head :: head('어린양의 약속 | ElSeeker', true, '/css/game/bible-story.css?v=4.6')}"
+    th:with="robotsContent='noindex',
                  pageDescription='유월절의 밤을 직접 준비하고, 바다를 건너고, 만나를 거두며 십자가와 부활에서 그 의미를 발견하는 성경 스토리 체험입니다.'">
 </head>
 <body class="has-fixed-nav bible-story-page" data-back-link="/web/game">
 <header th:replace="~{fragments/header :: header}"></header>
 
 <main class="story-main">
-    <section class="story-intro" id="storyIntro" aria-labelledby="storyIntroTitle">
-        <a class="story-page-back" href="/web/game" aria-label="게임 목록으로 돌아가기" title="게임 목록">←</a>
-        <div class="story-intro-backdrop" aria-hidden="true"></div>
-        <div class="story-intro-shade" aria-hidden="true"></div>
-        <div class="story-intro-content">
-            <span class="story-eyebrow">스토리 체험 · 유월절에서 십자가까지</span>
-            <p class="story-kicker">언약의 길</p>
-            <h1 id="storyIntroTitle">어린양의 약속</h1>
-            <p class="story-intro-lead">
-                문기둥에 피를 바르고, 밤을 지새우고, 바다를 건너고, 만나를 거둬 보세요.
-                당신의 손으로 모은 조각들이 십자가와 빈 무덤 앞에서 하나로 이어집니다.
-            </p>
-            <div class="story-intro-meta" aria-label="게임 정보">
-                <span>약 10~15분</span>
-                <span>직접 행하는 체험</span>
-                <span>결말은 바뀌지 않습니다</span>
-                <span>이 브라우저에 임시 저장</span>
-            </div>
-            <div class="story-intro-actions">
-                <button type="button" class="story-btn story-btn-primary" id="storyStartButton">
-                    기록을 시작합니다
-                </button>
-                <button type="button" class="story-btn story-btn-ghost d-none" id="storyResumeButton">
-                    이어서 기록합니다
-                </button>
-            </div>
-            <p class="story-creative-notice">
-                <span aria-hidden="true">ⓘ</span>
-                일부 대화와 인물(기록자, 미리암)은 몰입을 위한 게임적 창작이며, 기록관에서 성경 본문과
-                구분되어 표시됩니다. 진행 기록은 계정과 동기화되지 않고 현재 브라우저에만 저장됩니다.
-            </p>
-        </div>
-    </section>
+  <section class="story-intro" id="storyIntro" aria-labelledby="storyIntroTitle">
+    <a class="story-page-back" href="/web/game" aria-label="게임 목록으로 돌아가기" title="게임 목록">←</a>
+    <div class="story-intro-backdrop" aria-hidden="true"></div>
+    <div class="story-intro-shade" aria-hidden="true"></div>
+    <div class="story-intro-content">
+      <span class="story-eyebrow">스토리 체험 · 유월절에서 십자가까지</span>
+      <p class="story-kicker">언약의 길</p>
+      <h1 id="storyIntroTitle">어린양의 약속</h1>
+      <p class="story-intro-lead">
+        문기둥에 피를 바르고, 밤을 지새우고, 바다를 건너고, 만나를 거둬 보세요.
+        당신의 손으로 모은 조각들이 십자가와 빈 무덤 앞에서 하나로 이어집니다.
+      </p>
+      <div class="story-intro-meta" aria-label="게임 정보">
+        <span>약 10~15분</span>
+        <span>직접 행하는 체험</span>
+        <span>결말은 바뀌지 않습니다</span>
+        <span>이 브라우저에 임시 저장</span>
+      </div>
+      <div class="story-intro-actions">
+        <button type="button" class="story-btn story-btn-primary" id="storyStartButton">
+          기록을 시작합니다
+        </button>
+        <button type="button" class="story-btn story-btn-ghost d-none" id="storyResumeButton">
+          이어서 기록합니다
+        </button>
+      </div>
+      <p class="story-creative-notice">
+        <span aria-hidden="true">ⓘ</span>
+        일부 대화와 인물(기록자, 미리암)은 몰입을 위한 게임적 창작이며, 기록관에서 성경 본문과
+        구분되어 표시됩니다. 진행 기록은 계정과 동기화되지 않고 현재 브라우저에만 저장됩니다.
+      </p>
+    </div>
+  </section>
 
-    <section class="story-play d-none" id="storyGame" aria-label="어린양의 약속 플레이 화면">
-        <div class="story-hud">
-            <button type="button" class="story-exit-button" id="storyExitButton"
-                    aria-label="게임을 나가고 처음 화면으로" title="나가기">✕</button>
-            <div class="story-hud-progress">
-                <ol class="story-dots" id="storyDots" aria-hidden="true"></ol>
-                <span class="story-hud-scene" id="storyHudScene">장면 1 / 6 · 문 앞에서</span>
-            </div>
-            <button type="button" class="story-fragment-button" id="storySheetButton"
-                    aria-haspopup="dialog" aria-controls="storySheet">
-                <span class="story-fragment-gem" aria-hidden="true"></span>
-                조각
-                <span class="story-count" id="storyFragmentCount">0</span>
-            </button>
-        </div>
+  <section class="story-play d-none" id="storyGame" aria-label="어린양의 약속 플레이 화면">
+    <div class="story-hud">
+      <button type="button" class="story-exit-button" id="storyExitButton"
+              aria-label="게임을 나가고 처음 화면으로" title="나가기">✕
+      </button>
+      <div class="story-hud-progress">
+        <ol class="story-dots" id="storyDots" aria-hidden="true"></ol>
+        <span class="story-hud-scene" id="storyHudScene">장면 1 / 6 · 문 앞에서</span>
+      </div>
+      <button type="button" class="story-fragment-button" id="storySheetButton"
+              aria-haspopup="dialog" aria-controls="storySheet">
+        <span class="story-fragment-gem" aria-hidden="true"></span>
+        조각
+        <span class="story-count" id="storyFragmentCount">0</span>
+      </button>
+    </div>
 
-        <div class="story-stage">
-            <div class="story-backdrop" id="storyBackdrop" data-theme="door" aria-hidden="true">
-                <div class="story-backdrop-art"></div>
-                <div class="story-backdrop-wall story-backdrop-wall-left"></div>
-                <div class="story-backdrop-wall story-backdrop-wall-right"></div>
-                <div class="story-backdrop-dawn"></div>
-                <div class="story-backdrop-vignette"></div>
-            </div>
-            <p class="story-stage-caption">
-                <span id="storySceneEra">이집트 고센 · 유월절 전날 밤</span>
-                <span id="storySceneRef">출애굽기 12장</span>
-            </p>
-            <div class="story-play-area" id="storyPlayArea"></div>
-            <div class="story-dialogue" id="storyDialogue"></div>
-        </div>
-    </section>
+    <div class="story-stage">
+      <div class="story-backdrop" id="storyBackdrop" data-theme="door" aria-hidden="true">
+        <div class="story-backdrop-art"></div>
+        <div class="story-backdrop-wall story-backdrop-wall-left"></div>
+        <div class="story-backdrop-wall story-backdrop-wall-right"></div>
+        <div class="story-backdrop-dawn"></div>
+        <div class="story-backdrop-vignette"></div>
+      </div>
+      <p class="story-stage-caption">
+        <span id="storySceneEra">이집트 고센 · 유월절 전날 밤</span>
+        <span id="storySceneRef">출애굽기 12장</span>
+      </p>
+      <div class="story-play-area" id="storyPlayArea"></div>
+      <div class="story-dialogue" id="storyDialogue"></div>
+    </div>
+  </section>
 
-    <section class="story-ending d-none" id="storyEnding" aria-labelledby="storyEndingTitle">
-        <a class="story-page-back" href="/web/game" aria-label="게임 목록으로 돌아가기" title="게임 목록">←</a>
-        <div class="story-ending-glow" aria-hidden="true"></div>
-        <div class="story-ending-content">
-            <span class="story-eyebrow">기록의 재해석</span>
-            <p class="story-kicker">유월절에서 빈 무덤까지</p>
-            <h1 id="storyEndingTitle" tabindex="-1">약속은 한 길을 가리켰습니다</h1>
-            <p class="story-ending-lead">
-                유월절의 어린양은 죽음을 지나 해방으로 가는 표지였습니다.
-                신약은 그리스도를 우리의 유월절 양으로 직접 증언합니다.
-            </p>
+  <section class="story-ending d-none" id="storyEnding" aria-labelledby="storyEndingTitle">
+    <a class="story-page-back" href="/web/game" aria-label="게임 목록으로 돌아가기" title="게임 목록">←</a>
+    <div class="story-ending-glow" aria-hidden="true"></div>
+    <div class="story-ending-content">
+      <span class="story-eyebrow">기록의 재해석</span>
+      <p class="story-kicker">유월절에서 빈 무덤까지</p>
+      <h1 id="storyEndingTitle" tabindex="-1">약속은 한 길을 가리켰습니다</h1>
+      <p class="story-ending-lead">
+        유월절의 어린양은 죽음을 지나 해방으로 가는 표지였습니다.
+        신약은 그리스도를 우리의 유월절 양으로 직접 증언합니다.
+      </p>
 
-            <blockquote class="story-epilogue" id="storyEpilogue"></blockquote>
+      <blockquote class="story-epilogue" id="storyEpilogue"></blockquote>
 
-            <ol class="story-connection-timeline" aria-label="유월절과 그리스도의 연결">
-                <li>
-                    <span>출애굽기 12장</span>
-                    <strong>유월절의 밤</strong>
-                    <p>심판을 지나 해방으로 떠날 백성에게 주어진 표지</p>
-                </li>
-                <li>
-                    <span>누가복음 22장</span>
-                    <strong>유월절 식탁</strong>
-                    <p>예수님께서 떡과 잔을 나누시며 말씀하신 새 언약</p>
-                </li>
-                <li>
-                    <span>고린도전서 5:7</span>
-                    <strong>직접 연결된 증언</strong>
-                    <p>신약이 그리스도를 우리의 유월절 양으로 증언함</p>
-                </li>
-                <li>
-                    <span>요한복음 20장</span>
-                    <strong>빈 무덤의 새벽</strong>
-                    <p>죽음 뒤에 확인된 부활의 증언</p>
-                </li>
-            </ol>
+      <ol class="story-connection-timeline" aria-label="유월절과 그리스도의 연결">
+        <li>
+          <span>출애굽기 12장</span>
+          <strong>유월절의 밤</strong>
+          <p>심판을 지나 해방으로 떠날 백성에게 주어진 표지</p>
+        </li>
+        <li>
+          <span>누가복음 22장</span>
+          <strong>유월절 식탁</strong>
+          <p>예수님께서 떡과 잔을 나누시며 말씀하신 새 언약</p>
+        </li>
+        <li>
+          <span>고린도전서 5:7</span>
+          <strong>직접 연결된 증언</strong>
+          <p>신약이 그리스도를 우리의 유월절 양으로 증언함</p>
+        </li>
+        <li>
+          <span>요한복음 20장</span>
+          <strong>빈 무덤의 새벽</strong>
+          <p>죽음 뒤에 확인된 부활의 증언</p>
+        </li>
+      </ol>
 
-            <p class="story-ending-caption">
-                <span class="story-badge story-badge-direct">성경의 직접 연결</span>
-                이 연결은 게임이 만든 결말이 아니라, 신약이 직접 증언하는 결말입니다.
-            </p>
+      <p class="story-ending-caption">
+        <span class="story-badge story-badge-direct">성경의 직접 연결</span>
+        이 연결은 게임이 만든 결말이 아니라, 신약이 직접 증언하는 결말입니다.
+      </p>
 
-            <div class="story-ending-actions">
-                <button type="button" class="story-btn story-btn-primary" id="storyEndingSheetButton">
-                    일지와 기록 보기
-                </button>
-                <a class="story-btn story-btn-ghost"
-                   href="/web/bible/verse?translationId=1&bookOrder=2&chapterNumber=12">
-                    출애굽기 12장 읽기
-                </a>
-                <a class="story-btn story-btn-ghost"
-                   href="/web/bible/verse?translationId=1&bookOrder=43&chapterNumber=20">
-                    요한복음 20장 읽기
-                </a>
-                <button type="button" class="story-text-button" id="storyRestartButton">처음부터 다시</button>
-            </div>
-        </div>
-    </section>
+      <div class="story-ending-actions">
+        <button type="button" class="story-btn story-btn-primary" id="storyEndingSheetButton">
+          일지와 기록 보기
+        </button>
+        <a class="story-btn story-btn-ghost"
+           href="/web/bible/verse?translationId=1&bookOrder=2&chapterNumber=12">
+          출애굽기 12장 읽기
+        </a>
+        <a class="story-btn story-btn-ghost"
+           href="/web/bible/verse?translationId=1&bookOrder=43&chapterNumber=20">
+          요한복음 20장 읽기
+        </a>
+        <button type="button" class="story-text-button" id="storyRestartButton">처음부터 다시</button>
+      </div>
+    </div>
+  </section>
 </main>
 
 <dialog class="story-sheet" id="storySheet" aria-labelledby="storySheetTitle">
-    <div class="story-sheet-header">
-        <h2 id="storySheetTitle">기록자의 가방</h2>
-        <button type="button" class="story-sheet-close" id="storySheetClose" aria-label="닫기">×</button>
-    </div>
-    <div class="story-sheet-tabs" role="tablist" aria-label="일지와 기록관">
-        <button type="button" class="story-sheet-tab is-active" id="storyTabJournal"
-                role="tab" aria-selected="true">일지</button>
-        <button type="button" class="story-sheet-tab" id="storyTabArchive"
-                role="tab" aria-selected="false">기록관</button>
-    </div>
-    <div class="story-sheet-body">
-        <section id="storyJournalPanel" role="tabpanel" aria-label="기록자의 일지">
-            <div class="story-journal-list" id="storyJournalList"></div>
-            <p class="story-journal-empty" id="storyJournalEmpty">
-                장면을 진행하면 기록자의 일지가 이곳에 쌓입니다.
-            </p>
-        </section>
-        <section id="storyArchivePanel" role="tabpanel" aria-label="해금된 성경 기록" class="d-none">
-            <div class="story-archive-records" id="storyArchiveRecords"></div>
-            <details class="story-legend-details">
-                <summary>출처 표기 안내</summary>
-                <dl class="story-legend">
-                    <div><dt><span class="story-badge story-badge-scripture">성경 기록</span></dt><dd>본문에 직접 기록된 사건</dd></div>
-                    <div><dt><span class="story-badge story-badge-direct">성경의 직접 연결</span></dt><dd>신약이 구약 사건의 의미를 직접 연결한 내용</dd></div>
-                    <div><dt><span class="story-badge story-badge-canonical">정경적 연결</span></dt><dd>성경 전체에서 반복되어 드러나는 주제</dd></div>
-                    <div><dt><span class="story-badge story-badge-background">역사적 배경</span></dt><dd>시대와 문화 이해를 돕는 설명</dd></div>
-                    <div><dt><span class="story-badge story-badge-creative">게임적 창작</span></dt><dd>몰입을 위한 기록자 행동과 가상 대화</dd></div>
-                </dl>
-            </details>
-        </section>
-    </div>
-    <div class="story-sheet-footer">
-        <button type="button" class="story-text-button" id="storyResetButton">처음부터 다시 기록</button>
-    </div>
+  <div class="story-sheet-header">
+    <h2 id="storySheetTitle">기록자의 가방</h2>
+    <button type="button" class="story-sheet-close" id="storySheetClose" aria-label="닫기">×</button>
+  </div>
+  <div class="story-sheet-tabs" role="tablist" aria-label="일지와 기록관">
+    <button type="button" class="story-sheet-tab is-active" id="storyTabJournal"
+            role="tab" aria-selected="true">일지
+    </button>
+    <button type="button" class="story-sheet-tab" id="storyTabArchive"
+            role="tab" aria-selected="false">기록관
+    </button>
+  </div>
+  <div class="story-sheet-body">
+    <section id="storyJournalPanel" role="tabpanel" aria-label="기록자의 일지">
+      <div class="story-journal-list" id="storyJournalList"></div>
+      <p class="story-journal-empty" id="storyJournalEmpty">
+        장면을 진행하면 기록자의 일지가 이곳에 쌓입니다.
+      </p>
+    </section>
+    <section id="storyArchivePanel" role="tabpanel" aria-label="해금된 성경 기록" class="d-none">
+      <div class="story-archive-records" id="storyArchiveRecords"></div>
+      <details class="story-legend-details">
+        <summary>출처 표기 안내</summary>
+        <dl class="story-legend">
+          <div>
+            <dt><span class="story-badge story-badge-scripture">성경 기록</span></dt>
+            <dd>본문에 직접 기록된 사건</dd>
+          </div>
+          <div>
+            <dt><span class="story-badge story-badge-direct">성경의 직접 연결</span></dt>
+            <dd>신약이 구약 사건의 의미를 직접 연결한 내용</dd>
+          </div>
+          <div>
+            <dt><span class="story-badge story-badge-canonical">정경적 연결</span></dt>
+            <dd>성경 전체에서 반복되어 드러나는 주제</dd>
+          </div>
+          <div>
+            <dt><span class="story-badge story-badge-background">역사적 배경</span></dt>
+            <dd>시대와 문화 이해를 돕는 설명</dd>
+          </div>
+          <div>
+            <dt><span class="story-badge story-badge-creative">게임적 창작</span></dt>
+            <dd>몰입을 위한 기록자 행동과 가상 대화</dd>
+          </div>
+        </dl>
+      </details>
+    </section>
+  </div>
+  <div class="story-sheet-footer">
+    <button type="button" class="story-text-button" id="storyResetButton">처음부터 다시 기록</button>
+  </div>
 </dialog>
 
 <div class="visually-hidden" id="storyLiveRegion" aria-live="polite" aria-atomic="true"></div>
-<script type="module" src="/js/game/bible-story.js?v=4.5"></script>
+<script type="module" src="/js/game/bible-story.js?v=4.6"></script>
 </body>
 </html>

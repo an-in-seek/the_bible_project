@@ -45,8 +45,8 @@ const TESTIMONIES = [
 
 const CHARACTER_PORTRAITS = {
   '기록자': '/images/game/bible-story-character-recorder.jpg',
-  '아버지': '/images/game/bible-story-character-father.jpg',
-  '미리암': '/images/game/bible-story-character-young-miriam.jpg',
+  '안나 아버지': '/images/game/bible-story-character-father.jpg',
+  '안나': '/images/game/bible-story-character-young-anna.jpg',
   '말씀': '/images/game/bible-story-character-god.jpg',
   '백성': '/images/game/bible-story-character-people.jpg',
   '모세': '/images/game/bible-story-character-moses.jpg',
@@ -93,7 +93,7 @@ const scenes = [
           {text: '이제 마지막 열 번째 재앙만 남았다. 이집트의 모든 맏이가 죽는 밤이었다.', ref: '출애굽기 11:4–5'},
           {who: '기록자', text: '나는 기록자다. 심판이 예고된 이 밤, 하나님이 자기 백성에게 미리 열어 두신 살 길을 기록하러 왔다.'},
           {text: '그 길은 흠 없는 어린양 한 마리였다. 고센 땅의 한 가정이 나를 맞아 주었다.', ref: '출애굽기 12:3–5'},
-          {who: '아버지', text: '어린양은 잡아 두었어요. 이제 하나님이 말씀하신 대로 문에 피를 발라야 해요.'}
+          {who: '안나 아버지', text: '어린양은 잡아 두었어요. 이제 하나님이 말씀하신 대로 문에 피를 발라야 해요.'}
         ]
       },
       {
@@ -105,7 +105,7 @@ const scenes = [
       {
         type: 'say',
         lines: [
-          {who: '아버지', text: '이제 식탁 차례예요. 하나님이 정해 주신 것만 상에 올려 주세요.'}
+          {who: '안나 아버지', text: '이제 식탁 차례예요. 하나님이 정해 주신 것만 상에 올려 주세요.'}
         ]
       },
       {
@@ -168,8 +168,8 @@ const scenes = [
       {
         type: 'say',
         lines: [
-          {text: '문이 닫혔다. 어린 미리암이 등불 옆에서 나를 올려다봤다.'},
-          {who: '미리암', text: '기록자님, 밖에서 무슨 소리가 나는 것 같아요! 문을 열어 보면 안 될까요?'}
+          {text: '문이 닫혔다. 어린 안나이 등불 옆에서 나를 올려다봤다.'},
+          {who: '안나', text: '기록자님, 밖에서 무슨 소리가 나는 것 같아요! 문을 열어 보면 안 될까요?'}
         ]
       },
       {
@@ -192,7 +192,7 @@ const scenes = [
       {
         type: 'say',
         lines: [
-          {who: '아버지', text: '기록자님, 오늘 밤을 뭐라고 기록하실 건가요?'}
+          {who: '안나 아버지', text: '기록자님, 오늘 밤을 뭐라고 기록하실 건가요?'}
         ]
       },
       {
@@ -203,12 +203,12 @@ const scenes = [
           {
             value: 'obedience',
             label: '두려움 속에서도 지킨 순종의 밤',
-            reply: {who: '아버지', text: '맞아요. 우리는 떨면서도 말씀대로 했지요.'}
+            reply: {who: '안나 아버지', text: '맞아요. 우리는 떨면서도 말씀대로 했지요.'}
           },
           {
             value: 'faithfulness',
             label: '약속하신 분이 지키시는 밤',
-            reply: {who: '아버지', text: '맞아요. 이 문을 지키는 건 결국 우리가 아니지요.'}
+            reply: {who: '안나 아버지', text: '맞아요. 이 문을 지키는 건 결국 우리가 아니지요.'}
           }
         ]
       },
