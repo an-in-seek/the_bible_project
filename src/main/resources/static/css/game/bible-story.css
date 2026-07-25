@@ -471,13 +471,13 @@ body.bible-story-page .site-header {
 .story-backdrop[data-theme="sea"][data-phase="trapped"] .story-backdrop-art {
     background:
         linear-gradient(180deg, rgba(3, 12, 24, 0.03), rgba(3, 12, 24, 0.42)),
-        #101c29 url("/images/game/bible-story-trapped-at-red-sea.jpg?v=2") center / cover no-repeat;
+        #101c29 url("/images/game/bible-story-trapped-at-red-sea.jpg?v=3") center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="sea"][data-phase="barrier"] .story-backdrop-art {
     background:
         linear-gradient(180deg, rgba(3, 12, 24, 0.02), rgba(3, 12, 24, 0.38)),
-        #0a111c url("/images/game/bible-story-cloud-blocks-army.jpg") center / cover no-repeat;
+        #0a111c url("/images/game/bible-story-cloud-blocks-army.jpg?v=2") center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="sea"][data-sea="open"] .story-backdrop-art {
