@@ -294,7 +294,8 @@ const scenes = [
           {value: 'cry', label: '부르짖는다', reply: '백성의 울부짖는 소리가 바닷가를 가득 채웠다. 사람의 힘으로는 속수무책이었다.'}
         ],
         wordLine: {who: '모세', word: true, text: '두려워하지 마세요. 가만히 서서, 여호와께서 오늘 여러분을 위해 하시는 일을 보세요.', ref: '출애굽기 14:13'},
-        openLine: {text: '구름기둥이 뒤로 옮겨 가 이집트 군대와 이스라엘 사이를 가로막았다. 모세가 바다 위로 손을 내밀자 강한 동풍이 밤새 불었고, 바다가 갈라져 물이 양쪽에 벽처럼 섰다.', ref: '출애굽기 14:19–22'}
+        blockLine: {phase: 'barrier', text: '구름기둥이 뒤로 옮겨 가 이집트 군대와 이스라엘 사이를 가로막았다.', ref: '출애굽기 14:19–20'},
+        openLine: {phase: 'parted', text: '모세가 바다 위로 손을 내밀자 강한 동풍이 밤새 불었고, 바다가 갈라져 물이 양쪽에 벽처럼 섰다.', ref: '출애굽기 14:21–22'}
       },
       {
         type: 'seaCross',
@@ -1034,9 +1035,11 @@ function renderSeaChoiceBeat(scene, beat) {
       renderSheet();
       renderLine({text: option.reply}, () => {
         renderLine(beat.wordLine, () => {
-          elements.storyBackdrop.dataset.sea = 'open';
-          announce('바다가 갈라져 물이 양쪽에 벽처럼 섰습니다.');
-          renderLine(beat.openLine, nextBeat);
+          renderLine(beat.blockLine, () => {
+            elements.storyBackdrop.dataset.sea = 'open';
+            announce('바다가 갈라져 물이 양쪽에 벽처럼 섰습니다.');
+            renderLine(beat.openLine, nextBeat);
+          });
         });
       });
     });
@@ -1049,7 +1052,9 @@ function renderSeaChoiceBeat(scene, beat) {
 
 function renderSeaCrossBeat(beat) {
   renderPrompt(beat.prompt);
+  // 갈라지는 순간(parted)에서 마른 땅을 건너는 장면(crossing)으로 배경을 넘긴다
   elements.storyBackdrop.dataset.sea = 'open';
+  elements.storyBackdrop.dataset.phase = 'crossing';
   elements.storyPlayArea.classList.add('is-sea');
   elements.storyPlayArea.innerHTML = `
         <div class="story-sea-corridor" aria-hidden="true">

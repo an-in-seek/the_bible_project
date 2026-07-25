@@ -474,9 +474,28 @@ body.bible-story-page .site-header {
         #101c29 url("/images/game/bible-story-trapped-at-red-sea.jpg?v=2") center / cover no-repeat;
 }
 
+.story-backdrop[data-theme="sea"][data-phase="barrier"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(3, 12, 24, 0.02), rgba(3, 12, 24, 0.38)),
+        #0a111c url("/images/game/bible-story-cloud-blocks-army.jpg") center / cover no-repeat;
+}
+
 .story-backdrop[data-theme="sea"][data-sea="open"] .story-backdrop-art {
     background:
         linear-gradient(180deg, rgba(3, 12, 24, 0.08), rgba(3, 12, 24, 0.24)),
+        #0d4058 url("/images/game/bible-story-red-sea.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="sea"][data-sea="open"][data-phase="parted"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(3, 12, 24, 0.02), rgba(3, 12, 24, 0.34)),
+        #0a2538 url("/images/game/bible-story-east-wind-parts-sea.jpg?v=2") center / cover no-repeat;
+}
+
+/* 건너기 미니게임 — 물벽 사이 마른 땅을 걷는 행렬 */
+.story-backdrop[data-theme="sea"][data-sea="open"][data-phase="crossing"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(3, 12, 24, 0.06), rgba(3, 12, 24, 0.3)),
         #0d4058 url("/images/game/bible-story-red-sea.jpg") center / cover no-repeat;
 }
 
