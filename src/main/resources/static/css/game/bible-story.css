@@ -196,6 +196,7 @@ body.bible-story-page {
 .story-vigil-hold:focus-visible,
 .story-manna-piece:focus-visible,
 .story-match-card:focus-visible,
+.story-match-dialog-close:focus-visible,
 .story-sheet-tab:focus-visible,
 .story-sheet-close:focus-visible {
     outline: 3px solid var(--color-accent);
@@ -207,7 +208,8 @@ body.bible-story-page {
 .story-door-spot:not(:disabled),
 .story-table-item:not(:disabled),
 .story-manna-piece:not(:disabled),
-.story-match-card:not(.is-linked),
+.story-match-card,
+.story-match-dialog-close,
 .story-sheet-tab,
 .story-text-button {
     cursor: pointer;
@@ -466,6 +468,26 @@ body.bible-story-page .site-header {
         linear-gradient(180deg, #101c30 0%, #1b2338 60%, #2c2c3a 100%);
 }
 
+.story-backdrop[data-theme="link"][data-phase="jordan"] .story-backdrop-art {
+    background:
+        linear-gradient(0deg, rgba(3, 10, 20, 0.62), transparent 58%),
+        #526b6d url("/images/game/bible-story-jordan-river.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="link"][data-phase="john"] .story-backdrop-art {
+    background:
+        linear-gradient(0deg, rgba(3, 10, 20, 0.68), transparent 58%),
+        linear-gradient(90deg, rgba(3, 10, 20, 0.38), transparent 62%),
+        #6d654e url("/images/game/bible-story-john-the-baptist.jpg") 72% center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="link"][data-phase="jesus"] .story-backdrop-art {
+    background:
+        linear-gradient(0deg, rgba(3, 10, 20, 0.68), transparent 58%),
+        linear-gradient(90deg, rgba(3, 10, 20, 0.42), transparent 62%),
+        #66726a url("/images/game/bible-story-jesus-jordan.jpg") 72% center / cover no-repeat;
+}
+
 .story-backdrop[data-theme="dawn"] .story-backdrop-art {
     background:
         linear-gradient(0deg, #241a14 0%, transparent 35%),
@@ -484,6 +506,16 @@ body.bible-story-page .site-header {
     transition: opacity 1.2s ease;
 }
 
+.story-backdrop[data-theme="dawn"][data-phase="cross"] .story-backdrop-art {
+    background:
+        linear-gradient(0deg, rgba(4, 7, 12, 0.58), transparent 58%),
+        #151921 url("/images/game/bible-story-cross.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="dawn"][data-phase="cross"] .story-backdrop-art::after {
+    opacity: 0;
+}
+
 .story-backdrop[data-theme="dawn"][data-phase="dark"] .story-backdrop-art {
     background: linear-gradient(180deg, #05070c 0%, #020306 100%);
 }
@@ -494,8 +526,8 @@ body.bible-story-page .site-header {
 
 .story-backdrop[data-theme="dawn"][data-phase="tomb"] .story-backdrop-art {
     background:
-        radial-gradient(circle at 50% 62%, rgba(90, 108, 132, 0.5), transparent 12rem),
-        linear-gradient(180deg, #0a1220 0%, #131f31 100%);
+        linear-gradient(0deg, rgba(3, 8, 16, 0.62), transparent 60%),
+        #111b2b url("/images/game/bible-story-empty-tomb.jpg") 70% center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="dawn"][data-phase="tomb"] .story-backdrop-art::after,
@@ -505,8 +537,9 @@ body.bible-story-page .site-header {
 
 .story-backdrop[data-theme="dawn"][data-phase="risen"] .story-backdrop-art {
     background:
-        radial-gradient(circle at 50% 30%, rgba(255, 231, 173, 0.55), transparent 18rem),
-        linear-gradient(180deg, #23344d 0%, #6d5535 60%, #d9b678 100%);
+        linear-gradient(0deg, rgba(3, 8, 16, 0.58), transparent 62%),
+        linear-gradient(90deg, rgba(3, 8, 16, 0.34), transparent 60%),
+        #5e5f58 url("/images/game/bible-story-resurrection.jpg") 72% center / cover no-repeat;
 }
 
 /* 홍해: 물 벽 — data-sea="open" 이면 좌우로 갈라진다 */
@@ -720,10 +753,10 @@ body.bible-story-page .site-header {
     animation: story-spot-pulse 1.6s ease-in-out infinite;
 }
 
+/* transform 중앙정렬은 is-marked의 story-pop(transform) 애니메이션에 덮여 튀므로 left로 계산 */
 .story-door-spot-lintel {
     top: -37px;
-    left: 50%;
-    transform: translateX(-50%);
+    left: calc(50% - 23px);
 }
 
 .story-door-spot-left {
@@ -763,7 +796,9 @@ body.bible-story-page .site-header {
 }
 
 .story-table-item {
-    min-height: 64px;
+    position: relative;
+    min-height: 76px;
+    overflow: hidden;
     padding: 0.6rem;
     border: 1px solid rgba(255, 255, 255, 0.25);
     border-radius: 0.8rem;
@@ -781,24 +816,29 @@ body.bible-story-page .site-header {
     box-shadow: 0 0 24px rgba(242, 200, 121, 0.25);
 }
 
-.story-table-item.has-image {
-    display: flex;
-    min-height: 116px;
-    flex-direction: column;
-    gap: 0.4rem;
-    padding: 0.35rem;
-}
-
+/* 이미지는 카드 배경으로 깔아 카드 크기가 변하지 않게 한다 (레이아웃 시프트 방지) */
 .story-table-item-image {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
     width: 100%;
-    aspect-ratio: 16 / 9;
-    border-radius: 0.55rem;
+    height: 100%;
     object-fit: cover;
     animation: story-pop 0.45s ease;
 }
 
 .story-table-item-label {
+    position: relative;
+    z-index: 1;
     display: block;
+}
+
+.story-table-item.has-image .story-table-item-label {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border-radius: 0.45rem;
+    background: rgba(5, 12, 22, 0.66);
+    text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
 }
 
 .story-table-item.is-wrong {
@@ -994,49 +1034,99 @@ body.bible-story-page .site-header {
 
 .story-play-area.is-match {
     justify-content: flex-start;
+    width: min(900px, 100%);
+    min-height: 0;
+    max-height: clamp(320px, calc(100dvh - 13rem), 720px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
     padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
+.story-match-toolbar {
+    position: sticky;
+    top: 0.35rem;
+    z-index: 7;
+    width: 100%;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid rgba(242, 200, 121, 0.24);
+    border-radius: 0.9rem;
+    background: rgba(5, 13, 24, 0.9);
+    box-shadow: 0 10px 30px rgba(2, 7, 15, 0.28);
+    backdrop-filter: blur(12px);
+}
+
+.story-match-progress-copy {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.72rem;
+    font-weight: 700;
+}
+
+.story-match-progress-copy strong {
+    color: var(--story-gold-bright);
+    font-size: 0.76rem;
+}
+
+.story-match-progress {
+    height: 5px;
+    margin-top: 0.4rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.story-match-progress span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--story-gold), var(--story-gold-bright));
+    box-shadow: 0 0 10px rgba(242, 200, 121, 0.55);
+    transition: width 0.35s ease;
 }
 
 .story-match-board {
-    position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
-    gap: 0.6rem clamp(1.4rem, 6vw, 3rem);
+    gap: 0.7rem;
+    align-content: start;
     width: 100%;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 1rem;
+    background: rgba(5, 13, 24, 0.4);
 }
 
-.story-match-board.is-complete {
-    animation: story-pop 0.6s ease;
+.story-match-column-head {
+    display: grid;
+    gap: 0.15rem;
 }
 
-.story-match-lines {
-    position: absolute;
-    inset: 0;
-    z-index: 1;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
+.story-match-column-head strong {
+    color: #fff;
+    font-size: 0.84rem;
 }
 
-.story-match-lines line {
-    stroke: var(--story-gold-bright);
-    stroke-width: 2.5;
-    stroke-linecap: round;
-    filter: drop-shadow(0 0 6px rgba(242, 200, 121, 0.8));
-    stroke-dasharray: 640;
-    stroke-dashoffset: 640;
-    animation: story-line-draw 0.8s ease forwards;
+.story-match-column-head small {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.66rem;
 }
 
-.story-match-column {
+.story-match-list {
     display: grid;
     gap: 0.6rem;
-    align-content: start;
+}
+
+.story-match-fragments {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .story-match-card {
-    position: relative;
-    z-index: 2;
+    min-height: 52px;
     padding: 0.7rem 0.8rem;
     border: 1px solid rgba(255, 255, 255, 0.24);
     border-radius: 0.8rem;
@@ -1054,18 +1144,182 @@ body.bible-story-page .site-header {
     font-size: 0.84rem;
 }
 
-.story-match-card.is-selected {
-    border-color: var(--story-gold-bright);
-    box-shadow: 0 0 20px rgba(242, 200, 121, 0.35);
+.story-match-card-copy {
+    display: grid;
+    gap: 0.18rem;
+    min-width: 0;
 }
 
-.story-match-card.is-linked {
-    border-color: var(--story-gold);
-    background: rgba(199, 155, 82, 0.22);
+.story-match-card-copy small {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.66rem;
+    font-weight: 500;
+    line-height: 1.45;
 }
 
 .story-match-card.is-wrong {
+    border-color: #e59b8b;
+    box-shadow: 0 0 0 2px rgba(229, 155, 139, 0.28);
     animation: story-shake 0.4s ease;
+}
+
+.story-match-linked-list {
+    display: grid;
+    gap: 0.5rem;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.story-match-pair {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid color-mix(in srgb, var(--match-pair-color, var(--story-gold)) 55%, transparent);
+    border-radius: 0.8rem;
+    background: color-mix(in srgb, var(--match-pair-color, var(--story-gold)) 12%, rgba(8, 16, 28, 0.8));
+    box-shadow: inset 3px 0 0 var(--match-pair-color, var(--story-gold));
+    animation: story-pair-in 0.4s ease both;
+}
+
+.story-match-pair[data-pair="1"] {
+    --match-pair-color: #f2c879;
+}
+
+.story-match-pair[data-pair="2"] {
+    --match-pair-color: #7bc8bc;
+}
+
+.story-match-pair[data-pair="3"] {
+    --match-pair-color: #a9a2e8;
+}
+
+.story-match-pair[data-pair="4"] {
+    --match-pair-color: #dc927d;
+}
+
+.story-match-pair-fragment {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.45rem;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.story-match-pair-join {
+    flex: 0 0 auto;
+    color: var(--match-pair-color, var(--story-gold-bright));
+    font-weight: 900;
+}
+
+.story-match-pair-testimony {
+    min-width: 0;
+}
+
+.story-match-pair-testimony .story-match-quote {
+    font-size: 0.76rem;
+    line-height: 1.55;
+}
+
+.story-match-pair-testimony .story-match-ref {
+    margin-top: 0.15rem;
+}
+
+@keyframes story-pair-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.story-match-dialog {
+    width: min(560px, calc(100% - 2rem));
+    max-height: 80vh;
+    max-height: 80dvh;
+    display: none;
+    flex-direction: column;
+    gap: 0.65rem;
+    margin: auto;
+    padding: 1rem 1.1rem 1.1rem;
+    border: 1px solid rgba(242, 200, 121, 0.3);
+    border-radius: 1rem;
+    background: rgba(7, 15, 27, 0.97);
+    color: var(--story-stage-ink);
+    box-shadow: 0 30px 100px rgba(0, 0, 0, 0.5);
+}
+
+.story-match-dialog[open] {
+    display: flex;
+}
+
+.story-match-dialog::backdrop {
+    background: rgba(2, 8, 16, 0.72);
+    backdrop-filter: blur(4px);
+}
+
+.story-match-dialog-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.story-match-dialog-heading {
+    display: grid;
+    flex: 1;
+    gap: 0.15rem;
+    min-width: 0;
+}
+
+.story-match-dialog-heading strong {
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.story-match-dialog-heading small {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.7rem;
+    line-height: 1.45;
+}
+
+.story-match-dialog-close {
+    flex: 0 0 auto;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--story-stage-ink);
+    font-size: 1.3rem;
+}
+
+.story-match-dialog-guide {
+    min-height: 1.45em;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.78rem;
+    line-height: 1.5;
+}
+
+.story-match-dialog-guide strong {
+    margin-right: 0.25rem;
+    color: var(--story-gold-bright);
+}
+
+.story-match-dialog-options {
+    display: grid;
+    gap: 0.6rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
 }
 
 .story-match-quote {
@@ -1075,7 +1329,7 @@ body.bible-story-page .site-header {
     line-height: 1.6;
 }
 
-.story-match-testimony small {
+.story-match-ref {
     display: block;
     margin-top: 0.35rem;
     color: rgba(255, 255, 255, 0.55);
@@ -1083,11 +1337,17 @@ body.bible-story-page .site-header {
 }
 
 .story-match-note {
-    min-height: 1.5em;
-    margin: 0;
+    min-height: 1.45em;
+    margin: 0.55rem 0 0;
     color: rgba(255, 255, 255, 0.8);
     font-size: 0.8rem;
-    text-align: center;
+    line-height: 1.5;
+    text-align: left;
+}
+
+.story-match-note strong {
+    margin-right: 0.25rem;
+    color: var(--story-gold-bright);
 }
 
 .story-match-capstone {
@@ -1594,7 +1854,7 @@ html[data-theme="dark"] .story-badge,
 
     .story-choice-button:hover,
     .story-table-item:not(:disabled):hover,
-    .story-match-card:not(.is-linked):hover,
+    .story-match-card:hover,
     .story-fragment-button:hover,
     .story-exit-button:hover {
         border-color: var(--story-gold-bright);
@@ -1634,17 +1894,69 @@ html[data-theme="dark"] .story-badge,
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
+    .story-play-area.is-match {
+        gap: 0.75rem;
+        padding-inline: 0.7rem;
+    }
+
+    .story-match-toolbar {
+        top: 0.2rem;
+        padding: 0.65rem 0.7rem;
+    }
+
     .story-match-board {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
-        gap: 0.5rem 1.1rem;
+        padding: 0.65rem;
+    }
+
+    .story-match-pair {
+        flex-wrap: wrap;
+        row-gap: 0.35rem;
+    }
+
+    .story-match-pair-testimony {
+        flex: 1 1 100%;
+    }
+
+    .story-match-dialog {
+        width: 100%;
+        max-width: none; /* dialog UA 기본 max-width가 화면보다 좁아 왼쪽으로 치우치는 것 방지 */
+        max-height: 84vh;
+        max-height: 84dvh;
+        margin: auto 0 0;
+        border-radius: 1rem 1rem 0 0;
+        padding-bottom: calc(1.1rem + env(safe-area-inset-bottom));
+    }
+
+    .story-match-fragments {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
     .story-match-fragment {
+        min-height: 96px;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.4rem;
+        padding: 0.65rem;
         font-size: 0.76rem;
     }
 
+    .story-match-fragment .story-fragment-gem {
+        width: 22px;
+        height: 22px;
+    }
+
+    .story-match-card-copy small {
+        font-size: 0.62rem;
+    }
+
+    .story-match-testimony {
+        min-height: 64px;
+        padding: 0.8rem;
+    }
+
     .story-match-quote {
-        font-size: 0.76rem;
+        font-size: 0.8rem;
+        line-height: 1.7;
     }
 
     .story-connection-timeline {
@@ -1686,17 +1998,16 @@ html[data-theme="dark"] .story-badge,
     .story-dot.is-current,
     .story-line-hint,
     .story-door-spot,
+    .story-table-item-image,
     .story-sea-pillar,
     .story-fragment-gem-large,
     .story-finale-gem,
     .story-finale-beam,
-    .story-match-lines line,
-    .story-match-capstone {
+    .story-match-pair,
+    .story-match-capstone,
+    .story-match-progress span {
         animation: none;
-    }
-
-    .story-match-lines line {
-        stroke-dashoffset: 0;
+        transition: none;
     }
 
     .story-finale-gem {
@@ -1770,10 +2081,6 @@ html[data-theme="dark"] .story-badge,
         opacity: 0;
         transform: translate(-50%, -110%) scale(0.4);
     }
-}
-
-@keyframes story-line-draw {
-    to { stroke-dashoffset: 0; }
 }
 
 @keyframes story-gem-float {
