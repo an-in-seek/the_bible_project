@@ -1757,6 +1757,7 @@ body.bible-story-page .site-header {
 .story-finale-gem-2 { top: 16%; left: 86%; animation-delay: 0.25s; }
 .story-finale-gem-3 { top: 78%; left: 14%; animation-delay: 0.5s; }
 .story-finale-gem-4 { top: 84%; left: 80%; animation-delay: 0.75s; }
+.story-finale-gem-5 { top: 48%; left: 6%; animation-delay: 1s; }
 
 /* ---------------------------------------------------------------- ending */
 
@@ -2162,15 +2163,24 @@ html[data-theme="dark"] .story-badge,
         background-position: 72% center;
     }
 
-    .story-backdrop[data-theme="door"][data-phase="father-welcome"] .story-backdrop-art,
     .story-backdrop[data-theme="door"][data-phase="firstborn-bowl"] .story-backdrop-art,
     .story-backdrop[data-theme="door"][data-phase="lamb-ready"] .story-backdrop-art,
     .story-backdrop[data-theme="door"][data-phase="table-ready"] .story-backdrop-art {
         background-position: center;
     }
 
+    /* 문간 장면(passover.jpg)은 기록자와 아버지가 화면 양 끝에 서 있어
+       cover 로는 좁은 화면에서 한쪽 인물이 잘려 나간다. 전체가 들어오도록 contain. */
+    .story-backdrop[data-theme="door"]:not([data-phase]) .story-backdrop-art,
+    .story-backdrop[data-theme="door"][data-phase="father-welcome"] .story-backdrop-art {
+        background-color: #0b1a2e;
+        background-position: center;
+        background-size: contain;
+    }
+
+    /* 어머니가 화면 왼쪽 1/3 지점에 있어, 오른쪽(짐 보따리)을 잡으면 인물이 잘린다 */
     .story-backdrop[data-theme="door"][data-phase="kitchen-packed"] .story-backdrop-art {
-        background-position: 58% center;
+        background-position: 32% center;
     }
 
     .story-backdrop[data-theme="door"][data-phase="blood-door-safe"] .story-backdrop-art {

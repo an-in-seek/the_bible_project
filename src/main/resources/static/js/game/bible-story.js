@@ -1,5 +1,5 @@
-const STORAGE_KEY = 'elseeker.bibleStory.passover.v2';
-const STATE_VERSION = 2;
+const STORAGE_KEY = 'elseeker.bibleStory.passover.v3';
+const STATE_VERSION = 3;
 
 const PROVENANCE_LABELS = {
   scripture: ['성경 기록', 'story-badge-scripture'],
@@ -12,6 +12,7 @@ const PROVENANCE_LABELS = {
 const FRAGMENTS = {
   blood: {title: '어린양의 피', summary: '문기둥과 문 위쪽에 바른 구원의 표시'},
   promise: {title: '지켜진 약속', summary: '약속하신 그대로 지나간 밤의 기억'},
+  bone: {title: '꺾이지 않은 뼈', summary: '한 뼈도 꺾지 말라고 하신 유월절 양의 규정'},
   path: {title: '열린 길', summary: '사람의 힘이 아니라 하나님의 말씀으로 열린 길'},
   bread: {title: '날마다의 양식', summary: '날마다 하늘에서 내려온 하루치 먹을거리'}
 };
@@ -25,14 +26,14 @@ const TESTIMONIES = [
   },
   {
     id: 'blood',
-    text: '보세요. 세상의 죄를 짊어지고 가시는 하나님의 어린양이십니다.',
-    ref: '요한복음 1:29',
-    href: '/web/bible/verse?translationId=1&bookOrder=43&chapterNumber=1&verseNumber=29'
+    text: '여러분이 대속받은 것은 은이나 금 같이 없어질 것으로가 아니라, 흠도 티도 없는 어린양 같은 그리스도의 보배로운 피로 된 것입니다.',
+    ref: '베드로전서 1:18–19',
+    href: '/web/bible/verse?translationId=1&bookOrder=60&chapterNumber=1&verseNumber=18'
   },
   {
     id: 'path',
-    text: '우리 조상들은 모두 구름의 보호를 받으며 바다 한가운데를 지나갔고, 그 구름과 바다에서 모세에게 속하는 세례를 받았습니다.',
-    ref: '고린도전서 10:1–2',
+    text: '우리 조상들은 모두 바다 한가운데를 지나며 구름과 바다에서 모세에게 속하는 세례를 받았습니다. 그리고 그들을 따르던 반석은 곧 그리스도이셨습니다.',
+    ref: '고린도전서 10:1–4',
     href: '/web/bible/verse?translationId=1&bookOrder=46&chapterNumber=10&verseNumber=1'
   },
   {
@@ -40,6 +41,12 @@ const TESTIMONIES = [
     text: '이 잔은 너희를 위해 흘리는 내 피로 세우는 새 언약이다.',
     ref: '누가복음 22:20',
     href: '/web/bible/verse?translationId=1&bookOrder=42&chapterNumber=22&verseNumber=20'
+  },
+  {
+    id: 'bone',
+    text: '이 일이 일어난 것은 “그의 뼈가 하나도 꺾이지 않을 것이다” 하신 말씀이 이루어지게 하려는 것이었습니다.',
+    ref: '요한복음 19:36',
+    href: '/web/bible/verse?translationId=1&bookOrder=43&chapterNumber=19&verseNumber=36'
   }
 ];
 
@@ -99,6 +106,13 @@ const scenes = [
         body: '누룩 없는 빵과 쓴 나물을 서둘러 먹는 식사는, 곧 떠나야 한다는 뜻이었습니다.',
         ref: '출애굽기 12:8–11',
         href: '/web/bible/verse?translationId=1&bookOrder=2&chapterNumber=12&verseNumber=8'
+      },
+      {
+        title: '꺾이지 않은 뼈',
+        provenance: 'scripture',
+        body: '유월절 양은 한 집 안에서 먹되 뼈를 하나도 꺾지 말라는 규정이 함께 주어졌습니다.',
+        ref: '출애굽기 12:46',
+        href: '/web/bible/verse?translationId=1&bookOrder=2&chapterNumber=12&verseNumber=46'
       },
       {
         title: '안나네 가족',
@@ -239,7 +253,17 @@ const scenes = [
         type: 'say',
         lines: [
           {phase: 'blood-door-safe', who: '기록자', text: '문기둥에 바른 피가 등불빛에 검붉게 번들거렸다. 안나의 가족이 한참을 문 앞에 서 있었다.'},
-          {phase: 'blood-door-safe', who: '안나 오빠', text: '…이제 이 문 안이 세상에서 제일 안전한 곳이네요.'},
+          {phase: 'blood-door-safe', who: '안나 오빠', text: '…이제 이 문 안이 세상에서 제일 안전한 곳이네요.'}
+        ]
+      },
+      {
+        type: 'fragment',
+        id: 'blood',
+        journal: '한 가족이 어린양의 피를 문에 발랐다. 이 표시는 훗날 어떤 의미로 다시 읽히게 될까.'
+      },
+      {
+        type: 'say',
+        lines: [
           {phase: 'table-ready', who: '안나 아버지', text: '이제 식탁 차례예요. 하나님이 정해 주신 것만 상에 올려 주세요.'}
         ]
       },
@@ -270,9 +294,21 @@ const scenes = [
         doneLine: {phase: 'table-ready', who: '기록자', text: '식탁은 잔치가 아니라 떠날 준비였다. 이 밤의 모든 것이 하나님의 말씀을 향해 있었다.'}
       },
       {
+        type: 'say',
+        lines: [
+          {
+            phase: 'table-ready',
+            who: '안나 아버지',
+            text: '한 가지 더 있어요. 이 양은 한 집 안에서 먹되, 뼈는 하나도 꺾지 말라고 하셨습니다.',
+            ref: '출애굽기 12:46'
+          },
+          {phase: 'table-ready', who: '기록자', text: '나는 그 말을 받아 적으면서도 이유를 알지 못했다. 살은 나누어 먹으면서, 어째서 뼈만은 온전히 두라 하셨을까.'}
+        ]
+      },
+      {
         type: 'fragment',
-        id: 'blood',
-        journal: '한 가족이 어린양의 피를 문에 발랐다. 이 표시는 훗날 어떤 의미로 다시 읽히게 될까.'
+        id: 'bone',
+        journal: '유월절 양은 뼈를 하나도 꺾지 않은 채로 남아야 했다. 이 규정은 무엇을 지키려는 것이었을까.'
       }
     ]
   },
@@ -623,6 +659,13 @@ const scenes = [
         body: '복음서는 예수님이 십자가에서 죽으신 일을 기록합니다. 이 장면은 플레이어가 잘하든 못하든 바뀌지 않습니다.',
         ref: '요한복음 19장',
         href: '/web/bible/verse?translationId=1&bookOrder=43&chapterNumber=19'
+      },
+      {
+        title: '뼈가 꺾이지 않으신 분',
+        provenance: 'direct',
+        body: '군인들이 예수님의 다리를 꺾지 않은 것을 두고, 요한복음은 “그 뼈가 하나도 꺾이지 않을 것이다”라는 유월절 양의 규정이 이루어진 일이라고 직접 밝힙니다.',
+        ref: '요한복음 19:33–36',
+        href: '/web/bible/verse?translationId=1&bookOrder=43&chapterNumber=19&verseNumber=33'
       },
       {
         title: '빈 무덤과 부활',
