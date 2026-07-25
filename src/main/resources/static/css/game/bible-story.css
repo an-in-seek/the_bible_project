@@ -407,6 +407,8 @@ body.bible-story-page .site-header {
 .story-backdrop-art {
     position: absolute;
     inset: 0;
+    /* 밤샘: --vigil 0→1 에 따라 일러스트가 점점 어두워진다 */
+    filter: brightness(calc(1 - var(--vigil, 0) * 0.82));
     transition: opacity 0.8s ease;
 }
 
@@ -711,19 +713,26 @@ body.bible-story-page .site-header {
     transform: translateX(34%);
 }
 
-/* 밤샘: --vigil 0→1 로 새벽빛이 차오른다 */
+/* 새벽빛 레이어 — 밤을 다 지새운 뒤(daybreak)에만 차오른다 */
 .story-backdrop-dawn {
     position: absolute;
     inset: 0;
     background:
         radial-gradient(ellipse at 50% 100%, rgba(255, 214, 140, 0.55), transparent 55%),
         linear-gradient(0deg, rgba(120, 88, 46, 0.5), transparent 60%);
-    opacity: calc(var(--vigil, 0) * 0.9);
+    opacity: 0;
     transition: opacity 0.3s linear;
+}
+
+/* 밤샘 완료: --vigil 을 0 으로 되돌리면 다음 장면 일러스트가
+   짙은 어둠에서 서서히 밝아지며 드러난다 */
+.story-backdrop.is-vigil-clearing .story-backdrop-art {
+    transition: opacity 0.8s ease, filter 1.8s ease-out;
 }
 
 .story-backdrop[data-phase="daybreak"] .story-backdrop-dawn {
     opacity: 1;
+    transition: opacity 1.8s ease-out;
 }
 
 .story-backdrop-vignette {

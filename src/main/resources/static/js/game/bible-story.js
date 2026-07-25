@@ -273,8 +273,23 @@ const scenes = [
       {
         type: 'say',
         lines: [
-          {phase: 'closed-door', text: '문이 닫혔다. 어린 안나가 등불 옆에서 나를 올려다봤다.'},
-          {who: '안나', text: '기록자님, 밖에서 무슨 소리가 나는 것 같아요! 문을 열어 보면 안 될까요?'}
+          {
+            phase: 'closed-door',
+            who: '기록자',
+            text: '문에 빗장이 걸렸다. 다섯 사람은 허리에 띠를 매고 신을 신은 채, 지팡이를 곁에 둔 그대로 상 앞에 섰다.',
+            ref: '출애굽기 12:11'
+          },
+          {phase: 'closed-door', who: '안나 아버지', text: '앉지 말고 먹자. 언제 떠나라 하실지 모르니까.'},
+          {phase: 'closed-door', who: '기록자', text: '쓴 나물은 썼고, 빵은 부풀지 않아 납작했다. 아무도 오래 씹지 않았다.'},
+          {phase: 'closed-door', who: '기록자', text: '상이 비자 등불 하나만 남기고 불을 줄였다. 그때 문밖에서 무언가 지나가는 소리가 났다.'},
+          {phase: 'closed-door', who: '안나', text: '기록자님, 밖에서 무슨 소리가 나는 것 같아요! 문을 열어 보면 안 될까요?'},
+          {
+            phase: 'closed-door',
+            who: '안나 오빠',
+            text: '안 돼. 아침까지 아무도 문 밖에 나가지 말라고 하셨잖아.',
+            ref: '출애굽기 12:22'
+          },
+          {phase: 'closed-door', who: '기록자', text: '말은 그렇게 하면서도, 오빠의 눈은 아까부터 문고리에서 떨어지지 않고 있었다.'}
         ]
       },
       {
@@ -285,19 +300,31 @@ const scenes = [
           {
             value: 'promise',
             label: '주신 말씀을 다시 들려준다',
-            reply: {who: '기록자', text: '“내가 그 피를 보면 너희를 그냥 지나가겠다.” 나는 약속을 그대로 다시 읽어 주었다.'}
+            reply: {
+              who: '기록자',
+              text: '“내가 그 피를 보면 너희를 그냥 지나가겠다.” 나는 두루마리를 펴 약속을 그대로 다시 읽어 주었다. 안나가 입술을 달싹이며 그 말을 따라 했다.'
+            }
           },
           {
             value: 'beside',
             label: '아무 말 없이 곁에 앉는다',
-            reply: {text: '나는 등불 옆에 아이와 나란히 앉았다. 약속은 이미 문 위에 발려 있었다.'}
+            reply: {
+              who: '기록자',
+              text: '나는 등불 옆에 아이와 나란히 앉았다. 해 줄 말이 없어서가 아니라, 약속은 이미 문 위에 발려 있었기 때문이다. 안나가 슬며시 내 소매를 잡았다.'
+            }
           }
         ]
       },
       {
         type: 'say',
         lines: [
-          {who: '안나 아버지', text: '기록자님, 오늘 밤을 뭐라고 기록하실 건가요?'}
+          {phase: 'closed-door', who: '기록자', text: '나는 무릎 위에 두루마리를 펴고 붓을 들었다. 그런데 오늘 밤의 첫 줄을 좀처럼 시작하지 못하고 있었다.'},
+          {
+            phase: 'closed-door',
+            who: '안나 아버지',
+            text: '기록자님, 오늘 밤을 뭐라고 기록하실 건가요? 언젠가 저 아이들이 이 밤이 무슨 뜻이냐고 물을 텐데요.',
+            ref: '출애굽기 12:26–27'
+          }
         ]
       },
       {
@@ -308,12 +335,12 @@ const scenes = [
           {
             value: 'obedience',
             label: '두려움 속에서도 지킨 순종의 밤',
-            reply: {who: '안나 아버지', text: '맞아요. 우리는 떨면서도 말씀대로 했지요.'}
+            reply: {who: '안나 아버지', text: '…그렇게 적어 주세요. 사실 우리는 손을 떨면서 피를 발랐거든요. 그래도 말씀하신 그대로 했습니다.'}
           },
           {
             value: 'faithfulness',
             label: '약속하신 분이 지키시는 밤',
-            reply: {who: '안나 아버지', text: '맞아요. 이 문을 지키는 건 결국 우리가 아니지요.'}
+            reply: {who: '안나 아버지', text: '…그게 낫겠네요. 오늘 밤 이 문을 지키는 건 빗장도 저도 아니라, 약속하신 하나님이시니까요.'}
           }
         ]
       },
@@ -330,7 +357,7 @@ const scenes = [
       {
         type: 'say',
         lines: [
-          {text: '문 안에서는 안나 오빠가 그제야 참았던 숨을 길게 내쉬었다. 이 집의 맏아들은 아침을 맞았다.'},
+          {text: '문 안에서는 안나 오빠가 그제야 참았던 숨을 길게 내쉬었다. 이 집에서는 곡소리가 나지 않았다.'},
           {text: '그 밤에 바로도, 신하들도, 온 이집트 사람도 잠자리에서 뛰쳐나왔다. 바로는 한밤중에 사람을 보내 모세와 아론을 급히 불러들였다.', ref: '출애굽기 12:30–31'},
           {
             phase: 'release',
@@ -339,6 +366,7 @@ const scenes = [
             text: '너희와 이스라엘 백성은 당장 일어나 내 백성에게서 떠나라. 너희 말대로 가서 여호와를 섬겨라.',
             ref: '출애굽기 12:31'
           },
+          {text: '날이 밝고서야 빗장이 풀렸다. 문을 가장 먼저 밀고 나선 것은 안나 오빠였다. 이 집의 맏아들은 아침을 맞았다.', ref: '출애굽기 12:22'},
           {text: '백성은 서둘러 일어나 이집트를 떠났다. 430년 만의 새벽이었다.', ref: '출애굽기 12:40–41'},
           {
             phase: 'cloud',
@@ -763,6 +791,7 @@ function enterScene(index) {
   delete elements.storyBackdrop.dataset.phase;
   delete elements.storyBackdrop.dataset.sea;
   elements.storyBackdrop.style.removeProperty('--vigil');
+  elements.storyBackdrop.classList.remove('is-vigil-clearing');
   elements.storySceneEra.textContent = scene.era;
   elements.storySceneRef.textContent = scene.reference;
   elements.storyHudScene.textContent = `장면 ${index + 1} / ${scenes.length} · ${scene.title}`;
@@ -1073,21 +1102,23 @@ function renderVigilBeat(beat) {
     const nextStage = Math.min(beat.stages.length - 1, Math.floor(progress * (beat.stages.length + 1)) - 1);
     if (nextStage > stageIndex && nextStage >= 0) {
       stageIndex = nextStage;
-      if (stageIndex === 0) {
-        // 대응하는 CSS 규칙이 없는 phase다. 앞 장면의 배경 이미지를 걷어내고
-        // night 기본 그라데이션(순수한 어둠)만 남기려는 의도적 폴백이다.
-        elements.storyBackdrop.dataset.phase = 'plague';
-      }
+      // phase는 그대로 둔다 — 앞 장면의 일러스트를 유지한 채
+      // --vigil 이 그 위에 밝기를 떨어뜨려 밤이 깊어지는 것을 보여 준다.
       caption.textContent = beat.stages[stageIndex];
     }
 
     if (progress >= 1) {
       finished = true;
       holding = false;
-      elements.storyBackdrop.dataset.phase = 'daybreak';
       caption.textContent = '';
-      announce('밤이 지나고 새벽이 왔습니다.');
+      // 어둠을 유지한 채 doneLine 의 phase 로 배경을 갈아 끼운 뒤,
+      // --vigil 을 0 으로 되돌려 다음 장면이 서서히 밝아지며 드러나게 한다.
+      elements.storyBackdrop.classList.add('is-vigil-clearing');
+      announce('밤을 다 지새웠습니다.');
       renderLine(beat.doneLine, nextBeat);
+      requestAnimationFrame(() => {
+        elements.storyBackdrop.style.setProperty('--vigil', '0');
+      });
       return;
     }
     rafId = requestAnimationFrame(tick);
