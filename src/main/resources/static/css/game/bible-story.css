@@ -420,6 +420,12 @@ body.bible-story-page .site-header {
         linear-gradient(180deg, #030a15 0%, #081426 55%, #142338 100%);
 }
 
+.story-backdrop[data-theme="night"][data-phase="closed-door"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(2, 7, 15, 0.02), rgba(2, 7, 15, 0.42)),
+        #090d13 url("/images/game/bible-story-anna-closed-door.jpg") center / cover no-repeat;
+}
+
 .story-backdrop[data-theme="night"][data-phase="cloud"] .story-backdrop-art {
     background:
         linear-gradient(180deg, rgba(3, 10, 21, 0.08), rgba(3, 10, 21, 0.42)),
@@ -460,6 +466,12 @@ body.bible-story-page .site-header {
     background:
         linear-gradient(180deg, rgba(3, 12, 24, 0.04), rgba(3, 12, 24, 0.36)),
         #6c6b62 url("/images/game/bible-story-cloud-at-red-sea.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="sea"][data-phase="trapped"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(3, 12, 24, 0.03), rgba(3, 12, 24, 0.42)),
+        #101c29 url("/images/game/bible-story-trapped-at-red-sea.jpg?v=2") center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="sea"][data-sea="open"] .story-backdrop-art {
