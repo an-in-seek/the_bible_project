@@ -216,14 +216,16 @@ const scenes = [
         type: 'vigil',
         prompt: '누르고 있는 동안 밤이 깊어 가요. 손을 떼지 말고 밤을 지새워 주세요.',
         stages: [
-          '한밤중 — 이집트 온 땅에서 울음소리가 터져 나왔다.',
+          '한밤중 — 여호와께서 이집트 온 땅의 맏이를 치셨다.',
+          '바로의 맏아들부터 감옥에 갇힌 죄수의 맏아들까지, 짐승의 첫 새끼까지.',
           '그러나 이 집 문 안은 숨소리조차 고요했다.'
         ],
-        doneLine: {phase: 'mourning', text: '이집트 전체가 울음바다가 됐다. 한밤중에 바로가 사람을 보내 모세와 아론을 급히 불러들였다.', ref: '출애굽기 12:30–31'}
+        doneLine: {phase: 'mourning', text: '여호와께서 이집트 땅의 모든 장자를 치시니, 이집트 전역이 울음바다가 됐다. 초상이 나지 않은 집은 단 한 곳도 없었다.', ref: '출애굽기 12:29–30'}
       },
       {
         type: 'say',
         lines: [
+          {text: '그 밤에 바로도, 신하들도, 온 이집트 사람도 잠자리에서 뛰쳐나왔다. 바로는 한밤중에 사람을 보내 모세와 아론을 급히 불러들였다.', ref: '출애굽기 12:30–31'},
           {
             phase: 'release',
             who: '바로',
@@ -940,7 +942,8 @@ function renderVigilBeat(beat) {
   const ring = elements.storyPlayArea.querySelector('#vigilRing');
   const hold = elements.storyPlayArea.querySelector('#vigilHold');
   const caption = elements.storyPlayArea.querySelector('#vigilCaption');
-  const duration = prefersReducedMotion() ? 1400 : 3600;
+  // 자막 한 단계는 전체의 1/(stages+1) 동안 노출된다 — 단계 수에 맞춰 읽을 시간을 확보한다
+  const duration = prefersReducedMotion() ? 1800 : 4800;
   let progress = 0;
   let holding = false;
   let lastTick = 0;
