@@ -483,7 +483,7 @@ body.bible-story-page .site-header {
 .story-backdrop[data-theme="door"][data-phase="firstborn-bowl"] .story-backdrop-art {
     background:
         linear-gradient(180deg, rgba(4, 8, 14, 0.02), rgba(3, 6, 11, 0.42)),
-        #151c27 url("/images/game/bible-story-firstborn-blood-bowl.jpg?v=2") center / cover no-repeat;
+        #151c27 url("/images/game/bible-story-firstborn-blood-bowl.jpg?v=3") center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="door"][data-phase="anna-lamp"] .story-backdrop-art {
