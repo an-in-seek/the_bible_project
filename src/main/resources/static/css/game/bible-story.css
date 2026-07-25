@@ -2163,10 +2163,26 @@ html[data-theme="dark"] .story-badge,
         background-position: 72% center;
     }
 
-    .story-backdrop[data-theme="door"][data-phase="firstborn-bowl"] .story-backdrop-art,
-    .story-backdrop[data-theme="door"][data-phase="lamb-ready"] .story-backdrop-art,
-    .story-backdrop[data-theme="door"][data-phase="table-ready"] .story-backdrop-art {
+    .story-backdrop[data-theme="door"][data-phase="firstborn-bowl"] .story-backdrop-art {
         background-position: center;
+    }
+
+    /* 아버지(좌) · 기록자(중앙 뒤) · 오빠(우) 세 인물이 가로로 넓게 퍼져 있어
+       cover 로는(가로의 약 41%만 보임) 양 끝 인물이 반드시 잘린다.
+       전체가 들어오도록 contain, 남는 여백은 원래 폴백 색으로 채운다. */
+    .story-backdrop[data-theme="door"][data-phase="lamb-ready"] .story-backdrop-art {
+        background-color: #18151a;
+        background-position: center;
+        background-size: contain;
+    }
+
+    /* 식탁 장면은 여섯 인물이 가로로 늘어서 있어(어머니 17% · 안나 23% · 아버지 38% ·
+       오빠 49% · 노년 여인 61% · 기록자 87%), cover 로는 좁은 화면에 절반이 걸쳐 보인다.
+       화면 폭의 1/3 만 보이도록 확대해 아버지와 오빠에 붙는다.
+       세로는 32% 로 올려 두 사람의 얼굴이 잘리지 않게 한다. */
+    .story-backdrop[data-theme="door"][data-phase="table-ready"] .story-backdrop-art {
+        background-position: 40% 32%;
+        background-size: 380% auto;
     }
 
     /* 문간 장면(passover.jpg)은 기록자와 아버지가 화면 양 끝에 서 있어
@@ -2189,6 +2205,54 @@ html[data-theme="dark"] .story-badge,
 
     .story-backdrop[data-theme="door"][data-phase="anna-lamp"] .story-backdrop-art {
         background-position: 72% center;
+    }
+
+    /* 씬 2 이후 — 화자·핵심 인물이 한쪽에 치우친 장면들 */
+
+    /* 안나가 오른쪽에 앉아 있다. 왼쪽 절반은 빗장 걸린 문(어둠)이라 잘려도 무방 */
+    .story-backdrop[data-theme="night"][data-phase="closed-door"] .story-backdrop-art {
+        background-position: 66% center;
+    }
+
+    /* 화자인 바로가 오른쪽에서 손을 뻗고 있다 — 왼쪽의 모세·아론보다 우선 */
+    .story-backdrop[data-theme="night"][data-phase="release"] .story-backdrop-art {
+        background-position: 60% center;
+    }
+
+    /* 세 십자가가 중앙에서 살짝 오른쪽(53~69%)에 몰려 있다 */
+    .story-backdrop[data-theme="dawn"][data-phase="cross"] .story-backdrop-art {
+        background-position: 58% center;
+    }
+
+    /* 피 바르는 미니게임 — 문이 5:7 세로 비율이라 폭이 커질수록 높이가 1.4배로 늘어난다.
+       .story-stage 가 overflow: hidden 이라 인방 스팟이 잘리면 그 지점을 누를 수 없어
+       진행이 막힌다. 폭을 뷰포트 높이에도 물려 세 스팟이 항상 화면 안에 들어오게 한다. */
+    .story-door {
+        width: min(200px, 52vw, 26vh);
+        border-width: 11px;
+        border-bottom-width: 0;
+    }
+
+    /* 스팟은 문 바깥으로 돌출한다. 테두리가 얇아진 만큼 오프셋도 줄여 좌우 여유를 확보하고,
+       탭 영역은 44px 이상을 유지한다. */
+    .story-door-spot {
+        width: 44px;
+        height: 44px;
+    }
+
+    .story-door-spot-lintel {
+        top: -30px;
+        left: calc(50% - 22px);
+    }
+
+    .story-door-spot-left {
+        top: 38%;
+        left: -30px;
+    }
+
+    .story-door-spot-right {
+        top: 38%;
+        right: -30px;
     }
 
     .story-intro-shade {
