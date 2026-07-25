@@ -669,6 +669,33 @@ body.bible-story-page .site-header {
     font-size: 0.7rem;
 }
 
+.story-line-with-portrait {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.7rem;
+}
+
+.story-line-portrait {
+    flex: 0 0 auto;
+    width: 48px;
+    height: 48px;
+    border: 2px solid rgba(242, 200, 121, 0.4);
+    border-radius: 50%;
+    object-fit: cover;
+    background: rgba(8, 16, 28, 0.6);
+}
+
+.story-line-word .story-line-portrait {
+    border-color: var(--story-gold-bright);
+    box-shadow: 0 0 14px rgba(242, 200, 121, 0.35);
+}
+
+.story-line-body {
+    display: block;
+    flex: 1;
+    min-width: 0;
+}
+
 .story-line-hint {
     display: block;
     margin-top: 0.55rem;
@@ -1844,6 +1871,11 @@ html[data-theme="dark"] .story-badge,
 
     .story-hud-scene {
         font-size: 0.7rem;
+    }
+
+    .story-line-portrait {
+        width: 42px;
+        height: 42px;
     }
 
     .story-table-grid {

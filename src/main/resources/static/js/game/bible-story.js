@@ -19,7 +19,7 @@ const FRAGMENTS = {
 const TESTIMONIES = [
   {
     id: 'bread',
-    text: '내가 곧 생명의 떡이니 내게 오는 자는 결코 주리지 아니할 터이요',
+    text: '나는 생명의 떡이니 내게 오는 자는 결코 주리지 아니할 터이요',
     ref: '요한복음 6:35',
     href: '/web/bible/verse?translationId=1&bookOrder=43&chapterNumber=6&verseNumber=35'
   },
@@ -31,7 +31,7 @@ const TESTIMONIES = [
   },
   {
     id: 'path',
-    text: '우리 조상들이 다 구름 아래 있고 바다 가운데로 지나며 모세에게 속하여 구름과 바다에서 세례를 받고',
+    text: '우리 조상들이 다 구름 아래에 있고 바다 가운데로 지나며 모세에게 속하여 다 구름과 바다에서 세례를 받고',
     ref: '고린도전서 10:1–2',
     href: '/web/bible/verse?translationId=1&bookOrder=46&chapterNumber=10&verseNumber=1'
   },
@@ -42,6 +42,14 @@ const TESTIMONIES = [
     href: '/web/bible/verse?translationId=1&bookOrder=42&chapterNumber=22&verseNumber=20'
   }
 ];
+
+const CHARACTER_PORTRAITS = {
+  '기록자': '/images/game/bible-story-character-recorder.jpg',
+  '아버지': '/images/game/bible-story-character-father.jpg',
+  '미리암': '/images/game/bible-story-character-young-miriam.jpg',
+  '말씀': '/images/game/bible-story-character-god.jpg',
+  '백성': '/images/game/bible-story-character-people.jpg'
+};
 
 const scenes = [
   {
@@ -78,7 +86,7 @@ const scenes = [
       {
         type: 'say',
         lines: [
-          {text: '애굽 온 땅에 아홉 번의 재앙이 지나갔다. 그러나 바로의 마음은 여전히 완악했다.'},
+          {text: '애굽 온 땅에 아홉 번의 재앙이 지나갔다. 그러나 바로의 마음은 여전히 완악했다.', ref: '출애굽기 7–10장'},
           {text: '그리고 마지막 열 번째 재앙이 예고되었다. 애굽의 모든 처음 난 것이 죽는 밤이었다.', ref: '출애굽기 11:4–5'},
           {who: '기록자', text: '나는 기록자다. 심판이 예고된 이 밤, 하나님께서 자기 백성에게 먼저 열어 두신 살 길을 기록하러 왔다.'},
           {text: '그 길은 흠 없는 어린양 한 마리였다. 고센 땅의 한 가정이 기록자를 맞았다.', ref: '출애굽기 12:3–5'},
@@ -208,7 +216,7 @@ const scenes = [
           '한밤중 — 애굽 온 땅에 큰 부르짖음이 일었다.',
           '그러나 이 집의 문 안은 고요했다.'
         ],
-        doneLine: {text: '새벽 — 바로가 사람을 보내 외쳤다. “일어나 내 백성 가운데서 떠나라.”', ref: '출애굽기 12:30–31'}
+        doneLine: {text: '아직 밤이 깊을 때, 바로가 모세와 아론을 불러 외쳤다. “일어나 내 백성 가운데에서 떠나라.”', ref: '출애굽기 12:30–31'}
       },
       {
         type: 'say',
@@ -256,7 +264,7 @@ const scenes = [
           {text: '구름 기둥은 백성을 홍해 앞 바닷가로 이끌었다. 그곳에 진을 치라는 말씀대로였다.', ref: '출애굽기 14:1–2'},
           {text: '그 무렵 애굽에서는 바로가 다시 마음을 바꾸었다. 병거 육백 대가 추격을 시작했다.', ref: '출애굽기 14:5–7'},
           {text: '앞은 바다, 뒤는 애굽의 병거. 길이 끊겼다.'},
-          {who: '백성', text: '애굽에 묻힐 곳이 없어서 우리를 이 광야까지 끌고 온 겁니까!'}
+          {who: '백성', text: '애굽에 묻힐 곳이 없어서 우리를 이 광야까지 끌고 온 겁니까!', ref: '출애굽기 14:11'}
         ]
       },
       {
@@ -268,18 +276,18 @@ const scenes = [
           {value: 'fight', label: '싸울 준비를 한다', reply: '지팡이와 막대기뿐인 행렬이 병거와 싸울 수는 없었다.'},
           {value: 'cry', label: '부르짖는다', reply: '백성의 부르짖음이 바닷가에 가득했다. 사람이 할 수 있는 일은 거기까지였다.'}
         ],
-        wordLine: {who: '말씀', text: '너희는 두려워 말고 가만히 서서 여호와께서 오늘날 너희를 위하여 행하시는 구원을 보라.', ref: '출애굽기 14:13'},
-        openLine: {text: '그때 큰 동풍이 불기 시작했다. 바다가 갈라져 물이 좌우에 벽이 되었다.'}
+        wordLine: {who: '말씀', text: '너희는 두려워하지 말고 가만히 서서 여호와께서 오늘 너희를 위하여 행하시는 구원을 보라.', ref: '출애굽기 14:13'},
+        openLine: {text: '구름 기둥이 뒤로 옮겨 애굽 군대와 이스라엘 사이를 가로막았다. 모세가 바다 위로 손을 내밀자 큰 동풍이 밤새도록 불어 바다가 갈라지고, 물이 좌우에 벽이 되었다.', ref: '출애굽기 14:19–22'}
       },
       {
         type: 'seaCross',
-        prompt: '구름 기둥을 따라 마른 땅을 밟고 건너 주세요.',
+        prompt: '물 벽 사이로 열린 마른 땅을 밟고 건너 주세요.',
         steps: [
           '물 벽 사이로 첫걸음을 내디뎠다.',
           '아이들과 노인들, 양 떼까지 마른 땅을 밟았다.',
           '마지막 사람이 바다를 건넜다.'
         ],
-        doneLine: {text: '뒤에서 물이 다시 합쳐졌다. 추격은 끝났다.'}
+        doneLine: {text: '추격하던 병거들 위로 물이 다시 합쳐졌다. 바로의 군대는 하나도 남지 않았다.', ref: '출애굽기 14:27–28'}
       },
       {
         type: 'say',
@@ -314,10 +322,10 @@ const scenes = [
       {
         type: 'say',
         lines: [
-          {text: '바다를 건넌 노래는 오래가지 않았다. 기둥을 따라 들어간 광야에는 먹을 것이 없었다.', ref: '출애굽기 15:22'},
-          {text: '애굽에서 나온 지 한 달째 되던 날, 양식이 떨어지자 온 회중의 원망이 광야에 가득했다.', ref: '출애굽기 16:1–2'},
+          {text: '바다를 건넌 노래는 오래가지 않았다. 백성은 기둥을 따라 수르 광야로 들어갔다.', ref: '출애굽기 15:22'},
+          {text: '애굽에서 나온 지 한 달째, 신 광야에 이르러 양식이 떨어지자 온 회중의 원망이 가득했다.', ref: '출애굽기 16:1–2'},
           {who: '백성', text: '차라리 애굽에서 고기 가마 곁에 앉아 있을 때가 나았어요. 우리를 다 굶겨 죽일 작정인가요?', ref: '출애굽기 16:3'},
-          {who: '말씀', text: '볼지어다 내가 너희를 위하여 하늘에서 양식을 비같이 내리리니 백성이 나가서 일용할 것을 날마다 거둘 것이라.', ref: '출애굽기 16:4'}
+          {who: '말씀', text: '보라 내가 너희를 위하여 하늘에서 양식을 비 같이 내리리니 백성이 나가서 일용할 것을 날마다 거둘 것이라.', ref: '출애굽기 16:4'}
         ]
       },
       {
@@ -443,11 +451,11 @@ const scenes = [
       {
         type: 'say',
         lines: [
-          {phase: 'cross', text: '다음 날, 유월절의 예루살렘. 예수께서는 성문 밖 십자가에 달리셨다.'},
+          {phase: 'cross', text: '다음 날, 유월절의 예루살렘. 예수께서는 성문 밖 십자가에 달리셨다.', ref: '요한복음 19:17–18'},
           {phase: 'cross', who: '기록자', text: '이번에는 확인할 준비물도, 건널 바다도 없었다. 나는 다만 보았고, 기록했다.'},
-          {phase: 'dark', text: '낮 열두 시부터 어둠이 온 땅을 덮었다.'},
-          {phase: 'tomb', text: '사흘째 되던 날 이른 새벽, 여자들이 무덤에 갔다. 무덤은 비어 있었다.'},
-          {phase: 'risen', who: '말씀', text: '어찌하여 산 자를 죽은 자 가운데서 찾느냐 여기 계시지 않고 살아나셨느니라.', ref: '누가복음 24:5–6'}
+          {phase: 'dark', text: '낮 열두 시부터 어둠이 온 땅을 덮어 세 시간 동안 계속되었다.', ref: '누가복음 23:44–45'},
+          {phase: 'tomb', text: '사흘째 되던 날 이른 새벽, 여자들이 무덤에 갔다. 무덤은 비어 있었다.', ref: '누가복음 24:1–3'},
+          {phase: 'risen', who: '말씀', text: '어찌하여 살아 있는 자를 죽은 자 가운데서 찾느냐 여기 계시지 않고 살아나셨느니라.', ref: '누가복음 24:5–6'}
         ]
       },
       {type: 'finale'}
@@ -724,7 +732,17 @@ function renderBeat() {
 function lineMarkup(line) {
   const speaker = line.who ? `<span class="story-line-speaker">${line.who}</span>` : '';
   const ref = line.ref ? `<span class="story-line-ref">${line.ref}</span>` : '';
-  return `${speaker}<span class="story-line-text">${line.text}</span>${ref}`;
+  const body = `<span class="story-line-body">${speaker}<span class="story-line-text">${line.text}</span>${ref}</span>`;
+  const portrait = line.who ? CHARACTER_PORTRAITS[line.who] : null;
+  if (!portrait) {
+    return body;
+  }
+  return `
+        <span class="story-line-with-portrait">
+            <img class="story-line-portrait" src="${portrait}" alt="" width="48" height="48">
+            ${body}
+        </span>
+    `;
 }
 
 function renderLine(line, onAdvance, hint = '탭하여 계속') {
@@ -1316,11 +1334,11 @@ function finishMatch(beat, board, note) {
   capstone.className = 'story-match-capstone';
   capstone.innerHTML = `
         <span class="story-badge story-badge-direct">성경의 직접 연결</span>
-        <blockquote>“우리의 유월절 양 곧 그리스도께서 희생이 되셨느니라”</blockquote>
+        <blockquote>“우리의 유월절 양 곧 그리스도께서 희생되셨느니라”</blockquote>
         <small>고린도전서 5:7</small>
     `;
   board.replaceWith(capstone);
-  announce('모든 조각이 이어졌습니다. 우리의 유월절 양 곧 그리스도께서 희생이 되셨느니라. 고린도전서 5장 7절.');
+  announce('모든 조각이 이어졌습니다. 우리의 유월절 양 곧 그리스도께서 희생되셨느니라. 고린도전서 5장 7절.');
   renderLine(beat.doneLine, nextBeat);
 }
 
