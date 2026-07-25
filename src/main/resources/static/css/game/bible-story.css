@@ -456,6 +456,12 @@ body.bible-story-page .site-header {
         #071627 url("/images/game/bible-story-egyptian-army.jpg") center / cover no-repeat;
 }
 
+.story-backdrop[data-theme="sea"][data-phase="shore"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(3, 12, 24, 0.04), rgba(3, 12, 24, 0.36)),
+        #6c6b62 url("/images/game/bible-story-cloud-at-red-sea.jpg") center / cover no-repeat;
+}
+
 .story-backdrop[data-theme="sea"][data-sea="open"] .story-backdrop-art {
     background:
         linear-gradient(180deg, rgba(3, 12, 24, 0.08), rgba(3, 12, 24, 0.24)),
