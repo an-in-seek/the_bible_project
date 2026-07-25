@@ -48,7 +48,10 @@ const CHARACTER_PORTRAITS = {
   '아버지': '/images/game/bible-story-character-father.jpg',
   '미리암': '/images/game/bible-story-character-young-miriam.jpg',
   '말씀': '/images/game/bible-story-character-god.jpg',
-  '백성': '/images/game/bible-story-character-people.jpg'
+  '백성': '/images/game/bible-story-character-people.jpg',
+  '모세': '/images/game/bible-story-character-moses.jpg',
+  '바로': '/images/game/bible-story-character-pharaoh.jpg',
+  '천사': '/images/game/bible-story-character-angel.jpg'
 };
 
 const scenes = [
@@ -216,11 +219,17 @@ const scenes = [
           '한밤중 — 애굽 온 땅에 큰 부르짖음이 일었다.',
           '그러나 이 집의 문 안은 고요했다.'
         ],
-        doneLine: {text: '아직 밤이 깊을 때, 바로가 모세와 아론을 불러 외쳤다. “일어나 내 백성 가운데에서 떠나라.”', ref: '출애굽기 12:30–31'}
+        doneLine: {text: '애굽에 큰 부르짖음이 있었다. 아직 밤이 깊을 때, 바로가 사람을 보내 모세와 아론을 불러들였다.', ref: '출애굽기 12:30–31'}
       },
       {
         type: 'say',
         lines: [
+          {
+            who: '바로',
+            word: true,
+            text: '너희와 이스라엘 자손은 일어나 내 백성 가운데에서 떠나서 너희의 말대로 가서 여호와를 섬기며',
+            ref: '출애굽기 12:31'
+          },
           {text: '백성은 급히 일어나 애굽을 떠났다. 사백삼십 년 만의 새벽이었다.', ref: '출애굽기 12:40–41'},
           {
             phase: 'cloud',
@@ -262,7 +271,14 @@ const scenes = [
         type: 'say',
         lines: [
           {text: '구름 기둥은 백성을 홍해 앞 바닷가로 이끌었다. 그곳에 진을 치라는 말씀대로였다.', ref: '출애굽기 14:1–2'},
-          {text: '그 무렵 애굽에서는 바로가 다시 마음을 바꾸었다. 병거 육백 대가 추격을 시작했다.', ref: '출애굽기 14:5–7'},
+          {text: '그 무렵 애굽에서는 바로와 그의 신하들이 백성에 대하여 마음이 변하였다.', ref: '출애굽기 14:5'},
+          {
+            who: '바로',
+            word: true,
+            text: '우리가 어찌 이같이 하여 이스라엘을 우리를 섬김에서 놓아 보내었는가',
+            ref: '출애굽기 14:5'
+          },
+          {text: '바로는 병거 육백 대와 애굽의 모든 병거를 이끌고 추격에 나섰다.', ref: '출애굽기 14:7'},
           {text: '앞은 바다, 뒤는 애굽의 병거. 길이 끊겼다.'},
           {who: '백성', text: '애굽에 묻힐 곳이 없어서 우리를 이 광야까지 끌고 온 겁니까!', ref: '출애굽기 14:11'}
         ]
