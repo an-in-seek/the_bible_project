@@ -438,6 +438,18 @@ body.bible-story-page .site-header {
         #030b15 url("/images/game/bible-story-final-plague.jpg") center / cover no-repeat;
 }
 
+.story-backdrop[data-theme="night"][data-phase="mourning"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(2, 7, 15, 0.06), rgba(2, 7, 15, 0.38)),
+        #030b15 url("/images/game/bible-story-egypt-mourning.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="night"][data-phase="release"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(2, 7, 15, 0.04), rgba(2, 7, 15, 0.42)),
+        #090d15 url("/images/game/bible-story-pharaoh-release.jpg") center / cover no-repeat;
+}
+
 .story-backdrop[data-theme="sea"] .story-backdrop-art {
     background:
         linear-gradient(90deg, rgba(3, 12, 24, 0.42), rgba(3, 12, 24, 0.08) 56%, rgba(3, 12, 24, 0.2)),
