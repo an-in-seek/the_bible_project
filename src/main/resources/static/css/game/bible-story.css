@@ -669,31 +669,32 @@ body.bible-story-page .site-header {
     font-size: 0.7rem;
 }
 
-.story-line-with-portrait {
+/* 화자 컷인 초상화: 대사 상자 위에 크게 돌출되는 게임 대화 관례 (일러스트가 배경 있는
+   정사각 JPG라 스탠딩 스프라이트 대신 액자형 컷인 사용) */
+.story-portrait {
+    position: relative;
+    z-index: 1;
     display: flex;
-    align-items: flex-start;
-    gap: 0.7rem;
+    justify-content: flex-start;
+    padding: 0 0.5rem;
+    margin-bottom: -1rem;
+    pointer-events: none;
+    animation: story-line-in 0.35s ease both;
 }
 
-.story-line-portrait {
-    flex: 0 0 auto;
-    width: 48px;
-    height: 48px;
-    border: 2px solid rgba(242, 200, 121, 0.4);
-    border-radius: 50%;
+.story-portrait img {
+    width: clamp(96px, 24vw, 132px);
+    height: clamp(96px, 24vw, 132px);
     object-fit: cover;
-    background: rgba(8, 16, 28, 0.6);
+    border: 2px solid rgba(242, 200, 121, 0.5);
+    border-radius: 1rem 1rem 1rem 0.35rem;
+    background: rgba(8, 16, 28, 0.8);
+    box-shadow: 0 14px 40px rgba(2, 7, 15, 0.55);
 }
 
-.story-line-word .story-line-portrait {
+.story-portrait-word img {
     border-color: var(--story-gold-bright);
-    box-shadow: 0 0 14px rgba(242, 200, 121, 0.35);
-}
-
-.story-line-body {
-    display: block;
-    flex: 1;
-    min-width: 0;
+    box-shadow: 0 0 30px rgba(242, 200, 121, 0.45), 0 14px 40px rgba(2, 7, 15, 0.5);
 }
 
 .story-line-hint {
@@ -993,10 +994,6 @@ body.bible-story-page .site-header {
     transition: filter 0.6s ease;
 }
 
-.story-manna-field.is-rotten {
-    filter: saturate(0.5) brightness(0.75);
-}
-
 .story-manna-piece {
     position: absolute;
     width: 30px;
@@ -1055,6 +1052,23 @@ body.bible-story-page .site-header {
     color: rgba(255, 255, 255, 0.85);
     font-size: 0.8rem;
     font-weight: 700;
+}
+
+.story-manna-count.is-over {
+    color: #ffc9b8;
+}
+
+.story-manna-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.story-manna-bar .story-btn-ghost {
+    border-color: rgba(255, 255, 255, 0.28);
+    background: rgba(5, 16, 29, 0.6);
+    color: #fff;
 }
 
 /* ---------------------------------------------------------------- scene 5: match */
@@ -1873,10 +1887,6 @@ html[data-theme="dark"] .story-badge,
         font-size: 0.7rem;
     }
 
-    .story-line-portrait {
-        width: 42px;
-        height: 42px;
-    }
 
     .story-table-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1995,6 +2005,7 @@ html[data-theme="dark"] .story-badge,
 @media (prefers-reduced-motion: reduce) {
     .story-intro-backdrop,
     .story-line,
+    .story-portrait,
     .story-dot.is-current,
     .story-line-hint,
     .story-door-spot,

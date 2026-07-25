@@ -732,17 +732,7 @@ function renderBeat() {
 function lineMarkup(line) {
   const speaker = line.who ? `<span class="story-line-speaker">${line.who}</span>` : '';
   const ref = line.ref ? `<span class="story-line-ref">${line.ref}</span>` : '';
-  const body = `<span class="story-line-body">${speaker}<span class="story-line-text">${line.text}</span>${ref}</span>`;
-  const portrait = line.who ? CHARACTER_PORTRAITS[line.who] : null;
-  if (!portrait) {
-    return body;
-  }
-  return `
-        <span class="story-line-with-portrait">
-            <img class="story-line-portrait" src="${portrait}" alt="" width="48" height="48">
-            ${body}
-        </span>
-    `;
+  return `${speaker}<span class="story-line-text">${line.text}</span>${ref}`;
 }
 
 function renderLine(line, onAdvance, hint = '탭하여 계속') {
@@ -750,6 +740,16 @@ function renderLine(line, onAdvance, hint = '탭하여 계속') {
     elements.storyBackdrop.dataset.phase = line.phase;
   }
   elements.storyDialogue.innerHTML = '';
+
+  const portrait = line.who ? CHARACTER_PORTRAITS[line.who] : null;
+  if (portrait) {
+    const figure = document.createElement('div');
+    figure.className = `story-portrait${line.who === '말씀' ? ' story-portrait-word' : ''}`;
+    figure.setAttribute('aria-hidden', 'true');
+    figure.innerHTML = `<img src="${portrait}" alt="" width="132" height="132">`;
+    elements.storyDialogue.appendChild(figure);
+  }
+
   const button = document.createElement('button');
   button.type = 'button';
   button.className = `story-line story-line-tappable${line.who === '말씀' ? ' story-line-word' : ''}`;
@@ -1065,9 +1065,24 @@ function renderSeaCrossBeat(beat) {
 // ---------------------------------------------------------------- scene 4: manna
 
 const MANNA_ROUNDS = [
-  {label: '첫째 날 아침', need: 4, hint: '한 오멜은 네 움큼이에요.'},
-  {label: '둘째 날 아침', need: 4, hint: '어제의 양식은 어제로 끝났어요.'},
-  {label: '여섯째 날 아침', need: 8, hint: '내일은 안식일이에요. 오늘은 두 배를 거둬 주세요. (출 16:22–23)'}
+  {
+    label: '첫째 날 아침',
+    need: 4,
+    hint: '한 오멜은 네 움큼이에요.',
+    overNote: '하루 필요보다 많아요. 남긴 만나는 썩어요. (출 16:19–20)'
+  },
+  {
+    label: '둘째 날 아침',
+    need: 4,
+    hint: '어제의 양식은 어제로 끝났어요.',
+    overNote: '하루 필요보다 많아요. 남긴 만나는 썩어요. (출 16:19–20)'
+  },
+  {
+    label: '여섯째 날 아침',
+    need: 8,
+    hint: '내일은 안식일이에요. 오늘은 두 배를 거둬 주세요. (출 16:22–23)',
+    overNote: '이틀 몫보다 많아요. 안식일을 위한 두 배까지만 거둬 주세요. (출 16:22–23)'
+  }
 ];
 
 const MANNA_SPOTS = [
@@ -1086,7 +1101,10 @@ function renderMannaBeat(scene, beat) {
             <div class="story-manna-bar">
                 <div class="story-manna-gauge" aria-hidden="true"><span id="mannaGaugeFill"></span><i id="mannaGaugeNeed"></i></div>
                 <p class="story-manna-count" id="mannaCount" aria-live="polite">0 움큼 / 필요 ${config.need} 움큼</p>
-                <button type="button" class="story-btn story-btn-primary" id="mannaDoneButton" disabled>거두기를 마친다</button>
+                <div class="story-manna-actions">
+                    <button type="button" class="story-btn story-btn-ghost d-none" id="mannaPutBackButton">한 움큼 내려놓는다</button>
+                    <button type="button" class="story-btn story-btn-primary" id="mannaDoneButton" disabled>거두기를 마친다</button>
+                </div>
             </div>
         `;
 
@@ -1095,10 +1113,25 @@ function renderMannaBeat(scene, beat) {
     const needMark = elements.storyPlayArea.querySelector('#mannaGaugeNeed');
     const count = elements.storyPlayArea.querySelector('#mannaCount');
     const doneButton = elements.storyPlayArea.querySelector('#mannaDoneButton');
+    const putBackButton = elements.storyPlayArea.querySelector('#mannaPutBackButton');
     const max = MANNA_SPOTS.length;
     needMark.style.left = `${(config.need / max) * 100}%`;
 
     let collected = 0;
+    const pickedStack = [];
+
+    const updateBar = () => {
+      const over = collected > config.need;
+      fill.style.width = `${(collected / max) * 100}%`;
+      fill.classList.toggle('is-over', over);
+      count.classList.toggle('is-over', over);
+      count.textContent = over
+          ? `${collected} 움큼 — ${config.overNote}`
+          : `${collected} 움큼 / 필요 ${config.need} 움큼`;
+      putBackButton.classList.toggle('d-none', !over);
+      doneButton.disabled = collected !== config.need;
+    };
+
     MANNA_SPOTS.forEach(([x, y]) => {
       const piece = document.createElement('button');
       piece.type = 'button';
@@ -1112,43 +1145,39 @@ function renderMannaBeat(scene, beat) {
         }
         piece.classList.add('is-picked');
         piece.disabled = true;
+        pickedStack.push(piece);
         collected += 1;
-        fill.style.width = `${(collected / max) * 100}%`;
-        fill.classList.toggle('is-over', collected > config.need);
-        count.textContent = `${collected} 움큼 / 필요 ${config.need} 움큼`;
-        doneButton.disabled = collected < config.need;
+        updateBar();
+        if (collected > config.need) {
+          announce(`${config.overNote} 한 움큼 내려놓아야 거두기를 마칠 수 있어요.`);
+        }
       });
       field.appendChild(piece);
     });
 
+    putBackButton.addEventListener('click', () => {
+      const piece = pickedStack.pop();
+      if (!piece) {
+        return;
+      }
+      piece.classList.remove('is-picked');
+      piece.disabled = false;
+      collected -= 1;
+      updateBar();
+      announce('만나 한 움큼을 들에 내려놓았어요.');
+    });
+
     doneButton.addEventListener('click', () => {
-      const over = collected > config.need;
       const lastRound = round === MANNA_ROUNDS.length - 1;
-
-      if (over && !lastRound) {
-        state.mannaGreed = true;
-      }
-
-      let morning;
-      if (lastRound) {
-        morning = over
-            ? '안식일 아침 — 들에는 만나가 없었다. 두 배로 거둔 양식은 이번에는 상하지 않았다. (출 16:24)'
-            : '안식일 아침 — 들에는 만나가 없었다. 여섯째 날 거둔 양식으로 백성은 쉬었다. (출 16:25–26)';
-      } else {
-        morning = over
-            ? '이튿날 아침 — 남겨 둔 만나에 벌레가 생기고 냄새가 났다. (출 16:20)'
-            : '이튿날 아침 — 들에 다시 만나가 내렸다. 어제의 공급은 어제로 충분했다.';
-      }
-
-      elements.storyPlayArea.querySelector('.story-manna-field').classList.toggle('is-rotten', over && !lastRound);
+      const morning = lastRound
+          ? '안식일 아침 — 들에는 만나가 없었다. 여섯째 날 두 배로 거둔 양식은 상하지 않았고, 백성은 그 양식으로 쉬었다. (출 16:24–26)'
+          : '이튿날 아침 — 들에 다시 만나가 내렸다. 어제의 공급은 어제로 충분했다.';
       announce(morning);
 
       renderLine({text: morning}, () => {
         round += 1;
         if (round >= MANNA_ROUNDS.length) {
-          pushJournal('manna', scene.title, state.mannaGreed
-              ? '나는 이틀치를 움켜쥐었다가 썩는 것을 보았다. 공급은 날마다 새로 주어졌다.'
-              : '나는 하루치만 거두는 법을 배웠다. 공급은 날마다 새로 주어졌다.');
+          pushJournal('manna', scene.title, '나는 하루치만 거두는 법을 배웠다. 공급은 날마다 새로 주어졌다.');
           saveState();
           renderSheet();
           renderLine(beat.doneLine, nextBeat);
