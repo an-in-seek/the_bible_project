@@ -160,11 +160,31 @@ const scenes = [
             text: '앉으실 자리가 변변찮아요. 언제 떠나라 하실지 몰라서 세간을 죄다 싸 두었거든요.',
             ref: '출애굽기 12:11'
           },
-          {phase: 'firstborn-bowl', text: '마당에서는 안나 아버지가 문간에 매여 있던 어린양을 잡아 손질했고, 그 피를 받은 그릇은 이 집의 맏아들인 안나의 오빠가 두 손으로 받쳐 들고 있었다.'},
-          {phase: 'firstborn-bowl', who: '안나 오빠', text: '아버지… 정말 이 피를 문에 바르면 제가 살 수 있는 건가요?'},
-          {phase: 'firstborn-bowl', who: '안나 아버지', text: '그래 아들아, 하나님께서 약속하셨으니 두려워하지마라!'},
-          {phase: 'anna-lamp', text: '그때 등불 뒤에서 작은 얼굴이 빼꼼 나왔다.'},
-          {phase: 'anna-lamp', who: '안나', text: '기록자님! 저는 안나예요. 우리 오빠 지금 손 떨고 있는 거, 저만 본 거 아니죠?'},
+          {
+            phase: 'firstborn-bowl',
+            who: '기록자',
+            text: '마당에서는 안나 아버지가 문간에 매여 있던 어린양을 잡아 손질했고, 그 피를 받은 그릇은 이 집의 맏아들인 안나의 오빠가 두 손으로 받쳐 들고 있었다.'
+          },
+          {
+            phase: 'firstborn-bowl',
+            who: '안나 오빠',
+            text: '아버지… 정말 이 피를 문에 바르면 제가 살 수 있는 건가요?'
+          },
+          {
+            phase: 'firstborn-bowl',
+            who: '안나 아버지',
+            text: '그래 아들아, 하나님께서 약속하셨으니 두려워하지마라!'
+          },
+          {
+            phase: 'anna-lamp',
+            who: '기록자',
+            text: '그때 등불 뒤에서 작은 얼굴이 빼꼼 나왔다.'
+          },
+          {
+            phase: 'anna-lamp',
+            who: '안나',
+            text: '기록자님! 저는 안나예요. 우리 오빠 지금 손 떨고 있는 거, 저만 본 거 아니죠?'
+          },
           {
             phase: 'lamb-ready',
             who: '안나 아버지',
@@ -182,7 +202,7 @@ const scenes = [
       {
         type: 'say',
         lines: [
-          {phase: 'blood-door-safe', text: '문기둥에 바른 피가 등불빛에 검붉게 번들거렸다. 오빠가 그릇을 내려놓고 한참을 문 앞에 서 있었다.'},
+          {phase: 'blood-door-safe', who: '기록자', text: '문기둥에 바른 피가 등불빛에 검붉게 번들거렸다. 안나의 가족이 한참을 문 앞에 서 있었다.'},
           {phase: 'blood-door-safe', who: '안나 오빠', text: '…이제 이 문 안이 세상에서 제일 안전한 곳이네요.'},
           {phase: 'table-ready', who: '안나 아버지', text: '이제 식탁 차례예요. 하나님이 정해 주신 것만 상에 올려 주세요.'}
         ]
