@@ -420,6 +420,54 @@ body.bible-story-page .site-header {
         #211b16 url("/images/game/bible-story-pharaoh-enslaves-israel.jpg") center / cover no-repeat;
 }
 
+.story-backdrop[data-theme="door"][data-phase="labor-decree"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(21, 14, 8, 0.04), rgba(12, 8, 5, 0.38)),
+        #4c3727 url("/images/game/bible-story-slave-labor-decree.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="cries"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(3, 9, 18, 0.02), rgba(2, 7, 15, 0.38)),
+        #07111d url("/images/game/bible-story-israel-cries-to-god.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="moses-demands"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(12, 8, 4, 0.02), rgba(8, 5, 3, 0.42)),
+        #2d2117 url("/images/game/bible-story-moses-before-pharaoh.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="pharaoh-defies"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(13, 7, 3, 0.02), rgba(8, 4, 2, 0.42)),
+        #2c1b10 url("/images/game/bible-story-pharaoh-defies-moses.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="early-plagues"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(20, 6, 4, 0.02), rgba(10, 4, 3, 0.42)),
+        #39120e url("/images/game/bible-story-early-plagues.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="later-plagues"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(3, 7, 8, 0.02), rgba(3, 6, 7, 0.42)),
+        #172022 url("/images/game/bible-story-later-plagues.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="darkness"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(0, 3, 8, 0.02), rgba(0, 2, 6, 0.3)),
+        #01060b url("/images/game/bible-story-ninth-plague-darkness.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="plague"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(2, 7, 15, 0.04), rgba(2, 7, 15, 0.42)),
+        #030b15 url("/images/game/bible-story-final-plague.jpg") center / cover no-repeat;
+}
+
 .story-backdrop[data-theme="night"] .story-backdrop-art {
     background:
         radial-gradient(ellipse at 50% 88%, rgba(232, 178, 96, 0.28), transparent 34%),
@@ -1981,6 +2029,26 @@ html[data-theme="dark"] .story-badge,
 
     .story-backdrop[data-theme="door"][data-phase="slavery"] .story-backdrop-art {
         background-position: 31% center;
+    }
+
+    .story-backdrop[data-theme="door"][data-phase="labor-decree"] .story-backdrop-art {
+        background-position: 58% center;
+    }
+
+    .story-backdrop[data-theme="door"][data-phase="cries"] .story-backdrop-art,
+    .story-backdrop[data-theme="door"][data-phase="early-plagues"] .story-backdrop-art,
+    .story-backdrop[data-theme="door"][data-phase="later-plagues"] .story-backdrop-art,
+    .story-backdrop[data-theme="door"][data-phase="plague"] .story-backdrop-art {
+        background-position: center;
+    }
+
+    .story-backdrop[data-theme="door"][data-phase="moses-demands"] .story-backdrop-art,
+    .story-backdrop[data-theme="door"][data-phase="darkness"] .story-backdrop-art {
+        background-position: 28% center;
+    }
+
+    .story-backdrop[data-theme="door"][data-phase="pharaoh-defies"] .story-backdrop-art {
+        background-position: 72% center;
     }
 
     .story-intro-shade {
