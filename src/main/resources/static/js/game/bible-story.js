@@ -46,6 +46,8 @@ const TESTIMONIES = [
 const CHARACTER_PORTRAITS = {
   '기록자': '/images/game/bible-story-character-recorder.jpg',
   '안나 아버지': '/images/game/bible-story-character-father.jpg',
+  '안나 어머니': '/images/game/bible-story-character-mother.jpg',
+  '안나 오빠': '/images/game/bible-story-character-anna-brother.jpg',
   '안나': '/images/game/bible-story-character-young-anna.jpg',
   '말씀': '/images/game/bible-story-character-god.jpg',
   '백성': '/images/game/bible-story-character-people.jpg',
@@ -131,33 +133,40 @@ const scenes = [
           {phase: 'later-plagues', text: '가축이 쓰러지고 사람 몸에 악성 종기가 퍼졌다. 우박이 곡식을 때렸고, 메뚜기가 남은 이삭까지 갉아먹었다.', ref: '출애굽기 9–10장'},
           {phase: 'darkness', text: '아홉 번째로 사흘 동안 짙은 어둠이 이집트를 덮었다. 그런데도 바로는 요지부동, 고집을 꺾지 않았다.', ref: '출애굽기 10:21–23'},
           {phase: 'plague', text: '이제 남은 것은 열 번째, 마지막 재앙. 이집트의 모든 장자가 죽는 밤이다.', ref: '출애굽기 11:4–5'},
-          {phase: null, who: '기록자', text: '나는 기록자다. 심판이 예고된 이 밤, 하나님이 자기 백성에게 미리 열어 두신 구원의 길을 기록하러 왔다.'},
-          {text: '그 길은 군대도, 성벽도, 도망칠 국경도 아니었다. 모세를 통해 내려온 지시는 뜻밖에도 집집마다 준비할 어린양 한 마리였다.', ref: '출애굽기 12:3'},
-          {text: '이 달 열흘에 흠 없는 일 년 된 수컷을 골라 두었다가, 열나흘 저녁 해 질 때에 잡으라 하셨다. 오늘이 바로 그 열나흘이다.', ref: '출애굽기 12:5–6'},
-          {text: '해가 넘어가기 직전, 고센 땅의 한 집이 문을 열어 나를 들여보내 주었다.'}
+          {phase: 'father-welcome', who: '기록자', text: '나는 기록자다. 심판이 예고된 이 밤, 하나님이 자기 백성에게 미리 열어 두신 구원의 길을 기록하러 왔다.'},
+          {phase: 'father-welcome', who: '기록자', text: '그 길은 군대도, 성벽도, 도망칠 국경도 아니었다. 모세를 통해 내려온 지시는 뜻밖에도 집집마다 준비할 어린양 한 마리였다.', ref: '출애굽기 12:3'},
+          {phase: 'father-welcome', who: '기록자', text: '이 달 열흘에 흠 없는 일 년 된 수컷을 골라 두었다가, 열나흘 저녁 해 질 때에 잡으라 하셨다. 오늘이 바로 그 열나흘이다.', ref: '출애굽기 12:5–6'},
+          {phase: 'father-welcome', who: '기록자', text: '해가 지평선에 걸릴 무렵, 나는 고센 땅의 한 집 앞에 이르렀다. 문간에는 어린양 한 마리가 매여 있었고, 그 곁에 빈 그릇이 놓여 있었다.'}
         ]
       },
       {
         type: 'say',
         lines: [
-          {text: '문을 열어 준 사람은 안나의 아버지였다. 벽돌 가마에서 평생을 보낸 손등에 흉터가 가득했다.'},
           {
+            phase: 'father-welcome',
+            who: '기록자',
+            text: '열린 문 안쪽에서 등불빛이 흘러나왔다. 한 남자가 문간에 서서 가슴에 손을 얹고, 다른 손을 펴 나를 안으로 청했다. 안나의 아버지였다.'
+          },
+          {
+            phase: 'father-welcome',
             who: '안나 아버지',
             text: '해 지기 전에 오셔서 다행입니다. 오늘 밤엔 누가 두드려도 문을 열 수 없거든요. 아침까지 아무도 밖에 나가지 말라고 하셨어요.',
             ref: '출애굽기 12:22'
           },
-          {text: '부엌에서는 안나의 어머니가 쓴 나물을 다듬고 있었다. 꾸려 놓은 짐 보따리가 이미 문간에 쌓여 있었다.'},
+          {phase: 'kitchen-packed', text: '부엌에서는 안나의 어머니가 쓴 나물을 다듬고 있었다. 꾸려 놓은 짐 보따리가 이미 문간에 쌓여 있었다.'},
           {
+            phase: 'kitchen-packed',
             who: '안나 어머니',
             text: '앉으실 자리가 변변찮아요. 언제 떠나라 하실지 몰라서 세간을 죄다 싸 두었거든요.',
             ref: '출애굽기 12:11'
           },
-          {text: '마당에서는 안나의 오빠가 피를 받아 둔 그릇을 두 손으로 받쳐 들고 있었다. 이 집의 맏아들, 오늘 밤 심판이 겨누는 바로 그 자리였다.'},
-          {who: '안나 오빠', text: '아버지… 정말 이 피 한 번으로 제가 살 수 있는 건가요?'},
-          {who: '안나 아버지', text: '네가 잘나서 사는 게 아니란다. 하나님이 그러시겠다고 약속하셨으니까 사는 거야.'},
-          {text: '그때 등불 뒤에서 작은 얼굴이 빼꼼 나왔다.'},
-          {who: '안나', text: '기록자님! 저는 안나예요. 우리 오빠 지금 손 떨고 있는 거, 저만 본 거 아니죠?'},
+          {phase: 'firstborn-bowl', text: '마당에서는 안나의 오빠가 피를 받아 둔 그릇을 두 손으로 받쳐 들고 있었다. 이 집의 맏아들, 오늘 밤 심판이 겨누는 바로 그 자리였다.'},
+          {phase: 'firstborn-bowl', who: '안나 오빠', text: '아버지… 정말 이 피 한 번으로 제가 살 수 있는 건가요?'},
+          {phase: 'firstborn-bowl', who: '안나 아버지', text: '네가 잘나서 사는 게 아니란다. 하나님이 그러시겠다고 약속하셨으니까 사는 거야.'},
+          {phase: 'anna-lamp', text: '그때 등불 뒤에서 작은 얼굴이 빼꼼 나왔다.'},
+          {phase: 'anna-lamp', who: '안나', text: '기록자님! 저는 안나예요. 우리 오빠 지금 손 떨고 있는 거, 저만 본 거 아니죠?'},
           {
+            phase: 'lamb-ready',
             who: '안나 아버지',
             text: '어린양은 해 질 무렵에 잡아 두었어요. 이제 하나님이 말씀하신 대로 문에 피를 발라야 해요.',
             ref: '출애굽기 12:6–7'
@@ -168,14 +177,14 @@ const scenes = [
         type: 'door',
         prompt: '그릇에 담긴 피에 우슬초를 적셔서 양쪽 문기둥과 문 위쪽, 세 곳에 발라 주세요.',
         ref: '출애굽기 12:7, 22',
-        doneLine: {who: '말씀', text: '내가 그 피를 보면 너희를 그냥 지나가겠다. 재앙이 너희를 해치지 못할 것이다.', ref: '출애굽기 12:13'}
+        doneLine: {phase: 'blood-door-safe', who: '말씀', text: '내가 그 피를 보면 너희를 그냥 지나가겠다. 재앙이 너희를 해치지 못할 것이다.', ref: '출애굽기 12:13'}
       },
       {
         type: 'say',
         lines: [
-          {text: '문기둥에 바른 피가 등불빛에 검붉게 번들거렸다. 오빠가 그릇을 내려놓고 한참을 문 앞에 서 있었다.'},
-          {who: '안나 오빠', text: '…이제 이 문 안이 세상에서 제일 안전한 곳이네요.'},
-          {who: '안나 아버지', text: '이제 식탁 차례예요. 하나님이 정해 주신 것만 상에 올려 주세요.'}
+          {phase: 'blood-door-safe', text: '문기둥에 바른 피가 등불빛에 검붉게 번들거렸다. 오빠가 그릇을 내려놓고 한참을 문 앞에 서 있었다.'},
+          {phase: 'blood-door-safe', who: '안나 오빠', text: '…이제 이 문 안이 세상에서 제일 안전한 곳이네요.'},
+          {phase: 'table-ready', who: '안나 아버지', text: '이제 식탁 차례예요. 하나님이 정해 주신 것만 상에 올려 주세요.'}
         ]
       },
       {
@@ -202,7 +211,7 @@ const scenes = [
           },
           {label: '느긋한 잔치 차림', ok: false, note: '허리띠를 매고 서둘러 먹으라고 하셨어요. (출 12:11)'}
         ],
-        doneLine: {who: '기록자', text: '식탁은 잔치가 아니라 떠날 준비였다. 이 밤의 모든 것이 하나님의 말씀을 향해 있었다.'}
+        doneLine: {phase: 'table-ready', who: '기록자', text: '식탁은 잔치가 아니라 떠날 준비였다. 이 밤의 모든 것이 하나님의 말씀을 향해 있었다.'}
       },
       {
         type: 'fragment',

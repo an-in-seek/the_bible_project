@@ -56,7 +56,7 @@ body.bible-story-page {
     position: absolute;
     inset: 0;
     z-index: -3;
-    background: #071323 url("/images/game/bible-story-passover.jpg") center / cover no-repeat;
+    background: #071323 url("/images/game/bible-story-passover.jpg?v=4") center / cover no-repeat;
     animation: story-intro-reveal 1.2s ease both;
 }
 
@@ -411,7 +411,7 @@ body.bible-story-page .site-header {
 }
 
 .story-backdrop[data-theme="door"] .story-backdrop-art {
-    background: #0b1a2e url("/images/game/bible-story-passover.jpg") 68% center / cover no-repeat;
+    background: #0b1a2e url("/images/game/bible-story-passover.jpg?v=4") 60% center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="door"][data-phase="slavery"] .story-backdrop-art {
@@ -466,6 +466,48 @@ body.bible-story-page .site-header {
     background:
         linear-gradient(180deg, rgba(2, 7, 15, 0.04), rgba(2, 7, 15, 0.42)),
         #030b15 url("/images/game/bible-story-final-plague.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="father-welcome"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(13, 8, 4, 0.02), rgba(8, 5, 3, 0.4)),
+        #0b1a2e url("/images/game/bible-story-passover.jpg?v=4") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="kitchen-packed"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(13, 8, 4, 0.02), rgba(8, 5, 3, 0.4)),
+        #291b11 url("/images/game/bible-story-passover-kitchen-packed.jpg?v=3") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="firstborn-bowl"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(4, 8, 14, 0.02), rgba(3, 6, 11, 0.42)),
+        #151c27 url("/images/game/bible-story-firstborn-blood-bowl.jpg?v=2") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="anna-lamp"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(6, 7, 10, 0.02), rgba(4, 5, 8, 0.42)),
+        #16100d url("/images/game/bible-story-young-anna-lamp.jpg?v=2") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="lamb-ready"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(8, 7, 7, 0.02), rgba(5, 5, 7, 0.42)),
+        #18151a url("/images/game/bible-story-lamb-ready-sunset.jpg?v=3") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="blood-door-safe"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(8, 5, 3, 0.02), rgba(6, 4, 3, 0.38)),
+        #1d120d url("/images/game/bible-story-blood-marked-door-safe.jpg") center / cover no-repeat;
+}
+
+.story-backdrop[data-theme="door"][data-phase="table-ready"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(8, 5, 3, 0.02), rgba(6, 4, 3, 0.4)),
+        #21150e url("/images/game/bible-story-passover-table-ready.jpg?v=2") center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="night"] .story-backdrop-art {
@@ -2048,6 +2090,25 @@ html[data-theme="dark"] .story-badge,
     }
 
     .story-backdrop[data-theme="door"][data-phase="pharaoh-defies"] .story-backdrop-art {
+        background-position: 72% center;
+    }
+
+    .story-backdrop[data-theme="door"][data-phase="father-welcome"] .story-backdrop-art,
+    .story-backdrop[data-theme="door"][data-phase="firstborn-bowl"] .story-backdrop-art,
+    .story-backdrop[data-theme="door"][data-phase="lamb-ready"] .story-backdrop-art,
+    .story-backdrop[data-theme="door"][data-phase="table-ready"] .story-backdrop-art {
+        background-position: center;
+    }
+
+    .story-backdrop[data-theme="door"][data-phase="kitchen-packed"] .story-backdrop-art {
+        background-position: 58% center;
+    }
+
+    .story-backdrop[data-theme="door"][data-phase="blood-door-safe"] .story-backdrop-art {
+        background-position: 38% center;
+    }
+
+    .story-backdrop[data-theme="door"][data-phase="anna-lamp"] .story-backdrop-art {
         background-position: 72% center;
     }
 
