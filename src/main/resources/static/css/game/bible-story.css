@@ -495,7 +495,7 @@ body.bible-story-page .site-header {
 .story-backdrop[data-theme="door"][data-phase="lamb-ready"] .story-backdrop-art {
     background:
         linear-gradient(180deg, rgba(8, 7, 7, 0.02), rgba(5, 5, 7, 0.42)),
-        #18151a url("/images/game/bible-story-lamb-ready-sunset.jpg?v=3") center / cover no-repeat;
+        #18151a url("/images/game/bible-story-lamb-ready-sunset.jpg?v=4") center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="door"][data-phase="blood-door-safe"] .story-backdrop-art {
