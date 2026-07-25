@@ -414,6 +414,12 @@ body.bible-story-page .site-header {
     background: #0b1a2e url("/images/game/bible-story-passover.jpg") 68% center / cover no-repeat;
 }
 
+.story-backdrop[data-theme="door"][data-phase="slavery"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(5, 10, 16, 0.06), rgba(4, 8, 14, 0.42)),
+        #211b16 url("/images/game/bible-story-pharaoh-enslaves-israel.jpg") center / cover no-repeat;
+}
+
 .story-backdrop[data-theme="night"] .story-backdrop-art {
     background:
         radial-gradient(ellipse at 50% 88%, rgba(232, 178, 96, 0.28), transparent 34%),
@@ -1971,6 +1977,10 @@ html[data-theme="dark"] .story-badge,
 @media (max-width: 599px) {
     .story-intro-backdrop {
         background-position: 66% center;
+    }
+
+    .story-backdrop[data-theme="door"][data-phase="slavery"] .story-backdrop-art {
+        background-position: 31% center;
     }
 
     .story-intro-shade {

@@ -110,9 +110,9 @@ const scenes = [
       {
         type: 'say',
         lines: [
-          {text: '요셉을 알지 못하는 새 왕이 이집트에 일어났다. 그는 불어나는 이스라엘 백성을 두려워해 그들을 노예로 만들었다.', ref: '출애굽기 1:8–11'},
-          {text: '벽돌을 굽고 흙을 이기는 노동이 대를 이어 계속됐다. 나중에는 갓 태어난 사내아이를 강에 던지라는 명령까지 내려졌다.', ref: '출애굽기 1:13–22'},
-          {text: '400년 넘게 쌓인 신음이 마침내 하늘에 닿았다. 하나님은 그 부르짖음을 들으시고 모세를 바로 앞에 세우셨다.', ref: '출애굽기 2:23–25'},
+          {phase: 'slavery', text: '요셉을 알지 못하는 새 왕이 이집트에 일어났다. 그는 불어나는 이스라엘 백성을 두려워해 그들을 노예로 만들었다.', ref: '출애굽기 1:8–11'},
+          {phase: 'slavery', text: '벽돌을 굽고 흙을 이기는 노동이 대를 이어 계속됐다. 나중에는 갓 태어난 사내아이를 강에 던지라는 명령까지 내려졌다.', ref: '출애굽기 1:13–22'},
+          {phase: null, text: '400년 넘게 쌓인 신음이 마침내 하늘에 닿았다. 하나님은 그 부르짖음을 들으시고 모세를 바로 앞에 세우셨다.', ref: '출애굽기 2:23–25'},
           {
             who: '모세',
             word: true,
@@ -824,8 +824,12 @@ function lineMarkup(line) {
 }
 
 function renderLine(line, onAdvance, hint = '탭하여 계속') {
-  if (line.phase) {
-    elements.storyBackdrop.dataset.phase = line.phase;
+  if (Object.hasOwn(line, 'phase')) {
+    if (line.phase) {
+      elements.storyBackdrop.dataset.phase = line.phase;
+    } else {
+      delete elements.storyBackdrop.dataset.phase;
+    }
   }
   elements.storyDialogue.innerHTML = '';
 
