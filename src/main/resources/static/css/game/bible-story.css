@@ -501,7 +501,7 @@ body.bible-story-page .site-header {
 .story-backdrop[data-theme="door"][data-phase="blood-door-safe"] .story-backdrop-art {
     background:
         linear-gradient(180deg, rgba(8, 5, 3, 0.02), rgba(6, 4, 3, 0.38)),
-        #1d120d url("/images/game/bible-story-blood-marked-door-safe.jpg") center / cover no-repeat;
+        #1d120d url("/images/game/bible-story-blood-marked-door-safe.jpg?v=1") center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="door"][data-phase="table-ready"] .story-backdrop-art {
