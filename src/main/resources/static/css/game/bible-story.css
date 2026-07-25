@@ -1017,6 +1017,77 @@ body.bible-story-page .site-header {
     animation: story-shake 0.4s ease;
 }
 
+/* ---------------------------------------------------------------- scene 1: 아홉 재앙 복습 */
+
+.story-plagues-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.story-plagues-card {
+    position: relative;
+    min-height: 62px;
+    padding: 0.55rem 0.45rem;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 0.8rem;
+    background: rgba(8, 16, 28, 0.6);
+    color: var(--story-stage-ink);
+    font-size: 0.82rem;
+    font-weight: 700;
+    backdrop-filter: blur(6px);
+    transition: border-color 0.15s ease, background-color 0.15s ease, opacity 0.2s ease;
+}
+
+.story-plagues-seq {
+    position: absolute;
+    top: 0.3rem;
+    left: 0.4rem;
+    min-width: 1.15rem;
+    color: #f2c879;
+    font-size: 0.7rem;
+    font-weight: 800;
+}
+
+.story-plagues-card.is-done {
+    border-color: rgba(242, 200, 121, 0.6);
+    background: rgba(242, 200, 121, 0.14);
+    opacity: 0.85;
+}
+
+.story-plagues-card.is-wrong {
+    border-color: #e59b8b;
+    animation: story-shake 0.4s ease;
+}
+
+.story-plagues-note {
+    min-height: 2.6em;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.78rem;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.story-plagues-note strong {
+    display: block;
+    color: #f2c879;
+    font-size: 0.8rem;
+}
+
+.story-plagues-note small {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.7rem;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .story-plagues-card:not(.is-done):hover {
+        border-color: rgba(242, 200, 121, 0.65);
+        background: rgba(242, 200, 121, 0.12);
+    }
+}
+
 .story-table-item.is-rejected {
     opacity: 0.45;
     text-decoration: line-through;

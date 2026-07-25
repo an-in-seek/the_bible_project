@@ -132,7 +132,37 @@ const scenes = [
           {phase: 'early-plagues', text: '그 한마디 뒤로 재앙이 시작됐다. 나일강이 피로 변했고, 개구리와 이와 파리 떼가 온 땅을 뒤덮었다.', ref: '출애굽기 7–8장'},
           {phase: 'later-plagues', text: '가축이 쓰러지고 사람 몸에 악성 종기가 퍼졌다. 우박이 곡식을 때렸고, 메뚜기가 남은 이삭까지 갉아먹었다.', ref: '출애굽기 9–10장'},
           {phase: 'darkness', text: '아홉 번째로 사흘 동안 짙은 어둠이 이집트를 덮었다. 그런데도 바로는 요지부동, 고집을 꺾지 않았다.', ref: '출애굽기 10:21–23'},
-          {text: '이제 남은 것은 열 번째, 마지막 재앙. 이집트의 모든 장자가 죽는 밤이다.', ref: '출애굽기 11:4–5'},
+          {
+            phase: 'darkness',
+            who: '기록자',
+            text: '나는 기록자다. 마지막 재앙을 적기 전에, 나는 두루마리를 펴고 지나온 아홉 번의 경고부터 다시 헤아려 보았다.'
+          }
+        ]
+      },
+      {
+        type: 'plagues',
+        prompt: '아홉 재앙을 일어난 순서대로 눌러 두루마리에 정리해 주세요.',
+        ref: '출애굽기 7–10장',
+        items: [
+          {order: 1, label: '피', note: '나일강 물이 피로 변해 물고기가 죽고 강에서 악취가 났어요.', ref: '출 7:20–21'},
+          {order: 2, label: '개구리', note: '개구리가 강에서 올라와 집과 침실까지 뒤덮었어요.', ref: '출 8:6'},
+          {order: 3, label: '이', note: '땅의 티끌이 이가 되어 사람과 짐승에게 들끓었어요.', ref: '출 8:17'},
+          {order: 4, label: '파리', note: '파리 떼가 바로의 궁과 온 이집트 땅을 가득 채웠어요.', ref: '출 8:24'},
+          {order: 5, label: '가축병', note: '들에 있던 이집트의 가축이 병들어 죽었어요.', ref: '출 9:6'},
+          {order: 6, label: '악성 종기', note: '사람과 짐승의 몸에 독한 종기가 퍼졌어요.', ref: '출 9:10'},
+          {order: 7, label: '우박', note: '불 섞인 우박이 밭의 채소와 나무를 꺾어 놓았어요.', ref: '출 9:25'},
+          {order: 8, label: '메뚜기', note: '메뚜기가 우박이 남긴 것마저 남김없이 먹어 치웠어요.', ref: '출 10:15'},
+          {order: 9, label: '흑암', note: '사흘 동안 손에 잡힐 듯한 어둠이 이집트를 덮었어요.', ref: '출 10:22'}
+        ],
+        doneLine: {
+          who: '기록자',
+          text: '아홉 번의 경고가 지나갔다. 그런데도 바로의 대답은 한 번도 바뀌지 않았다.'
+        }
+      },
+      {
+        type: 'say',
+        lines: [
+          {phase: 'darkness', text: '이제 남은 것은 열 번째, 마지막 재앙. 이집트의 모든 장자가 죽는 밤이다.', ref: '출애굽기 11:4–5'},
           {phase: 'father-welcome', who: '기록자', text: '나는 기록자다. 심판이 예고된 이 때, 하나님이 자기 백성에게 미리 열어 두신 구원의 길을 기록하러 왔다.'},
           {phase: 'father-welcome', who: '기록자', text: '그 길은 군대도, 성벽도, 도망칠 국경도 아니었다. 모세를 통해 내려온 지시는 뜻밖에도 집집마다 준비할 어린양 한 마리였다.', ref: '출애굽기 12:3'},
           {phase: 'father-welcome', who: '기록자', text: '이 달 열흘에 흠 없는 일 년 된 수컷을 골라 두었다가, 열나흘 저녁 해 질 때에 잡으라 하셨다. 오늘이 바로 그 열나흘이다.', ref: '출애굽기 12:5–6'},
@@ -861,6 +891,9 @@ function renderBeat() {
     case 'table':
       renderTableBeat(beat);
       break;
+    case 'plagues':
+      renderPlaguesBeat(beat);
+      break;
     case 'vigil':
       renderVigilBeat(beat);
       break;
@@ -1062,6 +1095,59 @@ function renderTableBeat(beat) {
   });
 
   elements.storyPlayArea.append(grid, note);
+}
+
+// 아홉 재앙 복습 — 순서를 맞히는 게 목적이 아니라 다시 읽게 하는 게 목적이므로
+// 틀려도 진행이 막히지 않고 다음 순서를 알려 준다.
+function renderPlaguesBeat(beat) {
+  renderPrompt(beat.prompt, beat.ref);
+  elements.storyPlayArea.classList.add('is-plagues');
+
+  const grid = document.createElement('div');
+  grid.className = 'story-plagues-grid';
+  const note = document.createElement('p');
+  note.className = 'story-plagues-note';
+  note.setAttribute('aria-live', 'polite');
+  note.textContent = '첫 번째 재앙부터 차례로 눌러 주세요.';
+
+  const total = beat.items.length;
+  let next = 1;
+
+  shuffled(beat.items).forEach((item) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'story-plagues-card';
+    button.setAttribute('aria-label', `${item.label} 재앙`);
+    button.innerHTML = `
+            <span class="story-plagues-seq" aria-hidden="true"></span>
+            <span class="story-plagues-label">${item.label}</span>
+        `;
+    button.addEventListener('click', () => {
+      if (button.classList.contains('is-done')) {
+        return;
+      }
+      if (item.order !== next) {
+        button.classList.add('is-wrong');
+        button.addEventListener('animationend', () => button.classList.remove('is-wrong'), {once: true});
+        note.textContent = `아직 ‘${item.label}’ 차례가 아니에요. ${next}번째 재앙을 찾아 주세요.`;
+        announce(note.textContent);
+        return;
+      }
+      button.classList.add('is-done');
+      button.disabled = true;
+      button.querySelector('.story-plagues-seq').textContent = String(item.order);
+      note.innerHTML = `<strong>${item.order}. ${item.label}</strong> ${item.note} <small>${item.ref}</small>`;
+      announce(`${item.order}번째 재앙, ${item.label}. ${item.note}`);
+      next += 1;
+      if (next > total) {
+        renderLine(beat.doneLine, nextBeat);
+      }
+    });
+    grid.appendChild(button);
+  });
+
+  elements.storyPlayArea.append(grid, note);
+  grid.querySelector('button')?.focus({preventScroll: true});
 }
 
 // ---------------------------------------------------------------- scene 2: vigil
@@ -1788,6 +1874,15 @@ function announce(message) {
   requestAnimationFrame(() => {
     elements.storyLiveRegion.textContent = message;
   });
+}
+
+function shuffled(list) {
+  const copy = [...list];
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
 }
 
 function prefersReducedMotion() {
