@@ -1,9 +1,27 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <include resource="com/google/cloud/spring/logging/logback-appender.xml"/>
-    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
-    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
-    <root level="INFO">
-        <appender-ref ref="STACKDRIVER"/>
-    </root>
+
+  <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+  <!-- Stackdriver trace의 projects/{projectId}/traces/{traceId} 생성 기준을 Spring Cloud GCP 공통 project-id와 맞춘다.
+       프로파일별 프로젝트 분리는 application-{profile}.yml의 spring.cloud.gcp.project-id에서만 관리한다.
+       값이 비어 있으면 StackdriverJsonLayout이 ADC/metadata 기본 project id로 fallback한다. -->
+  <springProperty scope="context" name="projectId" source="spring.cloud.gcp.project-id" defaultValue=""/>
+
+  <appender name="CONSOLE_JSON" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+      <layout class="com.google.cloud.spring.logging.StackdriverJsonLayout">
+        <projectId>${projectId}</projectId>
+        <serviceContext>
+          <service>${K_SERVICE:-el-seeker}</service>
+          <version>${K_REVISION:-unknown}</version>
+        </serviceContext>
+      </layout>
+    </encoder>
+  </appender>
+
+  <root level="INFO">
+    <appender-ref ref="CONSOLE_JSON"/>
+  </root>
+
 </configuration>
