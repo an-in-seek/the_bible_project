@@ -68,13 +68,13 @@ steps:
       - runtime-prebuilt
       - '-t'
       - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$_SERVICE_NAME:$COMMIT_SHA
-      - '-t'
-      - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$_SERVICE_NAME:latest
       - .
       - '-f'
       - $_DOCKERFILE
   # =========================
-  # 3. Push (commit sha) — latest push와 병렬 실행
+  # 3. Push (commit sha)
+  # - :latest 태그는 만들지 않는다. Deploy 가 commit sha 로만 배포하므로 파이프라인에서 소비되는 곳이
+  #   없고, 가변 태그가 남아 있으면 "latest 로 배포" 같은 실수로 롤백 추적성이 깨진다.
   # =========================
   - name: gcr.io/cloud-builders/docker
     id: PushCommitSha
@@ -83,16 +83,7 @@ steps:
       - push
       - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$_SERVICE_NAME:$COMMIT_SHA
   # =========================
-  # 4. Push (latest) — commit sha push와 병렬 실행
-  # =========================
-  - name: gcr.io/cloud-builders/docker
-    id: PushLatest
-    waitFor: [ 'Build' ]
-    args:
-      - push
-      - $_AR_HOSTNAME/$_AR_PROJECT_ID/$_AR_REPOSITORY/$_SERVICE_NAME:latest
-  # =========================
-  # 5. Deploy (Cloud Run) — commit sha push 완료 즉시 시작 (latest push를 기다리지 않음)
+  # 4. Deploy (Cloud Run)
   # - 실행 프로파일을 여기서 환경변수로 주입한다 (이미지는 프로파일 중립)
   # - gcloud run deploy 는 서비스가 없으면 생성하고 있으면 갱신한다.
   # - --update-env-vars 는 기존 환경변수를 보존한 채 지정한 키만 덮어쓴다. 따라서 애플리케이션 설정
