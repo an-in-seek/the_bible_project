@@ -73,7 +73,11 @@ dependencies {
     // Kotlin JDSL
     implementation("com.linecorp.kotlin-jdsl:jpql-dsl:${kotlinJdslVersion}")
     implementation("com.linecorp.kotlin-jdsl:jpql-render:${kotlinJdslVersion}")
-    implementation("com.linecorp.kotlin-jdsl:spring-data-jpa-support:${kotlinJdslVersion}")
+    // ⚠️ spring-data-jpa-support 가 아니라 -boot4- 변형을 써야 한다.
+    // 전자의 QueryEnhancerFactoryAdaptor 는 Spring Data JPA 4 에서 삭제된 StringQuery 를 참조하므로
+    // 컴파일은 통과하고 findSlice/findPage 호출 시점에 NoClassDefFoundError 로 터진다.
+    // boot4 변형은 대체 API(QueryEnhancerFactories, QueryProvider)를 참조한다.
+    implementation("com.linecorp.kotlin-jdsl:spring-data-jpa-boot4-support:${kotlinJdslVersion}")
 
     // DB
     implementation("org.postgresql:postgresql")

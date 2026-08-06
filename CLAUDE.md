@@ -1,83 +1,44 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Claude Code(claude.ai/code)가 이 저장소에서 작업할 때 참고하는 안내서다.
 
-## Build & Run Commands
+el-seeker 는 성경 읽기·타이핑·퀴즈·낱말퍼즐·커뮤니티를 제공하는 Kotlin/Spring Boot 서버 렌더링
+웹 애플리케이션이다. Thymeleaf 로 화면을 그리고 같은 애플리케이션이 REST API 도 함께 제공한다.
+
+## 규칙 문서
+
+주제별 규칙은 `.claude/rules/` 에 나눠 두었다. **작업 전에 해당 주제 문서를 먼저 읽는다.**
+
+| 문서 | 언제 읽나 |
+|---|---|
+| [architecture.md](.claude/rules/architecture.md) | 모듈·레이어 구조, 패키지 배치, 인증/보안 필터 체인을 다룰 때 |
+| [tech-stack.md](.claude/rules/tech-stack.md) | 빌드·실행, 의존성 추가/변경, Spring Boot 4 관련 문제, DB 설정 |
+| [naming.md](.claude/rules/naming.md) | 클래스·메서드 이름을 정할 때 |
+| [error-handling.md](.claude/rules/error-handling.md) | 예외를 던지거나 에러 응답을 만들 때 |
+| [testing.md](.claude/rules/testing.md) | 테스트를 작성·수정할 때 |
+| [caching.md](.claude/rules/caching.md) | 캐시를 추가하거나 만료 정책을 바꿀 때 |
+| [time-and-locale.md](.claude/rules/time-and-locale.md) | 날짜·시각·타임존을 다룰 때 |
+| [frontend.md](.claude/rules/frontend.md) | Thymeleaf 템플릿, CSS, JavaScript 를 건드릴 때 |
+
+## 자주 쓰는 명령
 
 ```bash
-./gradlew bootRun          # Run locally (H2 in-memory, local profile)
-./gradlew build            # Build + run all tests
-./gradlew test             # Run tests only
-./gradlew test --tests "com.elseeker.game.application.service.BibleTypingSessionServiceTest"  # Single test class
-./gradlew bootJar          # Produce runnable JAR
+./gradlew bootRun     # 로컬 실행 (DB 환경변수 필요, tech-stack.md 참고)
+./gradlew build       # 빌드 + 전체 테스트
+./gradlew test        # 테스트만 (Docker 필요 — Testcontainers)
+./gradlew bootJar     # 실행 가능한 JAR
 ```
 
-- Gradle 8.12.1, Java 21 toolchain, Kotlin 1.9.25, Spring Boot 3.5.9
-- No linter or formatter configured
-- **Do NOT run `./gradlew build` or `./gradlew test` for frontend-only changes (HTML, CSS, JS, Thymeleaf templates).** Only run build/test when Kotlin/Java code changes are included.
+프론트엔드(HTML/CSS/JS/Thymeleaf)만 고쳤다면 `./gradlew build` 나 `test` 를 돌리지 않는다.
+Kotlin 코드가 함께 바뀐 경우에만 돌린다.
 
-## Architecture
+린터·포매터는 설정돼 있지 않다.
 
-Hexagonal (ports & adapters) organized by domain module under `src/main/kotlin/com/elseeker`:
+## Git 커밋 컨벤션
+
+AngularJS 컨벤션의 접두사를 쓴다: `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`, `build:`
 
 ```
-{module}/
-  adapter/input/api/     — REST controllers (@RestController), *ApiDocument interfaces for Swagger
-  adapter/input/web/     — Thymeleaf view controllers (@Controller)
-  adapter/output/jpa/    — Spring Data JPA repositories with custom JPQL
-  application/service/   — Thin service facades
-  application/component/ — Domain logic helpers (e.g., BibleReader)
-  domain/model/          — JPA @Entity classes
-  domain/vo/             — Enums and value objects
-  domain/result/         — Service output DTOs
+feat: 성경 낱말 퍼즐 기능 추가
+fix: 퍼즐 보드 셀 렌더링 오류 수정
 ```
-
-Modules: `bible`, `study`, `game`, `member`, `auth`, `common`
-
-### Key patterns
-- Services delegate to `@Component` helpers for actual logic (e.g., `BibleService` → `BibleReader`)
-- Swagger annotations live in `*ApiDocument` interfaces; controllers implement them
-- Repositories use explicit `JOIN FETCH` in JPQL to prevent N+1 (entities default to `LAZY`)
-- Error handling: `ServiceError` exception → `GlobalExceptionHandler` → `ErrorResponse`
-- `BaseEntity` (`@MappedSuperclass`, `@Id IDENTITY`) is the root for all entities; `BaseTimeEntity` adds `@CreatedDate`/`@LastModifiedDate`
-
-## Frontend
-
-- Thymeleaf templates in `src/main/resources/templates/` using fragments (`fragments/head.html`, `fragments/header.html`)
-- JavaScript: ES6 modules (`type="module"`), no bundler. Shared utils in `/js/storage-util.js` and `/js/common-util.js`
-- CSS: Bootstrap 5.3 via WebJars + feature-specific CSS files. BEM-like naming per feature (e.g., `genealogy-node`, `bible-overview-video-card`)
-- Hover styles: desktop-only via `@media (hover: hover) and (pointer: fine)`. Avoid hover-based UX for touch/mobile.
-- Client-only pages (no server API): `bible-overview-video`, `bible-genealogy` — data is static JS arrays
-- **Cache busting**: When modifying CSS/JS files, always bump the `?v=` query parameter in the referencing HTML templates. e.g., `lords-prayer.css?v=1.0` → `lords-prayer.css?v=1.1`.
-- **Active menu handling**: Thymeleaf 3.1+ blocks direct access to `#request` in templates. Use `@ControllerAdvice` + `@ModelAttribute("currentPath")` to inject the current path from the server, then use `th:classappend="${#strings.startsWith(currentPath, '/path')} ? 'active'"` in templates. Do NOT use JS `location.pathname` for active class toggling (violates SSR principles). See: `GlobalModelAttribute.kt`
-
-## Auth & Security
-
-- JWT (JJWT 0.12.3) + OAuth2 (Google, Naver, Kakao)
-- Stateless sessions; Access/Refresh tokens in HttpOnly cookies
-- Filter chain: `JwtRefreshFilter` → `JwtAuthenticationFilter` → Spring Security
-- API auth failures → 401 JSON; Web auth failures → redirect to `/web/auth/login?returnUrl=...`
-- Client-side: `fetchWithAuthRetry()` in `common-util.js` handles token refresh
-
-## Database & Seed Data
-
-- H2 in-memory (local/test), PostgreSQL 17 (prod)
-- Schema: `spring.jpa.hibernate.ddl-auto: create` (local), `none` (prod)
-- Seed data: `spring.sql.init` with `defer-datasource-initialization: true` loads SQL files from `src/main/resources/data/` after JPA schema creation
-- Translations: KRV (66 books full text), NKRV (Genesis/Exodus only), KJV (book list only)
-
-## Testing
-
-- JUnit 5 + Kotest 5.9.1 + Testcontainers (PostgreSQL 17)
-- `IntegrationTest` base class: auto-configures Testcontainers, creates test member in `@BeforeEach`, truncates all tables via `DatabaseCleaner` in `@AfterEach`
-- `TestProfileResolver` forces `test` profile
-- Test config: `src/test/resources/application-test.yml` (no seed data, `ddl-auto: update`)
-
-## Git Commit Convention
-
-- Follow AngularJS commit convention prefixes: `feat:`, `fix:`, `docs:`, `style:`, `refactor:`, `test:`, `chore:`, etc.
-- Examples: `feat: add Bible word puzzle feature`, `fix: fix puzzle board cell rendering error`
-
-## Environment Variables (prod)
-
-`JWT_SECRET_BASE64`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`, `GOOGLE_CLIENT_ID/SECRET`, `NAVER_CLIENT_ID/SECRET`, `KAKAO_CLIENT_ID/SECRET`, `EL_SEEKER_API_BASE_URL`
