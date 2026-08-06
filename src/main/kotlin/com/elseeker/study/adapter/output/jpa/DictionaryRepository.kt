@@ -8,14 +8,23 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 import org.springframework.stereotype.Repository
 
+/**
+ * 한글 사전 정렬에는 ICU 콜레이션 `ko-KR-x-icu` 를 쓴다.
+ *
+ * libc 콜레이션(`ko_KR.utf8`)은 OS 에 해당 로케일이 생성돼 있어야 하는데, Supabase 의 DB 는
+ * `en_US.UTF-8` 로만 초기화돼 있고 관리형이라 로케일을 추가할 수 없다. 그대로 두면 조회 시점에
+ * `collation "ko_KR.utf8" for encoding "UTF8" does not exist` 로 터진다.
+ * ICU 콜레이션은 OS 로케일과 무관하게 PostgreSQL 이 들고 있어 Supabase 와 테스트용 `postgres:17`
+ * 컨테이너 양쪽에 모두 존재한다 (실측 확인).
+ */
 @Repository
 interface DictionaryRepository : JpaRepository<Dictionary, Long> {
 
     @Query(
         value = """
-        SELECT * 
+        SELECT *
         FROM dictionary d
-        ORDER BY d.term COLLATE "ko_KR.utf8"
+        ORDER BY d.term COLLATE "ko-KR-x-icu"
         """,
         countQuery = "SELECT count(*) FROM dictionary",
         nativeQuery = true
@@ -24,13 +33,13 @@ interface DictionaryRepository : JpaRepository<Dictionary, Long> {
 
     @Query(
         value = """
-        SELECT * 
+        SELECT *
         FROM dictionary d
         WHERE d.term ILIKE CONCAT('%', :term, '%')
-        ORDER BY d.term COLLATE "ko_KR.utf8"
+        ORDER BY d.term COLLATE "ko-KR-x-icu"
         """,
         countQuery = """
-        SELECT count(*) 
+        SELECT count(*)
         FROM dictionary d
         WHERE d.term ILIKE CONCAT('%', :term, '%')
         """,
