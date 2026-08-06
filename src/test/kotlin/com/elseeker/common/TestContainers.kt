@@ -3,7 +3,7 @@ package com.elseeker.common
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
-import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.postgresql.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Testcontainers
 import org.testcontainers.utility.DockerImageName
 
@@ -20,8 +20,10 @@ abstract class TestContainers {
         private const val CONTAINER_REUSE = false
 
         // ===== Containers =====
+        // Testcontainers 2.0 의 org.testcontainers.postgresql.PostgreSQLContainer 는 비제네릭이다
+        // (구 org.testcontainers.containers.PostgreSQLContainer<SELF> 는 deprecated).
         @JvmStatic
-        private val postgresContainer: PostgreSQLContainer<*> =
+        private val postgresContainer: PostgreSQLContainer =
             PostgreSQLContainer(DockerImageName.parse(POSTGRESQL_IMAGE))
                 .withDatabaseName("container")
                 .withUsername("user")
