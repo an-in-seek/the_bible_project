@@ -43,6 +43,7 @@ out/
 ### Env ###
 /src/main/resources/keys/
 .env
+.env2
 
 ### Docs ###
 /docs/auth/
@@ -58,3 +59,4 @@ out/
 
 ### omc ###
 .omc
+/src/main/resources/data/db_backup_Cloud_SQL_Export.sql
