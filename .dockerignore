@@ -1,0 +1,39 @@
+# Docker 빌드 컨텍스트에서 제외할 대상.
+#
+# ⚠️ src/, gradle/, gradlew, *.gradle.kts 는 제외하면 안 된다.
+#    Dockerfile 의 기본 타깃(runtime)이 컨테이너 안에서 소스를 빌드하므로 이들이 필요하다.
+
+# 버전 관리 / 로컬 도구 상태
+.git
+.gitattributes
+.gitignore
+.gradle
+.idea
+.vscode
+.claude
+.codex
+.agents
+.omc
+bin
+
+# 로컬 시크릿 — 이미지/레이어에 절대 들어가면 안 된다
+.env
+src/main/resources/keys
+
+# Gradle 산출물 — CI(--target runtime-prebuilt)가 조립에 쓰는 부트 jar 만 남긴다
+build
+!build/libs
+build/libs/*-plain.jar
+
+# 빌드에 불필요한 문서/자산
+docs
+img
+README.md
+CLAUDE.md
+AGENTS.md
+HELP.md
+
+# 컨테이너 정의 자체는 컨텍스트에 필요 없다
+Dockerfile
+.dockerignore
+cloudbuild.yaml

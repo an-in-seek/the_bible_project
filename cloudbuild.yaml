@@ -1,0 +1,148 @@
+# =========================
+# el_seeker (the_bible_project)
+# Cloud Build → Artifact Registry → Cloud Run 파이프라인
+#
+# 이 프로젝트에 맞춘 전제
+# - 의존성은 전부 mavenCentral 에서 받는다 → 사설 저장소(Nexus) 자격증명이 필요 없다
+# - 기본 워커 풀에서 실행한다 (사설 워커 풀 없음)
+# - Gradle 의존성 캐시를 GCS 에 보관하지 않는다 → 매 빌드가 클린 빌드다
+# - 배포 대상은 Cloud Run 서비스 el-seeker (prod 프로파일)
+# =========================
+steps:
+  # =========================
+  # 1. Build & Test (Gradle)
+  # - gradle build 한 번으로 테스트 실행 + jar 생성 (컴파일은 여기서 1회만)
+  # - 이미지 태그는 build.gradle.kts 의 toolchain(Java 25) 및 Spring Boot 4.1 / Kotlin 2.4 요구사항에 맞춘다.
+  #   Dockerfile 의 builder 스테이지와 같은 태그를 쓴다.
+  # - 통합 테스트(IntegrationTest/TestContainers.kt)는 Testcontainers 로 PostgreSQL 17 을 띄운다.
+  #   Cloud Build 는 스텝 컨테이너에 호스트의 Docker 소켓을 물려주므로 컨테이너 기동 자체는 가능하지만,
+  #   기동된 PostgreSQL 은 "형제 컨테이너"라 포트가 워커 호스트에 열린다. 스텝 컨테이너 입장에서
+  #   localhost 는 자기 자신이므로 TESTCONTAINERS_HOST_OVERRIDE 로 호스트 주소를 알려줘야 접속된다.
+  # =========================
+  - name: gradle:9.6.1-jdk25-corretto
+    id: BuildAndTest
+    waitFor: [ '-' ]
+    entrypoint: bash
+    env:
+      - GRADLE_OPTS=-Xmx2g -XX:+UseParallelGC -Dorg.gradle.daemon=false
+      - GRADLE_USER_HOME=/home/gradle/.gradle
+      # Ryuk(컨테이너 정리기) 비활성화. Cloud Build 워커는 빌드가 끝나면 폐기되므로 남은 컨테이너를
+      # 회수할 대상 자체가 없다. Ryuk 이미지 pull 과 Ryuk 접속 실패(DinD 환경의 대표적 실패 지점)도
+      # 함께 사라진다. 로컬에서는 그대로 동작한다.
+      - TESTCONTAINERS_RYUK_DISABLED=true
+    args:
+      - '-c'
+      - |
+        set -eu
+        if [ -S /var/run/docker.sock ]; then
+          # 스텝 컨테이너의 기본 게이트웨이 = 워커 호스트. Testcontainers 가 매핑 포트에 접속할 주소다.
+          HOST_IP=$$(ip -4 route show default 2>/dev/null | awk '{print $$3; exit}' || true)
+          [ -n "$${HOST_IP:-}" ] || HOST_IP=172.17.0.1
+          export TESTCONTAINERS_HOST_OVERRIDE="$$HOST_IP"
+          echo "Testcontainers host override: $$TESTCONTAINERS_HOST_OVERRIDE"
+        else
+          echo "WARNING: /var/run/docker.sock 이 없습니다 — Testcontainers 통합 테스트는 실패합니다." >&2
+          echo "         테스트 없이 배포하려면 _GRADLE_TASKS 를 'bootJar -x test' 로 지정하십시오." >&2
+        fi
+        gradle ${_GRADLE_TASKS} --no-daemon
+  # =========================
+  # 2. Docker Build
+  # - 1단계에서 만든 jar를 조립만 한다 (--target runtime-prebuilt, 컨테이너 내 재컴파일 없음)
+  # - 이미지는 프로파일 중립이다 (프로파일은 Deploy 단계에서 환경변수로 주입)
+  # - commit sha / latest 태그를 한 번에 지정 (별도 tag 단계 제거)
+  # =========================
+  - name: gcr.io/cloud-builders/docker
+    id: Build
+    waitFor: [ 'BuildAndTest' ]
+    env:
+      - DOCKER_BUILDKIT=1
+    args:
+      - build
+      - '--target'
+      - runtime-prebuilt
+      - '-t'
+      - $_AR_HOSTNAME/$PROJECT_ID/$_REPOSITORY/$_SERVICE_NAME:$COMMIT_SHA
+      - '-t'
+      - $_AR_HOSTNAME/$PROJECT_ID/$_REPOSITORY/$_SERVICE_NAME:latest
+      - .
+      - '-f'
+      - $_DOCKERFILE
+  # =========================
+  # 3. Push (commit sha) — latest push와 병렬 실행
+  # =========================
+  - name: gcr.io/cloud-builders/docker
+    id: PushCommitSha
+    waitFor: [ 'Build' ]
+    args:
+      - push
+      - $_AR_HOSTNAME/$PROJECT_ID/$_REPOSITORY/$_SERVICE_NAME:$COMMIT_SHA
+  # =========================
+  # 4. Push (latest) — commit sha push와 병렬 실행
+  # =========================
+  - name: gcr.io/cloud-builders/docker
+    id: PushLatest
+    waitFor: [ 'Build' ]
+    args:
+      - push
+      - $_AR_HOSTNAME/$PROJECT_ID/$_REPOSITORY/$_SERVICE_NAME:latest
+  # =========================
+  # 5. Deploy (Cloud Run) — commit sha push 완료 즉시 시작 (latest push를 기다리지 않음)
+  # - 실행 프로파일을 여기서 환경변수로 주입한다 (이미지는 프로파일 중립)
+  # - gcloud run deploy 는 서비스가 없으면 생성하고 있으면 갱신한다.
+  # - --update-env-vars 는 기존 환경변수를 보존한 채 지정한 키만 덮어쓴다. 따라서 애플리케이션 설정
+  #   (JWT_SECRET_BASE64, DB_HOST/DB_PORT/DB_NAME/DB_USER/DB_PASSWORD,
+  #    GOOGLE_/NAVER_/KAKAO_CLIENT_ID·SECRET, EL_SEEKER_API_BASE_URL)은 서비스에 한 번만
+  #   설정해두면 배포 때마다 유지된다. 비밀값은 --set-secrets 로 Secret Manager 를 연결하는 편이 낫다.
+  # - 최초 1회 공개 접근 허용이 필요하면 별도로 실행:
+  #     gcloud run services add-iam-policy-binding el-seeker --region=asia-northeast3 \
+  #       --member=allUsers --role=roles/run.invoker
+  # - cloud-sdk:slim 대신 gcr.io/cloud-builders/gcloud 를 쓴다. 후자는 워커에 미리 캐시되어 있어
+  #   ("Already have image") 내려받지 않는다.
+  # =========================
+  - name: gcr.io/cloud-builders/gcloud
+    id: Deploy
+    waitFor: [ 'PushCommitSha' ]
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - $_SERVICE_NAME
+      - --platform=$_PLATFORM
+      - --image=$_AR_HOSTNAME/$PROJECT_ID/$_REPOSITORY/$_SERVICE_NAME:$COMMIT_SHA
+      - --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$COMMIT_SHA,gcb-build-id=$BUILD_ID
+      - --region=$_DEPLOY_REGION
+      - --port=8080
+      - --update-env-vars=SPRING_PROFILES_ACTIVE=$_SPRING_PROFILES_ACTIVE
+      - --quiet
+# =========================
+# 옵션
+# =========================
+options:
+  substitutionOption: ALLOW_LOOSE
+  logging: CLOUD_LOGGING_ONLY
+  # 기본 머신은 e2-standard-2(2 vCPU) 다. Gradle 빌드 + Testcontainers 가 느리면 아래를 켠다
+  # (프리미엄 머신 타입은 무료 티어에 포함되지 않는다).
+  # machineType: E2_HIGHCPU_8
+# 기본 타임아웃은 60분이다. 클린 빌드 + 통합 테스트 + 이미지 push 기준으로 30분이면 충분하며,
+# 초과 시 매달리지 않고 실패시킨다.
+timeout: 1800s
+# =========================
+# Tags
+# =========================
+tags:
+  - gcp-cloud-build-deploy-cloud-run
+  - gcp-cloud-build-deploy-cloud-run-managed
+  - el-seeker
+# =========================
+# 대체 변수
+# =========================
+substitutions:
+  _DEPLOY_REGION: asia-northeast3
+  _AR_HOSTNAME: asia-northeast3-docker.pkg.dev
+  _PLATFORM: managed
+  _SERVICE_NAME: el-seeker
+  _REPOSITORY: cloud-run-source-deploy
+  _DOCKERFILE: Dockerfile
+  _SPRING_PROFILES_ACTIVE: prod
+  # 통합 테스트까지 실행한다. Docker 를 못 쓰는 환경이면 'bootJar -x test' 로 바꾼다.
+  _GRADLE_TASKS: build

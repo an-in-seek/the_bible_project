@@ -1,8 +1,9 @@
 plugins {
-    kotlin("jvm") version "1.9.25"
-    kotlin("plugin.spring") version "1.9.25"
-    kotlin("plugin.jpa") version "1.9.25"
-    id("org.springframework.boot") version "3.5.14"
+    val kotlinVersion = "2.4.10"
+    kotlin("jvm") version kotlinVersion
+    kotlin("plugin.spring") version kotlinVersion
+    kotlin("plugin.jpa") version kotlinVersion
+    id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -11,7 +12,7 @@ version = "1.0.0"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(25)
     }
 }
 
@@ -19,12 +20,12 @@ repositories {
     mavenCentral()
 }
 
-val kotlinLogging = "8.0.01"
-val kotestVersion = "5.9.1"
-val kotlinJdslVersion = "3.5.5"
-val springDocVersion = "2.8.14"
-val springCloudVersion = "2025.0.2"
-val springCloudGcpVersion = "7.4.8"
+val kotlinLogging = "8.0.02"
+val kotestVersion = "6.2.3"
+val kotlinJdslVersion = "3.9.0"
+val springDocVersion = "3.0.3"
+val springCloudVersion = "2025.1.2"
+val springCloudGcpVersion = "8.1.0"
 
 dependencyManagement {
     imports {
