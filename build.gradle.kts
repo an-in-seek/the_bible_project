@@ -26,6 +26,7 @@ val kotlinJdslVersion = "3.9.0"
 val springDocVersion = "3.0.3"
 val springCloudVersion = "2025.1.2"
 val springCloudGcpVersion = "8.1.0"
+val jjwtVersion = "0.12.3"
 
 dependencyManagement {
     imports {
@@ -81,15 +82,18 @@ dependencies {
     implementation("com.google.api-client:google-api-client:2.7.2")
 
     // JWT
-    implementation("io.jsonwebtoken:jjwt-api:0.12.3")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.3")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.12.3")
+    implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:${jjwtVersion}")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:${jjwtVersion}")
 
     // Dev
     developmentOnly("org.springframework.boot:spring-boot-devtools")
 
     // Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // Spring Boot 4 는 MockMvc 테스트 지원을 기술별 모듈로 분리했다. @AutoConfigureMockMvc 는
+    // 더 이상 spring-boot-test-autoconfigure 에 없고 이 모듈에 들어 있다.
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
@@ -110,9 +114,11 @@ dependencies {
     testImplementation("org.testcontainers:testcontainers-postgresql")
 }
 
-configurations.all {
-    exclude(group = "commons-logging", module = "commons-logging")
-}
+// ⚠️ commons-logging 을 제외하지 말 것.
+// Spring Framework 6 까지는 spring-jcl 이 org.apache.commons.logging.Log/LogFactory 를 대신 제공했기에
+// 중복을 피하려 commons-logging 을 제외하는 것이 관용구였다. Spring Framework 7 에서 spring-jcl 이
+// 제거되고 실제 commons-logging 아티팩트를 직접 의존하도록 바뀌었으므로, 지금 제외하면 JCL API 의
+// 유일한 공급원이 사라져 Spring 이 NoClassDefFoundError: org/apache/commons/logging/Log 로 죽는다.
 
 kotlin {
     compilerOptions {
