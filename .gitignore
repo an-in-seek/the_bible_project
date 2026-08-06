@@ -49,7 +49,10 @@ out/
 /docs/auth/
 
 ### Claude ###
-/.claude/
+# 규칙 문서(.claude/rules)는 팀 공용이라 추적하고, settings.local.json 같은 로컬 설정만 제외한다.
+# 디렉터리 자체를 제외(/.claude/)하면 하위 항목을 다시 포함시킬 수 없으므로 /* 로 내용만 제외한다.
+/.claude/*
+!/.claude/rules/
 /.omc/
 
 ### Etc ###
