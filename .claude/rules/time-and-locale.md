@@ -1,19 +1,19 @@
 # Time & Locale
 
-## 저장은 UTC, 집계 기준은 KST
+## Store in UTC, aggregate by KST
 
-`spring.jpa.properties.hibernate.jdbc.time_zone: UTC` 가 설정돼 있다. 모든 시각 컬럼은 **UTC 로
-저장된다.** 서버가 어느 타임존에서 돌든 값이 같다.
+`spring.jpa.properties.hibernate.jdbc.time_zone: UTC` is configured. Every timestamp column is
+**stored in UTC.** The value is the same regardless of the server's time zone.
 
-집계용 날짜 컬럼은 다르다. "며칠자 방문인가" 같은 질문은 사용자 기준 날짜여야 하므로
-**Asia/Seoul 로 변환한 날짜**를 별도 컬럼에 저장한다.
+Aggregation date columns are different. A question like "which day's visit is this?" must use the
+user's date, so a **date converted to Asia/Seoul** is stored in a separate column.
 
-`analytics` 모듈의 이벤트 테이블이 이 방식이다.
+The event tables in the `analytics` module follow this pattern.
 
-| 컬럼 | 의미 |
+| Column | Meaning |
 |---|---|
-| `visited_at` / `occurred_at` | 이벤트 발생 시각 (UTC, `Instant`) |
-| `visited_date` / `occurred_date` | 집계 기준 날짜 (Asia/Seoul 로 변환한 `LocalDate`) |
+| `visited_at` / `occurred_at` | Event timestamp (UTC, `Instant`) |
+| `visited_date` / `occurred_date` | Aggregation date (`LocalDate` converted to Asia/Seoul) |
 
 ```kotlin
 class SiteVisitTrackingService(...) {
@@ -30,60 +30,61 @@ class SiteVisitTrackingService(...) {
 }
 ```
 
-**두 값을 각각 따로 구하지 않는다.** 같은 `Instant` 하나에서 파생시킨다. `Instant.now()` 를 두 번
-부르면 자정 근처에서 시각과 날짜가 서로 다른 날을 가리킬 수 있다.
+**Do not derive the two values independently.** Derive both from the same `Instant`. Calling
+`Instant.now()` twice can make the timestamp and the date point at different days near midnight.
 
-## `ZoneId.systemDefault()` 를 쓰지 않는다
+## Do not use `ZoneId.systemDefault()`
 
-서버 타임존에 따라 결과가 달라진다. 로컬(Windows/KST)과 Cloud Run(UTC)에서 다르게 동작해
-로컬에서는 재현되지 않는 날짜 밀림이 생긴다.
+Results would depend on the server's time zone. Local (Windows/KST) and Cloud Run (UTC) would
+behave differently, producing date shifts that cannot be reproduced locally.
 
 ```kotlin
-// ✅ 명시적 존
+// ✅ explicit zone
 private val KST: ZoneId = ZoneId.of("Asia/Seoul")
 LocalDate.ofInstant(instant, KST)
 
-// ❌ 서버 설정에 의존
+// ❌ depends on server configuration
 LocalDate.now()
 LocalDate.ofInstant(instant, ZoneId.systemDefault())
 ```
 
-`ZoneId` 상수는 사용하는 클래스의 `companion object` 에 둔다. 여러 모듈에서 필요해지면
-공용 상수로 승격하되, 그전까지는 지역 상수로 둔다.
+Keep the `ZoneId` constant in the `companion object` of the class that uses it. Promote it to a
+shared constant once several modules need it, but keep it local until then.
 
-## 날짜 경계 계산
+## Date boundary calculations
 
-"오늘의 데이터"를 조회할 때 `LocalDate` 를 그대로 UTC 컬럼과 비교하지 않는다. KST 기준 하루를
-UTC 구간으로 변환해서 비교하거나, 집계용 날짜 컬럼(`*_date`)을 쓴다.
+When querying "today's data", do not compare a `LocalDate` directly against a UTC column. Convert
+the KST day into a UTC range, or use the aggregation date column (`*_date`).
 
 ```kotlin
-// KST 하루 → UTC 구간
+// KST day -> UTC range
 val start = date.atStartOfDay(KST).toInstant()
 val end = date.plusDays(1).atStartOfDay(KST).toInstant()
 // where occurredAt >= :start and occurredAt < :end
 ```
 
-끝 경계는 `<=` 가 아니라 `<` 를 쓴다. `23:59:59` 로 자르면 그 사이 1초가 누락된다.
+Use `<` for the end boundary, not `<=`. Cutting at `23:59:59` drops the intervening second.
 
-## 타입 선택
+## Type selection
 
-| 상황 | 타입 |
+| Situation | Type |
 |---|---|
-| 이벤트 발생 시각, 생성/수정 시각 | `Instant` (UTC 시점) |
-| 집계 기준 날짜, 사용자에게 보여줄 날짜 | `LocalDate` (KST 기준으로 변환한 값) |
-| 사용자가 입력한 "날짜만" 값 | `LocalDate` |
+| Event timestamp, created/updated timestamp | `Instant` (a UTC instant) |
+| Aggregation date, date shown to users | `LocalDate` (converted to KST) |
+| A "date only" value entered by the user | `LocalDate` |
 
-`LocalDateTime` 은 존 정보가 없어 UTC 인지 KST 인지 코드만 봐서는 알 수 없다. 새 컬럼에는
-쓰지 않는다.
+`LocalDateTime` carries no zone information, so the code alone cannot tell whether it is UTC or
+KST. Do not use it for new columns.
 
-## 로케일
+## Locale
 
-다국어 요청 컨텍스트(`Accept-Language` 기반 분기)는 아직 없다. 성경 번역본은 로케일이 아니라
-`bible_translation.language_code` 로 구분한다 — 사용자의 브라우저 언어가 아니라 사용자가 고른
-번역본이 기준이다.
+There is no multilingual request context yet (no `Accept-Language` branching). Bible translations
+are distinguished by `bible_translation.language_code`, not by locale — the basis is the
+translation the user picked, not the browser language.
 
-`nv-i18n` 의존성은 국가/언어 코드 검증용이며 요청별 로케일 해석과는 무관하다.
+The `nv-i18n` dependency is for country/language code validation and is unrelated to per-request
+locale resolution.
 
-앞으로 요청별 로케일이 필요해지면, 컨트롤러(interface 레이어)에서만 읽고 application/domain 으로는
-**파라미터로 내려보낸다.** 하위 레이어에서 요청 컨텍스트를 직접 들여다보면 숨은 의존성이 생겨
-테스트가 어려워진다.
+If per-request locale becomes necessary, read it only in the controller (interface layer) and
+**pass it down to application/domain as a parameter.** Having lower layers inspect the request
+context directly creates hidden dependencies and makes testing hard.

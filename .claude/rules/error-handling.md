@@ -1,30 +1,33 @@
 # Error Handling
 
-비즈니스·도메인 오류는 메시지를 하드코딩하지 않는다. `ErrorType` 에 정의하고 `throwError` 로 던진다.
+Never hardcode messages for business/domain errors. Define them in `ErrorType` and raise them with
+`throwError`.
 
 ```kotlin
-// ✅ 올바름
+// ✅ correct
 val translation = translationRepository.findById(id)
     ?: throwError(ErrorType.TRANSLATION_NOT_FOUND)
 
-// ❌ 하드코딩된 예외/메시지
+// ❌ hardcoded exception/message
 val translation = translationRepository.findById(id)
     ?: throw IllegalStateException("번역본을 찾을 수 없습니다")
 ```
 
-## 구성 요소
+## Components
 
-전부 `common/domain/` 에 있다.
+All of these live in `common/domain/`.
 
-| 요소 | 역할 |
+| Element | Role |
 |---|---|
-| `ErrorType` (enum) | `HttpStatus` + 메시지 + `LogLevel` 을 한 곳에 묶는다 |
-| `ServiceError` | `RuntimeException`. `errorType` 과 가변 `data` 를 갖는다 |
-| `throwError(errorType, vararg data): Nothing` | 던지는 함수. 반환 타입이 `Nothing` 이라 엘비스 우변에 바로 쓸 수 있다 |
-| `GlobalExceptionHandler` | `@RestControllerAdvice`. `ServiceError` 를 잡아 `ErrorResponse` 로 변환 |
-| `ErrorResponse` | `status` / `code`(=`ErrorType` 이름) / `message` |
+| `ErrorType` (enum) | Bundles `HttpStatus` + message + `LogLevel` in one place |
+| `ServiceError` | A `RuntimeException` carrying `errorType` and a vararg `data` |
+| `throwError(errorType, vararg data): Nothing` | The throwing function. Returns `Nothing`, so it can sit on the right side of an elvis operator |
+| `GlobalExceptionHandler` | `@RestControllerAdvice`. Catches `ServiceError` and converts it to `ErrorResponse` |
+| `ErrorResponse` | `status` / `code` (= `ErrorType` name) / `message` |
 
-`ErrorType` 은 HTTP 상태 구간별로 묶어서 정의한다 (`// 400`, `// 404`, …). 현재 66개.
+`ErrorType` entries are grouped by HTTP status range (`// 400`, `// 404`, …). 66 entries today.
+
+Error messages themselves are written in Korean — they are user-facing.
 
 ```kotlin
 enum class ErrorType(
@@ -37,28 +40,29 @@ enum class ErrorType(
 }
 ```
 
-## LogLevel 은 장식이 아니다
+## LogLevel is not decoration
 
-`GlobalExceptionHandler` 가 `errorType.logLevel` 로 분기해 실제 로그 레벨을 정한다. 사용자 입력
-실수(잘못된 파라미터, 중복 닉네임)에 `ERROR` 를 달면 운영 알림이 울린다. **클라이언트 잘못이면
-`WARN`, 서버 잘못이면 `ERROR`** 가 기준이다. 기존 400/404 항목이 전부 `WARN` 인 이유다.
+`GlobalExceptionHandler` branches on `errorType.logLevel` to pick the actual log level. Tagging a
+user input mistake (bad parameter, duplicate nickname) as `ERROR` sets off production alerts. The
+rule is: **client's fault → `WARN`, server's fault → `ERROR`.** That is why every existing 400/404
+entry is `WARN`.
 
-## data 를 쓰는 경우
+## When to use `data`
 
-`ServiceError.message` 는 `data` 가 있으면 `"{메시지} - {data 를 콤마로 연결}"` 형태가 된다.
-이 문자열은 **응답 body 의 `message` 로 그대로 나간다.** 내부 식별자나 사용자에게 보여선 안 되는
-값을 `data` 에 넣지 않는다.
+When `data` is present, `ServiceError.message` becomes `"{message} - {data joined by commas}"`.
+That string **goes straight into the `message` field of the response body.** Do not put internal
+identifiers or anything else users should not see into `data`.
 
 ```kotlin
 throwError(ErrorType.TRANSLATION_NOT_FOUND, translationId)   // "번역본을 찾을 수 없습니다. - 3"
 ```
 
-## 규칙
+## Rules
 
-- **새 `ErrorType` 을 만들기 전에 기존 항목을 먼저 찾는다.** 66개 중 맞는 게 대개 있다.
-- `require`/`check` + 문자열 리터럴로 비즈니스 오류를 던지지 않는다. 스택트레이스에 의미 있는
-  코드가 남지 않고 `GlobalExceptionHandler` 도 잡지 못해 500 이 된다.
-- `ErrorType` 은 `common/domain` 에 있지만 **공유 커널**이다. 어느 모듈의 어느 레이어에서 참조해도
-  된다.
-- 프레임워크 예외(`MethodArgumentNotValidException` 등)를 `ServiceError` 로 감싸 다시 던지지
-  않는다. 필요하면 `GlobalExceptionHandler` 에 핸들러를 추가한다.
+- **Search the existing entries before adding a new `ErrorType`.** One of the 66 usually fits.
+- Do not raise business errors with `require` / `check` plus a string literal. No meaningful code
+  is left in the stack trace, and `GlobalExceptionHandler` will not catch it, so it becomes a 500.
+- `ErrorType` lives in `common/domain` but is a **shared kernel**. Any layer of any module may
+  reference it.
+- Do not wrap framework exceptions (`MethodArgumentNotValidException` etc.) in `ServiceError` and
+  rethrow. Add a handler to `GlobalExceptionHandler` instead.
