@@ -128,13 +128,14 @@ class AuthApi(
     }
 
     /** orphaned session 종료: access/refresh 쿠키 삭제 + 401 응답. */
-    private fun <T> clearAuthCookiesUnauthorized(
+    // Spring Framework 7 의 ResponseEntity 는 타입 파라미터가 non-null(T : Any)이므로 상한을 맞춘다.
+    private fun <T : Any> clearAuthCookiesUnauthorized(
         request: HttpServletRequest,
         response: HttpServletResponse,
     ): ResponseEntity<T> {
         val cookieSecure = cookieSecure(request)
         CookieUtils.deleteCookie(response, JwtProvider.ACCESS_TOKEN_COOKIE_NAME, cookieSecure)
         CookieUtils.deleteCookie(response, JwtProvider.REFRESH_TOKEN_COOKIE_NAME, cookieSecure)
-        return ResponseEntity.status(401).build()
+        return ResponseEntity.status(401).build<T>()
     }
 }

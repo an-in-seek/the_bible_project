@@ -62,7 +62,10 @@ class CustomOAuth2UserService(
         val savedMember = memberRepository.save(resolveMember(userInfo))
 
         // 3. 후속 Handler가 사용할 OAuth2User 구성 (memberUid/role/status 등 주입)
+        // Spring Security 7 에서 userNameAttributeName 은 nullable 로 선언됐다. 값이 없다는 것은
+        // 해당 provider 등록에 user-name-attribute 가 빠졌다는 뜻이라 사용자 식별이 불가능하다.
         val userNameAttributeName = userRequest.clientRegistration.providerDetails.userInfoEndpoint.userNameAttributeName
+            ?: throwError(ErrorType.OAUTH_PROVIDER_USER_ID_MISSING, provider.registrationId)
         return buildOAuth2User(oAuth2User, savedMember, userNameAttributeName)
     }
 

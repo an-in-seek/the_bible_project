@@ -102,9 +102,12 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.13")
 
     // testcontainers
+    // Spring Boot 4.1 은 testcontainers-bom 2.0.x 를 가져온다. Testcontainers 2.0 에서 모든 모듈
+    // 아티팩트명에 testcontainers- 접두사가 붙어(junit-jupiter -> testcontainers-junit-jupiter)
+    // 예전 좌표는 BOM 에 없고 버전이 비어 해석에 실패한다.
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:testcontainers-junit-jupiter")
+    testImplementation("org.testcontainers:testcontainers-postgresql")
 }
 
 configurations.all {

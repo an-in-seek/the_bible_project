@@ -12,7 +12,8 @@ data class PageResponse<T>(
     val hasPrevious: Boolean,
 ) {
     companion object {
-        fun <T, R> from(page: Page<T>, mapper: (T) -> R): PageResponse<R> =
+        // Spring Data 4 의 Page 는 타입 파라미터가 non-null(T : Any)로 선언돼 있어 여기서도 상한을 맞춘다.
+        fun <T : Any, R> from(page: Page<T>, mapper: (T) -> R): PageResponse<R> =
             PageResponse(
                 content = page.content.map(mapper),
                 page = page.number,

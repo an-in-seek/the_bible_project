@@ -33,24 +33,22 @@ class HttpCookieOAuth2AuthorizationRequestRepository(
         return deserialize(cookie.value)
     }
 
+    /**
+     * Spring Security 7 에서 이 메서드의 파라미터는 non-null 로 바뀌었습니다(패키지가 JSpecify
+     * `@NullMarked` 이며 파라미터에 `@Nullable` 이 없음). 이전 버전의 "null 을 넘겨 쿠키를 지운다"는
+     * 관례가 사라졌으므로, 삭제는 [removeAuthorizationRequest] 가 전담합니다.
+     */
     override fun saveAuthorizationRequest(
-        authorizationRequest: OAuth2AuthorizationRequest?,
+        authorizationRequest: OAuth2AuthorizationRequest,
         request: HttpServletRequest,
         response: HttpServletResponse,
     ) {
-        if (authorizationRequest == null) {
-            removeAuthorizationRequestCookies(request, response)
-            return
-        }
-
         val linkFlag = request.getParameter(LINK_FLAG_PARAMETER)
         val enrichedRequest = if (!linkFlag.isNullOrBlank() && linkFlag.equals("true", ignoreCase = true)) {
             OAuth2AuthorizationRequest.from(authorizationRequest)
-                .attributes { attrs ->
-                    val updated = HashMap(attrs)
-                    updated[LINK_FLAG_ATTRIBUTE] = true
-                    updated
-                }
+                // attributes(Consumer) 는 전달된 맵을 제자리에서 수정하는 API 다. 복사본을 만들어
+                // 반환해도 Consumer 의 반환값은 버려지므로 플래그가 유실된다.
+                .attributes { attrs -> attrs[LINK_FLAG_ATTRIBUTE] = true }
                 .build()
         } else {
             authorizationRequest
