@@ -569,6 +569,20 @@ const scenes = [
     theme: 'link',
     records: [
       {
+        title: '대대로 지킨 유월절',
+        provenance: 'scripture',
+        body: '유월절은 그 밤 한 번으로 끝나지 않았습니다. 대대로 지켜 자녀에게 그 뜻을 알려 주라는 규례가 함께 주어졌고, 그래서 해마다 같은 밤이 반복되었습니다.',
+        ref: '출애굽기 12:24–27',
+        href: '/web/bible/verse?translationId=1&bookOrder=2&chapterNumber=12&verseNumber=24'
+      },
+      {
+        title: '시대를 건너는 기록자',
+        provenance: 'creative',
+        body: '한 사람의 기록자가 출애굽의 밤부터 신약의 증언까지 직접 보고 적는 설정은 몰입을 위한 게임적 창작입니다. 성경에 그런 인물은 없습니다. 다만 그가 확인하는 연결 자체는 창작이 아니라 신약이 직접 밝힌 것이며, 아래 기록들이 그 근거입니다.',
+        ref: '고린도전서 5:7',
+        href: '/web/bible/verse?translationId=1&bookOrder=46&chapterNumber=5&verseNumber=7'
+      },
+      {
         title: '세례 요한의 증언',
         provenance: 'direct',
         body: '요한복음은 세례 요한이 예수님을 “하나님의 어린양”으로 증언했다고 기록합니다.',
@@ -602,6 +616,13 @@ const scenes = [
         body: '바울은 그리스도를 우리의 유월절 양이라고 곧바로 말합니다.',
         ref: '고린도전서 5:7',
         href: '/web/bible/verse?translationId=1&bookOrder=46&chapterNumber=5&verseNumber=7'
+      },
+      {
+        title: '해마다 되풀이된 이유',
+        provenance: 'direct',
+        body: '히브리서는 해마다 되풀이되는 제사가 그 자체로 온전하게 하지 못했고, 장차 올 좋은 일의 그림자였다고 밝힙니다. 유월절이 반복된 까닭을 신약이 직접 설명하는 대목입니다.',
+        ref: '히브리서 10:1–4',
+        href: '/web/bible/verse?translationId=1&bookOrder=58&chapterNumber=10&verseNumber=1'
       }
     ],
     beats: [
@@ -609,10 +630,37 @@ const scenes = [
         type: 'say',
         lines: [
           {text: '만나는 40년 동안 그치지 않았고, 백성은 마침내 약속의 땅에 들어갔다.', ref: '출애굽기 16:35'},
-          {text: '그 뒤로도 이스라엘은 해마다 유월절을 지켰다. 어린양을 잡고, 문에 바른 피와 지켜 주신 그 밤을 기억했다.'},
+          {
+            who: '기록자',
+            text: '그런데 유월절은 그 밤 한 번으로 끝나지 않았다. 대대로 지켜 자녀에게 그 뜻을 알려 주라는 규례가 함께 주어져 있었다.',
+            ref: '출애굽기 12:24–27'
+          },
+          {
+            who: '기록자',
+            text: '그래서 해마다 같은 밤이 돌아왔다. 흠 없는 어린양을 고르고, 피를 받고, 뼈를 꺾지 않은 채로 상에 올렸다. 안나의 아이들도, 그 아이들의 아이들도.'
+          },
+          {
+            who: '기록자',
+            text: '나는 그 반복을 세면서 두루마리 끝에 답 없는 물음 하나를 적어 두었다. 지켜 주신 그 밤이 그토록 완전했다면, 어째서 해마다 다시 지켜야 하는가.'
+          },
+          {
+            who: '기록자',
+            text: '기록자는 제 수명이 아니라 기록이 이어지는 길을 따라간다. 나는 답을 적지 못한 두루마리를 안고 세대를 건넜다.'
+          },
           {
             phase: 'jordan',
-            text: '그렇게 1,500년이 흘렀다. 어느 날 요단강가에서 세례 요한이 한 사람을 가리키며 외쳤다.'
+            text: '그렇게 1,500번의 유월절이 지나갔다. 어느 봄, 요단강 건너편 베다니에 사람들이 모여 있었다.',
+            ref: '요한복음 1:28'
+          },
+          {
+            phase: 'jordan',
+            who: '기록자',
+            text: '광야에서 나온 사람이 강물에 서서 사람들에게 세례를 주고 있었다. 그의 이름은 요한이었다.'
+          },
+          {
+            phase: 'john',
+            who: '기록자',
+            text: '그가 말을 멈추더니, 강가로 걸어오는 한 사람을 손으로 가리켰다.'
           },
           {
             phase: 'john',
@@ -624,22 +672,62 @@ const scenes = [
           {
             phase: 'jesus',
             who: '기록자',
-            text: '어린양이라니. 나는 낡은 두루마리에서 조각 네 개를 꺼냈다. 이 연결만큼은 내 손으로 직접 확인해야 한다.'
+            text: '붓이 멎었다. 1,500년 동안 어린양은 우리에 매인 짐승을 부르는 말이었다. 요한은 그 말을 걸어오는 사람에게 붙였다.'
+          },
+          {
+            phase: 'jesus',
+            who: '기록자',
+            text: '게다가 세상의 죄를 짊어지고 가신다고 했다. 유월절 양은 한 집을, 하룻밤 지켰을 뿐이다. 한 분이 세상을, 그것도 단번에 짊어진다는 말은 규정 어디에도 없었다.'
+          },
+          {
+            phase: 'jesus',
+            who: '기록자',
+            text: '이건 받아 적고 넘어갈 말이 아니었다. 나는 그날부터 그분을 따라다니며, 들은 말과 본 일을 남김없이 적었다.'
+          },
+          {
+            phase: '',
+            who: '기록자',
+            text: '그리고 모든 일이 끝난 뒤에야 등불을 켜고 두루마리를 처음부터 다시 폈다. 첫 장에서 모은 조각 다섯 개와, 뒷장에 새로 적은 증언들을 나란히 놓아 본다.'
           }
         ]
       },
       {
         type: 'match',
-        prompt: '조각을 누르고, 그 약속이 이루어지는 신약의 증언을 찾아 이어 주세요.',
-        doneLine: {who: '기록자', text: '네 개의 선이 한 이름 위에서 만났다. 조각들이 그분을 만들어 낸 게 아니다. 처음부터 그분이 계셨고, 조각들은 줄곧 그분을 가리키고 있었다.'}
+        prompt: '조각을 눌러, 그 약속이 이루어진 신약의 증언을 골라 주세요.',
+        doneLine: {who: '기록자', text: '다섯 개의 선이 한 이름 위에서 만났다. 조각들이 그분을 만들어 낸 게 아니다. 처음부터 그분이 계셨고, 조각들은 줄곧 그분을 가리키고 있었다.'}
       },
       {
         type: 'say',
         lines: [
           {
-            phase: 'jesus',
-            text: '그리고 어린양이라 불리신 예수님은 유월절 저녁에 제자들과 마지막 식탁에 앉아 빵과 잔을 나누셨다.',
-            ref: '누가복음 22:14–20'
+            who: '기록자',
+            text: '두루마리 끝에 남겨 둔 물음에도 그제야 답을 적을 수 있었다. 해마다 다시 지켜야 했던 것은 그 밤이 모자라서가 아니라, 아직 가리키는 중이었기 때문이다.',
+            ref: '히브리서 10:1–4'
+          },
+          {
+            who: '기록자',
+            text: '이제 그 조각들이 한날한시에 겹쳐진 날로 돌아간다. 요한이 그분을 가리킨 뒤로 세 번째 유월절이었다.'
+          },
+          {
+            phase: 'supper',
+            text: '유월절 저녁, 예수님은 열두 제자와 함께 상에 앉으셨다. 상 위에는 어린양과 누룩 없는 빵과 쓴 나물이 올라 있었다.',
+            ref: '누가복음 22:14–15'
+          },
+          {
+            phase: 'supper',
+            who: '기록자',
+            text: '1,500년 전 안나네 집에서 받아 적은 것과 똑같은 상이었다. 그런데 그 밤, 그분은 규정에 없던 말씀을 하셨다.'
+          },
+          {
+            phase: 'supper',
+            word: true,
+            text: '“이것은 너희를 위해 주는 내 몸이다. 이 잔은 너희를 위해 흘리는 내 피로 세우는 새 언약이다.”',
+            ref: '누가복음 22:19–20'
+          },
+          {
+            phase: 'supper',
+            who: '기록자',
+            text: '상 위의 어린양을 가리키지 않으셨다. 빵과 잔을 드시고는, 자기 자신을 가리키셨다.'
           }
         ]
       }
@@ -661,6 +749,13 @@ const scenes = [
         href: '/web/bible/verse?translationId=1&bookOrder=43&chapterNumber=19'
       },
       {
+        title: '어둠과 찢어진 휘장',
+        provenance: 'scripture',
+        body: '낮 열두 시부터 세 시간 동안 온 땅이 어두워졌고, 예수님이 숨을 거두실 때 성전 휘장이 두 폭으로 찢어졌다고 기록되어 있습니다.',
+        ref: '누가복음 23:44–46',
+        href: '/web/bible/verse?translationId=1&bookOrder=42&chapterNumber=23&verseNumber=44'
+      },
+      {
         title: '뼈가 꺾이지 않으신 분',
         provenance: 'direct',
         body: '군인들이 예수님의 다리를 꺾지 않은 것을 두고, 요한복음은 “그 뼈가 하나도 꺾이지 않을 것이다”라는 유월절 양의 규정이 이루어진 일이라고 직접 밝힙니다.',
@@ -679,11 +774,17 @@ const scenes = [
       {
         type: 'say',
         lines: [
-          {phase: 'cross', text: '다음 날, 유월절을 맞은 예루살렘. 예수님은 성문 밖에서 십자가에 달리셨다.', ref: '요한복음 19:17–18'},
+          {phase: 'cross', text: '그 밤이 새기 전에 그분은 붙잡히셨고, 날이 밝자 성문 밖 골고다에서 십자가에 달리셨다.', ref: '요한복음 19:16–18'},
           {phase: 'cross', who: '기록자', text: '이번에는 준비할 것도, 건널 바다도 없었다. 나는 그저 보았고, 기록했다.'},
           {phase: 'dark', text: '낮 열두 시, 온 땅이 캄캄해졌다. 어둠은 세 시간이 지나도록 걷히지 않았다.', ref: '누가복음 23:44–45'},
+          {phase: 'dark', who: '기록자', text: '이집트를 덮었던 아홉 번째 어둠이 떠올랐다. 그때 어둠 밖에 있던 것은 문에 피를 바른 집이었다. 이번에는 그분이 어둠 한가운데 계셨다.'},
+          {phase: 'cross', text: '오후 세 시, 그분이 숨을 거두시자 성전 휘장이 위에서 아래까지 두 폭으로 찢어졌다.', ref: '누가복음 23:45–46'},
+          {phase: 'cross', text: '유월절 안식일을 앞두고 시신을 십자가에 두지 않으려고, 군인들이 다리를 꺾으러 올라왔다.', ref: '요한복음 19:31'},
+          {phase: 'cross', who: '기록자', text: '군인들은 양옆 두 사람의 다리를 차례로 꺾었다. 그리고 가운데 십자가 앞에 섰다가, 이미 숨진 것을 보고 그냥 지나갔다.', ref: '요한복음 19:32–33'},
+          {phase: 'cross', who: '기록자', text: '뼈가 하나도 꺾이지 않았다. 1,500년 전 안나네 집 상 앞에서 이유도 모른 채 받아 적었던 그 규정을, 나는 그제야 읽을 수 있었다.', ref: '요한복음 19:36'},
           {phase: 'tomb', text: '사흘째 되던 날 이른 새벽, 여자들이 무덤을 찾아갔다. 무덤은 텅 비어 있었다.', ref: '누가복음 24:1–3'},
-          {phase: 'risen', who: '천사', word: true, text: '어째서 살아 계신 분을 죽은 사람들 사이에서 찾고 있습니까? 그분은 여기 계시지 않습니다. 다시 살아나셨습니다.', ref: '누가복음 24:5–6'}
+          {phase: 'risen', who: '천사', word: true, text: '어째서 살아 계신 분을 죽은 사람들 사이에서 찾고 있습니까? 그분은 여기 계시지 않습니다. 다시 살아나셨습니다.', ref: '누가복음 24:5–6'},
+          {phase: 'risen', who: '기록자', text: '유월절의 밤은 죽음이 지나간 밤이었다. 이 새벽은 죽음을 지나온 아침이었다. 나는 두루마리의 마지막 줄을 적으려고 붓을 들었다.'}
         ]
       },
       {type: 'finale'}
@@ -1564,13 +1665,15 @@ function renderMannaBeat(scene, beat) {
 
 // ---------------------------------------------------------------- scene 5: match
 
+// 조각 목록은 한 화면에 고정된 5행이다. 연결에 성공하면 행이 그 자리에서 '조각 ↔ 출처' 로
+// 바뀐다. 별도의 연결 목록을 아래에 쌓으면 진행할수록 화면이 길어지고 레이아웃이 밀린다.
 function renderMatchBeat(beat) {
   renderPrompt(beat.prompt);
   elements.storyPlayArea.classList.add('is-match');
   elements.storyPlayArea.innerHTML = `
         <div class="story-match-toolbar">
             <div class="story-match-progress-copy">
-                <span>증언 연결</span>
+                <span>약속의 조각</span>
                 <strong id="matchProgressCount">0 / ${TESTIMONIES.length}</strong>
             </div>
             <div class="story-match-progress" id="matchProgress" role="progressbar"
@@ -1578,19 +1681,8 @@ function renderMatchBeat(beat) {
                  aria-valuemax="${TESTIMONIES.length}" aria-valuenow="0">
                 <span id="matchProgressFill"></span>
             </div>
-            <p class="story-match-note" id="matchNote" aria-live="polite">
-                조각 카드를 누르면 이어질 신약의 증언을 고르는 창이 열립니다.
-            </p>
         </div>
-        <ol class="story-match-linked-list d-none" id="matchLinkedList" aria-label="이어진 증언"></ol>
-        <section class="story-match-board" id="matchBoard" aria-labelledby="matchFragmentTitle">
-            <div class="story-match-column-head">
-                <strong id="matchFragmentTitle">약속의 조각</strong>
-                <small>지나온 장면에서 모은 기록 — 카드를 눌러 증언과 이어 주세요</small>
-            </div>
-            <div class="story-match-list story-match-fragments" id="matchFragments"
-                 role="group" aria-labelledby="matchFragmentTitle"></div>
-        </section>
+        <ol class="story-match-list" id="matchList" aria-label="약속의 조각"></ol>
         <dialog class="story-match-dialog" id="matchDialog" aria-labelledby="matchDialogTitle">
             <div class="story-match-dialog-header">
                 <span class="story-fragment-gem" aria-hidden="true"></span>
@@ -1607,10 +1699,7 @@ function renderMatchBeat(beat) {
         </dialog>
     `;
 
-  const board = elements.storyPlayArea.querySelector('#matchBoard');
-  const linkedList = elements.storyPlayArea.querySelector('#matchLinkedList');
-  const fragmentsCol = elements.storyPlayArea.querySelector('#matchFragments');
-  const note = elements.storyPlayArea.querySelector('#matchNote');
+  const list = elements.storyPlayArea.querySelector('#matchList');
   const progress = elements.storyPlayArea.querySelector('#matchProgress');
   const progressFill = elements.storyPlayArea.querySelector('#matchProgressFill');
   const progressCount = elements.storyPlayArea.querySelector('#matchProgressCount');
@@ -1642,46 +1731,31 @@ function renderMatchBeat(beat) {
     progressFill.style.width = `${(matchedIds.size / TESTIMONIES.length) * 100}%`;
   };
 
-  const completePair = (fragmentButton, testimony) => {
+  const completePair = (row, testimony) => {
     const fragment = FRAGMENTS[testimony.id];
     closeDialog();
-    fragmentButton.remove();
-
-    const pairItem = document.createElement('li');
-    pairItem.className = 'story-match-pair';
-    pairItem.dataset.pair = String(matchedIds.size);
-    pairItem.innerHTML = `
-            <span class="story-match-pair-fragment">
-                <span class="story-fragment-gem" aria-hidden="true"></span>${fragment.title}
-            </span>
-            <span class="story-match-pair-join" aria-hidden="true">↔</span>
-            <span class="story-match-pair-testimony">
-                <span class="story-match-quote">“${testimony.text}”</span>
-                <small class="story-match-ref">${testimony.ref}</small>
-            </span>
+    row.classList.add('is-linked');
+    row.innerHTML = `
+            <span class="story-fragment-gem" aria-hidden="true"></span>
+            <span class="story-match-row-title">${fragment.title}</span>
+            <span class="story-match-row-ref">${testimony.ref}</span>
         `;
-    linkedList.appendChild(pairItem);
-    linkedList.classList.remove('d-none');
 
     updateProgress();
-    note.innerHTML = `<strong>연결 완료</strong> ${fragment.title} ↔ ${testimony.ref}`;
     announce(`${fragment.title} — ${testimony.ref} 연결. ${matchedIds.size} / ${TESTIMONIES.length}`);
 
     if (matchedIds.size === TESTIMONIES.length) {
-      finishMatch(beat, board, note);
+      finishMatch(beat, list);
     } else {
-      const nextCard = board.querySelector('.story-match-fragment');
-      if (nextCard) {
-        nextCard.focus();
-      }
+      list.querySelector('.story-match-row:not(.is-linked) .story-match-open')?.focus();
     }
   };
 
-  const openDialog = (fragmentButton, id) => {
+  const openDialog = (row, id) => {
     const fragment = FRAGMENTS[id];
     dialogTitle.textContent = fragment.title;
     dialogSummary.textContent = fragment.summary;
-    dialogGuide.innerHTML = `‘${fragment.title}’ — 이 조각과 이어지는 신약의 증언을 골라 주세요.`;
+    dialogGuide.textContent = '';
     dialogOptions.innerHTML = '';
 
     TESTIMONIES.filter((testimony) => !matchedIds.has(testimony.id)).forEach((testimony) => {
@@ -1697,11 +1771,11 @@ function renderMatchBeat(beat) {
         dialogOptions.querySelectorAll('.is-wrong').forEach((card) => card.classList.remove('is-wrong'));
         if (testimony.id === id) {
           matchedIds.add(id);
-          completePair(fragmentButton, testimony);
+          completePair(row, testimony);
         } else {
           option.classList.add('is-wrong');
           option.addEventListener('animationend', () => option.classList.remove('is-wrong'), {once: true});
-          dialogGuide.innerHTML = '<strong>다시 확인</strong> 이 증언은 다른 조각을 가리켜요. 조각의 뜻과 견주어 다시 골라 보세요.';
+          dialogGuide.textContent = '이 증언은 다른 조각을 가리켜요. 다시 골라 보세요.';
           announce('짝이 아니에요. 다른 증언을 골라 보세요.');
         }
       });
@@ -1712,25 +1786,22 @@ function renderMatchBeat(beat) {
   };
 
   Object.entries(FRAGMENTS).forEach(([id, fragment]) => {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.className = 'story-match-card story-match-fragment';
-    button.dataset.matchId = id;
-    button.setAttribute('aria-haspopup', 'dialog');
-    button.innerHTML = `
-            <span class="story-fragment-gem" aria-hidden="true"></span>
-            <span class="story-match-card-copy">
-                <strong>${fragment.title}</strong>
-                <small>${fragment.summary}</small>
-            </span>
+    const row = document.createElement('li');
+    row.className = 'story-match-row';
+    row.dataset.matchId = id;
+    row.innerHTML = `
+            <button type="button" class="story-match-open" aria-haspopup="dialog">
+                <span class="story-fragment-gem" aria-hidden="true"></span>
+                <span class="story-match-row-title">${fragment.title}</span>
+                <span class="story-match-row-cue" aria-hidden="true">›</span>
+            </button>
         `;
-    button.addEventListener('click', () => openDialog(button, id));
-    fragmentsCol.appendChild(button);
+    row.querySelector('.story-match-open').addEventListener('click', () => openDialog(row, id));
+    list.appendChild(row);
   });
 }
 
-function finishMatch(beat, board, note) {
-  note.innerHTML = `<strong>${TESTIMONIES.length} / ${TESTIMONIES.length} 연결 완료</strong> 네 개의 조각이 모두 신약의 증언과 이어졌습니다.`;
+function finishMatch(beat, list) {
   const capstone = document.createElement('div');
   capstone.className = 'story-match-capstone';
   capstone.innerHTML = `
@@ -1738,7 +1809,7 @@ function finishMatch(beat, board, note) {
         <blockquote>“우리의 유월절 양이신 그리스도께서 이미 희생되셨습니다”</blockquote>
         <small>고린도전서 5:7</small>
     `;
-  board.replaceWith(capstone);
+  list.insertAdjacentElement('afterend', capstone);
   announce('모든 조각이 이어졌습니다. 우리의 유월절 양이신 그리스도께서 이미 희생되셨습니다. 고린도전서 5장 7절.');
   renderLine(beat.doneLine, nextBeat);
 }
@@ -1785,7 +1856,7 @@ function updateFragmentCount(pulse) {
 }
 
 function renderFinaleBeat() {
-  renderPrompt('네 개의 조각이 한 빛을 향해 모입니다.');
+  renderPrompt(`${Object.keys(FRAGMENTS).length}개의 조각이 한 빛을 향해 모입니다.`);
   elements.storyPlayArea.classList.add('is-finale');
   elements.storyPlayArea.innerHTML = `
         <div class="story-finale" aria-hidden="true">
@@ -1833,7 +1904,7 @@ function buildEpilogue() {
       ? '광야에서 나는 움켜쥔 것이 썩는 걸 봤고, 필요한 양식은 날마다 새로 주어진다는 걸 배웠다.'
       : '광야에서 나는 하루치만 거두면서, 필요한 양식은 날마다 새로 주어진다는 걸 배웠다.');
 
-  parts.push('그리고 빈 무덤의 새벽에 이르러서야, 첫 페이지의 어린양이 누구를 가리키고 있었는지 알게 됐다.');
+  parts.push('그리고 십자가 아래에서 꺾이지 않은 뼈를 보고서야, 첫 페이지의 어린양이 줄곧 누구를 가리키고 있었는지 알게 됐다. 빈 무덤의 새벽은 그 기록의 마지막 줄이었다.');
   return parts.join(' ');
 }
 

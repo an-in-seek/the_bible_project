@@ -196,6 +196,7 @@ body.bible-story-page {
 .story-vigil-hold:focus-visible,
 .story-manna-piece:focus-visible,
 .story-match-card:focus-visible,
+.story-match-open:focus-visible,
 .story-match-dialog-close:focus-visible,
 .story-sheet-tab:focus-visible,
 .story-sheet-close:focus-visible {
@@ -209,6 +210,7 @@ body.bible-story-page {
 .story-table-item:not(:disabled),
 .story-manna-piece:not(:disabled),
 .story-match-card,
+.story-match-open,
 .story-match-dialog-close,
 .story-sheet-tab,
 .story-text-button {
@@ -623,6 +625,13 @@ body.bible-story-page .site-header {
         linear-gradient(0deg, rgba(3, 10, 20, 0.68), transparent 58%),
         linear-gradient(90deg, rgba(3, 10, 20, 0.42), transparent 62%),
         #66726a url("/images/game/bible-story-jesus-jordan.jpg") 72% center / cover no-repeat;
+}
+
+/* 마지막 유월절 식탁 — 빵과 잔으로 새 언약을 말씀하시는 순간 */
+.story-backdrop[data-theme="link"][data-phase="supper"] .story-backdrop-art {
+    background:
+        linear-gradient(180deg, rgba(8, 5, 3, 0.02), rgba(6, 4, 3, 0.46)),
+        #21150e url("/images/game/bible-story-last-supper-new-covenant.jpg?v=1") 63% center / cover no-repeat;
 }
 
 .story-backdrop[data-theme="dawn"] .story-backdrop-art {
@@ -1407,39 +1416,72 @@ body.bible-story-page .site-header {
     transition: width 0.35s ease;
 }
 
-.story-match-board {
-    display: grid;
-    gap: 0.7rem;
-    align-content: start;
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 1rem;
-    background: rgba(5, 13, 24, 0.4);
-}
-
-.story-match-column-head {
-    display: grid;
-    gap: 0.15rem;
-}
-
-.story-match-column-head strong {
-    color: #fff;
-    font-size: 0.84rem;
-}
-
-.story-match-column-head small {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.66rem;
-}
-
+/* 조각 목록 — 항상 5행 고정. 연결되면 같은 자리에서 '조각 ↔ 출처' 로 바뀐다. */
 .story-match-list {
     display: grid;
-    gap: 0.6rem;
+    gap: 0.5rem;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    list-style: none;
 }
 
-.story-match-fragments {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.story-match-row {
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 0.8rem;
+    background: rgba(8, 16, 28, 0.64);
+    transition: border-color 0.25s ease, background 0.25s ease;
+}
+
+.story-match-open {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    min-height: 52px;
+    padding: 0.65rem 0.85rem;
+    border: 0;
+    background: none;
+    color: var(--story-stage-ink);
+    text-align: left;
+}
+
+.story-match-row-title {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.story-match-row-cue {
+    flex: 0 0 auto;
+    color: rgba(242, 200, 121, 0.75);
+    font-size: 1.1rem;
+    line-height: 1;
+}
+
+/* 연결 완료 — 행 자체가 진행 표시다. 별도의 완료 문구를 두지 않는다. */
+.story-match-row.is-linked {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.65rem 0.85rem;
+    border-color: color-mix(in srgb, var(--story-gold) 55%, transparent);
+    background: color-mix(in srgb, var(--story-gold) 12%, rgba(8, 16, 28, 0.8));
+    box-shadow: inset 3px 0 0 var(--story-gold);
+    animation: story-pair-in 0.35s ease both;
+}
+
+.story-match-row.is-linked .story-match-row-title {
+    color: #fff;
+}
+
+.story-match-row-ref {
+    flex: 0 0 auto;
+    color: var(--story-gold-bright);
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
 .story-match-card {
@@ -1454,97 +1496,10 @@ body.bible-story-page .site-header {
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.story-match-fragment {
-    display: flex;
-    align-items: center;
-    gap: 0.55rem;
-    font-size: 0.84rem;
-}
-
-.story-match-card-copy {
-    display: grid;
-    gap: 0.18rem;
-    min-width: 0;
-}
-
-.story-match-card-copy small {
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 0.66rem;
-    font-weight: 500;
-    line-height: 1.45;
-}
-
 .story-match-card.is-wrong {
     border-color: #e59b8b;
     box-shadow: 0 0 0 2px rgba(229, 155, 139, 0.28);
     animation: story-shake 0.4s ease;
-}
-
-.story-match-linked-list {
-    display: grid;
-    gap: 0.5rem;
-    width: 100%;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.story-match-pair {
-    display: flex;
-    align-items: center;
-    gap: 0.65rem;
-    padding: 0.6rem 0.75rem;
-    border: 1px solid color-mix(in srgb, var(--match-pair-color, var(--story-gold)) 55%, transparent);
-    border-radius: 0.8rem;
-    background: color-mix(in srgb, var(--match-pair-color, var(--story-gold)) 12%, rgba(8, 16, 28, 0.8));
-    box-shadow: inset 3px 0 0 var(--match-pair-color, var(--story-gold));
-    animation: story-pair-in 0.4s ease both;
-}
-
-.story-match-pair[data-pair="1"] {
-    --match-pair-color: #f2c879;
-}
-
-.story-match-pair[data-pair="2"] {
-    --match-pair-color: #7bc8bc;
-}
-
-.story-match-pair[data-pair="3"] {
-    --match-pair-color: #a9a2e8;
-}
-
-.story-match-pair[data-pair="4"] {
-    --match-pair-color: #dc927d;
-}
-
-.story-match-pair-fragment {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    gap: 0.45rem;
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 800;
-    white-space: nowrap;
-}
-
-.story-match-pair-join {
-    flex: 0 0 auto;
-    color: var(--match-pair-color, var(--story-gold-bright));
-    font-weight: 900;
-}
-
-.story-match-pair-testimony {
-    min-width: 0;
-}
-
-.story-match-pair-testimony .story-match-quote {
-    font-size: 0.76rem;
-    line-height: 1.55;
-}
-
-.story-match-pair-testimony .story-match-ref {
-    margin-top: 0.15rem;
 }
 
 @keyframes story-pair-in {
@@ -1619,17 +1574,16 @@ body.bible-story-page .site-header {
     font-size: 1.3rem;
 }
 
+/* 오답일 때만 나타난다. 빈 상태로 자리를 잡아 두면 다이얼로그가 이유 없이 길어진다. */
 .story-match-dialog-guide {
-    min-height: 1.45em;
     margin: 0;
-    color: rgba(255, 255, 255, 0.78);
+    color: #f0b3a3;
     font-size: 0.78rem;
     line-height: 1.5;
 }
 
-.story-match-dialog-guide strong {
-    margin-right: 0.25rem;
-    color: var(--story-gold-bright);
+.story-match-dialog-guide:empty {
+    display: none;
 }
 
 .story-match-dialog-options {
@@ -1651,20 +1605,6 @@ body.bible-story-page .site-header {
     margin-top: 0.35rem;
     color: rgba(255, 255, 255, 0.55);
     font-size: 0.68rem;
-}
-
-.story-match-note {
-    min-height: 1.45em;
-    margin: 0.55rem 0 0;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 0.8rem;
-    line-height: 1.5;
-    text-align: left;
-}
-
-.story-match-note strong {
-    margin-right: 0.25rem;
-    color: var(--story-gold-bright);
 }
 
 .story-match-capstone {
@@ -2129,6 +2069,7 @@ html[data-theme="dark"] .story-badge,
     .story-choice-button:hover,
     .story-table-item:not(:disabled):hover,
     .story-match-card:hover,
+    .story-match-row:has(.story-match-open:hover),
     .story-fragment-button:hover,
     .story-exit-button:hover {
         border-color: var(--story-gold-bright);
@@ -2183,6 +2124,12 @@ html[data-theme="dark"] .story-badge,
     .story-backdrop[data-theme="door"][data-phase="table-ready"] .story-backdrop-art {
         background-position: 40% 32%;
         background-size: 380% auto;
+    }
+
+    /* 마지막 식탁은 예수님과 빵·잔이 좁은 화면의 중심에 남도록 맞춘다. */
+    .story-backdrop[data-theme="link"][data-phase="supper"] .story-backdrop-art {
+        background-position: 63% center;
+        background-size: cover;
     }
 
     /* 문간 장면(passover.jpg)은 기록자와 아버지가 화면 양 끝에 서 있어
@@ -2294,36 +2241,19 @@ html[data-theme="dark"] .story-badge,
         padding: 0.65rem 0.7rem;
     }
 
-    .story-match-board {
-        padding: 0.65rem;
-    }
-
-    /* 모바일: 연결 카드를 '제목 ↔ 출처' 한 줄 요약으로 압축 — 4장이 쌓여도 스크롤이 생기지 않게.
-       인용문 전문은 선택 다이얼로그·캡스톤·기록관에서 확인 가능 */
-    .story-match-pair {
+    .story-match-open,
+    .story-match-row.is-linked {
         gap: 0.5rem;
-        padding: 0.5rem 0.65rem;
+        min-height: 46px;
+        padding: 0.55rem 0.7rem;
     }
 
-    .story-match-pair-fragment {
-        font-size: 0.76rem;
+    .story-match-row-title {
+        font-size: 0.82rem;
     }
 
-    .story-match-pair-testimony {
-        flex: 0 1 auto;
-        margin-left: auto;
-        text-align: right;
-    }
-
-    .story-match-pair-testimony .story-match-quote {
-        display: none;
-    }
-
-    .story-match-pair-testimony .story-match-ref {
-        margin-top: 0;
-        color: rgba(255, 255, 255, 0.75);
-        font-size: 0.7rem;
-        white-space: nowrap;
+    .story-match-row-ref {
+        font-size: 0.68rem;
     }
 
     .story-match-dialog {
@@ -2336,26 +2266,9 @@ html[data-theme="dark"] .story-badge,
         padding-bottom: calc(1.1rem + env(safe-area-inset-bottom));
     }
 
-    .story-match-fragments {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-    .story-match-fragment {
-        min-height: 96px;
-        align-items: flex-start;
-        flex-direction: column;
-        gap: 0.4rem;
-        padding: 0.65rem;
-        font-size: 0.76rem;
-    }
-
-    .story-match-fragment .story-fragment-gem {
+    .story-match-row .story-fragment-gem {
         width: 22px;
         height: 22px;
-    }
-
-    .story-match-card-copy small {
-        font-size: 0.62rem;
     }
 
     .story-match-testimony {
@@ -2407,7 +2320,7 @@ html[data-theme="dark"] .story-badge,
     .story-fragment-gem-large,
     .story-finale-gem,
     .story-finale-beam,
-    .story-match-pair,
+    .story-match-row.is-linked,
     .story-match-capstone,
     .story-match-progress span {
         animation: none;
