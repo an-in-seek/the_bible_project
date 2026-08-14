@@ -4,16 +4,16 @@
 
 - Kotlin 2.4.10
 - Java 25 (Gradle toolchain)
-- Gradle 9.6.1 (wrapper)
+- Gradle 9.7.0 (wrapper)
 - Spring Boot 4.1.0 (Spring Framework 7 / Spring Security 7 / Spring Data JPA 4)
 - Spring Cloud 2025.1.2 / Spring Cloud GCP 8.1.0
 - PostgreSQL 17 (Supabase)
 - Kotlin JDSL 3.9.0 (type-safe queries)
-- springdoc-openapi 3.0.3 (Swagger UI)
+- springdoc-openapi 3.1.0 (Swagger UI)
 - Caffeine (local cache) — [caching.md](caching.md)
 - Thymeleaf + Bootstrap 5.3 (WebJars) — [frontend.md](frontend.md)
-- JJWT 0.12.3
-- Testing: JUnit 5 + Kotest assertions 6.2.3 + MockK 1.13.13 + Testcontainers 2.x — [testing.md](testing.md)
+- JJWT 0.13.0
+- Testing: JUnit 5 + Kotest assertions 6.2.4 + MockK 1.14.11 + Testcontainers 2.x — [testing.md](testing.md)
 
 ## Build & run
 
@@ -49,6 +49,52 @@ variant references the replacement API (`QueryEnhancerFactories`, `QueryProvider
 
 Because it surfaces at runtime rather than compile time, reverting the dependency still produces a
 successful build. Be careful.
+
+### JSON is Jackson 3 — the Kotlin module must use the `tools.jackson` coordinates
+
+`spring-boot-starter-web` now pulls `tools.jackson.core:jackson-databind` (Jackson 3), and the HTTP
+message converter uses that mapper. The Jackson 2 module (`com.fasterxml.jackson.module:jackson-module-kotlin`)
+is never registered on it, so without the Jackson 3 module the app serializes Kotlin classes with
+plain JavaBean introspection.
+
+```kotlin
+implementation("tools.jackson.module:jackson-module-kotlin")        // ✅ runtime JSON
+implementation("com.fasterxml.jackson.module:jackson-module-kotlin") // springdoc/swagger-core only
+```
+
+The visible symptom is `is`-prefixed booleans. `val isCorrect: Boolean` compiles to an `isCorrect()`
+getter, which JavaBean naming reads as the property `correct`:
+
+```json
+{"correct": true}    // ❌ no Kotlin module — the frontend's result.isCorrect is undefined
+{"isCorrect": true}  // ✅ with tools.jackson module
+```
+
+Nothing fails at build time and the endpoint still returns 200 — only the key name changes, so it
+shows up as a feature quietly behaving as if the flag were always `false`. Kotlin default values and
+non-null constructor parameters are silently lost the same way.
+
+`JacksonAutoConfiguration` calls `findAndAddModules()`, so having the artifact on the classpath is
+enough — no configuration. `JacksonKotlinModuleTest` pins the behavior.
+
+#### Jackson 3 conventions
+
+Two Jackson stacks coexist. Jackson 3 (`tools.jackson`) does the app's JSON; Jackson 2
+(`com.fasterxml.jackson`) survives only because springdoc/swagger-core and `jjwt-jackson` are built
+on it. Which one a rule applies to matters.
+
+| Topic | Rule |
+|---|---|
+| Modules | Jackson 3 coordinates (`tools.jackson.module:*`, `tools.jackson.datatype:*`). Versions come from the Boot BOM — do not pin them. |
+| Annotations | Keep importing `com.fasterxml.jackson.annotation.*`. Jackson 3 depends on `jackson-annotations` **2.21**; the annotation package is shared and was never moved. There is nothing to migrate. |
+| `java.time` | Built into Jackson 3 databind. Do **not** add `jackson-datatype-jsr310` — that is the Jackson 2 artifact and has no effect on the web mapper. `Instant` serializes as ISO-8601 (`"2024-01-15T10:31:00Z"`), not an epoch number. |
+| Mapper customization | Register a `JsonMapperBuilderCustomizer` bean (`org.springframework.boot.jackson.autoconfigure`). `Jackson2ObjectMapperBuilderCustomizer` no longer touches the web mapper. Jackson 3 mappers are immutable — configure the builder, never mutate a mapper. |
+| Injecting a mapper | Inject `tools.jackson.databind.ObjectMapper` / `JsonMapper`. Injecting `com.fasterxml.jackson.databind.ObjectMapper` gets you springdoc's mapper, configured differently from the one serving responses. |
+
+Deserialization is stricter now that the Kotlin module is back, and that is the intended behavior:
+a missing non-null constructor parameter raises `MismatchedInputException` (→ 400) instead of
+injecting `null` and blowing up later; Kotlin default values are honored; unknown properties are
+still ignored.
 
 ### Do not exclude `commons-logging`
 
