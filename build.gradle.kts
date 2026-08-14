@@ -20,13 +20,13 @@ repositories {
     mavenCentral()
 }
 
-val kotlinLogging = "8.0.02"
-val kotestVersion = "6.2.3"
+val kotlinLogging = "8.0.4"
+val kotestVersion = "6.2.4"
 val kotlinJdslVersion = "3.9.0"
-val springDocVersion = "3.0.3"
+val springDocVersion = "3.1.0"
 val springCloudVersion = "2025.1.2"
 val springCloudGcpVersion = "8.1.0"
-val jjwtVersion = "0.12.3"
+val jjwtVersion = "0.13.0"
 
 dependencyManagement {
     imports {
@@ -57,8 +57,7 @@ dependencies {
     implementation("com.github.ben-manes.caffeine:caffeine")
 
     // Web UI/UX
-    implementation("org.webjars:bootstrap:5.3.0")
-    implementation("org.webjars:jquery:3.6.0")
+    implementation("org.webjars:bootstrap:5.3.8")
 
     // i18n
     implementation("com.neovisionaries:nv-i18n:1.29")
@@ -95,7 +94,7 @@ dependencies {
     implementation("org.postgresql:postgresql")
 
     // Google ID Token 검증
-    implementation("com.google.api-client:google-api-client:2.7.2")
+    implementation("com.google.api-client:google-api-client:2.9.0")
 
     // JWT
     implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")
@@ -119,7 +118,7 @@ dependencies {
     testImplementation("io.kotest:kotest-framework-engine:${kotestVersion}")
 
     // MockK (Kotlin 친화 모킹 — Docker 불필요 단위 테스트용)
-    testImplementation("io.mockk:mockk:1.13.13")
+    testImplementation("io.mockk:mockk:1.14.11")
 
     // testcontainers
     // Spring Boot 4.1 은 testcontainers-bom 2.0.x 를 가져온다. Testcontainers 2.0 에서 모든 모듈

@@ -4,16 +4,16 @@
 
 - Kotlin 2.4.10
 - Java 25 (Gradle toolchain)
-- Gradle 9.6.1 (wrapper)
+- Gradle 9.7.0 (wrapper)
 - Spring Boot 4.1.0 (Spring Framework 7 / Spring Security 7 / Spring Data JPA 4)
 - Spring Cloud 2025.1.2 / Spring Cloud GCP 8.1.0
 - PostgreSQL 17 (Supabase)
 - Kotlin JDSL 3.9.0 (type-safe queries)
-- springdoc-openapi 3.0.3 (Swagger UI)
+- springdoc-openapi 3.1.0 (Swagger UI)
 - Caffeine (local cache) — [caching.md](caching.md)
 - Thymeleaf + Bootstrap 5.3 (WebJars) — [frontend.md](frontend.md)
-- JJWT 0.12.3
-- Testing: JUnit 5 + Kotest assertions 6.2.3 + MockK 1.13.13 + Testcontainers 2.x — [testing.md](testing.md)
+- JJWT 0.13.0
+- Testing: JUnit 5 + Kotest assertions 6.2.4 + MockK 1.14.11 + Testcontainers 2.x — [testing.md](testing.md)
 
 ## Build & run
 
