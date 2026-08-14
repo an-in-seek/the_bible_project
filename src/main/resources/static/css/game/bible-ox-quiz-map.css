@@ -310,9 +310,52 @@ html[data-theme="dark"] .ox-stage-badge.in-progress {
     transition: box-shadow 0.4s ease, background 0.4s ease;
 }
 
+/* 다크 모드에서 스포트라이트 대상은 흰 배경 + 라이트 톤 텍스트로 통째로 되돌린다.
+   has-progress / is-completed 셀렉터가 (0,3,1) 이라 상태 클래스를 함께 명시하지 않으면
+   배경만 어두운 채로 남고 글자는 어두운 색으로 덮여 본문이 보이지 않는다. */
 html[data-theme="dark"] .ox-stage-card.is-spotlight-target,
+html[data-theme="dark"] .ox-stage-card.has-progress.is-spotlight-target,
+html[data-theme="dark"] .ox-stage-card.is-completed.is-spotlight-target {
+    background: #fff;
+    color: #1f2933;
+}
+
+html[data-theme="dark"] .ox-stage-card.has-progress.is-spotlight-target {
+    border-color: #bfdbfe;
+    border-left-color: #2563eb;
+}
+
+html[data-theme="dark"] .ox-stage-card.is-completed.is-spotlight-target {
+    border-color: #d1e7c4;
+    border-left-color: #16a34a;
+}
+
 html[data-theme="dark"] .ox-stage-card.is-spotlight-target .ox-stage-book {
     color: #1f2933;
+}
+
+html[data-theme="dark"] .ox-stage-card.is-spotlight-target .ox-stage-score {
+    color: #64748b;
+}
+
+html[data-theme="dark"] .ox-stage-card.has-progress.is-spotlight-target .ox-stage-number {
+    color: #2563eb;
+}
+
+html[data-theme="dark"] .ox-stage-card.is-completed.is-spotlight-target .ox-stage-number {
+    color: #16a34a;
+}
+
+html[data-theme="dark"] .ox-stage-card.is-spotlight-target .ox-stage-badge.in-progress {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+html[data-theme="dark"] .ox-stage-card.is-spotlight-target .ox-stage-badge.completed {
+    background: #dcfce7;
+    color: #15803d;
+    border-color: #bbf7d0;
 }
 
 /* 스포트라이트 진행 중 상단 검색창 임시 숨김 — 어두운 오버레이 위로 떠 보이는
