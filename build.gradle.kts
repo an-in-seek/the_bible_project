@@ -63,7 +63,14 @@ dependencies {
     // i18n
     implementation("com.neovisionaries:nv-i18n:1.29")
 
-    //
+    // Jackson
+    // ⚠️ Spring Boot 4 의 HTTP 메시지 컨버터는 Jackson 3(tools.jackson) 을 쓴다.
+    // Jackson 2 좌표(com.fasterxml.jackson.module)의 kotlin 모듈은 Jackson 3 매퍼에 등록되지 않으므로
+    // 이것만 두면 코틀린 인식이 통째로 빠진다. 그러면 `val isCorrect: Boolean` 의 게터가 자바빈 규칙으로
+    // 해석되어 JSON 키가 "correct" 로 나가고, isXxx 를 읽는 프런트엔드가 전부 undefined 를 받는다.
+    // tools.jackson 모듈은 JacksonAutoConfiguration 의 findAndAddModules() 가 자동 등록한다.
+    implementation("tools.jackson.module:jackson-module-kotlin")
+    // springdoc/swagger-core 는 여전히 Jackson 2 로 스키마를 만든다. 이쪽 코틀린 인식용으로 유지한다.
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 

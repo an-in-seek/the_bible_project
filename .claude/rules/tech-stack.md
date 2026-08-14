@@ -50,6 +50,33 @@ variant references the replacement API (`QueryEnhancerFactories`, `QueryProvider
 Because it surfaces at runtime rather than compile time, reverting the dependency still produces a
 successful build. Be careful.
 
+### JSON is Jackson 3 — the Kotlin module must use the `tools.jackson` coordinates
+
+`spring-boot-starter-web` now pulls `tools.jackson.core:jackson-databind` (Jackson 3), and the HTTP
+message converter uses that mapper. The Jackson 2 module (`com.fasterxml.jackson.module:jackson-module-kotlin`)
+is never registered on it, so without the Jackson 3 module the app serializes Kotlin classes with
+plain JavaBean introspection.
+
+```kotlin
+implementation("tools.jackson.module:jackson-module-kotlin")        // ✅ runtime JSON
+implementation("com.fasterxml.jackson.module:jackson-module-kotlin") // springdoc/swagger-core only
+```
+
+The visible symptom is `is`-prefixed booleans. `val isCorrect: Boolean` compiles to an `isCorrect()`
+getter, which JavaBean naming reads as the property `correct`:
+
+```json
+{"correct": true}    // ❌ no Kotlin module — the frontend's result.isCorrect is undefined
+{"isCorrect": true}  // ✅ with tools.jackson module
+```
+
+Nothing fails at build time and the endpoint still returns 200 — only the key name changes, so it
+shows up as a feature quietly behaving as if the flag were always `false`. Kotlin default values and
+non-null constructor parameters are silently lost the same way.
+
+`JacksonAutoConfiguration` calls `findAndAddModules()`, so having the artifact on the classpath is
+enough — no configuration. `JacksonKotlinModuleTest` pins the behavior.
+
 ### Do not exclude `commons-logging`
 
 Through Spring Framework 6, `spring-jcl` provided `org.apache.commons.logging.Log/LogFactory`, so
