@@ -1,6 +1,7 @@
 package com.elseeker.common.config
 
 import com.elseeker.game.adapter.input.api.client.response.OxAnswerResponse
+import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldContain
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
@@ -34,5 +35,20 @@ class JacksonKotlinModuleTest {
 
         // then
         json shouldContain "\"isCorrect\":true"
+    }
+
+    @Test
+    @DisplayName("is 로 시작하는 코틀린 프로퍼티는 같은 이름으로 역직렬화된다")
+    fun deserializeIsPrefixedProperty() {
+        // given
+        val json = """
+            {"isCorrect":true,"correctAnswer":true,"currentScore":1,"answeredAt":"2024-01-15T10:31:00Z"}
+        """.trimIndent()
+
+        // when
+        val response = sut.readValue(json, OxAnswerResponse::class.java)
+
+        // then
+        response.isCorrect shouldBe true
     }
 }

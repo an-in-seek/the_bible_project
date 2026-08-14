@@ -77,6 +77,25 @@ non-null constructor parameters are silently lost the same way.
 `JacksonAutoConfiguration` calls `findAndAddModules()`, so having the artifact on the classpath is
 enough — no configuration. `JacksonKotlinModuleTest` pins the behavior.
 
+#### Jackson 3 conventions
+
+Two Jackson stacks coexist. Jackson 3 (`tools.jackson`) does the app's JSON; Jackson 2
+(`com.fasterxml.jackson`) survives only because springdoc/swagger-core and `jjwt-jackson` are built
+on it. Which one a rule applies to matters.
+
+| Topic | Rule |
+|---|---|
+| Modules | Jackson 3 coordinates (`tools.jackson.module:*`, `tools.jackson.datatype:*`). Versions come from the Boot BOM — do not pin them. |
+| Annotations | Keep importing `com.fasterxml.jackson.annotation.*`. Jackson 3 depends on `jackson-annotations` **2.21**; the annotation package is shared and was never moved. There is nothing to migrate. |
+| `java.time` | Built into Jackson 3 databind. Do **not** add `jackson-datatype-jsr310` — that is the Jackson 2 artifact and has no effect on the web mapper. `Instant` serializes as ISO-8601 (`"2024-01-15T10:31:00Z"`), not an epoch number. |
+| Mapper customization | Register a `JsonMapperBuilderCustomizer` bean (`org.springframework.boot.jackson.autoconfigure`). `Jackson2ObjectMapperBuilderCustomizer` no longer touches the web mapper. Jackson 3 mappers are immutable — configure the builder, never mutate a mapper. |
+| Injecting a mapper | Inject `tools.jackson.databind.ObjectMapper` / `JsonMapper`. Injecting `com.fasterxml.jackson.databind.ObjectMapper` gets you springdoc's mapper, configured differently from the one serving responses. |
+
+Deserialization is stricter now that the Kotlin module is back, and that is the intended behavior:
+a missing non-null constructor parameter raises `MismatchedInputException` (→ 400) instead of
+injecting `null` and blowing up later; Kotlin default values are honored; unknown properties are
+still ignored.
+
 ### Do not exclude `commons-logging`
 
 Through Spring Framework 6, `spring-jcl` provided `org.apache.commons.logging.Log/LogFactory`, so
