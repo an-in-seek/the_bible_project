@@ -6,6 +6,7 @@ import com.elseeker.member.domain.vo.MemberRole
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.wiremock.spring.ConfigureWireMock
@@ -22,6 +23,9 @@ import org.wiremock.spring.EnableWireMock
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
 @ActiveProfiles(resolver = TestProfileResolver::class)   // 변경하지 말 것
+// MockMvc 도 같은 이유로 베이스에서만 켠다. 개별 클래스에 붙이면 컨텍스트가 쪼개진다.
+// 라우팅·Content-Type 협상·permitAll 은 HTTP 계층을 실제로 태워야만 검증된다.
+@AutoConfigureMockMvc
 @EnableWireMock(
     ConfigureWireMock(name = "apple", baseUrlProperties = ["test.apple.base-url"])
 )

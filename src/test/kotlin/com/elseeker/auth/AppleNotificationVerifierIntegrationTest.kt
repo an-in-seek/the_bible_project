@@ -11,14 +11,6 @@ import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.serverError
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
-import com.nimbusds.jose.JWSAlgorithm
-import com.nimbusds.jose.JWSHeader
-import com.nimbusds.jose.crypto.RSASSASigner
-import com.nimbusds.jose.jwk.JWKSet
-import com.nimbusds.jose.jwk.RSAKey
-import com.nimbusds.jose.jwk.gen.RSAKeyGenerator
-import com.nimbusds.jwt.JWTClaimsSet
-import com.nimbusds.jwt.SignedJWT
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
@@ -28,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.wiremock.spring.InjectWireMock
 import java.time.Duration
 import java.time.Instant
-import java.util.Date
 
 /**
  * Apple 알림 서명 검증 통합테스트.
@@ -53,55 +44,43 @@ class AppleNotificationVerifierIntegrationTest @Autowired constructor(
     @BeforeEach
     fun stubJwks() {
         appleServer.stubFor(
-            get(urlEqualTo("/auth/keys"))
-                .willReturn(okJson(JWKSet(signingKey.toPublicJWK()).toString()))
+            get(urlEqualTo(AppleTestTokens.JWKS_PATH))
+                .willReturn(okJson(AppleTestTokens.jwksJson()))
         )
     }
 
     @Test
     @DisplayName("Apple 이 서명한 정상 알림이면 이벤트를 돌려준다")
     fun verifyValidNotification() {
-        // given
-        val payload = signedToken()
-
         // when
-        val notification = appleNotificationVerifier.verify(payload)
+        val notification = appleNotificationVerifier.verify(AppleTestTokens.signedToken())
 
         // then
-        notification.jti shouldBe JTI
+        notification.jti shouldBe AppleTestTokens.JTI
         notification.events.size shouldBe 1
         notification.events[0].type shouldBe "consent-revoked"
-        notification.events[0].sub shouldBe APPLE_SUB
+        notification.events[0].sub shouldBe AppleTestTokens.APPLE_SUB
     }
 
     @Test
     @DisplayName("Apple 키가 아닌 다른 키로 서명하면 거부한다")
     fun rejectForgedSignature() {
         // given — kid 는 같지만 개인키가 다르다(= 위조)
-        val payload = signedToken(signer = forgedKey)
-
-        // when & then
-        verifyShouldFail(payload)
+        verifyShouldFail(AppleTestTokens.signedToken(signer = AppleTestTokens.forgedKey))
     }
 
     @Test
     @DisplayName("iss 가 Apple 이 아니면 거부한다")
     fun rejectWrongIssuer() {
         // given — 서명은 유효하지만 발급자가 다르다
-        val payload = signedToken(issuer = "https://evil.example.com")
-
-        // when & then
-        verifyShouldFail(payload)
+        verifyShouldFail(AppleTestTokens.signedToken(issuer = "https://evil.example.com"))
     }
 
     @Test
     @DisplayName("aud 가 허용 목록에 없으면 거부한다")
     fun rejectWrongAudience() {
         // given — 다른 개발자의 앱으로 발급된 알림을 우리 엔드포인트로 흘려보낸 경우
-        val payload = signedToken(audience = "com.someone.else.app")
-
-        // when & then
-        verifyShouldFail(payload)
+        verifyShouldFail(AppleTestTokens.signedToken(audience = "com.someone.else.app"))
     }
 
     @Test
@@ -109,20 +88,13 @@ class AppleNotificationVerifierIntegrationTest @Autowired constructor(
     fun rejectExpiredToken() {
         // given — 캡처해 둔 페이로드의 재사용을 막는다
         val past = Instant.now().minusSeconds(3600)
-        val payload = signedToken(issuedAt = past, expiresAt = past.plusSeconds(60))
-
-        // when & then
-        verifyShouldFail(payload)
+        verifyShouldFail(AppleTestTokens.signedToken(issuedAt = past, expiresAt = past.plusSeconds(60)))
     }
 
     @Test
     @DisplayName("jti 가 없으면 중복 수신을 판별할 수 없으므로 거부한다")
     fun rejectMissingJti() {
-        // given
-        val payload = signedToken(jti = null)
-
-        // when & then
-        verifyShouldFail(payload)
+        verifyShouldFail(AppleTestTokens.signedToken(jti = null))
     }
 
     @Test
@@ -139,7 +111,7 @@ class AppleNotificationVerifierIntegrationTest @Autowired constructor(
         )
 
         // when & then
-        val error = shouldThrow<ServiceError> { verifier.verify(signedToken()) }
+        val error = shouldThrow<ServiceError> { verifier.verify(AppleTestTokens.signedToken()) }
         error.errorType shouldBe ErrorType.OAUTH_APPLE_JWKS_UNAVAILABLE
     }
 
@@ -155,7 +127,7 @@ class AppleNotificationVerifierIntegrationTest @Autowired constructor(
             teamId = "TEAMTEST01",
             keyId = "KEYTEST001",
             privateKey = "",
-            notificationAudiences = listOf(ALLOWED_AUDIENCE),
+            notificationAudiences = listOf(AppleTestTokens.ALLOWED_AUDIENCE),
             jwkSetUri = jwkSetUri,
         ),
     )
@@ -165,47 +137,8 @@ class AppleNotificationVerifierIntegrationTest @Autowired constructor(
         error.errorType shouldBe ErrorType.OAUTH_APPLE_NOTIFICATION_INVALID
     }
 
-    /** Apple 이 보내는 형태의 알림 토큰을 만든다. 인자를 바꿔 각 거부 조건을 재현한다. */
-    private fun signedToken(
-        issuer: String = APPLE_ISSUER,
-        audience: String = ALLOWED_AUDIENCE,
-        jti: String? = JTI,
-        issuedAt: Instant = Instant.now(),
-        expiresAt: Instant = Instant.now().plusSeconds(600),
-        signer: RSAKey = signingKey,
-    ): String {
-        val claims = JWTClaimsSet.Builder()
-            .issuer(issuer)
-            .audience(audience)
-            .issueTime(Date.from(issuedAt))
-            .expirationTime(Date.from(expiresAt))
-            .apply { jti?.let { jwtID(it) } }
-            // Apple 은 events 를 JSON 을 문자열로 감싸 보낸다
-            .claim("events", """{"type":"consent-revoked","sub":"$APPLE_SUB","event_time":1700000000000}""")
-            .build()
-
-        // kid 는 항상 JWKS 에 있는 것으로 둔다. 위조 케이스는 개인키만 바꿔 서명 불일치를 만든다.
-        val header = JWSHeader.Builder(JWSAlgorithm.RS256).keyID(signingKey.keyID).build()
-        return SignedJWT(header, claims).apply { sign(RSASSASigner(signer)) }.serialize()
-    }
-
     companion object {
-        private const val APPLE_ISSUER = "https://appleid.apple.com"
-        private const val JTI = "0e0e0e0e-1111-2222-3333-444444444444"
-        private const val APPLE_SUB = "001234.abcdef0123456789.1234"
-
-        /** `application-test.yml` 의 `el-seeker.apple.notification-audiences` 와 일치해야 한다. */
-        private const val ALLOWED_AUDIENCE = "com.elseeker.test.app"
-
-        private const val KEY_ID = "apple-test-key"
-
-        /** JWKS 조회 실패를 재현하는 별도 경로. 정상 스텁(/auth/keys)을 건드리지 않는다. */
+        /** JWKS 조회 실패를 재현하는 별도 경로. 정상 스텁을 건드리지 않는다. */
         private const val JWKS_DOWN_PATH = "/auth/keys-down"
-
-        /** JWKS 로 내려주는 키. Apple 의 서명 키 역할. */
-        private val signingKey: RSAKey = RSAKeyGenerator(2048).keyID(KEY_ID).generate()
-
-        /** JWKS 에 없는 키. 공격자가 임의로 서명한 상황을 만든다. */
-        private val forgedKey: RSAKey = RSAKeyGenerator(2048).keyID(KEY_ID).generate()
     }
 }
