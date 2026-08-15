@@ -9,26 +9,26 @@
   - `game`: Bible quiz domain (domain, application, adapter/in, adapter/out).
   - `member`: member profile and account management.
 - `src/main/resources`: configuration and assets.
-  - `application.yml`: main runtime config (H2, JPA, OAuth2, JWT).
+  - `application.yml`: main runtime config (JPA, OAuth2, JWT); datasource lives in the profile files.
   - `application-local.yml`, `application-prod.yml`: env-specific overrides.
   - `data/`: SQL seed scripts for translations/books/chapters/verses, quizzes, and dictionary.
     - `krv/`, `nkrv/`, `kjv/`: translation-specific book/verse seeds.
   - `templates/`: Thymeleaf HTML pages.
   - `static/`: CSS, JS, images.
-- `docs/`: domain documentation (currently game-focused).
-- `src/test/kotlin`: test support + game service tests.
+- `docs/`: per-domain documentation (analytics, bible, community, game, member, study, support, qna, policy, android, googleplay, …).
+- `src/test/kotlin`: test support + tests for `auth`, `bible`, `common`, `game`, `member`, `qna`, `study`.
 - `src/test/resources`: test config (`application-test.yml`).
 
 ## Build, Test, and Development Commands
-- `./gradlew bootRun`: run the service locally with the embedded H2 database.
+- `./gradlew bootRun`: run the service locally. Requires PostgreSQL connection env vars (`DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`) — see `.claude/rules/tech-stack.md`.
 - `./gradlew build`: compile and run tests (if present), produce the boot JAR.
-- `./gradlew test`: run unit tests with JUnit 5.
+- `./gradlew test`: run unit tests with JUnit 5. Requires Docker (Testcontainers).
 - `./gradlew bootJar`: build the runnable Spring Boot artifact.
-- Gradle toolchain targets Java 21; Kotlin 1.9.x + Spring Boot 3.5.x.
+- Gradle 9.7.0 (wrapper); toolchain targets Java 25; Kotlin 2.4.10 + Spring Boot 4.1.0.
 - **Do NOT run `./gradlew build` or `./gradlew test` for frontend-only changes (HTML, CSS, JS, Thymeleaf templates).** Only run build/test when Kotlin/Java code changes are included.
 
 ## Coding Style & Naming Conventions
-- Kotlin + Spring Boot 3; keep idiomatic Kotlin (data classes, null-safety) and Spring annotations.
+- Kotlin + Spring Boot 4; keep idiomatic Kotlin (data classes, null-safety) and Spring annotations.
 - Use 4-space indentation and standard Kotlin naming: `UpperCamel` for classes, `lowerCamel` for functions/vars, `UPPER_SNAKE` for constants.
 - SQL seed files follow `bible_krv_XX_<book>.sql` in `src/main/resources/data/krv`.
 - No formatter or linter is configured; avoid reformatting unrelated files.
@@ -58,8 +58,9 @@
 - Reference implementation: `GlobalModelAttribute.kt` (`common/adapter/input/web/`)
 
 ## Configuration & Data Notes
-- H2 runs in-memory by default (`jdbc:h2:mem:test`); data is loaded from SQL in `src/main/resources/data`.
-- PostgreSQL driver is included for external DB use.
+- PostgreSQL 17 (Supabase) is the database in both production and local. H2 is not used.
+- `ddl-auto` is `none` outside the test profile; the app does not create the schema.
+- The SQL files in `src/main/resources/data` are **not** loaded automatically (`spring.sql.init` is off). They remain as reference material for seeding.
 - OAuth2 client and JWT settings live in `src/main/resources/application.yml`.
 - Access/refresh JWT cookies are issued on OAuth2 login; access is auto-refreshed via `JwtRefreshFilter` using refresh cookie (or via `POST /api/v1/auth/refresh`).
 - API responses return all timestamps in UTC ISO-8601 (example: `2024-01-01T10:00:00Z`); client converts to user timezone.
