@@ -54,11 +54,11 @@ class DatabaseCleaner(
      * 이번 테스트에서 실제로 쓰기가 발생한 테이블만 단일 TRUNCATE 문으로 비운다.
      *
      * 테이블을 하나씩 TRUNCATE 하면 다른 테이블이 건 FK 제약에 걸린다. 그래서 이전에는 테이블마다
-     * DISABLE TRIGGER -> TRUNCATE -> ENABLE TRIGGER 세 문장을 실행했다(엔티티 47개 = 메서드당 141문장).
+     * DISABLE TRIGGER -> TRUNCATE -> ENABLE TRIGGER 세 문장을 실행했다(엔티티 52개 = 메서드당 156문장).
      * PostgreSQL 의 TRUNCATE 는 여러 테이블을 한 번에 받으며, 한 문장에 함께 지정된 테이블들 사이에서는
      * FK 를 검사하지 않는다. 따라서 트리거를 껐다 켤 필요 자체가 없어지고 문장 수가 3N -> 1 이 된다.
      *
-     * 다만 매번 47개 전부를 TRUNCATE 하면 비어 있는 테이블까지 relfilenode 를 새로 만들고 identity
+     * 다만 매번 52개 전부를 TRUNCATE 하면 비어 있는 테이블까지 relfilenode 를 새로 만들고 identity
      * 시퀀스를 되돌린다. 실제로 데이터가 들어가는 테이블은 테스트당 몇 개뿐이므로 [findDirtyTables] 로
      * 대상을 좁힌다. IntegrationTest 는 @BeforeEach 에서 member 한 건만 저장하므로, 대다수 테스트의
      * 감지 결과는 member 와 해당 테스트가 건드린 테이블뿐이다.
@@ -69,7 +69,8 @@ class DatabaseCleaner(
      * "cannot truncate a table referenced in a foreign key constraint" 로 실패한다.
      * 파급된 테이블은 어차피 비어 있어 지울 행이 없다.
      *
-     * 실측(postgres:17, 이 스키마 형태로 50회 평균, 서버 측 실행 시간):
+     * 실측(postgres:17, 50회 평균, 서버 측 실행 시간). **엔티티 47개 시점 수치**라 아래 개수는
+     * 위 본문의 현재 개수와 다르다. 측정값이므로 그대로 둔다:
      *   기존 3N 방식 519ms -> 이 방식 136ms. 감지를 생략하고 47개를 통째로 TRUNCATE 하면 367ms 다.
      *   JDBC 왕복이 141회에서 2회로 줄어드는 몫은 이 수치에 포함돼 있지 않으므로 실제 이득은 더 크다.
      */
