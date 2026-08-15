@@ -50,5 +50,12 @@ data class ElSeekerProperties(
          * 가 찍히므로, 그 값을 이 목록에 추가하면 된다.
          */
         val notificationAudiences: List<String> = emptyList(),
+        /**
+         * Apple 공개키(JWKS) 엔드포인트. id_token 및 서버-대-서버 알림의 서명 검증에 쓴다.
+         *
+         * 운영에서 바꿀 일은 없다. **테스트에서 WireMock 으로 돌려 실제 네트워크를 끊기 위해**
+         * 설정 가능하게 두었다.
+         */
+        val jwkSetUri: String = "https://appleid.apple.com/auth/keys",
     )
 }

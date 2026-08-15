@@ -49,12 +49,14 @@ class AppleNotificationVerifier(
     /** 알림을 검증할 수 있는 상태인지 여부. `aud` 후보가 하나도 없으면 검증 자체가 불가능하다. */
     val isConfigured: Boolean = allowedAudiences.isNotEmpty()
 
+    private val jwkSetUri: String = elSeekerProperties.apple?.jwkSetUri ?: DEFAULT_APPLE_JWK_SET_URI
+
     /**
      * JWKS 를 원격 조회하는 디코더. Apple 서버에 대한 **기동 의존성을 만들지 않도록** 지연 생성한다.
      * [NimbusJwtDecoder] 는 첫 검증 시점에 JWKS 를 가져와 캐시하므로 Apple 의 키 교체에 자동 대응한다.
      */
     private val jwtDecoder: JwtDecoder by lazy {
-        NimbusJwtDecoder.withJwkSetUri(APPLE_JWK_SET_URI).build()
+        NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build()
     }
 
     /**
@@ -103,7 +105,9 @@ class AppleNotificationVerifier(
 
     companion object {
         private const val APPLE_ISSUER = "https://appleid.apple.com"
-        private const val APPLE_JWK_SET_URI = "https://appleid.apple.com/auth/keys"
+
+        /** [ElSeekerProperties.Apple.jwkSetUri] 가 없을 때(Apple 미설정) 쓰는 기본값. */
+        private const val DEFAULT_APPLE_JWK_SET_URI = "https://appleid.apple.com/auth/keys"
 
         private const val CLAIM_ISSUER = "iss"
         private const val CLAIM_JWT_ID = "jti"

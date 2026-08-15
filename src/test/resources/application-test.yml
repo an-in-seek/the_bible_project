@@ -44,3 +44,14 @@ el-seeker:
   api:
     base-url: http://localhost:8080
     api-key: TEST_API_KEY
+  # Apple 서버-대-서버 알림 검증용. private-key 는 알림 검증 경로에 쓰이지 않아 비워 둔다
+  # (client_secret 생성은 AppleClientSecretGeneratorTest 가 자체 키로 따로 검증한다).
+  apple:
+    client-id: com.elseeker.test.service
+    team-id: TEAMTEST01
+    key-id: KEYTEST001
+    private-key: ""
+    # 알림의 aud 는 Services ID 가 아니라 primary App ID 로 온다
+    notification-audiences: com.elseeker.test.app
+    # 실제 Apple 서버 대신 WireMock 이 JWKS 를 내려준다 (IntegrationTest 의 @EnableWireMock)
+    jwk-set-uri: ${test.apple.base-url}/auth/keys
