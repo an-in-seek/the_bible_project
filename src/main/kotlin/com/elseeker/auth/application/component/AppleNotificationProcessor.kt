@@ -58,8 +58,20 @@ class AppleNotificationProcessor(
             return
         }
 
+        // Apple 이 통보한 것은 "Apple 인증을 더는 쓰지 않겠다"이지 "서비스 계정을 지워달라"가 아니다.
+        // Google 로 가입한 뒤 Apple 을 추가 연동한 사용자를 통째로 지우면, 본인이 요청한 적 없는
+        // 데이터 삭제가 되고 다음 Google 로그인 때 빈 계정이 새로 생긴다.
+        // 따라서 Apple 연동만 끊고, 그것이 마지막 로그인 수단일 때만 회원까지 정리한다.
+        val isLastLinkedAccount = memberOAuthAccountRepository.findAllByMemberUid(memberUid).size <= 1
+        if (!isLastLinkedAccount) {
+            memberService.unlinkOAuthAccountByProviderNotification(memberUid, OAuthProvider.APPLE, event.sub)
+            log.info { "Apple 연동만 해제(다른 소셜 연동 유지): type=${type.rawValue}, memberUid=$memberUid" }
+            record(jti, event, AppleNotificationResult.APPLE_ACCOUNT_UNLINKED, memberUid)
+            return
+        }
+
         memberService.deleteMemberByProviderNotification(memberUid)
-        log.info { "Apple 알림으로 회원 탈퇴 처리 완료: type=${type.rawValue}, memberUid=$memberUid" }
+        log.info { "Apple 알림으로 회원 탈퇴 처리 완료(마지막 연동): type=${type.rawValue}, memberUid=$memberUid" }
         record(jti, event, AppleNotificationResult.MEMBER_WITHDRAWN, memberUid)
     }
 

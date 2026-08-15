@@ -5,7 +5,15 @@ package com.elseeker.auth.domain.vo
  */
 enum class AppleNotificationResult {
 
-    /** 연결된 회원을 탈퇴 처리했다. */
+    /**
+     * Apple 연동만 해제했다. 다른 소셜 연동이 남아 있어 회원은 유지된다.
+     *
+     * `consent-revoked` 는 "**Apple** 인증을 철회한다"는 뜻이지 "서비스 계정을 지워달라"가 아니다.
+     * Google 로 가입한 뒤 Apple 을 추가 연동한 사용자의 데이터를 통째로 지우면 안 된다.
+     */
+    APPLE_ACCOUNT_UNLINKED,
+
+    /** 마지막 남은 연동이라 로그인 수단이 사라지므로 회원까지 탈퇴 처리했다. */
     MEMBER_WITHDRAWN,
 
     /** 탈퇴 대상 이벤트였으나 해당 Apple 계정에 연결된 회원이 없었다(이미 탈퇴했거나 미가입). */

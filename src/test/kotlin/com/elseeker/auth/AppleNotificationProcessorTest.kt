@@ -39,14 +39,12 @@ class AppleNotificationProcessorTest {
     )
 
     @Test
-    @DisplayName("account-deleted 이면 연결된 회원을 탈퇴 처리한다")
-    fun processAccountDeleted() {
+    @DisplayName("Apple 이 마지막 연동이면 account-deleted 에 회원을 탈퇴 처리한다")
+    fun processAccountDeletedWithOnlyAppleLinked() {
         // given
         val member = memberOf()
         givenNotProcessed()
-        every {
-            memberOAuthAccountRepository.findByProviderAndProviderUserId(OAuthProvider.APPLE, APPLE_SUB)
-        } returns oauthAccountOf(member)
+        givenAppleLinked(member, alsoLinked = emptyList())
         justRun { memberService.deleteMemberByProviderNotification(member.uid) }
         val saved = givenAuditSaved()
 
@@ -60,14 +58,12 @@ class AppleNotificationProcessorTest {
     }
 
     @Test
-    @DisplayName("consent-revoked 도 동일하게 탈퇴 처리한다")
-    fun processConsentRevoked() {
+    @DisplayName("consent-revoked 도 마지막 연동이면 동일하게 탈퇴 처리한다")
+    fun processConsentRevokedWithOnlyAppleLinked() {
         // given
         val member = memberOf()
         givenNotProcessed()
-        every {
-            memberOAuthAccountRepository.findByProviderAndProviderUserId(OAuthProvider.APPLE, APPLE_SUB)
-        } returns oauthAccountOf(member)
+        givenAppleLinked(member, alsoLinked = emptyList())
         justRun { memberService.deleteMemberByProviderNotification(member.uid) }
         val saved = givenAuditSaved()
 
@@ -77,6 +73,51 @@ class AppleNotificationProcessorTest {
         // then
         verify(exactly = 1) { memberService.deleteMemberByProviderNotification(member.uid) }
         saved.captured.result shouldBe AppleNotificationResult.MEMBER_WITHDRAWN
+    }
+
+    @Test
+    @DisplayName("다른 소셜 연동이 남아 있으면 Apple 연동만 해제하고 회원은 유지한다")
+    fun processConsentRevokedWithOtherProviderLinked() {
+        // given — Google 로 가입한 뒤 Apple 을 추가 연동한 회원.
+        // Apple 인증 철회를 이유로 Google 사용자의 데이터까지 지워서는 안 된다.
+        val member = memberOf()
+        givenNotProcessed()
+        givenAppleLinked(member, alsoLinked = listOf(OAuthProvider.GOOGLE))
+        justRun {
+            memberService.unlinkOAuthAccountByProviderNotification(member.uid, OAuthProvider.APPLE, APPLE_SUB)
+        }
+        val saved = givenAuditSaved()
+
+        // when
+        sut.process(JTI, eventOf("consent-revoked"))
+
+        // then
+        verify(exactly = 0) { memberService.deleteMemberByProviderNotification(any()) }
+        verify(exactly = 1) {
+            memberService.unlinkOAuthAccountByProviderNotification(member.uid, OAuthProvider.APPLE, APPLE_SUB)
+        }
+        saved.captured.result shouldBe AppleNotificationResult.APPLE_ACCOUNT_UNLINKED
+        saved.captured.memberUid shouldBe member.uid
+    }
+
+    @Test
+    @DisplayName("account-deleted 여도 다른 연동이 남아 있으면 회원을 삭제하지 않는다")
+    fun processAccountDeletedWithOtherProviderLinked() {
+        // given — Apple ID 자체가 삭제돼도 그 사용자의 Google 신원까지 사라진 것은 아니다
+        val member = memberOf()
+        givenNotProcessed()
+        givenAppleLinked(member, alsoLinked = listOf(OAuthProvider.KAKAO))
+        justRun {
+            memberService.unlinkOAuthAccountByProviderNotification(member.uid, OAuthProvider.APPLE, APPLE_SUB)
+        }
+        val saved = givenAuditSaved()
+
+        // when
+        sut.process(JTI, eventOf("account-deleted"))
+
+        // then
+        verify(exactly = 0) { memberService.deleteMemberByProviderNotification(any()) }
+        saved.captured.result shouldBe AppleNotificationResult.APPLE_ACCOUNT_UNLINKED
     }
 
     @Test
@@ -149,6 +190,25 @@ class AppleNotificationProcessorTest {
         every {
             appleNotificationAuditRepository.existsByJtiAndEventTypeAndAppleSub(any(), any(), any())
         } returns false
+    }
+
+    /** Apple 을 연동한 회원을 세우고, [alsoLinked] 로 함께 연동된 다른 provider 를 지정한다. */
+    private fun givenAppleLinked(member: Member, alsoLinked: List<OAuthProvider>) {
+        val appleAccount = oauthAccountOf(member)
+        every {
+            memberOAuthAccountRepository.findByProviderAndProviderUserId(OAuthProvider.APPLE, APPLE_SUB)
+        } returns appleAccount
+        val others = alsoLinked.map { provider ->
+            MemberOAuthAccount.create(
+                member = member,
+                provider = provider,
+                providerUserId = "${provider.registrationId}-user-id",
+                email = null,
+                nickname = null,
+                profileImageUrl = null,
+            )
+        }
+        every { memberOAuthAccountRepository.findAllByMemberUid(member.uid) } returns listOf(appleAccount) + others
     }
 
     private fun givenAuditSaved() = slot<AppleNotificationAudit>().also { captured ->

@@ -34,7 +34,7 @@ COMMENT ON COLUMN apple_notification_audit.apple_sub        IS 'Apple 사용자 
 COMMENT ON COLUMN apple_notification_audit.email            IS '이메일 관련 이벤트에서 Apple 이 내려준 주소 (비공개 릴레이일 수 있음)';
 COMMENT ON COLUMN apple_notification_audit.is_private_email IS 'Apple 비공개 이메일 릴레이 주소 여부';
 COMMENT ON COLUMN apple_notification_audit.occurred_at      IS 'Apple 이 알려 준 이벤트 발생 시각 (UTC). 수신 시각은 created_at';
-COMMENT ON COLUMN apple_notification_audit.result           IS '처리 결과 (MEMBER_WITHDRAWN / MEMBER_NOT_FOUND / NO_ACTION / UNSUPPORTED_TYPE)';
+COMMENT ON COLUMN apple_notification_audit.result           IS '처리 결과 (APPLE_ACCOUNT_UNLINKED / MEMBER_WITHDRAWN / MEMBER_NOT_FOUND / NO_ACTION / UNSUPPORTED_TYPE)';
 COMMENT ON COLUMN apple_notification_audit.member_uid       IS '처리 대상 회원의 uid. 대상이 없었으면 NULL (FK 제약 없음)';
 
 -- =====================================================================

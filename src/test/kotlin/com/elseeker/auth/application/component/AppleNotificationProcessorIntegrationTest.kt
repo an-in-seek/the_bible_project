@@ -38,9 +38,33 @@ class AppleNotificationProcessorIntegrationTest @Autowired constructor(
 ) : IntegrationTest() {
 
     @Test
-    @DisplayName("account-deleted 알림을 받으면 회원이 삭제되고 감사 기록이 남는다")
+    @DisplayName("다른 소셜 연동이 남아 있으면 Apple 연동만 끊고 회원과 데이터를 보존한다")
+    fun processConsentRevokedKeepsMultiProviderMember() {
+        // given — Google 로 가입한 뒤 Apple 을 추가 연동한 회원.
+        // Apple 인증 철회만으로 이 회원의 데이터를 지우면 본인이 요청한 적 없는 삭제가 된다.
+        linkAppleAccount()
+        linkGoogleAccount()
+
+        // when
+        appleNotificationProcessor.process(JTI, eventOf("consent-revoked"))
+
+        // then — 회원과 Google 연동은 살아 있고, Apple 연동만 사라진다
+        memberRepository.findByUid(member.uid) shouldNotBe null
+        memberOAuthAccountRepository
+            .findByProviderAndProviderUserId(OAuthProvider.GOOGLE, GOOGLE_SUB) shouldNotBe null
+        memberOAuthAccountRepository
+            .findByProviderAndProviderUserId(OAuthProvider.APPLE, APPLE_SUB) shouldBe null
+
+        val audits = appleNotificationAuditRepository.findAll()
+        audits.size shouldBe 1
+        audits[0].result shouldBe AppleNotificationResult.APPLE_ACCOUNT_UNLINKED
+        audits[0].memberUid shouldBe member.uid
+    }
+
+    @Test
+    @DisplayName("Apple 이 마지막 연동이면 account-deleted 에 회원이 삭제되고 감사 기록이 남는다")
     fun processAccountDeleted() {
-        // given — Apple 소셜 계정이 연결된 회원
+        // given — Apple 소셜 계정만 연결된 회원
         linkAppleAccount()
         memberOAuthAccountRepository.findByProviderAndProviderUserId(OAuthProvider.APPLE, APPLE_SUB) shouldNotBe null
 
@@ -90,13 +114,21 @@ class AppleNotificationProcessorIntegrationTest @Autowired constructor(
         }
     }
 
-    private fun linkAppleAccount() {
-        member.addOAuthAccount(
-            provider = OAuthProvider.APPLE,
-            providerUserId = APPLE_SUB,
-            email = "user@privaterelay.appleid.com",
-        )
-        memberRepository.save(member)
+    private fun linkAppleAccount() = linkAccount(OAuthProvider.APPLE, APPLE_SUB, "user@privaterelay.appleid.com")
+
+    private fun linkGoogleAccount() = linkAccount(OAuthProvider.GOOGLE, GOOGLE_SUB, "member@elseeker.test")
+
+    /**
+     * 소셜 계정을 연동한다.
+     *
+     * `save` 결과를 [member] 에 **다시 담아야 한다.** 트랜잭션 밖이라 `member` 는 준영속이고,
+     * `save` 는 `merge` 로 동작해 관리 상태의 **사본**을 돌려준다. 원본 인스턴스의 자식들은
+     * 생성된 id 를 받지 못하므로, 그대로 두고 두 번째 연동을 추가하면 첫 연동이 다시 신규로
+     * 취급돼 `uk_member_oauth_provider_user` 위반으로 INSERT 가 두 번 나간다.
+     */
+    private fun linkAccount(provider: OAuthProvider, providerUserId: String, email: String) {
+        member.addOAuthAccount(provider = provider, providerUserId = providerUserId, email = email)
+        member = memberRepository.save(member)
     }
 
     private fun eventOf(type: String) = AppleNotificationEvent(
@@ -117,6 +149,7 @@ class AppleNotificationProcessorIntegrationTest @Autowired constructor(
     companion object {
         private const val JTI = "0e0e0e0e-1111-2222-3333-444444444444"
         private const val APPLE_SUB = "001234.abcdef0123456789.1234"
+        private const val GOOGLE_SUB = "109876543210987654321"
         private val OCCURRED_AT: Instant = Instant.ofEpochMilli(1700000000000)
     }
 }
