@@ -24,10 +24,15 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2ParameterNames
  * Google/Naver/Kakao 는 이 설정의 영향을 받지 않는다.
  */
 /*
- * `OAuth2ClientProperties` 를 직접 바인딩한다.
- * Boot 의 OAuth2 클라이언트 자동설정은 registration 이 하나라도 있을 때만 동작하며,
- * 그 안에서 이 프로퍼티 빈이 등록된다. 테스트 프로파일처럼 registration 이 비면 자동설정이
- * 물러나 빈이 사라지고, 이 설정이 기동에 실패한다. (등록이 중복돼도 빈 이름이 같아 안전하다.)
+ * `OAuth2ClientProperties` 를 직접 바인딩한다. **지우면 기동에 실패한다.**
+ *
+ * Boot 는 이 프로퍼티 빈을 `OAuth2ClientConfigurations.ClientRegistrationRepositoryConfiguration`
+ * 에서만 등록하는데, 그 클래스는 `@ConditionalOnMissingBean(ClientRegistrationRepository)` 로
+ * 가드돼 있다. 아래에서 `clientRegistrationRepository` 빈을 직접 정의하는 순간 조건이 깨져
+ * 자동설정이 통째로 물러나고, 프로퍼티 빈도 함께 사라진다.
+ *
+ * 즉 테스트 프로파일 한정 안전장치가 아니라 **모든 프로파일에서 상시 필요한 배선**이다.
+ * (자동설정이 살아 있는 경우와 중복돼도 빈 이름이 같아 안전하다.)
  */
 @Configuration
 @EnableConfigurationProperties(OAuth2ClientProperties::class)
