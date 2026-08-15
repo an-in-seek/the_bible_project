@@ -40,16 +40,20 @@ function buildShareUrl() {
     }
 }
 
+// aria-live 영역은 내용이 바뀌기 전부터 DOM 에 있어야 스크린리더가 변경을 읽는다.
+// 그래서 빈 채로 초기화 시점에 미리 붙여 둔다 (initTopNavShare 참고).
+function createShareToast() {
+    const toast = document.createElement("div");
+    toast.id = "shareToast";
+    toast.className = "share-toast";
+    toast.setAttribute("role", "status");
+    toast.setAttribute("aria-live", "polite");
+    document.body.appendChild(toast);
+    return toast;
+}
+
 function showShareToast(message, isError = false) {
-    let toast = document.getElementById("shareToast");
-    if (!toast) {
-        toast = document.createElement("div");
-        toast.id = "shareToast";
-        toast.className = "share-toast";
-        toast.setAttribute("role", "status");
-        toast.setAttribute("aria-live", "polite");
-        document.body.appendChild(toast);
-    }
+    const toast = document.getElementById("shareToast") ?? createShareToast();
 
     toast.textContent = message;
     toast.classList.toggle("is-error", isError);
@@ -62,19 +66,20 @@ function showShareToast(message, isError = false) {
 }
 
 function copyByExecCommand(text) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.setAttribute("readonly", "readonly");
+    textarea.style.position = "fixed";
+    textarea.style.left = "-9999px";
+    document.body.appendChild(textarea);
     try {
-        const textarea = document.createElement("textarea");
-        textarea.value = text;
-        textarea.setAttribute("readonly", "readonly");
-        textarea.style.position = "fixed";
-        textarea.style.left = "-9999px";
-        document.body.appendChild(textarea);
         textarea.select();
-        const copied = document.execCommand("copy");
-        document.body.removeChild(textarea);
-        return copied;
+        return document.execCommand("copy");
     } catch (error) {
         return false;
+    } finally {
+        // select()/execCommand 가 던져도 임시 textarea 가 DOM 에 남지 않도록 한다.
+        textarea.remove();
     }
 }
 
@@ -116,6 +121,9 @@ function initTopNavShare() {
     if (!button) {
         return;
     }
+
+    // 첫 안내가 스크린리더에 읽히도록 aria-live 영역을 미리 만들어 둔다.
+    createShareToast();
 
     // 공유 시트가 떠 있는 동안의 연타 방지.
     // button.disabled 를 쓰면 포커스가 body 로 날아가 키보드 사용자가 위치를 잃으므로 플래그로 막는다.
