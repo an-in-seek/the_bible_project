@@ -3,8 +3,10 @@ package com.elseeker.common.security.oauth.apple
 import com.elseeker.common.config.ElSeekerProperties
 import com.elseeker.common.domain.ErrorType
 import com.elseeker.common.domain.throwError
+import com.nimbusds.jose.RemoteKeySourceException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.security.oauth2.jwt.JwtDecoder
+import org.springframework.security.oauth2.jwt.JwtDecoderInitializationException
 import org.springframework.security.oauth2.jwt.JwtException
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder
 import org.springframework.stereotype.Component
@@ -62,8 +64,11 @@ class AppleNotificationVerifier(
     /**
      * 알림 페이로드(JWS 문자열)를 검증하고 이벤트 목록으로 변환한다.
      *
-     * 검증 실패는 [ErrorType.OAUTH_APPLE_NOTIFICATION_INVALID](401)로 끝낸다. Apple 이 재전송해도
-     * 결과가 같으므로 5xx 로 올려 재시도를 유도할 이유가 없다.
+     * 검증 실패는 [ErrorType.OAUTH_APPLE_NOTIFICATION_INVALID](401)로 끝낸다. 페이로드가 잘못된
+     * 것이라 Apple 이 재전송해도 결과가 같으므로 재시도를 유도할 이유가 없다.
+     *
+     * 단, **우리 쪽 사정으로 검증하지 못한 경우**(JWKS 조회 실패)는 [ErrorType.OAUTH_APPLE_JWKS_UNAVAILABLE]
+     * (503)로 구분해 Apple 이 다시 보내도록 한다. [throwJwksUnavailable] 참고.
      */
     fun verify(payload: String): AppleNotification {
         if (!isConfigured) {
@@ -72,7 +77,17 @@ class AppleNotificationVerifier(
 
         val jwt = try {
             jwtDecoder.decode(payload)
+        } catch (ex: JwtDecoderInitializationException) {
+            // JwtException 을 상속하지 않으므로(RuntimeException 직속) 아래 catch 로는 잡히지 않는다.
+            // 따로 받지 않으면 ErrorType 없는 500 으로 새어 나간다.
+            throwJwksUnavailable(ex)
         } catch (ex: JwtException) {
+            // ⚠️ JWKS 조회 실패도 **평범한 JwtException** 으로 온다(Spring Security 7.1 기준, 실측).
+            // 예외 타입으로는 위조와 구분되지 않으므로 원인 사슬을 봐야 한다.
+            //   JwtException <- RemoteKeySourceException <- HttpServerErrorException
+            if (hasCause<RemoteKeySourceException>(ex)) {
+                throwJwksUnavailable(ex)
+            }
             log.warn(ex) { "Apple 알림 서명 검증 실패" }
             throwError(ErrorType.OAUTH_APPLE_NOTIFICATION_INVALID)
         }
@@ -101,6 +116,27 @@ class AppleNotificationVerifier(
             jti = jti,
             events = appleNotificationEventParser.parse(jwt.claims[CLAIM_EVENTS]),
         )
+    }
+
+    /**
+     * JWKS 를 가져오지 못한 상황(Apple 장애, DNS, egress 차단)을 **서명 위조와 구분해** 끝낸다.
+     *
+     * 같은 401 로 묶으면 두 가지가 동시에 망가진다. Apple JWKS 장애 때 위조 시도 폭주처럼 보여
+     * 운영자가 오판하고, Apple 은 4xx 에 재시도하지 않으므로 실제 탈퇴가 조용히 누락된다.
+     * 5xx 로 올려 재시도를 유도한다.
+     */
+    private fun throwJwksUnavailable(ex: Throwable): Nothing {
+        log.error(ex) { "Apple JWKS 조회 실패 — 알림을 검증할 수 없다. jwkSetUri=$jwkSetUri" }
+        throwError(ErrorType.OAUTH_APPLE_JWKS_UNAVAILABLE)
+    }
+
+    private inline fun <reified T : Throwable> hasCause(ex: Throwable): Boolean {
+        var cause: Throwable? = ex
+        while (cause != null) {
+            if (cause is T) return true
+            cause = cause.cause
+        }
+        return false
     }
 
     companion object {

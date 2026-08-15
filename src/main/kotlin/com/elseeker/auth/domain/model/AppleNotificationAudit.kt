@@ -13,6 +13,15 @@ import java.time.Instant
 import java.util.UUID
 
 /**
+ * 재전송 멱등성을 지키는 유니크 제약명.
+ *
+ * 제약 위반을 "이미 처리된 알림"으로 판별할 때 이 이름을 대조하므로,
+ * 엔티티 애노테이션 · DDL(`db/schema/apple_notification_audit.sql`) · 위반 판별이
+ * **같은 값을 봐야 한다.** 그래서 상수로 뽑아 둔다.
+ */
+const val APPLE_NOTIFICATION_AUDIT_UNIQUE_CONSTRAINT = "uk_apple_notification_audit_event"
+
+/**
  * Apple 서버-대-서버 알림 수신 이력.
  *
  * 남기는 이유는 두 가지다.
@@ -27,7 +36,7 @@ import java.util.UUID
     uniqueConstraints = [
         // 한 토큰(jti)에 여러 이벤트가 담길 수 있어 jti 단독으로는 유일하지 않다.
         UniqueConstraint(
-            name = "uk_apple_notification_audit_event",
+            name = APPLE_NOTIFICATION_AUDIT_UNIQUE_CONSTRAINT,
             columnNames = ["jti", "event_type", "apple_sub"]
         )
     ],

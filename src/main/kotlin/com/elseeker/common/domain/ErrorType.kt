@@ -91,5 +91,8 @@ enum class ErrorType(
     OAUTH_APPLE_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 로그인이 설정되지 않았습니다.", LogLevel.ERROR),
     OAUTH_APPLE_PRIVATE_KEY_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 로그인 개인키를 읽을 수 없습니다.", LogLevel.ERROR),
     OAUTH_APPLE_NOTIFICATION_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 알림 수신이 설정되지 않았습니다.", LogLevel.ERROR),
+
+    // 503 — Apple 이 재시도하도록 5xx 로 응답해야 하는 일시적 실패
+    OAUTH_APPLE_JWKS_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "Apple 공개키를 조회할 수 없습니다.", LogLevel.ERROR),
     UNKNOWN(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 오류가 발생했습니다.", LogLevel.ERROR),
 }

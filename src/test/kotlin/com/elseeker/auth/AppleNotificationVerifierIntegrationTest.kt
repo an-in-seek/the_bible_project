@@ -1,12 +1,15 @@
 package com.elseeker.auth
 
 import com.elseeker.common.IntegrationTest
+import com.elseeker.common.config.ElSeekerProperties
 import com.elseeker.common.domain.ErrorType
 import com.elseeker.common.domain.ServiceError
+import com.elseeker.common.security.oauth.apple.AppleNotificationEventParser
 import com.elseeker.common.security.oauth.apple.AppleNotificationVerifier
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.get
 import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.serverError
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSHeader
@@ -23,6 +26,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.wiremock.spring.InjectWireMock
+import java.time.Duration
 import java.time.Instant
 import java.util.Date
 
@@ -40,6 +44,7 @@ import java.util.Date
 @DisplayName("AppleNotificationVerifier 통합테스트")
 class AppleNotificationVerifierIntegrationTest @Autowired constructor(
     private val appleNotificationVerifier: AppleNotificationVerifier,
+    private val appleNotificationEventParser: AppleNotificationEventParser,
 ) : IntegrationTest() {
 
     @InjectWireMock("apple")
@@ -120,6 +125,41 @@ class AppleNotificationVerifierIntegrationTest @Autowired constructor(
         verifyShouldFail(payload)
     }
 
+    @Test
+    @DisplayName("JWKS 를 못 가져오면 서명 위조와 구분해 5xx 로 올린다")
+    fun rejectWhenJwksUnavailable() {
+        // given — Apple 장애/DNS/egress 차단 상황.
+        // 위조와 같은 401 로 묶으면 운영자가 공격으로 오판하고, Apple 이 재시도하지 않아
+        // 실제 탈퇴가 조용히 누락된다.
+        appleServer.stubFor(get(urlEqualTo(JWKS_DOWN_PATH)).willReturn(serverError()))
+        // 디코더가 JWKS 를 캐시하므로, 이 케이스만 별도 인스턴스로 확인한다.
+        val verifier = AppleNotificationVerifier(
+            elSeekerProperties = propertiesWithJwkSetUri("${appleServer.baseUrl()}$JWKS_DOWN_PATH"),
+            appleNotificationEventParser = appleNotificationEventParser,
+        )
+
+        // when & then
+        val error = shouldThrow<ServiceError> { verifier.verify(signedToken()) }
+        error.errorType shouldBe ErrorType.OAUTH_APPLE_JWKS_UNAVAILABLE
+    }
+
+    private fun propertiesWithJwkSetUri(jwkSetUri: String) = ElSeekerProperties(
+        jwt = ElSeekerProperties.Jwt(
+            secret = "dGVzdC1zZWNyZXQta2V5LWZvci1pbnRlZ3JhdGlvbi10ZXN0LTEyMzQ=",
+            accessTokenTtl = Duration.ofHours(1),
+            refreshTokenTtl = Duration.ofDays(14),
+        ),
+        api = ElSeekerProperties.Api(baseUrl = "http://localhost:8080", apiKey = "TEST"),
+        apple = ElSeekerProperties.Apple(
+            clientId = "com.elseeker.test.service",
+            teamId = "TEAMTEST01",
+            keyId = "KEYTEST001",
+            privateKey = "",
+            notificationAudiences = listOf(ALLOWED_AUDIENCE),
+            jwkSetUri = jwkSetUri,
+        ),
+    )
+
     private fun verifyShouldFail(payload: String) {
         val error = shouldThrow<ServiceError> { appleNotificationVerifier.verify(payload) }
         error.errorType shouldBe ErrorType.OAUTH_APPLE_NOTIFICATION_INVALID
@@ -158,6 +198,9 @@ class AppleNotificationVerifierIntegrationTest @Autowired constructor(
         private const val ALLOWED_AUDIENCE = "com.elseeker.test.app"
 
         private const val KEY_ID = "apple-test-key"
+
+        /** JWKS 조회 실패를 재현하는 별도 경로. 정상 스텁(/auth/keys)을 건드리지 않는다. */
+        private const val JWKS_DOWN_PATH = "/auth/keys-down"
 
         /** JWKS 로 내려주는 키. Apple 의 서명 키 역할. */
         private val signingKey: RSAKey = RSAKeyGenerator(2048).keyID(KEY_ID).generate()
