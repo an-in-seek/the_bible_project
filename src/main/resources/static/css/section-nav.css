@@ -202,6 +202,20 @@ html[data-theme="dark"] {
     }
 }
 
+/* --- share-toast 공존 보정 --- */
+/* --bottom-tab-height 는 탭바 유무와 무관하게 :root 에 정의돼 있으므로,
+   실제로 .section-nav 가 있는 화면에서만 띄운다. 없는 화면에서 띄우면 허공에 뜬다. */
+@media (max-width: 599.98px) {
+    body:has(.section-nav) .share-toast {
+        bottom: calc(1.5rem + var(--bottom-tab-height));
+        transition: opacity 0.2s ease, transform 0.2s ease, bottom 300ms ease;
+    }
+
+    body.bottom-tab-hidden .share-toast {
+        bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    }
+}
+
 /* --- scroll-to-top 버튼 공존 보정 --- */
 @media (max-width: 599.98px) {
     body:has(.section-nav) .scroll-to-top-btn {

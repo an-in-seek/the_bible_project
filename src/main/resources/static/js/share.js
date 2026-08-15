@@ -80,7 +80,8 @@ function copyByExecCommand(text) {
 
 async function copyToClipboard(text) {
     try {
-        if (navigator.clipboard?.writeText && window.isSecureContext) {
+        // navigator.clipboard 는 보안 컨텍스트에서만 존재한다. 없으면 바로 execCommand 로 간다.
+        if (navigator.clipboard?.writeText) {
             await navigator.clipboard.writeText(text);
             return true;
         }
@@ -116,13 +117,18 @@ function initTopNavShare() {
         return;
     }
 
+    // 공유 시트가 떠 있는 동안의 연타 방지.
+    // button.disabled 를 쓰면 포커스가 body 로 날아가 키보드 사용자가 위치를 잃으므로 플래그로 막는다.
+    let sharing = false;
     button.addEventListener("click", async () => {
-        // 공유 시트가 뜨는 동안의 연타 방지
-        button.disabled = true;
+        if (sharing) {
+            return;
+        }
+        sharing = true;
         try {
             await shareCurrentPage(button);
         } finally {
-            button.disabled = false;
+            sharing = false;
         }
     });
 }

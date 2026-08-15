@@ -290,11 +290,11 @@
 }
 
 /* --- Share Toast (Web Share 미지원 시 링크 복사 피드백) --- */
-/* share.js 가 body 에 동적으로 붙인다. 하단 탭바가 있는 화면에서도 가리지 않도록 탭바 높이만큼 띄운다. */
+/* share.js 가 body 에 동적으로 붙인다. 하단 탭바 공존 보정은 section-nav.css 에 있다. */
 .share-toast {
     position: fixed;
     left: 50%;
-    bottom: calc(1.5rem + var(--bottom-tab-height, 0px));
+    bottom: 1.5rem;
     z-index: 1080;
     max-width: min(90vw, 420px);
     padding: 0.625rem 1.125rem;

@@ -13,8 +13,11 @@
 | 본문 상단/하단 고정 버튼 | 화면마다 배치를 다시 잡아야 하고, `bible-history-map`(지도 UI)처럼 본문을 UI 가 꽉 채우는 화면에는 놓을 자리가 없다. |
 | FAB (성경 본문처럼) | 학습 화면 다수가 `has-dual-bottom-nav` 라 하단 탭바·스크롤 상단 버튼과 겹친다. FAB 는 성경 본문의 "구절 선택 후 동작"처럼 선택 대상이 있을 때 어울린다. 화면 전체 공유에는 과하다. |
 
-`has-dual-bottom-nav` 화면에서 상단바는 스크롤을 내리면 숨는다. 위로 조금만 올리면 다시
-나타나므로 접근성 문제는 없다고 판단했다.
+상단바 auto-hide 를 걱정할 필요는 없다. `common-nav.js` 의 auto-hide 는 DOM 에
+`.section-nav` 가 있을 때만 동작하는데, 학습 화면 19개 중 `.section-nav` 를 넣는 건
+`study.html` 하나뿐이고 그 화면은 `has-dual-bottom-nav` 를 달지 않는다. 즉 **학습 섹션에서
+상단바는 항상 떠 있다.** (`has-dual-bottom-nav` 클래스만 붙은 학습 화면이 9개 있지만
+`.section-nav` 가 없어 auto-hide 가 걸리지 않는다.)
 
 ## 구성
 
@@ -25,7 +28,8 @@
 | `templates/fragments/head.html` | `showShareButton` 일 때만 `share.js` 로드 |
 | `static/js/share.js` | Web Share / 클립보드 복사 동작, 토스트 |
 | `static/css/top-nav.css` | `.top-nav-share-button`, `.top-nav-share-icon` |
-| `static/css/common.css` | `.share-toast` |
+| `static/css/common.css` | `.share-toast` 기본 스타일 |
+| `static/css/section-nav.css` | `.share-toast` 하단 탭바 공존 보정 |
 
 ## 노출 대상은 경로 접두사로 결정한다
 
