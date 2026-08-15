@@ -1,6 +1,6 @@
 # 화면 URL 공유 (상단 네비게이션 공유 버튼)
 
-## 구현 상태: ✅ 완료 (학습 섹션 전체 적용)
+## 구현 상태: ✅ 완료 (학습 섹션 적용, `creation` 제외)
 
 현재 보고 있는 화면의 URL 을 공유할 수 있는 공통 버튼입니다. 상단 네비게이션 오른쪽,
 계정 버튼 왼쪽에 위치합니다.
@@ -9,8 +9,8 @@
 
 | 후보 | 판단 |
 |---|---|
-| **상단 네비게이션 (채택)** | 학습 화면 19개가 레이아웃이 제각각(카드 그리드, 풀스크린 스크롤, 지도, 타임라인)인데 상단바만은 모든 화면에 동일하게 있다. 화면별 CSS·마크업 추가 없이 한 곳만 고치면 전부 적용된다. 이미 검색·알림·게시글 메뉴가 같은 자리를 쓰고 있어 사용자에게 "화면 단위 동작"으로 읽힌다. |
-| 본문 상단/하단 고정 버튼 | 화면마다 배치를 다시 잡아야 하고, `creation`(풀스크린 스크롤)·`bible-history-map`(지도 UI)에서는 놓을 자리가 없다. |
+| **상단 네비게이션 (채택)** | 학습 화면 레이아웃이 제각각(카드 그리드, 지도, 타임라인, 상세)인데 상단바만은 모든 화면에 동일하게 있다. 화면별 CSS·마크업 추가 없이 한 곳만 고치면 전부 적용된다. 이미 검색·알림·게시글 메뉴가 같은 자리를 쓰고 있어 사용자에게 "화면 단위 동작"으로 읽힌다. |
+| 본문 상단/하단 고정 버튼 | 화면마다 배치를 다시 잡아야 하고, `bible-history-map`(지도 UI)처럼 본문을 UI 가 꽉 채우는 화면에는 놓을 자리가 없다. |
 | FAB (성경 본문처럼) | 학습 화면 다수가 `has-dual-bottom-nav` 라 하단 탭바·스크롤 상단 버튼과 겹친다. FAB 는 성경 본문의 "구절 선택 후 동작"처럼 선택 대상이 있을 때 어울린다. 화면 전체 공유에는 과하다. |
 
 `has-dual-bottom-nav` 화면에서 상단바는 스크롤을 내리면 숨는다. 위로 조금만 올리면 다시
@@ -34,16 +34,28 @@
 
 ```kotlin
 @ModelAttribute("showShareButton")
-fun showShareButton(request: HttpServletRequest): Boolean =
-    SHARE_ENABLED_PATH_PREFIXES.any { request.requestURI.startsWith(it) }
+fun showShareButton(request: HttpServletRequest): Boolean {
+    val requestUri = request.requestURI
+    return SHARE_ENABLED_PATH_PREFIXES.any { requestUri.startsWith(it) } &&
+        requestUri !in SHARE_EXCLUDED_PATHS
+}
 
 companion object {
     private val SHARE_ENABLED_PATH_PREFIXES = listOf("/web/study")
+
+    /** 풀스크린 스크롤 연출 화면 — 상단 버튼이 몰입을 깨서 공유 대상에서 뺀다. */
+    private val SHARE_EXCLUDED_PATHS = setOf("/web/study/creation")
 }
 ```
 
-다른 섹션으로 넓힐 때는 이 목록에 접두사를 추가하면 된다. 관리자 화면(`/web/admin`)은
-접두사가 달라 영향을 받지 않는다.
+다른 섹션으로 넓힐 때는 접두사 목록에 추가하면 된다. 관리자 화면(`/web/admin`)은 접두사가
+달라 영향을 받지 않는다.
+
+### 예외: `creation` (7일 창조)
+
+`/web/study/creation` 은 풀스크린 스크롤로 창조 과정을 체험하는 연출 화면이라 공유 버튼을
+띄우지 않는다. 접두사만으로는 걸러지지 않으므로 `SHARE_EXCLUDED_PATHS` 로 정확히 일치하는
+경로를 제외한다. 같은 성격의 화면이 생기면 이 목록에 추가한다.
 
 ## 공유되는 값
 

@@ -20,10 +20,16 @@ class GlobalModelAttribute {
      * 설계 문서: docs/common/url-share.md
      */
     @ModelAttribute("showShareButton")
-    fun showShareButton(request: HttpServletRequest): Boolean =
-        SHARE_ENABLED_PATH_PREFIXES.any { request.requestURI.startsWith(it) }
+    fun showShareButton(request: HttpServletRequest): Boolean {
+        val requestUri = request.requestURI
+        return SHARE_ENABLED_PATH_PREFIXES.any { requestUri.startsWith(it) } &&
+            requestUri !in SHARE_EXCLUDED_PATHS
+    }
 
     companion object {
         private val SHARE_ENABLED_PATH_PREFIXES = listOf("/web/study")
+
+        /** 풀스크린 스크롤 연출 화면 — 상단 버튼이 몰입을 깨서 공유 대상에서 뺀다. */
+        private val SHARE_EXCLUDED_PATHS = setOf("/web/study/creation")
     }
 }
