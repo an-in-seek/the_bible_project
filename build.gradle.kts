@@ -27,6 +27,8 @@ val springDocVersion = "3.1.0"
 val springCloudVersion = "2025.1.2"
 val springCloudGcpVersion = "8.1.0"
 val jjwtVersion = "0.13.0"
+// WireMock (Spring Boot 통합)
+val wiremockSpringBootVersion = "4.2.2"
 
 dependencyManagement {
     imports {
@@ -119,6 +121,11 @@ dependencies {
 
     // MockK (Kotlin 친화 모킹 — Docker 불필요 단위 테스트용)
     testImplementation("io.mockk:mockk:1.14.11")
+
+    // WireMock — 외부 HTTP 의존(Apple JWKS 등)을 스텁해 통합 테스트에서 실제 네트워크를 끊는다.
+    // Spring Cloud Contract 5.x 에서 @AutoConfigureWireMock 이 삭제되어 wiremock-spring-boot 의
+    // @EnableWireMock 으로 대체한다. WireMock 서버 자체(3.x)는 이 의존성이 함께 가져온다.
+    testImplementation("org.wiremock.integrations:wiremock-spring-boot:$wiremockSpringBootVersion")
 
     // testcontainers
     // Spring Boot 4.1 은 testcontainers-bom 2.0.x 를 가져온다. Testcontainers 2.0 에서 모든 모듈

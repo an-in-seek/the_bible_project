@@ -585,7 +585,7 @@ fragments/  head, header, footer, community-widgets, app-install-banner,
 > ⚠️ **시드 데이터는 자동으로 로딩되지 않습니다.**
 
 `ddl-auto` 가 모든 프로필에서 `none` 이라 애플리케이션은 스키마를 만들지 않고, `spring.sql.init` 은 꺼져 있으며
-`defer-datasource-initialization` 도 주석 처리돼 있습니다. `src/main/resources/data` 의 SQL 파일들은
+`defer-datasource-initialization` 도 주석 처리돼 있습니다. `db/seed` 의 SQL 파일들은
 **초기 데이터 투입용 참고 자료**로만 남아 있으며, 필요할 때 직접 실행합니다.
 
 * `bible_translation.sql` — 번역본 정의

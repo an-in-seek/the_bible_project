@@ -100,6 +100,10 @@ el-seeker:
     team-id: ${APPLE_TEAM_ID:}
     key-id: ${APPLE_KEY_ID:}
     private-key: ${APPLE_PRIVATE_KEY:}
+    # 서버-대-서버 알림 JWT 의 aud 허용 목록(쉼표 구분). 알림 엔드포인트는 primary App ID 에만
+    # 등록할 수 있어, Apple 이 웹 로그인용 Services ID 가 아니라 App ID 를 aud 로 보낼 수 있다.
+    # 비워 두면 client-id 만 허용한다. 값이 다르면 검증 실패 로그에 수신한 aud 가 찍힌다.
+    notification-audiences: ${APPLE_NOTIFICATION_AUDIENCES:}
 
 springdoc:
   api-docs:

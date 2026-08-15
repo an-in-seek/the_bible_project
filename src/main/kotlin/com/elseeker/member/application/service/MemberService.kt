@@ -96,7 +96,49 @@ class MemberService(
         if (memberUid != principalUid) {
             throwError(ErrorType.MEMBER_ACCESS_DENIED, memberUid)
         }
+        purgeMember(getMember(memberUid))
+    }
+
+    /**
+     * 소셜 provider 가 통보한 탈퇴를 처리한다. (Apple `account-deleted` 등)
+     *
+     * 본인 확인 절차가 없다는 점만 [deleteMember] 와 다르다. 호출 측이 **provider 서명을 검증한
+     * 뒤에만** 불러야 하며, 사용자 요청 경로에서는 절대 재사용하지 말 것.
+     *
+     * **다른 소셜 연동이 남아 있는지 확인한 뒤에 호출해야 한다.** 한 provider 의 통보만으로
+     * 회원 전체를 지우면 다른 경로로 가입한 사용자의 데이터까지 함께 사라진다.
+     * ([unlinkOAuthAccountByProviderNotification] 참고)
+     */
+    @Transactional
+    fun deleteMemberByProviderNotification(memberUid: UUID) {
+        purgeMember(getMember(memberUid))
+    }
+
+    /**
+     * 소셜 provider 가 통보한 **연동 해제**를 처리한다. 회원 자체는 유지된다.
+     *
+     * 본인 확인 절차가 없다는 점만 [unlinkOAuthAccount] 와 다르다. 호출 측이 provider 서명을
+     * 검증한 뒤에만 불러야 한다.
+     */
+    @Transactional
+    fun unlinkOAuthAccountByProviderNotification(
+        memberUid: UUID,
+        provider: OAuthProvider,
+        providerUserId: String,
+    ) {
         val member = getMember(memberUid)
+        val account = memberOAuthAccountRepository.findByProviderAndProviderUserId(provider, providerUserId)
+            ?: throwError(ErrorType.OAUTH_ACCOUNT_NOT_FOUND, provider.registrationId)
+        if (account.member.id != member.id) {
+            throwError(ErrorType.OAUTH_ACCOUNT_NOT_FOUND, provider.registrationId)
+        }
+        // orphanRemoval = true 라 컬렉션에서 빼면 행이 삭제된다.
+        member.removeOAuthAccount(account)
+        memberRepository.save(member)
+    }
+
+    private fun purgeMember(member: Member) {
+        val memberUid = member.uid
         val memberId = member.id ?: throwError(ErrorType.MEMBER_ID_MISSING, memberUid)
         memberWithdrawalAuditRepository.save(
             MemberWithdrawalAudit(

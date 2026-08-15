@@ -124,9 +124,18 @@ write `PostgreSQLContainer(...)`, not `PostgreSQLContainer<Nothing>(...)`, and p
 - **PostgreSQL 17 (Supabase) in both production and local.** H2 is not used.
 - `ddl-auto` is `none` in `application.yml`, `local`, and `prod`. The application does not create
   the schema. Only the test profile uses `update`.
-- The seed files in `src/main/resources/data/*.sql` are **not loaded automatically.**
+- **All SQL lives under `db/` at the repo root** — `db/schema/` (table DDL, one file per table),
+  `db/migration/` (one-off change scripts), `db/seed/` (static reference data). No migration tool
+  is used; every script is applied by hand. See [db/README.md](../../db/README.md) for the
+  conventions and how to apply them.
+- `db/` is deliberately outside `src/main/resources/` because nothing there is read at runtime.
+  Keeping it in `resources/` packaged 6.9 MB of seed SQL into the boot JAR and the container image.
+- The seed files in `db/seed/*.sql` are **not loaded automatically.**
   `spring.sql.init` is off and `defer-datasource-initialization` is commented out. They remain only
   as reference material for seeding initial data.
+- **The test profile creates its schema with Hibernate, not with `db/schema/`.** A missing or wrong
+  script in `db/schema/` therefore still leaves the test suite green — production has to be checked
+  separately.
 - Timestamp columns are stored in UTC (`spring.jpa.properties.hibernate.jdbc.time_zone: UTC`).
   See [time-and-locale.md](time-and-locale.md).
 

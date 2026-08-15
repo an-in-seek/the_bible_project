@@ -28,6 +28,8 @@ build/libs/*-plain.jar
 # 빌드에 불필요한 문서/자산
 docs
 img
+# DB 스크립트는 런타임에 쓰이지 않고 사람이 직접 적용한다. 시드만 6.9MB 라 컨텍스트에서 뺀다.
+db
 README.md
 CLAUDE.md
 AGENTS.md

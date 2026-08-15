@@ -200,9 +200,9 @@ object PolicyVersion {
 
 > 로컬/테스트는 `ddl-auto: create/update`로 자동 반영. **prod는 `ddl-auto: none`이며 별도 마이그레이션 도구(Flyway 등) 미사용** → 배포 전 수동 DDL 적용.
 >
-> **방식(결정): 수동 SQL 스크립트 + 문서화.** 기존 `docs/*/ddl/*.sql` 컨벤션을 따라 스크립트를 리포에 보관하고 배포 직전 1회 수동 실행한다.
+> **방식(결정): 수동 SQL 스크립트 + 문서화.** 스크립트를 [`db/`](../../db/README.md) 에 보관하고 배포 직전 1회 수동 실행한다.
 
-📄 **마이그레이션 스크립트**: [`ddl/member_consent_migration.sql`](./ddl/member_consent_migration.sql)
+📄 **마이그레이션 스크립트**: [`db/migration/member_consent_migration.sql`](../../db/migration/member_consent_migration.sql)
 
 적용 순서(스크립트 내용 요약):
 1. `member.status` 컬럼 추가(`DEFAULT 'ACTIVE'`로 **기존 행 백필**) — 기존 회원은 ACTIVE 그랜드패더링.
@@ -284,4 +284,4 @@ object PolicyVersion {
 | 동의 취소 시 처리 | **즉시 삭제** — 취소 시 PENDING 회원·OAuth 링크를 바로 삭제(잔여 데이터 없음). 24h 방치 정리 배치는 보조로 병행. | §8 |
 | 동의 이력 IP 저장 | **저장함** — `member_consent_audit.ip_address`에 동의 시점 IP 기록(분쟁 증빙). 개인정보처리방침에 '접속 IP' 수집이 이미 명시되어 추가 부담 없음. | §4-3, DDL |
 | 기존 회원 소급 재동의 | **소급 안 함** — 마이그레이션 이전 회원은 ACTIVE 그랜드패더링(과거 간편 고지로 동의 간주). 향후 약관 개정 시 `policy_version` 비교로 재동의 유도는 별도 과제. | §7 |
-| prod 마이그레이션 | **수동 SQL 스크립트 + 문서화** — 마이그레이션 도구 미도입. DDL 스크립트를 리포에 두고 배포 직전 1회 수동 적용. 스크립트: [`ddl/member_consent_migration.sql`](./ddl/member_consent_migration.sql) | §7 |
+| prod 마이그레이션 | **수동 SQL 스크립트 + 문서화** — 마이그레이션 도구 미도입. DDL 스크립트를 리포에 두고 배포 직전 1회 수동 적용. 스크립트: [`db/migration/member_consent_migration.sql`](../../db/migration/member_consent_migration.sql) | §7 |

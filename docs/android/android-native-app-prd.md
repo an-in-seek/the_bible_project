@@ -649,9 +649,9 @@ Android 프로젝트는 백엔드 레포를 **심볼릭 링크로 연결**한다
 ### B.3 성경 데이터 준비 상태 확인
 
 * API 목록(`GET /api/v1/bibles/translations`)은 계약상 `KRV/NKRV/KJV`를 반환할 수 있으나, 앱 노출은 4-A.9 데이터 게이트를 따른다.
-* `src/main/resources/data/krv/`는 66권 본문 seed가 존재한다.
-* `src/main/resources/data/nkrv/`는 현재 일부 책 seed만 확인된다.
-* `src/main/resources/data/kjv/`는 현재 `bible_kjv_book.sql`만 확인되며 장/절 본문 seed는 확인되지 않는다.
+* `db/seed/krv/`는 66권 본문 seed가 존재한다.
+* `db/seed/nkrv/`는 현재 일부 책 seed만 확인된다.
+* `db/seed/kjv/`는 현재 `bible_kjv_book.sql`만 확인되며 장/절 본문 seed는 확인되지 않는다.
 * 앱 개발 시작 시 실제 실행 서버의 `/translations`→`/books`→`/chapters`→`/verses` smoke test로 최종 노출 번역본을 다시 확정한다.
 
 ### B.4 동반 문서 (심링크로 참조)

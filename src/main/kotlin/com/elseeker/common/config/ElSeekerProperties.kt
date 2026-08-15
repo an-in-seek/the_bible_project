@@ -41,5 +41,21 @@ data class ElSeekerProperties(
         val keyId: String,
         /** `.p8` 파일 내용(PEM). PEM 헤더/개행이 포함돼 있어도 된다. */
         val privateKey: String,
+        /**
+         * 서버-대-서버 알림 JWT 의 `aud` 로 허용할 값 목록.
+         *
+         * 알림 엔드포인트는 **primary App ID 에만** 등록할 수 있어, Apple 이 보내는 `aud` 가
+         * 웹 로그인용 Services ID([clientId]) 가 아니라 App ID(예: `com.elseeker.ios`)일 수 있다.
+         * 비워 두면 [clientId] 하나만 허용한다. 실제 값이 다르면 검증 실패 로그에 수신한 `aud`
+         * 가 찍히므로, 그 값을 이 목록에 추가하면 된다.
+         */
+        val notificationAudiences: List<String> = emptyList(),
+        /**
+         * Apple 공개키(JWKS) 엔드포인트. id_token 및 서버-대-서버 알림의 서명 검증에 쓴다.
+         *
+         * 운영에서 바꿀 일은 없다. **테스트에서 WireMock 으로 돌려 실제 네트워크를 끊기 위해**
+         * 설정 가능하게 두었다.
+         */
+        val jwkSetUri: String = "https://appleid.apple.com/auth/keys",
     )
 }

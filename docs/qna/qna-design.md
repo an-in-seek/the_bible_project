@@ -221,7 +221,7 @@ class Inquiry(
 ### 3-4. DDL (PostgreSQL 17 기준)
 
 > 운영 DB는 `ddl-auto: none`이므로 아래 마이그레이션을 수동 적용한다. 로컬/테스트(H2)는 JPA가 스키마(컬럼 +
-> `@Index`)를 자동 생성한다. 구현 시 `docs/qna/ddl/qna_inquiry.sql`로 분리 저장한다(`site_visit_event.sql` 포맷).
+> `@Index`)를 자동 생성한다. 구현 시 `db/schema/qna_inquiry.sql`로 분리 저장한다(`site_visit_event.sql` 포맷).
 
 ```sql
 -- =====================================================================
@@ -736,7 +736,7 @@ INQUIRY_ACCESS_DENIED(HttpStatus.FORBIDDEN, "문의에 대한 접근 권한이 �
 - 회원 API(`/api/v1/qna/inquiries`) + 관리자 API(`/api/v1/admin/qna/inquiries`) + `*ApiDocument`.
 - DTO/매퍼, `ErrorType` 4종 추가, `SecurityConfig`에 `/api/v1/qna/**` 인증 규칙.
 - 회원 "내 문의" 화면 — 목록 / 작성·수정(공용 폼) / 상세 **3개 화면 분리** + 헤더 진입점, 관리자 Q&A 콘솔.
-- DDL(`docs/qna/ddl/qna_inquiry.sql`), 통합/단위 테스트(11절).
+- DDL(`db/schema/qna_inquiry.sql`), 통합/단위 테스트(11절).
 
 **2차**
 - **왕복 스레드**: `InquiryMessage`(자식 테이블)로 회원 추가 질문 ↔ 관리자 재답변. `Inquiry`의 임베드 답변을
