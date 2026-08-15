@@ -96,7 +96,22 @@ class MemberService(
         if (memberUid != principalUid) {
             throwError(ErrorType.MEMBER_ACCESS_DENIED, memberUid)
         }
-        val member = getMember(memberUid)
+        purgeMember(getMember(memberUid))
+    }
+
+    /**
+     * 소셜 provider 가 통보한 탈퇴를 처리한다. (Apple `consent-revoked` / `account-deleted`)
+     *
+     * 본인 확인 절차가 없다는 점만 [deleteMember] 와 다르다. 호출 측이 **provider 서명을 검증한
+     * 뒤에만** 불러야 하며, 사용자 요청 경로에서는 절대 재사용하지 말 것.
+     */
+    @Transactional
+    fun deleteMemberByProviderNotification(memberUid: UUID) {
+        purgeMember(getMember(memberUid))
+    }
+
+    private fun purgeMember(member: Member) {
+        val memberUid = member.uid
         val memberId = member.id ?: throwError(ErrorType.MEMBER_ID_MISSING, memberUid)
         memberWithdrawalAuditRepository.save(
             MemberWithdrawalAudit(

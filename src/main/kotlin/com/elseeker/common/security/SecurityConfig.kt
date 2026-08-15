@@ -131,6 +131,12 @@ class SecurityConfig(
                         org.springframework.http.HttpMethod.POST,
                         "/api/v1/analytics/app-install-banner/events"
                     ).permitAll()
+                    // Apple 서버-대-서버 알림 — 호출자가 Apple 서버라 세션/토큰이 없다.
+                    // 인증은 본문 JWS 서명 검증(AppleNotificationVerifier)으로 대체한다.
+                    .requestMatchers(
+                        org.springframework.http.HttpMethod.POST,
+                        "/api/v1/auth/apple/notifications"
+                    ).permitAll()
                     .requestMatchers(
                         "/api/v1/auth/me",
                         "/api/v1/auth/consent",

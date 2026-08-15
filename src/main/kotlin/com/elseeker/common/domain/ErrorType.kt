@@ -78,6 +78,7 @@ enum class ErrorType(
 
     // 401
     AUTHENTICATION_REQUIRED(HttpStatus.UNAUTHORIZED, "인증이 필요합니다. 다시 로그인해 주세요.", LogLevel.WARN),
+    OAUTH_APPLE_NOTIFICATION_INVALID(HttpStatus.UNAUTHORIZED, "Apple 알림을 검증할 수 없습니다.", LogLevel.WARN),
 
     // 403
     MEMBER_ACCESS_DENIED(HttpStatus.FORBIDDEN, "요청한 회원 정보에 접근할 수 없습니다.", LogLevel.WARN),
@@ -89,5 +90,6 @@ enum class ErrorType(
     MEMBER_ID_MISSING(HttpStatus.INTERNAL_SERVER_ERROR, "사용자 식별 정보가 없습니다.", LogLevel.ERROR),
     OAUTH_APPLE_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 로그인이 설정되지 않았습니다.", LogLevel.ERROR),
     OAUTH_APPLE_PRIVATE_KEY_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 로그인 개인키를 읽을 수 없습니다.", LogLevel.ERROR),
+    OAUTH_APPLE_NOTIFICATION_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 알림 수신이 설정되지 않았습니다.", LogLevel.ERROR),
     UNKNOWN(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 오류가 발생했습니다.", LogLevel.ERROR),
 }
