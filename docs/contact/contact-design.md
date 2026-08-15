@@ -76,7 +76,7 @@ RECEIVED ──replyByAdmin──> REPLIED ──changeStatus──> CLOSED
 삭제(soft-delete) 개념은 두지 않는다 — 게스트 본인 수정/삭제 경로가 없고, 보존이 기본.
 
 ### 3-4. DDL
-`docs/contact/ddl/contact_message.sql` 참조. prod(`ddl-auto: none`)에 **수동 적용** 필요. 로컬/테스트(`ddl-auto: create/update`)는 자동 생성.
+`db/schema/contact_message.sql` 참조. prod(`ddl-auto: none`)에 **수동 적용** 필요. 로컬/테스트(`ddl-auto: create/update`)는 자동 생성.
 
 ## 4. 리포지토리 (`qna/adapter/output/jpa/ContactMessageRepository.kt`)
 - `findAdminPage(status, category, keyword, pageable)` — 최신순 + 동적 필터(키워드는 title/content/email LIKE), `repliedBy` fetch join, countQuery 분리.

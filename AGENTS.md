@@ -30,7 +30,7 @@
 ## Coding Style & Naming Conventions
 - Kotlin + Spring Boot 4; keep idiomatic Kotlin (data classes, null-safety) and Spring annotations.
 - Use 4-space indentation and standard Kotlin naming: `UpperCamel` for classes, `lowerCamel` for functions/vars, `UPPER_SNAKE` for constants.
-- SQL seed files follow `bible_krv_XX_<book>.sql` in `src/main/resources/data/krv`.
+- SQL seed files follow `bible_krv_XX_<book>.sql` in `db/seed/krv`.
 - No formatter or linter is configured; avoid reformatting unrelated files.
 - Frontend JS: prefer ES module scripts (`type="module"`); avoid IIFEs and `'use strict'` in module files. Use explicit `import`/`export` instead of globals.
 - Hover styles: apply only on desktop (mouse) using `@media (hover: hover) and (pointer: fine)`. Do not design hover-based UX for touch/mobile.
@@ -60,7 +60,7 @@
 ## Configuration & Data Notes
 - PostgreSQL 17 (Supabase) is the database in both production and local. H2 is not used.
 - `ddl-auto` is `none` outside the test profile; the app does not create the schema.
-- The SQL files in `src/main/resources/data` are **not** loaded automatically (`spring.sql.init` is off). They remain as reference material for seeding.
+- The SQL files in `db/seed` are **not** loaded automatically (`spring.sql.init` is off). They remain as reference material for seeding.
 - OAuth2 client and JWT settings live in `src/main/resources/application.yml`.
 - Access/refresh JWT cookies are issued on OAuth2 login; access is auto-refreshed via `JwtRefreshFilter` using refresh cookie (or via `POST /api/v1/auth/refresh`).
 - API responses return all timestamps in UTC ISO-8601 (example: `2024-01-01T10:00:00Z`); client converts to user timezone.

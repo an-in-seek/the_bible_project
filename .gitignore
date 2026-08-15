@@ -56,10 +56,10 @@ out/
 /.omc/
 
 ### Etc ###
-/src/main/resources/data/community_sample.sql
+/db/seed/community_sample.sql
 /docs/mobile/social-login-api.md
 /.codex
 
 ### omc ###
 .omc
-/src/main/resources/data/db_backup_Cloud_SQL_Export.sql
+/db/seed/db_backup_Cloud_SQL_Export.sql

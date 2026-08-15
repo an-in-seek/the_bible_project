@@ -420,4 +420,4 @@ keywords:    "창세기 1장,7일 창조,창조 이야기,빛이 있으라,하�
 - 섹션 페이드인 CSS 패턴: `static/css/home.css` `.universe-fade`
 - Thymeleaf head 프래그먼트: `templates/fragments/head.html`
 - 학습 허브 카드 패턴: `templates/study/study.html`
-- 개역한글(KRV) 성경 본문 출처: `src/main/resources/data/krv/`
+- 개역한글(KRV) 성경 본문 출처: `db/seed/krv/`
