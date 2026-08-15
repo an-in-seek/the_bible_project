@@ -28,6 +28,9 @@ class HttpCookieOAuth2AuthorizationRequestRepository(
      */
     private val signingKey: ByteArray = Base64.getDecoder().decode(elSeekerProperties.jwt.secret)
 
+    /** null 이면 요청의 `isSecure` 를 따르고, 설정되어 있으면 그 값을 강제합니다(JWT 쿠키와 동일 규칙). */
+    private val cookieSecure: Boolean? = elSeekerProperties.jwt.cookieSecure
+
     override fun loadAuthorizationRequest(request: HttpServletRequest): OAuth2AuthorizationRequest? {
         val cookie = CookieUtils.getCookie(request, OAUTH2_AUTH_REQUEST_COOKIE_NAME) ?: return null
         return deserialize(cookie.value)
@@ -54,6 +57,8 @@ class HttpCookieOAuth2AuthorizationRequestRepository(
             authorizationRequest
         }
 
+        val sameSite = resolveSameSite(request)
+
         val serialized = serialize(enrichedRequest)
         CookieUtils.addCookie(
             response,
@@ -61,6 +66,7 @@ class HttpCookieOAuth2AuthorizationRequestRepository(
             serialized,
             COOKIE_EXPIRE_SECONDS,
             request.isSecure,
+            sameSite,
         )
 
         val returnUrl = request.getParameter(RETURN_URL_PARAMETER)
@@ -73,6 +79,7 @@ class HttpCookieOAuth2AuthorizationRequestRepository(
                 encodedReturnUrl,
                 COOKIE_EXPIRE_SECONDS,
                 request.isSecure,
+                sameSite,
             )
         }
 
@@ -83,8 +90,34 @@ class HttpCookieOAuth2AuthorizationRequestRepository(
                 "true",
                 COOKIE_EXPIRE_SECONDS,
                 request.isSecure,
+                sameSite,
             )
         }
+    }
+
+    /**
+     * Apple 로그인만 `SameSite=None` 으로 발급합니다.
+     *
+     * Apple 은 `response_mode=form_post` 로 콜백을 **cross-site POST** 로 보내는데,
+     * `SameSite=Lax` 쿠키는 cross-site POST 에 전송되지 않습니다. 그대로 두면 콜백 시점에
+     * 인가 요청 쿠키가 사라져 state 검증이 실패하고 로그인이 끝까지 가지 못합니다.
+     *
+     * `SameSite=None` 은 `Secure` 와 함께여야 브라우저가 받아들이므로 HTTPS 일 때만 적용하고,
+     * 그 외에는 기존대로 `Lax` 를 유지합니다. Apple 은 애초에 HTTPS return URL 만 허용하므로
+     * 평문 로컬 환경에서 Apple 로그인을 시도할 일은 없습니다.
+     *
+     * HTTPS 판별은 `request.isSecure` 를 직접 보지 않고 JWT 쿠키와 동일하게
+     * `el-seeker.jwt.cookie-secure` 오버라이드를 우선합니다. 프록시 뒤에서는 `isSecure` 가
+     * 신뢰할 수 없어 이 오버라이드가 존재하는 것이고, 여기만 raw 값을 쓰면
+     * 포워드 헤더 설정이 빠진 환경에서 쿠키가 `Lax` 로 발급돼 Apple 콜백에 실리지 않습니다.
+     * 증상이 `authorization_request_not_found` 로만 나타나 원인 추적이 어렵습니다.
+     *
+     * 나머지 provider 는 top-level GET 리다이렉트로 돌아오므로 `Lax` 로 충분합니다.
+     */
+    private fun resolveSameSite(request: HttpServletRequest): String {
+        val isAppleFlow = request.requestURI.orEmpty().endsWith("/$APPLE_REGISTRATION_ID")
+        val isSecure = cookieSecure ?: request.isSecure
+        return if (isAppleFlow && isSecure) CookieUtils.SAME_SITE_NONE else CookieUtils.SAME_SITE_LAX
     }
 
     override fun removeAuthorizationRequest(
@@ -185,6 +218,9 @@ class HttpCookieOAuth2AuthorizationRequestRepository(
         const val LINK_FLAG_ATTRIBUTE = "oauth_link"
         private const val LINK_FLAG_PARAMETER = "link"
         private const val COOKIE_EXPIRE_SECONDS = 180L
+
+        /** [com.elseeker.member.domain.vo.OAuthProvider.APPLE] 의 registrationId. */
+        private const val APPLE_REGISTRATION_ID = "apple"
 
         /** 쿠키 위변조 방지 서명 알고리즘. */
         private const val HMAC_ALGORITHM = "HmacSHA256"

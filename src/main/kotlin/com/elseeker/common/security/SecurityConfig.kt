@@ -8,7 +8,9 @@ import com.elseeker.common.security.oauth.handler.OAuth2LoginFailureHandler
 import com.elseeker.common.security.oauth.handler.OAuth2LoginSuccessHandler
 import com.elseeker.common.security.oauth.repository.HttpCookieOAuth2AuthorizationRequestRepository
 import com.elseeker.common.security.oauth.service.CustomOAuth2UserService
+import com.elseeker.common.security.oauth.service.CustomOidcUserService
 import jakarta.servlet.http.HttpServletRequest
+import org.springframework.security.oauth2.client.web.OAuth2AuthorizationRequestResolver
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpStatus
@@ -33,9 +35,13 @@ import java.nio.charset.StandardCharsets
 @EnableWebSecurity
 class SecurityConfig(
     private val customOAuth2UserService: CustomOAuth2UserService,
+    /** Apple 전용. `openid` scope 를 쓰는 provider 는 이 경로를 탄다. */
+    private val customOidcUserService: CustomOidcUserService,
     private val oAuth2LoginSuccessHandler: OAuth2LoginSuccessHandler,
     private val oAuth2LoginFailureHandler: OAuth2LoginFailureHandler,
     private val authorizationRequestRepository: HttpCookieOAuth2AuthorizationRequestRepository,
+    /** Apple 요청에만 `response_mode=form_post` 를 덧붙인다. */
+    private val authorizationRequestResolver: OAuth2AuthorizationRequestResolver,
     private val jwtAuthenticationFilter: JwtAuthenticationFilter,
     private val jwtRefreshFilter: JwtRefreshFilter,
     private val consentGateFilter: ConsentGateFilter,
@@ -163,9 +169,13 @@ class SecurityConfig(
             .oauth2Login { oauth2 ->
                 oauth2.authorizationEndpoint { authorizationEndpoint ->
                     authorizationEndpoint.authorizationRequestRepository(authorizationRequestRepository)
+                    authorizationEndpoint.authorizationRequestResolver(authorizationRequestResolver)
                 }
                 oauth2.userInfoEndpoint { userInfo ->
+                    // Google/Naver/Kakao — scope 에 openid 가 없어 userinfo 엔드포인트를 조회한다.
                     userInfo.userService(customOAuth2UserService)
+                    // Apple — userinfo 엔드포인트가 없어 id_token 클레임만으로 처리한다.
+                    userInfo.oidcUserService(customOidcUserService)
                 }
                 oauth2.successHandler(oAuth2LoginSuccessHandler)
                 oauth2.failureHandler(oAuth2LoginFailureHandler)

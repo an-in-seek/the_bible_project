@@ -18,6 +18,7 @@ enum class ErrorType(
     OAUTH_ACCOUNT_NOT_FOUND(HttpStatus.NOT_FOUND, "소셜 계정을 찾을 수 없습니다.", LogLevel.WARN),
     OAUTH_LINK_REQUIRED(HttpStatus.BAD_REQUEST, "연동 전용 요청입니다. 마이페이지에서 연동을 진행해 주세요.", LogLevel.WARN),
     SOCIAL_LOGIN_INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "소셜 로그인 토큰이 유효하지 않습니다.", LogLevel.WARN),
+    SOCIAL_LOGIN_PROVIDER_NOT_SUPPORTED(HttpStatus.BAD_REQUEST, "해당 소셜 로그인 방식은 지원하지 않습니다.", LogLevel.WARN),
     SOCIAL_LOGIN_EMAIL_NOT_VERIFIED(HttpStatus.CONFLICT, "이메일이 인증되지 않아 기존 계정과 연결할 수 없습니다.", LogLevel.WARN),
     REQUIRED_NICKNAME(HttpStatus.BAD_REQUEST, "닉네임은 필수입니다.", LogLevel.WARN),
     INVALID_NICKNAME_FORMAT(HttpStatus.BAD_REQUEST, "닉네임은 공백을 포함할 수 없습니다.", LogLevel.WARN),
@@ -86,5 +87,7 @@ enum class ErrorType(
     SEARCH_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "검색 처리 중 오류가 발생했습니다.", LogLevel.ERROR),
     DB_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "데이터베이스 오류가 발생했습니다.", LogLevel.ERROR),
     MEMBER_ID_MISSING(HttpStatus.INTERNAL_SERVER_ERROR, "사용자 식별 정보가 없습니다.", LogLevel.ERROR),
+    OAUTH_APPLE_NOT_CONFIGURED(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 로그인이 설정되지 않았습니다.", LogLevel.ERROR),
+    OAUTH_APPLE_PRIVATE_KEY_INVALID(HttpStatus.INTERNAL_SERVER_ERROR, "Apple 로그인 개인키를 읽을 수 없습니다.", LogLevel.ERROR),
     UNKNOWN(HttpStatus.INTERNAL_SERVER_ERROR, "알 수 없는 오류가 발생했습니다.", LogLevel.ERROR),
 }

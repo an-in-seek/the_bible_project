@@ -50,6 +50,9 @@ class SocialTokenVerifier(
             OAuthProvider.GOOGLE -> verifyGoogle(token)
             OAuthProvider.KAKAO -> verifyKakao(token)
             OAuthProvider.NAVER -> verifyNaver(token)
+            // Apple 은 웹 OAuth 리다이렉트 흐름(/oauth2/authorization/apple)만 지원한다.
+            // 네이티브 SDK 토큰을 받는 이 경로는 대응하지 않는다.
+            OAuthProvider.APPLE -> throwError(ErrorType.SOCIAL_LOGIN_PROVIDER_NOT_SUPPORTED)
         }
     }
 

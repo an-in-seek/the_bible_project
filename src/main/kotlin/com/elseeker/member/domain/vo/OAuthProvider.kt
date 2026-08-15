@@ -8,7 +8,8 @@ import jakarta.persistence.Converter
 enum class OAuthProvider(val registrationId: String) {
     GOOGLE("google"),
     NAVER("naver"),
-    KAKAO("kakao");
+    KAKAO("kakao"),
+    APPLE("apple");
 
     companion object {
         fun fromRegistrationId(registrationId: String): OAuthProvider {

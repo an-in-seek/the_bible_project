@@ -187,6 +187,18 @@
     box-shadow: 0 4px 12px rgba(254, 229, 0, 0.3);
 }
 
+/* Apple */
+.social-login-button.apple {
+    background: #000000;
+    color: #ffffff;
+    border: 1px solid transparent;
+}
+
+.social-login-button.apple:hover {
+    background: #1a1a1a;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
 /* Meta & Skip */
 .login-meta {
     margin-top: 1.75rem;

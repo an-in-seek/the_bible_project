@@ -35,6 +35,19 @@ spring:
               - profile_nickname
               - account_email
               - profile_image
+          # Apple 은 client-id / client-secret 을 여기서 주지 않는다. 둘 다 반드시 같은
+          # Services ID 를 가리켜야 하므로 el-seeker.apple.* 을 단일 정본으로 삼아
+          # AppleOAuthConfig 가 요청 시점에 함께 주입한다. 아래 값은 자리표시자일 뿐이다.
+          apple:
+            client-id: unused-overridden-at-runtime
+            client-secret: unused-generated-at-runtime
+            client-authentication-method: client_secret_post
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            client-name: Apple
+            scope:
+              - openid
+              - email
         provider:
           naver:
             authorization-uri: https://nid.naver.com/oauth2.0/authorize
@@ -46,6 +59,16 @@ spring:
             token-uri: https://kauth.kakao.com/oauth/token
             user-info-uri: https://kapi.kakao.com/v2/user/me
             user-name-attribute: id
+          # Apple 은 userinfo 엔드포인트가 없다. 사용자 정보는 id_token 클레임에서만 나오므로
+          # user-info-uri 를 두지 않고 jwk-set-uri 로 id_token 서명을 검증한다.
+          # issuer-uri 는 일부러 두지 않는다. 이 값이 있으면 Boot 가 기동 시 OIDC discovery 를
+          # 호출해 Apple 서버에 대한 기동 의존성이 생긴다. issuer 는 AppleOAuthConfig 에서
+          # registration 을 만들 때 직접 넣는다(검증은 유지, 기동 의존성은 제거).
+          apple:
+            authorization-uri: https://appleid.apple.com/auth/authorize
+            token-uri: https://appleid.apple.com/auth/token
+            jwk-set-uri: https://appleid.apple.com/auth/keys
+            user-name-attribute: sub
   jpa:
     open-in-view: false
     hibernate:
@@ -70,6 +93,13 @@ el-seeker:
   api:
     base-url: ${EL_SEEKER_API_BASE_URL:http://localhost:8080}
     api-key: ${EL_SEEKER_API_KEY:TEST_API_KEY}
+  # Apple 로그인. 네 값이 모두 있어야 활성화되고, 하나라도 비면 Apple 로그인만 비활성화된다.
+  # APPLE_PRIVATE_KEY 는 .p8 파일 내용 전체(PEM). 개행이 \n 리터럴이어도 처리된다.
+  apple:
+    client-id: ${APPLE_CLIENT_ID:}
+    team-id: ${APPLE_TEAM_ID:}
+    key-id: ${APPLE_KEY_ID:}
+    private-key: ${APPLE_PRIVATE_KEY:}
 
 springdoc:
   api-docs:
