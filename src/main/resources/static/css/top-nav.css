@@ -123,6 +123,22 @@
     transition: background-color 0.15s ease-in-out, color 0.15s ease-in-out;
 }
 
+.top-nav-share-button {
+    min-width: 44px;
+    max-width: 44px;
+    flex: 0 0 44px;
+    padding: 0.375rem 0.5rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.375rem;
+}
+
+.top-nav-share-icon {
+    display: block;
+    width: 20px;
+    height: 20px;
+}
+
 .top-nav-notification-button {
     position: relative;
     min-width: 44px;

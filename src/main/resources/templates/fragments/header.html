@@ -92,6 +92,33 @@
                         </div>
                     </div>
 
+                    <!-- URL 공유 — showShareButton 플래그(GlobalModelAttribute)로 섹션 단위 노출.
+                         화면별 제목은 shareTitle 로 덮어쓸 수 있고, 없으면 og:title 을 쓴다.
+                         설계 문서: docs/common/url-share.md -->
+                    <button id="topNavShareButton"
+                            type="button"
+                            class="top-nav-share-button top-nav-btn btn btn-outline-secondary"
+                            aria-label="현재 화면 공유"
+                            title="현재 화면 공유"
+                            th:if="${showShareButton == true}"
+                            th:attr="data-share-title=${shareTitle}">
+                        <svg class="top-nav-share-icon"
+                             viewBox="0 0 24 24"
+                             fill="none"
+                             stroke="currentColor"
+                             stroke-width="2"
+                             stroke-linecap="round"
+                             stroke-linejoin="round"
+                             aria-hidden="true"
+                             focusable="false">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.6" y1="13.5" x2="15.4" y2="17.5"></line>
+                            <line x1="15.4" y1="6.5" x2="8.6" y2="10.5"></line>
+                        </svg>
+                    </button>
+
                     <button id="topNavNotificationButton"
                             type="button"
                             class="top-nav-notification-button top-nav-btn btn btn-outline-secondary d-none"
