@@ -1,7 +1,12 @@
 /**
  * 성경 족보 — 하나님 → 예수 그리스도
  * 마태복음 족보 (마태복음 1장) / 누가복음 족보 (누가복음 3장)
+ *
+ * 선택한 탭은 ?tab= 으로 URL 에 남긴다. 상단 공유 버튼이 쿼리를 그대로 실어 보내므로
+ * 받는 사람이 같은 족보를 보게 된다. 설계 문서: docs/common/url-share.md
  */
+
+import {readDeepLinkParams, syncDeepLinkParams} from "/js/deep-link-util.js?v=1.0";
 
 const MATTHEW_GENEALOGY_SECTIONS = [
     {
@@ -223,9 +228,17 @@ const GENEALOGY_DATA = {
     luke: LUKE_GENEALOGY_SECTIONS,
 };
 
+const DEFAULT_TAB = "matthew";
+
+/** 공유 링크로 들어왔으면 ?tab= 이 가리키는 족보를 연다. 없거나 모르는 값이면 기본 탭. */
+function readInitialTab() {
+    const tab = readDeepLinkParams().get("tab") ?? "";
+    return Object.hasOwn(GENEALOGY_DATA, tab) ? tab : DEFAULT_TAB;
+}
+
 class BibleGenealogy {
     constructor() {
-        this.activeTab = "matthew";
+        this.activeTab = readInitialTab();
         this.initElements();
         this.init();
     }
@@ -262,17 +275,29 @@ class BibleGenealogy {
                 const tabKey = tab.dataset.tab;
                 if (tabKey === this.activeTab) return;
                 this.activeTab = tabKey;
-                this.tabs.forEach(t => {
-                    const isActive = t.dataset.tab === tabKey;
-                    t.classList.toggle("is-active", isActive);
-                    t.setAttribute("aria-selected", String(isActive));
-                });
-                this.sectionsEl.setAttribute("aria-labelledby", tab.id);
+                this.syncTabState();
                 this.sectionsEl.innerHTML = "";
                 this.renderSections();
                 window.scrollTo({top: 0});
+                syncDeepLinkParams({tab: tabKey === DEFAULT_TAB ? null : tabKey});
             });
         });
+    }
+
+    /** 탭 버튼과 패널의 활성 표시를 activeTab 에 맞춘다. 마크업 기본값은 마태복음이다. */
+    syncTabState() {
+        let activeTabEl = null;
+        this.tabs.forEach(tab => {
+            const isActive = tab.dataset.tab === this.activeTab;
+            tab.classList.toggle("is-active", isActive);
+            tab.setAttribute("aria-selected", String(isActive));
+            if (isActive) {
+                activeTabEl = tab;
+            }
+        });
+        if (activeTabEl) {
+            this.sectionsEl.setAttribute("aria-labelledby", activeTabEl.id);
+        }
     }
 
     initNav() {
@@ -290,6 +315,7 @@ class BibleGenealogy {
     }
 
     render() {
+        this.syncTabState();
         this.renderSections();
         this.loadingEl.classList.add("d-none");
         this.contentEl.classList.remove("d-none");

@@ -5,8 +5,7 @@
         siteUrl='https://elseeker.com',
         siteName='ElSeeker',
         siteLogo='https://elseeker.com/images/elseeker_og.png',
-        requestUri=${#httpServletRequest != null ? #httpServletRequest.requestURI : null},
-        resolvedCanonical=${!#strings.isEmpty(canonicalUrl) ? canonicalUrl : (requestUri != null ? siteUrl + requestUri : siteUrl)},
+        resolvedCanonical=${!#strings.isEmpty(canonicalUrl) ? canonicalUrl : (!#strings.isEmpty(currentPath) ? siteUrl + currentPath : siteUrl)},
         resolvedTitle=${#strings.isEmpty(title) ? siteName : title},
         resolvedDescription=${#strings.isEmpty(pageDescription) ? '성경을 통해 하나님을 알아가는 여정을 돕는 ElSeeker입니다. 다양한 성경 번역본, 빠른 구절 검색, 성경 퀴즈와 학습 콘텐츠를 제공합니다.' : pageDescription},
         resolvedKeywords=${#strings.isEmpty(pageKeywords) ? '성경,온라인 성경,성경 읽기,성경 검색,성경 학습,성경 퀴즈,ElSeeker' : pageKeywords},
@@ -66,6 +65,10 @@
     <meta name="keywords" th:content="${resolvedKeywords}"
           content="성경,온라인 성경,성경 읽기,성경 검색,성경 학습,성경 퀴즈,ElSeeker">
     <meta name="robots" th:if="${!#strings.isEmpty(robotsContent)}" th:content="${robotsContent}">
+    <!-- canonical 경로는 서버가 모델에 넣어 준 currentPath(GlobalModelAttribute)를 쓴다.
+         Thymeleaf 3.1 에서 #httpServletRequest 가 제거돼, 쓰면 예외가 아니라 조용히 null 이 되어
+         canonical 이 siteUrl 로 폴백한다(= 모든 페이지가 루트를 정본으로 선언, 공유 URL 도 루트).
+         상단 공유 버튼이 이 값을 그대로 쓰므로 CanonicalUrlTest 로 고정해 두었다. -->
     <link rel="canonical" th:href="${resolvedCanonical}" href="https://elseeker.com/">
 
     <!-- Open Graph -->
@@ -161,6 +164,6 @@
     <script type="module" src="/js/theme-toggle.js?v=1.4"></script>
     <script th:if="${useCommonCss}" type="module" src="/js/app-install-banner.js?v=1.1"></script>
     <!-- 상단 공유 버튼 — showShareButton 인 화면에서만 로드 (설계 문서: docs/common/url-share.md) -->
-    <script th:if="${showShareButton}" type="module" src="/js/share.js?v=1.0"></script>
+    <script th:if="${showShareButton}" type="module" src="/js/share.js?v=1.1"></script>
 </head>
 </html>

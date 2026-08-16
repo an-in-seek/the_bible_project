@@ -44,6 +44,13 @@ fun currentPath(request: HttpServletRequest): String = request.requestURI
 **Do not toggle the active class from JS via `location.pathname`.** It violates the
 server-rendering principle and makes the menu flicker on first paint.
 
+**`#httpServletRequest` fails silently — never reach for it as a workaround.** Thymeleaf 3.1
+removed it along with `#request`, but an unknown `#name` is an undefined SpEL variable, so it
+evaluates to `null` instead of raising. The page still renders; only the value is gone. That is
+how every page ended up declaring `https://elseeker.com` as its canonical (and how the share
+button ended up copying the site root from every screen). Use `currentPath` — anything else the
+page needs from the request goes through the model the same way.
+
 ## Hover is desktop-only
 
 ```css

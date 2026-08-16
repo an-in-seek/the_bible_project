@@ -1,5 +1,10 @@
 // 성경 주석 사이트 큐레이션 — 정적 데이터 + 렌더링
 // 사이트 추가/제거 시 본 배열만 수정 (SSOT)
+//
+// 검색어는 ?keyword= 로 URL 에 남긴다. 상단 공유 버튼이 쿼리를 그대로 실어 보내므로
+// 받는 사람이 같은 검색 결과를 보게 된다. 설계 문서: docs/common/url-share.md
+
+import {readDeepLinkParams, syncDeepLinkParams} from "/js/deep-link-util.js?v=1.0";
 
 const BIBLE_COMMENTARY_SITES = [
     {
@@ -87,7 +92,7 @@ const BIBLE_COMMENTARY_SITES = [
 
 class BibleCommentary {
     constructor() {
-        this.state = { keyword: "" };
+        this.state = { keyword: readDeepLinkParams().get("keyword") ?? "" };
         this.searchTimer = null;
         this.composing = false;
         this.initElements();
@@ -106,6 +111,7 @@ class BibleCommentary {
 
     init() {
         this.initNav();
+        this.restoreSearch();
         this.bindSearch();
         this.render();
         this.injectStructuredData();
@@ -122,6 +128,13 @@ class BibleCommentary {
         }
     }
 
+    /** 공유 링크로 들어온 ?keyword= 를 입력창에 되돌린다. render() 전에 호출해야 첫 렌더가 필터된 상태로 그려진다. */
+    restoreSearch() {
+        if (!this.state.keyword) return;
+        this.searchEl.value = this.state.keyword;
+        this.toggleClearButton();
+    }
+
     bindSearch() {
         const handleInput = () => {
             if (this.composing) return;
@@ -130,6 +143,7 @@ class BibleCommentary {
                 this.state.keyword = this.searchEl.value;
                 this.toggleClearButton();
                 this.render();
+                syncDeepLinkParams({keyword: this.state.keyword.trim()});
             }, 150);
         };
 
@@ -149,6 +163,7 @@ class BibleCommentary {
             this.state.keyword = "";
             this.toggleClearButton();
             this.render();
+            syncDeepLinkParams({keyword: null});
             this.searchEl.focus();
         });
     }

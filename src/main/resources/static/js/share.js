@@ -5,9 +5,14 @@
  * - Web Share API 를 우선 사용하고, 미지원 브라우저에서는 클립보드 복사로 대체한다.
  * - 공유 URL 은 canonical 링크(운영 도메인) + 현재 쿼리스트링으로 조립한다.
  *   화면 상태(검색어, 선택한 시대 등)가 쿼리에 담기므로 받는 사람이 같은 화면을 보게 된다.
+ *   상태를 쿼리에 싣는 쪽은 각 화면이며 deep-link-util.js 를 쓴다.
+ * - 이렇게 만든 https URL 은 Android App Links 로 앱에서도 같은 화면을 여는 딥링크가 된다.
+ *   그래서 커스텀 스킴(elseeker://)을 쓰지 않는다. 앱이 없는 사람에게 열리지 않는 링크가 되기 때문이다.
  *
  * 설계 문서: docs/common/url-share.md
  */
+
+import {flushDeepLinkParams} from "/js/deep-link-util.js?v=1.0";
 
 const SITE_NAME_SUFFIX_PATTERN = /\s*[|｜]\s*ElSeeker\s*$/;
 const TOAST_VISIBLE_MS = 2000;
@@ -25,8 +30,13 @@ function buildShareTitle(button) {
     return rawTitle.replace(SITE_NAME_SUFFIX_PATTERN, "").trim() || "ElSeeker";
 }
 
-// --- 공유 URL: canonical 의 origin/path + 현재 쿼리스트링 ---
-function buildShareUrl() {
+/**
+ * 공유 URL: canonical 의 origin/path + 현재 쿼리스트링.
+ * 화면이 debounce 로 미뤄 둔 상태 반영이 있으면 먼저 URL 에 반영해, 방금 바꾼 상태가 빠지지 않게 한다.
+ */
+export function buildShareUrl() {
+    flushDeepLinkParams();
+
     const canonicalHref = document.querySelector('link[rel="canonical"]')?.href;
     if (!canonicalHref) {
         return window.location.href;
@@ -43,6 +53,10 @@ function buildShareUrl() {
 // aria-live 영역은 내용이 바뀌기 전부터 DOM 에 있어야 스크린리더가 변경을 읽는다.
 // 그래서 빈 채로 초기화 시점에 미리 붙여 둔다 (initTopNavShare 참고).
 function createShareToast() {
+    const existing = document.getElementById("shareToast");
+    if (existing) {
+        return existing;
+    }
     const toast = document.createElement("div");
     toast.id = "shareToast";
     toast.className = "share-toast";
@@ -53,7 +67,7 @@ function createShareToast() {
 }
 
 function showShareToast(message, isError = false) {
-    const toast = document.getElementById("shareToast") ?? createShareToast();
+    const toast = createShareToast();
 
     toast.textContent = message;
     toast.classList.toggle("is-error", isError);
@@ -96,16 +110,18 @@ async function copyToClipboard(text) {
     return copyByExecCommand(text);
 }
 
-async function shareCurrentPage(button) {
-    const title = buildShareTitle(button);
-    const url = buildShareUrl();
-
+/**
+ * 링크 공유 — OS 공유 시트 → 실패 시 클립보드 복사 + 토스트.
+ * 상단 공유 버튼과 게시글 더보기 메뉴가 같은 동작을 쓰도록 공개한다.
+ */
+export async function shareLink({title, url}) {
     if (navigator.share) {
         try {
             await navigator.share({title, url});
             return;
         } catch (error) {
-            // 사용자가 공유 시트를 닫은 경우(AbortError)는 복사로 대체하지 않는다.
+            // 사용자가 공유 시트를 그냥 닫은 경우(AbortError)는 복사로 대체하지 않는다.
+            // 취소했는데 "복사되었습니다" 가 뜨면 의도하지 않은 동작이 일어난 것처럼 보인다.
             if (error?.name === "AbortError") {
                 return;
             }
@@ -116,11 +132,18 @@ async function shareCurrentPage(button) {
     showShareToast(copied ? "링크가 복사되었습니다." : "링크 복사에 실패했습니다.", !copied);
 }
 
+async function shareCurrentPage(button) {
+    await shareLink({title: buildShareTitle(button), url: buildShareUrl()});
+}
+
 function initTopNavShare() {
     const button = document.getElementById("topNavShareButton");
-    if (!button) {
+    if (!button || button.dataset.shareBound === "true") {
         return;
     }
+    // 이 모듈을 script 태그와 import 양쪽에서 불러오면 인스턴스가 둘일 수 있다.
+    // 그때 리스너가 두 번 붙어 공유 시트가 두 번 뜨지 않도록 DOM 에 표시를 남긴다.
+    button.dataset.shareBound = "true";
 
     // 첫 안내가 스크린리더에 읽히도록 aria-live 영역을 미리 만들어 둔다.
     createShareToast();

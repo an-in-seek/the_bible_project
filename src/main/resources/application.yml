@@ -104,6 +104,13 @@ el-seeker:
     # 등록할 수 있어, Apple 이 웹 로그인용 Services ID 가 아니라 App ID 를 aud 로 보낼 수 있다.
     # 비워 두면 client-id 만 허용한다. 값이 다르면 검증 실패 로그에 수신한 aud 가 찍힌다.
     notification-audiences: ${APPLE_NOTIFICATION_AUDIENCES:}
+  # 앱 딥링크(Android App Links). 공유 버튼이 만드는 https 링크를 앱의 해당 화면으로 열기 위한
+  # /.well-known/assetlinks.json 응답 값이다. 지문(쉼표 구분)이 비면 엔드포인트는 404 를 반환한다.
+  # Play App Signing 사용 시 업로드 키와 앱 서명 키 지문을 **둘 다** 넣어야 한다.
+  app-link:
+    android:
+      package-name: ${ANDROID_APP_PACKAGE_NAME:com.elseeker.android}
+      sha256-cert-fingerprints: ${ANDROID_APP_SHA256_CERT_FINGERPRINTS:}
 
 springdoc:
   api-docs:

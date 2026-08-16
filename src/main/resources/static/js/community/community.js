@@ -1,6 +1,7 @@
 import { formatNumberWithComma } from "/js/common-util.js";
 import { checkAuthStatus, buildLoginRedirectUrl } from "/js/auth/auth-check.js";
 import { createRestoreStore, restoreScroll } from "/js/nav-restore.js?v=1.0";
+import { syncDeepLinkParams } from "/js/deep-link-util.js?v=1.0";
 
 const API = {
     POSTS: "/api/v1/community/posts",
@@ -12,6 +13,7 @@ const NOTICE_PAGE_SIZE = 1;
 const SCROLL_ROOT_MARGIN = "200px";
 const NOTICE_TYPE = "NOTICE";
 const NOTICE_CATEGORY = "공지";
+const DEFAULT_CATEGORY = "all";
 
 const CATEGORY_CONFIG = {
     all: { sort: "latest" },
@@ -191,7 +193,7 @@ const App = {
             return paramCategory;
         }
         const activeTab = document.querySelector(".community-tab.active");
-        return activeTab?.dataset.category || "all";
+        return activeTab?.dataset.category || DEFAULT_CATEGORY;
     },
 
     selectCategory(category, opts = {}) {
@@ -204,6 +206,9 @@ const App = {
         }
 
         App.state.activeCategory = category;
+        // 상단 공유 버튼이 쿼리를 그대로 실어 보내므로, 보고 있는 탭을 URL 에 남겨야 딥링크가 된다.
+        // 읽는 쪽은 getInitialCategory. 설계 문서: docs/common/url-share.md
+        syncDeepLinkParams({ category: category === DEFAULT_CATEGORY ? null : category });
         App.updateTabState(category);
         App.toggleTop3(category === "all");
 

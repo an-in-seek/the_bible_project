@@ -2,6 +2,8 @@ import {fetchWithAuthRetry, formatNumberWithComma, setupDialogScrollLock} from "
 import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
 import {buildLoginRedirectUrl, checkAuthStatus} from "/js/auth/auth-check.js";
 import { createRestoreStore, restoreScroll } from "/js/nav-restore.js?v=1.0";
+// head.html 의 script 태그와 같은 URL 이어야 모듈 인스턴스가 하나로 유지된다 (?v= 를 함께 올릴 것).
+import { buildShareUrl, shareLink } from "/js/share.js?v=1.1";
 
 const API = {
     POSTS: "/api/v1/community/posts",
@@ -194,6 +196,7 @@ const App = {
 
     renderPost(post) {
         App.setText("postTitle", post.title || "");
+        App.setShareTitle(post.title);
         App.setText("postAuthor", post.authorNickname || "익명");
         App.setText("postTime", App.formatRelativeTime(post.createdAt));
 
@@ -665,22 +668,21 @@ const App = {
         buttons.forEach((button) => button.addEventListener("click", App.sharePost));
     },
 
+    /**
+     * 상단 공유 버튼의 제목을 게시글 제목으로 덮어쓴다.
+     * 상세는 클라이언트에서 그리므로 og:title 이 사이트 기본값이라 그대로 두면 제목 없이 공유된다.
+     */
+    setShareTitle(title) {
+        const button = document.getElementById("topNavShareButton");
+        if (!button) return;
+        button.dataset.shareTitle = (title || "").trim() || "커뮤니티 게시글";
+    },
+
+    // 상단 공유 버튼과 동작을 맞추기 위해 share.js 로 위임한다.
+    // (공유 시트를 그냥 닫은 경우 복사로 넘어가지 않는 처리도 함께 따라온다.)
     async sharePost() {
-        const url = window.location.href;
         const title = document.getElementById("postTitle")?.textContent?.trim() || "게시글 공유";
-        const text = `| 커뮤니티 | ElSeeker`;
-
-        if (navigator.share) {
-            try {
-                await navigator.share({title, text, url});
-                return;
-            } catch (error) {
-                // fallback to clipboard
-            }
-        }
-
-        const copied = await App.copyToClipboard(url);
-        alert(copied ? "링크가 복사되었습니다." : "링크 복사에 실패했습니다.");
+        await shareLink({title, url: buildShareUrl()});
     },
 
     setLikeState(active) {
@@ -688,35 +690,6 @@ const App = {
         const button = document.getElementById("btnLike");
         if (button) {
             button.classList.toggle("active", App.state.likeActive);
-        }
-    },
-
-    async copyToClipboard(text) {
-        if (!text) return false;
-        try {
-            if (navigator.clipboard?.writeText) {
-                await navigator.clipboard.writeText(text);
-                return true;
-            }
-        } catch (error) {
-            // fallback below
-        }
-        return App.fallbackCopy(text);
-    },
-
-    fallbackCopy(text) {
-        try {
-            const textarea = document.createElement("textarea");
-            textarea.value = text;
-            textarea.style.position = "fixed";
-            textarea.style.left = "-9999px";
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand("copy");
-            document.body.removeChild(textarea);
-            return true;
-        } catch (error) {
-            return false;
         }
     },
 
