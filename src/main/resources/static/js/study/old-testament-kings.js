@@ -9,6 +9,7 @@
  */
 
 import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+import {readDeepLinkParams, syncDeepLinkParams} from "/js/deep-link-util.js?v=1.0";
 
 const KINGDOMS = {
   united: {label: "통일왕국", short: "통일"},
@@ -831,14 +832,17 @@ class OldTestamentKingsTimeline {
       selectedKingId: null
     };
     this.highlightTimer = null;
+    this.pendingKingId = null;
   }
 
   init() {
     this.cacheElements();
     setupDialogScrollLock(this.detailDialog);
+    this.readUrl();
     this.renderTimeline();
     this.bindEvents();
     this.bindScrollToTop();
+    this.restoreFromUrl();
   }
 
   cacheElements() {
@@ -1091,6 +1095,73 @@ class OldTestamentKingsTimeline {
     this.detailEl.classList.add("is-open");
   }
 
+  // ---------- URL 동기화 (딥링크) ----------
+
+  /**
+   * 공유 링크의 쿼리를 상태로 되돌린다.
+   * 카드가 아직 없는 시점(renderTimeline 이전)이라 DOM 반영은 restoreFromUrl 이 맡는다.
+   */
+  readUrl() {
+    const params = readDeepLinkParams();
+
+    const kingdom = params.get("kingdom");
+    if (kingdom === "all" || Object.hasOwn(KINGDOMS, kingdom ?? "")) {
+      this.state.kingdom = kingdom;
+    }
+
+    const evaluations = params.get("eval");
+    if (evaluations) {
+      this.state.evaluations = new Set(
+          evaluations.split(",").filter((key) => Object.hasOwn(EVALUATIONS, key))
+      );
+    }
+
+    this.state.keyword = params.get("keyword") ?? "";
+
+    const kingId = params.get("king");
+    if (kingId && this.kingById.has(kingId)) {
+      this.pendingKingId = kingId;
+    }
+  }
+
+  /** readUrl 이 읽어 둔 상태를 필터 UI·목록·상세에 반영한다. 카드가 그려진 뒤에 호출해야 한다. */
+  restoreFromUrl() {
+    const filtered = this.state.kingdom !== "all"
+        || this.state.evaluations.size > 0
+        || this.state.keyword !== "";
+
+    if (filtered) {
+      this.syncKingdomButtons();
+      this.evalBar.querySelectorAll("input[data-evaluation]").forEach((input) => {
+        input.checked = this.state.evaluations.has(input.dataset.evaluation);
+      });
+      this.searchInput.value = this.state.keyword;
+      this.searchClear.classList.toggle("d-none", this.state.keyword.length === 0);
+      this.applyFilters();
+    }
+
+    if (!this.pendingKingId) {
+      return;
+    }
+    // goToKing 은 가려진 왕이면 필터를 풀어 주고 카드로 스크롤한 뒤 상세를 연다.
+    const kingId = this.pendingKingId;
+    this.pendingKingId = null;
+    this.goToKing(kingId);
+  }
+
+  /**
+   * 현재 필터·선택을 URL 에 남긴다. 상단 공유 버튼이 이 쿼리를 그대로 실어 보내므로
+   * 여기 담기지 않은 상태는 받는 사람에게 기본 화면으로 보인다.
+   */
+  writeUrl() {
+    syncDeepLinkParams({
+      kingdom: this.state.kingdom === "all" ? null : this.state.kingdom,
+      eval: this.state.evaluations.size > 0 ? [...this.state.evaluations].join(",") : null,
+      keyword: this.state.keyword.trim(),
+      king: this.state.selectedKingId
+    });
+  }
+
   // ---------- 필터 ----------
 
   applyFilters() {
@@ -1129,6 +1200,8 @@ class OldTestamentKingsTimeline {
 
     const total = visible.united + visible.israel + visible.judah;
     this.emptyEl.classList.toggle("d-none", total > 0);
+
+    this.writeUrl();
   }
 
   toggleEra(kind, show) {
@@ -1300,6 +1373,7 @@ class OldTestamentKingsTimeline {
 
     this.markContemporaries(king);
     this.renderDetail(king);
+    this.writeUrl();
 
     if (this.detailDialog && !this.detailDialog.open) {
       this.detailDialog.showModal();
@@ -1309,6 +1383,7 @@ class OldTestamentKingsTimeline {
   closeDetail() {
     this.clearSelection();
     this.state.selectedKingId = null;
+    this.writeUrl();
     this.detailEl.classList.remove("is-open");
     this.detailEl.innerHTML = "";
     if (this.detailDialog && this.detailDialog.open) {

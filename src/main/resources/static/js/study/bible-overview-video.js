@@ -1,6 +1,11 @@
 /**
  * 성경 개요 영상 - 66권 유튜브 영상 목록
+ *
+ * 책 검색어는 ?keyword= 로 URL 에 남긴다. 상단 공유 버튼이 쿼리를 그대로 실어 보내므로
+ * 받는 사람이 같은 목록을 보게 된다. 설계 문서: docs/common/url-share.md
  */
+
+import {readDeepLinkParams, syncDeepLinkParams} from "/js/deep-link-util.js?v=1.0";
 
 const BIBLE_VIDEOS = [
     {bookOrder: 1, bookName: "창세기", youtubeUrl: "https://youtu.be/dLv2ndgXrbo?si=sJmYqcu0vhoJdBKB"},
@@ -94,6 +99,7 @@ class BibleOverviewVideo {
         this.initNav();
         this.render();
         this.initBookSearch();
+        this.restoreBookSearch();
         this.scrollToTargetBook();
     }
 
@@ -180,14 +186,28 @@ class BibleOverviewVideo {
             const keyword = this.bookSearchInput.value.trim();
             this.bookSearchClear.classList.toggle("d-none", keyword.length === 0);
             this.filterBooks(keyword);
+            syncDeepLinkParams({keyword});
         });
 
         this.bookSearchClear.addEventListener("click", () => {
             this.bookSearchInput.value = "";
             this.bookSearchClear.classList.add("d-none");
             this.filterBooks("");
+            syncDeepLinkParams({keyword: null});
             this.bookSearchInput.focus();
         });
+    }
+
+    /** 공유 링크로 들어온 ?keyword= 를 검색창에 되돌리고 목록에 반영한다. */
+    restoreBookSearch() {
+        if (!this.bookSearchInput) return;
+
+        const keyword = (readDeepLinkParams().get("keyword") ?? "").trim();
+        if (!keyword) return;
+
+        this.bookSearchInput.value = keyword;
+        this.bookSearchClear.classList.remove("d-none");
+        this.filterBooks(keyword);
     }
 
     filterBooks(keyword) {

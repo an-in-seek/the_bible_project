@@ -1,5 +1,6 @@
 package com.elseeker.common.security
 
+import com.elseeker.common.adapter.input.api.AppLinkApi
 import com.elseeker.common.config.ElSeekerProperties
 import com.elseeker.common.security.jwt.ConsentGateFilter
 import com.elseeker.common.security.jwt.JwtAuthenticationFilter
@@ -159,6 +160,8 @@ class SecurityConfig(
                         "/favicon.ico",
                         "/robots.txt",
                         "/sitemap.xml",
+                        // Android App Links 검증 파일. Android 가 인증 없이 가져가므로 공개여야 한다.
+                        AppLinkApi.WELL_KNOWN_ASSET_LINKS_PATH,
                         "/css/**",
                         "/js/**",
                         "/images/**",
