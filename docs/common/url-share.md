@@ -78,9 +78,13 @@ companion object {
 
 **URL** — `link[rel=canonical]` 의 origin/path 에 현재 쿼리스트링을 합쳐 만든다.
 
-- canonical 은 `head.html` 이 `https://elseeker.com + requestURI` 로 만들기 때문에,
+- canonical 은 `head.html` 이 `https://elseeker.com + currentPath` 로 만들기 때문에,
   로컬·스테이징에서 눌러도 **운영 도메인 링크**가 공유된다. 공유는 남에게 보내는 동작이므로
   의도한 동작이다.
+- 경로는 `GlobalModelAttribute` 가 넣어 주는 `currentPath` 를 쓴다. **템플릿에서
+  `#httpServletRequest` 로 직접 읽으면 안 된다** — Thymeleaf 3.1 이 그 표현식 객체를 없앴는데
+  예외가 아니라 조용히 `null` 이 되고, canonical 이 `siteUrl` 로 폴백해 **어느 화면에서 눌러도
+  루트가 공유된다.** 렌더링은 멀쩡해서 눈에 띄지 않으므로 `CanonicalUrlTest` 로 고정해 두었다.
 - 쿼리스트링을 살리는 이유는 canonical 에 쿼리가 빠져 있기 때문이다. 화면 상태가 쿼리에 담기므로
   이걸 버리면 받는 사람이 다른 화면을 보게 된다.
 
