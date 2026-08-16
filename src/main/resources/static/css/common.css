@@ -289,6 +289,39 @@
     opacity: 1;
 }
 
+/* --- Share Toast (Web Share 미지원 시 링크 복사 피드백) --- */
+/* share.js 가 body 에 동적으로 붙인다. 하단 탭바 공존 보정은 section-nav.css 에 있다. */
+.share-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1.5rem;
+    z-index: 1080;
+    max-width: min(90vw, 420px);
+    padding: 0.625rem 1.125rem;
+    border: 1px solid var(--color-border);
+    border-radius: 9999px;
+    background-color: var(--color-bg-elevated-strong);
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    box-shadow: 0 8px 24px var(--color-shadow);
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 0.5rem);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.share-toast.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+}
+
+.share-toast.is-error {
+    border-color: var(--bs-danger-border-subtle);
+    color: var(--bs-danger-text-emphasis);
+}
+
 /* ── Dialog 공통 ── */
 /* 다이얼로그 활성 시 뒤 본문 스크롤 잠금 — JS에서 토글 */
 body.scroll-locked {

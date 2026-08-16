@@ -35,6 +35,7 @@ class DictionaryWebController(
         val backLink = buildBackLink(keyword)
         model.addAttribute("dictionary", dictionary)
         model.addAttribute("backLink", backLink)
+        model.addAttribute("shareTitle", "${dictionary.term} - 성경 사전")
         return "study/dictionary-detail"
     }
 

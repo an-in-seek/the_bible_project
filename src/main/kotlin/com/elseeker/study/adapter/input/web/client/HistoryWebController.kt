@@ -37,6 +37,7 @@ class HistoryWebController {
         model.addAttribute("currentEra", eraSummary)
         model.addAttribute("currentEraSlug", era)
         model.addAttribute("events", events)
+        eraSummary?.let { model.addAttribute("shareTitle", "${it.label} - 성경 연대기") }
         return "study/history-era"
     }
 
@@ -47,6 +48,7 @@ class HistoryWebController {
     ): String {
         val detail = HistoryDummyData.findEventDetail(id) ?: buildFallbackDetail(id)
         model.addAttribute("detail", detail)
+        model.addAttribute("shareTitle", "${detail.title} - 성경 역사")
         return "study/history-event"
     }
 
