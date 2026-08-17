@@ -6,229 +6,372 @@
     <title>관리자 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
-    <link href="/css/admin/admin-analytics-visitors.css?v=5.0" rel="stylesheet">
+    <link href="/css/admin/admin-analytics-visitors.css?v=6.0" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
     <aside th:replace="~{admin/fragments/admin-sidebar :: sidebar}"></aside>
     <div class="admin-sidebar-overlay" data-admin-sidebar-close></div>
-    <main class="admin-content">
+    <main class="admin-content admin-dashboard">
         <div class="admin-topbar">
             <button class="admin-sidebar-toggle" type="button" aria-label="메뉴 열기" data-admin-sidebar-toggle>
                 <span></span>
             </button>
             <span class="admin-topbar-title">관리자</span>
         </div>
-        <h2>관리자 대시보드</h2>
 
-        <section class="analytics-kpi-grid">
-            <div class="analytics-kpi-card">
-                <div class="analytics-kpi-label">오늘 페이지뷰</div>
-                <div class="analytics-kpi-value" data-kpi="todayPageView">-</div>
+        <header class="dash-header">
+            <div class="dash-header-text">
+                <h2>관리자 대시보드</h2>
+                <p class="dash-header-desc">방문 추이와 인기 검색어를 한눈에 확인합니다. 모든 날짜는 한국 시간(KST) 기준입니다.</p>
             </div>
-            <div class="analytics-kpi-card">
-                <div class="analytics-kpi-label">오늘 고유 방문자</div>
-                <div class="analytics-kpi-value" data-kpi="todayUniqueVisitor">-</div>
+            <div class="dash-header-aside">
+                <span class="dash-updated-at" data-dash-updated></span>
+                <button type="button" class="dash-refresh" data-dash-refresh>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M21 12a9 9 0 1 1-3-6.7"></path>
+                        <path d="M21 3v6h-6"></path>
+                    </svg>
+                    새로고침
+                </button>
             </div>
-            <div class="analytics-kpi-card">
-                <div class="analytics-kpi-label">최근 7일 페이지뷰</div>
-                <div class="analytics-kpi-value" data-kpi="last7PageView">-</div>
+        </header>
+
+        <p class="visually-hidden" role="status" aria-live="polite" data-dash-status></p>
+
+        <section class="analytics-kpi-grid" aria-label="주요 지표">
+            <div class="analytics-kpi-card" role="group" aria-labelledby="kpi-label-todayPageView" data-accent="pv">
+                <p class="analytics-kpi-label" id="kpi-label-todayPageView">
+                    페이지뷰
+                    <span class="analytics-kpi-period">오늘</span>
+                </p>
+                <div class="analytics-kpi-value is-loading" data-kpi="todayPageView">0</div>
+                <div class="analytics-kpi-foot" data-kpi-trend="todayPageView"></div>
             </div>
-            <div class="analytics-kpi-card">
-                <div class="analytics-kpi-label">최근 30일 고유 방문자 (브라우저)</div>
-                <div class="analytics-kpi-value" data-kpi="last30UniqueVisitor">-</div>
+            <div class="analytics-kpi-card" role="group" aria-labelledby="kpi-label-todayUniqueVisitor" data-accent="uv">
+                <p class="analytics-kpi-label" id="kpi-label-todayUniqueVisitor">
+                    고유 방문자
+                    <span class="analytics-kpi-period">오늘</span>
+                </p>
+                <div class="analytics-kpi-value is-loading" data-kpi="todayUniqueVisitor">0</div>
+                <div class="analytics-kpi-foot" data-kpi-trend="todayUniqueVisitor"></div>
             </div>
-            <div class="analytics-kpi-card">
-                <div class="analytics-kpi-label">최근 30일 고유 회원</div>
-                <div class="analytics-kpi-value" data-kpi="last30UniqueMember">-</div>
+            <div class="analytics-kpi-card" role="group" aria-labelledby="kpi-label-last7PageView" data-accent="pv">
+                <p class="analytics-kpi-label" id="kpi-label-last7PageView">
+                    페이지뷰
+                    <span class="analytics-kpi-period">최근 7일</span>
+                </p>
+                <div class="analytics-kpi-value is-loading" data-kpi="last7PageView">0</div>
+                <div class="analytics-kpi-foot" data-kpi-trend="last7PageView"></div>
+            </div>
+            <div class="analytics-kpi-card" role="group" aria-labelledby="kpi-label-last30UniqueVisitor" data-accent="uv">
+                <p class="analytics-kpi-label" id="kpi-label-last30UniqueVisitor">
+                    고유 방문자
+                    <span class="analytics-kpi-period">최근 30일</span>
+                </p>
+                <div class="analytics-kpi-value is-loading" data-kpi="last30UniqueVisitor">0</div>
+                <div class="analytics-kpi-foot">
+                    <span class="analytics-kpi-delta-caption">브라우저 기준 · 기간 내 중복 제거</span>
+                </div>
+            </div>
+            <div class="analytics-kpi-card" role="group" aria-labelledby="kpi-label-last30UniqueMember" data-accent="uv">
+                <p class="analytics-kpi-label" id="kpi-label-last30UniqueMember">
+                    고유 회원
+                    <span class="analytics-kpi-period">최근 30일</span>
+                </p>
+                <div class="analytics-kpi-value is-loading" data-kpi="last30UniqueMember">0</div>
+                <div class="analytics-kpi-foot">
+                    <span class="analytics-kpi-delta-caption">로그인 기준</span>
+                </div>
             </div>
         </section>
 
-        <section class="analytics-section">
+        <section class="analytics-section" aria-labelledby="dash-daily-title">
             <div class="analytics-section-header">
-                <h3>일별 추이</h3>
-                <form class="analytics-range-form" data-range-form>
-                    <label>
-                        <span>시작</span>
-                        <input type="date" name="from" data-range-from class="form-control form-control-sm">
-                    </label>
-                    <label>
-                        <span>종료</span>
-                        <input type="date" name="to" data-range-to class="form-control form-control-sm">
-                    </label>
-                    <button type="submit" class="btn btn-outline-secondary btn-sm">조회</button>
-                </form>
+                <div class="analytics-section-heading">
+                    <h3 id="dash-daily-title">일별 추이</h3>
+                    <p class="analytics-section-note" data-range-label></p>
+                </div>
+                <div class="analytics-controls">
+                    <div class="analytics-presets" role="group" aria-label="조회 기간 빠른 선택">
+                        <button type="button" class="analytics-preset" data-range-preset="7" aria-pressed="false">7일</button>
+                        <button type="button" class="analytics-preset" data-range-preset="30" aria-pressed="true">30일</button>
+                        <button type="button" class="analytics-preset" data-range-preset="90" aria-pressed="false">90일</button>
+                    </div>
+                    <form class="analytics-range-form" data-range-form>
+                        <label>
+                            <span>시작</span>
+                            <input type="date" name="from" data-range-from class="form-control form-control-sm">
+                        </label>
+                        <label>
+                            <span>종료</span>
+                            <input type="date" name="to" data-range-to class="form-control form-control-sm">
+                        </label>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">조회</button>
+                        <p class="analytics-form-error" role="alert" data-range-error></p>
+                    </form>
+                </div>
             </div>
+
+            <div class="analytics-chart-legend">
+                <span class="analytics-legend-item" data-series="pv">
+                    <span class="analytics-legend-swatch" aria-hidden="true"></span>페이지뷰
+                </span>
+                <span class="analytics-legend-item" data-series="uv">
+                    <span class="analytics-legend-swatch" aria-hidden="true"></span>고유 방문자
+                </span>
+            </div>
+
             <div class="analytics-chart-wrapper">
-                <svg class="analytics-chart" data-chart viewBox="0 0 800 260" preserveAspectRatio="xMidYMid meet">
+                <svg class="analytics-chart" data-chart role="img"
+                     aria-describedby="dash-daily-table-desc">
+                    <defs>
+                        <linearGradient id="dashPvGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#2563eb" stop-opacity="0.20"></stop>
+                            <stop offset="100%" stop-color="#2563eb" stop-opacity="0"></stop>
+                        </linearGradient>
+                    </defs>
                     <g data-chart-grid></g>
-                    <polyline data-chart-line fill="none" stroke="#2563eb" stroke-width="2"></polyline>
+                    <path class="analytics-chart-area" data-chart-area d=""></path>
+                    <line class="analytics-chart-crosshair" data-chart-crosshair></line>
+                    <path class="analytics-chart-line-uv" data-chart-line="uv" d=""></path>
+                    <path class="analytics-chart-line-pv" data-chart-line="pv" d=""></path>
                     <g data-chart-points></g>
                 </svg>
-                <div class="analytics-chart-empty" data-chart-empty>데이터가 없습니다.</div>
+                <div class="analytics-chart-tooltip" data-chart-tooltip aria-hidden="true"></div>
+                <div class="analytics-chart-empty" data-chart-empty>선택한 기간에 집계된 방문 기록이 없습니다.</div>
             </div>
+
+            <p id="dash-daily-table-desc" class="visually-hidden">
+                아래 표에 일별 페이지뷰와 고유 방문자 수가 같은 데이터로 제공됩니다.
+            </p>
             <div class="analytics-table-wrapper">
                 <table class="admin-table analytics-daily-table">
+                    <caption class="visually-hidden">일별 페이지뷰 및 고유 방문자 수</caption>
                     <thead>
                     <tr>
-                        <th>날짜</th>
-                        <th>페이지뷰</th>
-                        <th>고유 방문자</th>
+                        <th scope="col">날짜</th>
+                        <th scope="col" class="analytics-num">페이지뷰</th>
+                        <th scope="col" class="analytics-num">고유 방문자</th>
                     </tr>
                     </thead>
                     <tbody data-daily-tbody>
-                    <tr><td colspan="3" class="text-center text-muted">로딩 중...</td></tr>
+                    <tr>
+                        <td colspan="3" class="analytics-state-cell">불러오는 중…</td>
+                    </tr>
                     </tbody>
+                    <tfoot data-daily-tfoot hidden>
+                    <tr>
+                        <td>합계</td>
+                        <td class="analytics-num" data-daily-total-pv>-</td>
+                        <td class="analytics-num" data-daily-total-uv>-</td>
+                    </tr>
+                    </tfoot>
                 </table>
             </div>
         </section>
 
-        <section class="analytics-section">
+        <section class="analytics-section" aria-labelledby="dash-pages-title">
             <div class="analytics-section-header">
-                <h3>페이지별 방문 순위</h3>
-                <form class="analytics-range-form" data-page-form>
-                    <label>
-                        <span>날짜</span>
-                        <input type="date" name="date" data-page-date class="form-control form-control-sm">
-                    </label>
-                    <button type="submit" class="btn btn-outline-secondary btn-sm">조회</button>
-                </form>
+                <div class="analytics-section-heading">
+                    <h3 id="dash-pages-title">페이지별 방문 순위</h3>
+                    <p class="analytics-section-note">하루 단위로 집계됩니다.</p>
+                </div>
+                <div class="analytics-controls">
+                    <form class="analytics-range-form" data-page-form>
+                        <label>
+                            <span>날짜</span>
+                            <input type="date" name="date" data-page-date class="form-control form-control-sm">
+                        </label>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm">조회</button>
+                    </form>
+                </div>
             </div>
             <div class="admin-table-wrapper">
                 <table class="admin-table">
+                    <caption class="visually-hidden">페이지별 페이지뷰 및 고유 방문자 수</caption>
                     <thead>
                     <tr>
-                        <th>페이지</th>
-                        <th>페이지뷰</th>
-                        <th>고유 방문자</th>
+                        <th scope="col" class="analytics-rank-cell">#</th>
+                        <th scope="col">페이지</th>
+                        <th scope="col" class="analytics-bar-cell analytics-num">페이지뷰</th>
+                        <th scope="col" class="analytics-num">고유 방문자</th>
                     </tr>
                     </thead>
                     <tbody data-page-tbody>
-                    <tr><td colspan="3" class="text-center text-muted">로딩 중...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="admin-pagination" data-page-pagination></div>
-        </section>
-
-        <section class="analytics-section">
-            <div class="analytics-section-header">
-                <h3>성경 인기 검색어</h3>
-                <form class="analytics-range-form" data-keyword-form="bible">
-                    <label>
-                        <span>개수</span>
-                        <select name="limit" data-keyword-limit="bible" class="form-select form-select-sm">
-                            <option value="10">10</option>
-                            <option value="20" selected>20</option>
-                            <option value="50">50</option>
-                        </select>
-                    </label>
-                    <button type="submit" class="btn btn-outline-secondary btn-sm">조회</button>
-                </form>
-            </div>
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
                     <tr>
-                        <th style="width: 80px">순위</th>
-                        <th>키워드</th>
-                        <th style="width: 140px">검색 횟수</th>
+                        <td colspan="4" class="analytics-state-cell">불러오는 중…</td>
                     </tr>
-                    </thead>
-                    <tbody data-keyword-tbody="bible">
-                    <tr><td colspan="3" class="text-center text-muted">로딩 중...</td></tr>
                     </tbody>
                 </table>
             </div>
-            <div class="analytics-meta text-muted small" data-keyword-refreshed="bible"></div>
+            <nav class="admin-pagination" data-page-pagination aria-label="페이지별 방문 순위 페이지 이동"></nav>
         </section>
 
-        <section class="analytics-section">
-            <div class="analytics-section-header">
-                <h3>성경 사전 인기 검색어</h3>
-                <form class="analytics-range-form" data-keyword-form="dictionary">
-                    <label>
-                        <span>개수</span>
-                        <select name="limit" data-keyword-limit="dictionary" class="form-select form-select-sm">
-                            <option value="10">10</option>
-                            <option value="20" selected>20</option>
-                            <option value="50">50</option>
-                        </select>
-                    </label>
-                    <button type="submit" class="btn btn-outline-secondary btn-sm">조회</button>
-                </form>
-            </div>
-            <div class="admin-table-wrapper">
-                <table class="admin-table">
-                    <thead>
-                    <tr>
-                        <th style="width: 80px">순위</th>
-                        <th>키워드</th>
-                        <th style="width: 140px">검색 횟수</th>
-                    </tr>
-                    </thead>
-                    <tbody data-keyword-tbody="dictionary">
-                    <tr><td colspan="3" class="text-center text-muted">로딩 중...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="analytics-meta text-muted small" data-keyword-refreshed="dictionary"></div>
-        </section>
+        <div class="dash-ranking-grid">
+            <section class="analytics-section" aria-labelledby="dash-keyword-bible-title">
+                <div class="analytics-section-header">
+                    <div class="analytics-section-heading">
+                        <h3 id="dash-keyword-bible-title">성경 인기 검색어</h3>
+                        <p class="analytics-section-note">최대 30초 캐시된 값입니다.</p>
+                    </div>
+                    <div class="analytics-controls">
+                        <form class="analytics-range-form" data-keyword-form="bible">
+                            <label>
+                                <span>개수</span>
+                                <select name="limit" data-keyword-limit="bible" class="form-select form-select-sm">
+                                    <option value="10">10개</option>
+                                    <option value="20" selected>20개</option>
+                                    <option value="50">50개</option>
+                                </select>
+                            </label>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">조회</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <caption class="visually-hidden">성경 검색어 순위와 검색 횟수</caption>
+                        <thead>
+                        <tr>
+                            <th scope="col" class="analytics-rank-cell">순위</th>
+                            <th scope="col">키워드</th>
+                            <th scope="col" class="analytics-bar-cell analytics-num">검색 횟수</th>
+                        </tr>
+                        </thead>
+                        <tbody data-keyword-tbody="bible">
+                        <tr>
+                            <td colspan="3" class="analytics-state-cell">불러오는 중…</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p class="analytics-meta" data-keyword-refreshed="bible"></p>
+            </section>
 
-        <h3 class="mt-4">빠른 이동</h3>
-        <div class="row g-3">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">회원</h5>
-                        <p class="card-text">회원 정보를 관리합니다.</p>
-                        <a href="/web/admin/members" class="btn btn-primary btn-sm">관리</a>
+            <section class="analytics-section" aria-labelledby="dash-keyword-dictionary-title">
+                <div class="analytics-section-header">
+                    <div class="analytics-section-heading">
+                        <h3 id="dash-keyword-dictionary-title">성경 사전 인기 검색어</h3>
+                        <p class="analytics-section-note">최대 30초 캐시된 값입니다.</p>
+                    </div>
+                    <div class="analytics-controls">
+                        <form class="analytics-range-form" data-keyword-form="dictionary">
+                            <label>
+                                <span>개수</span>
+                                <select name="limit" data-keyword-limit="dictionary" class="form-select form-select-sm">
+                                    <option value="10">10개</option>
+                                    <option value="20" selected>20개</option>
+                                    <option value="50">50개</option>
+                                </select>
+                            </label>
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">조회</button>
+                        </form>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">성경 사전</h5>
-                        <p class="card-text">사전 용어를 관리합니다.</p>
-                        <a href="/web/admin/dictionaries" class="btn btn-primary btn-sm">관리</a>
-                    </div>
+                <div class="admin-table-wrapper">
+                    <table class="admin-table">
+                        <caption class="visually-hidden">성경 사전 검색어 순위와 검색 횟수</caption>
+                        <thead>
+                        <tr>
+                            <th scope="col" class="analytics-rank-cell">순위</th>
+                            <th scope="col">키워드</th>
+                            <th scope="col" class="analytics-bar-cell analytics-num">검색 횟수</th>
+                        </tr>
+                        </thead>
+                        <tbody data-keyword-tbody="dictionary">
+                        <tr>
+                            <td colspan="3" class="analytics-state-cell">불러오는 중…</td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">번역본</h5>
-                        <p class="card-text">성경 번역본을 관리합니다.</p>
-                        <a href="/web/admin/bible/translations" class="btn btn-primary btn-sm">관리</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">O/X 퀴즈</h5>
-                        <p class="card-text">O/X 퀴즈 스테이지와 문제를 관리합니다.</p>
-                        <a href="/web/admin/ox-quiz/stages" class="btn btn-primary btn-sm">관리</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">성경 객관식 퀴즈</h5>
-                        <p class="card-text">객관식 퀴즈 스테이지와 문제를 관리합니다.</p>
-                        <a href="/web/admin/quiz/stages" class="btn btn-primary btn-sm">관리</a>
-                    </div>
-                </div>
-            </div>
+                <p class="analytics-meta" data-keyword-refreshed="dictionary"></p>
+            </section>
         </div>
+
+        <section class="dash-quick-links" aria-labelledby="dash-quick-title">
+            <h3 id="dash-quick-title">빠른 이동</h3>
+            <div class="dash-quick-grid">
+                <a class="dash-quick-tile" href="/web/admin/members">
+                    <span class="dash-quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="9" cy="7" r="4"></circle>
+                            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                        </svg>
+                    </span>
+                    <span class="dash-quick-text">회원</span>
+                    <span class="dash-quick-chevron" aria-hidden="true"></span>
+                </a>
+                <a class="dash-quick-tile" href="/web/admin/dictionaries">
+                    <span class="dash-quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </span>
+                    <span class="dash-quick-text">성경 사전</span>
+                    <span class="dash-quick-chevron" aria-hidden="true"></span>
+                </a>
+                <a class="dash-quick-tile" href="/web/admin/bible/translations">
+                    <span class="dash-quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 7v14"></path>
+                            <path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"></path>
+                        </svg>
+                    </span>
+                    <span class="dash-quick-text">번역본</span>
+                    <span class="dash-quick-chevron" aria-hidden="true"></span>
+                </a>
+                <a class="dash-quick-tile" href="/web/admin/ox-quiz/stages">
+                    <span class="dash-quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="8" cy="12" r="5"></circle>
+                            <path d="M16 8l6 8"></path>
+                            <path d="M22 8l-6 8"></path>
+                        </svg>
+                    </span>
+                    <span class="dash-quick-text">O/X 퀴즈</span>
+                    <span class="dash-quick-chevron" aria-hidden="true"></span>
+                </a>
+                <a class="dash-quick-tile" href="/web/admin/quiz/stages">
+                    <span class="dash-quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <path d="M12 17h.01"></path>
+                            <circle cx="12" cy="12" r="10"></circle>
+                        </svg>
+                    </span>
+                    <span class="dash-quick-text">성경 객관식 퀴즈</span>
+                    <span class="dash-quick-chevron" aria-hidden="true"></span>
+                </a>
+                <a class="dash-quick-tile" href="/web/admin/word-puzzles">
+                    <span class="dash-quick-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                             stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                            <path d="M9 3v18"></path>
+                            <path d="M3 9h18"></path>
+                        </svg>
+                    </span>
+                    <span class="dash-quick-text">성경 Word Puzzle</span>
+                    <span class="dash-quick-chevron" aria-hidden="true"></span>
+                </a>
+            </div>
+        </section>
     </main>
 </div>
 <script type="module">
     import {initAdminSidebarToggle} from "/js/admin/admin-common.js";
-    import {initAnalyticsVisitors} from "/js/admin/admin-analytics-visitors.js?v=1.2";
-    import {initSearchKeywordRanking} from "/js/admin/admin-search-keyword-ranking.js?v=1.2";
+    import {initAnalyticsVisitors} from "/js/admin/admin-analytics-visitors.js?v=1.3";
+    import {initSearchKeywordRanking} from "/js/admin/admin-search-keyword-ranking.js?v=1.3";
     initAdminSidebarToggle();
     initAnalyticsVisitors();
     initSearchKeywordRanking();

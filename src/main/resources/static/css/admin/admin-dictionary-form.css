@@ -1,0 +1,490 @@
+/* 성경 사전 등록/수정 화면
+ * 이 파일은 admin-dictionary-form.html 에서만 사용한다.
+ * admin 화면은 theme.css 를 로드하지 않으므로 라이트 컬러를 하드코딩한다. */
+
+.admin-dictionary-form {
+    --dict-surface: #ffffff;
+    --dict-border: #e5e7eb;
+    --dict-border-strong: #ced4da;
+    --dict-text: #212529;
+    --dict-text-muted: #6b7280;
+    --dict-text-subtle: #9ca3af;
+    --dict-accent: #2563eb;
+    --dict-danger: #dc2626;
+    --dict-danger-soft: #fef2f2;
+    --dict-radius: 10px;
+    --dict-radius-sm: 8px;
+    --dict-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+/* ---------------------------------------------------------------- 페이지 헤더 */
+
+.dict-header {
+    margin-bottom: 16px;
+}
+
+.dict-header h2 {
+    margin: 0 0 4px;
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.dict-header-desc {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--dict-text-muted);
+}
+
+/* 폼과 목록의 최대 폭. 아주 넓은 화면에서 입력줄이 끝없이 늘어나면 읽기 어렵다. */
+.dict-shell {
+    max-width: 900px;
+}
+
+/* -------------------------------------------------------------------- 입력 폼 */
+
+.dict-fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.dict-field + .dict-field {
+    margin-top: 18px;
+}
+
+.dict-label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.admin-dictionary-form .admin-form label {
+    margin-bottom: 0;
+}
+
+.dict-required {
+    color: var(--dict-danger);
+    margin-left: 2px;
+}
+
+.dict-counter {
+    flex: 0 0 auto;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--dict-text-subtle);
+    font-variant-numeric: tabular-nums;
+}
+
+.dict-counter.is-near-limit {
+    color: #b45309;
+    font-weight: 700;
+}
+
+.dict-counter.is-over-limit {
+    color: var(--dict-danger);
+    font-weight: 700;
+}
+
+/* 관련 구절 추가 폼(.dict-ref-form)은 .admin-form 바깥에 있어서 admin.css 의 입력 기본값
+   (width:100%, padding, border, font-size)을 물려받지 못한다. 그대로 두면 number 입력이
+   브라우저 기본 폭(약 155px)을 유지해 그리드 트랙을 넘어 오른쪽으로 삐져나온다.
+   두 폼의 컨트롤 스타일을 여기서 한꺼번에 명시한다. */
+.admin-dictionary-form .admin-form input[type="text"],
+.admin-dictionary-form .admin-form input[type="number"],
+.admin-dictionary-form .admin-form select,
+.admin-dictionary-form .admin-form textarea,
+.admin-dictionary-form .dict-ref-form input[type="number"],
+.admin-dictionary-form .dict-ref-form select {
+    width: 100%;
+    min-width: 0;
+    min-height: 40px;
+    padding: 0.4rem 0.6rem;
+    border: 1px solid var(--dict-border-strong);
+    border-radius: 6px;
+    background: var(--dict-surface);
+    color: var(--dict-text);
+    font-size: 0.9rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.admin-dictionary-form .admin-form input:focus,
+.admin-dictionary-form .admin-form select:focus,
+.admin-dictionary-form .admin-form textarea:focus,
+.admin-dictionary-form .dict-ref-form input:focus,
+.admin-dictionary-form .dict-ref-form select:focus {
+    outline: 0;
+    border-color: var(--dict-accent);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.admin-dictionary-form .admin-form textarea {
+    min-height: 220px;
+    line-height: 1.65;
+    resize: vertical;
+}
+
+/* 검증 실패 필드는 테두리만이 아니라 메시지와 함께 알려 준다 */
+.admin-dictionary-form .admin-form .is-invalid {
+    border-color: var(--dict-danger);
+    background: var(--dict-danger-soft);
+}
+
+.admin-dictionary-form .admin-form .is-invalid:focus {
+    border-color: var(--dict-danger);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+.dict-error {
+    display: none;
+    margin: 6px 0 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--dict-danger);
+}
+
+.dict-error.is-visible {
+    display: block;
+}
+
+.dict-hint {
+    margin: 6px 0 0;
+    font-size: 0.75rem;
+    color: var(--dict-text-subtle);
+}
+
+/* 저장 결과처럼 폼 전체에 해당하는 알림 */
+.dict-alert {
+    display: none;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border-radius: var(--dict-radius-sm);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.dict-alert.is-visible {
+    display: flex;
+}
+
+.dict-alert[data-tone="error"] {
+    background: var(--dict-danger-soft);
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.dict-alert[data-tone="success"] {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    color: #166534;
+}
+
+/* 저장 중에는 버튼 라벨을 바꿔 진행 상태를 알린다 */
+.dict-save-spinner {
+    display: none;
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: dict-spin 0.7s linear infinite;
+    vertical-align: -2px;
+}
+
+.is-saving .dict-save-spinner {
+    display: inline-block;
+}
+
+@keyframes dict-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dict-save-spinner {
+        animation-duration: 2s;
+    }
+}
+
+/* ----------------------------------------------------------------- 관련 구절 */
+
+.dict-references {
+    margin-top: 28px;
+}
+
+.dict-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.dict-section-header h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.dict-count-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 22px;
+    padding: 0 7px;
+    background: #eef2ff;
+    border-radius: 999px;
+    color: #3730a3;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* 신규 등록 화면에서는 섹션을 숨기지 않고 왜 못 쓰는지 알려 준다 */
+.dict-locked-note {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px;
+    background: #f9fafb;
+    border: 1px dashed var(--dict-border-strong);
+    border-radius: var(--dict-radius);
+    color: var(--dict-text-muted);
+    font-size: 0.8125rem;
+}
+
+.dict-ref-form {
+    display: grid;
+    /* 장/절은 최대 3자리 숫자라 폭을 고정한다. 1fr 로 두면 220px 까지 늘어나
+       숫자 하나 넣는 칸이 성경책 선택보다 커 보인다. */
+    grid-template-columns: minmax(0, 1fr) 110px 110px auto;
+    align-items: end;
+    gap: 10px;
+    padding: 14px;
+    background: #f9fafb;
+    border: 1px solid var(--dict-border);
+    border-radius: var(--dict-radius);
+    margin-bottom: 14px;
+}
+
+.dict-ref-field {
+    min-width: 0;
+}
+
+.admin-dictionary-form .dict-ref-field label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--dict-text-muted);
+}
+
+.dict-ref-submit {
+    min-height: 40px;
+    white-space: nowrap;
+}
+
+.dict-ref-error {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+.dict-ref-preview {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 0.75rem;
+    color: var(--dict-text-muted);
+}
+
+.dict-ref-preview b {
+    color: var(--dict-accent);
+}
+
+/* 목록 */
+.admin-dictionary-form .admin-table-wrapper {
+    box-shadow: var(--dict-shadow);
+}
+
+.admin-dictionary-form .admin-table {
+    font-size: 0.875rem;
+}
+
+.admin-dictionary-form .admin-table th {
+    background: #f3f4f6;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.dict-order-cell {
+    width: 56px;
+    font-variant-numeric: tabular-nums;
+    color: var(--dict-text-subtle);
+    font-weight: 700;
+}
+
+.dict-verse-label {
+    font-weight: 700;
+    color: var(--dict-text);
+}
+
+.dict-verse-meta {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.75rem;
+    color: var(--dict-text-subtle);
+    font-variant-numeric: tabular-nums;
+}
+
+.dict-actions-cell {
+    width: 168px;
+}
+
+.dict-row-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+/* 순서 이동 버튼은 아이콘만이라 최소 탭 크기를 따로 확보한다 */
+.dict-move-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    background: var(--dict-surface);
+    border: 1px solid var(--dict-border-strong);
+    border-radius: 6px;
+    color: #374151;
+    font-size: 0.875rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.dict-move-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .dict-move-btn:not(:disabled):hover {
+        background: #f3f4f6;
+        border-color: #9ca3af;
+    }
+}
+
+.dict-move-btn:focus-visible,
+.admin-dictionary-form .admin-form input:focus-visible,
+.admin-dictionary-form .admin-form select:focus-visible,
+.admin-dictionary-form .dict-ref-form input:focus-visible,
+.admin-dictionary-form .dict-ref-form select:focus-visible {
+    outline: 2px solid var(--dict-accent);
+    outline-offset: 1px;
+}
+
+.dict-state-box {
+    padding: 28px 16px;
+    background: var(--dict-surface);
+    border: 1px solid var(--dict-border);
+    border-radius: var(--dict-radius);
+    text-align: center;
+    color: var(--dict-text-subtle);
+    font-size: 0.8125rem;
+}
+
+.dict-state-box.is-error {
+    background: var(--dict-danger-soft);
+    border-color: #fecaca;
+    color: #991b1b;
+    font-weight: 600;
+}
+
+/* ============================================================== 반응형 조정 */
+
+@media (max-width: 768px) {
+    .dict-header h2 {
+        font-size: 1.1875rem;
+    }
+
+    /* 하단 고정 저장 바에 마지막 요소가 가리지 않도록 컨테이너에서 한 번만 확보한다.
+       admin.css 는 폼 카드 안쪽에 5rem 을 넣지만, 폼 뒤에 관련 구절이 오는 이 화면에서는
+       카드 안에 빈 흰 공간만 생기고 정작 목록이 가려진다. */
+    .admin-dictionary-form .dict-shell {
+        padding-bottom: calc(1rem + 4.5rem);
+    }
+
+    .admin-dictionary-form .admin-form.mobile-actions {
+        padding-bottom: 1rem;
+    }
+
+    /* 3열로 좁게 밀어 넣으면 장/절 입력이 눌린다. 성경책은 한 줄을 통째로 쓴다. */
+    .dict-ref-form {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        padding: 12px;
+    }
+
+    .dict-ref-field[data-field="book"] {
+        grid-column: 1 / -1;
+    }
+
+    .dict-ref-submit {
+        grid-column: 1 / -1;
+        min-height: 44px;
+    }
+
+    .admin-dictionary-form .admin-form input[type="text"],
+    .admin-dictionary-form .admin-form input[type="number"],
+    .admin-dictionary-form .admin-form select,
+    .admin-dictionary-form .dict-ref-form input[type="number"],
+    .admin-dictionary-form .dict-ref-form select {
+        min-height: 44px;
+        font-size: 1rem; /* iOS 는 16px 미만이면 포커스 시 화면을 확대한다 */
+    }
+
+    .admin-dictionary-form .admin-form textarea {
+        min-height: 40vh;
+        font-size: 1rem;
+    }
+
+    /* 카드 목록에서 순서 이동/삭제 버튼을 오른쪽에 모아 둔다 */
+    .admin-dictionary-form .admin-card-actions {
+        justify-content: flex-end;
+    }
+
+    /* btn-sm 기본 높이는 31px 로 손가락에 작다. 카드 안 조작 버튼만 키운다. */
+    .admin-dictionary-form .admin-card-actions .btn,
+    .admin-dictionary-form .admin-card-actions .dict-move-btn {
+        min-height: 40px;
+        min-width: 40px;
+    }
+
+    .admin-dictionary-form .admin-card-actions .btn {
+        padding-left: 14px;
+        padding-right: 14px;
+    }
+
+    .dict-references {
+        margin-top: 22px;
+    }
+}
+
+@media (min-width: 769px) {
+    /* 데스크탑에서는 용어 입력이 화면 끝까지 늘어날 필요가 없다 */
+    .dict-field[data-field="term"] input {
+        max-width: 420px;
+    }
+}

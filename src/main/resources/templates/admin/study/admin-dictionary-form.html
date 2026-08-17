@@ -6,72 +6,124 @@
     <title>사전 등록/수정 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
+    <link href="/css/admin/admin-dictionary-form.css?v=1.0" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
     <aside th:replace="~{admin/fragments/admin-sidebar :: sidebar}"></aside>
     <div class="admin-sidebar-overlay" data-admin-sidebar-close></div>
-    <main class="admin-content">
+    <main class="admin-content admin-dictionary-form">
         <div class="admin-topbar">
             <button class="admin-sidebar-toggle" type="button" aria-label="메뉴 열기" data-admin-sidebar-toggle>
                 <span></span>
             </button>
             <span class="admin-topbar-title">관리자</span>
         </div>
-        <div class="admin-breadcrumb">
-            <a href="/web/admin/dictionaries">사전 목록</a> &gt; <span th:text="${dictionary != null} ? '수정' : '등록'">등록</span>
-        </div>
-        <h2 th:text="${dictionary != null} ? '사전 수정' : '사전 등록'">사전 등록</h2>
-        <div class="admin-form mobile-actions">
-            <div class="form-group">
-                <label for="term">용어</label>
-                <input type="text" id="term" th:value="${dictionary?.term}" required>
-            </div>
-            <div class="form-group">
-                <label for="description">설명</label>
-                <textarea id="description" th:text="${dictionary?.description}"></textarea>
-            </div>
-            <div class="admin-form-actions mobile-actions">
-                <button type="button" class="btn btn-primary btn-sm" id="saveBtn">저장</button>
-                <a href="/web/admin/dictionaries" class="btn btn-outline-secondary btn-sm">취소</a>
-            </div>
+
+        <nav class="admin-breadcrumb" aria-label="현재 위치">
+            <a href="/web/admin/dictionaries">사전 목록</a>
+            <span aria-hidden="true">&gt;</span>
+            <span th:text="${dictionary != null} ? '수정' : '등록'">등록</span>
+        </nav>
+
+        <div class="dict-header">
+            <h2 th:text="${dictionary != null} ? '사전 수정' : '사전 등록'">사전 등록</h2>
+            <p class="dict-header-desc" th:text="${dictionary != null}
+                ? '용어와 설명을 수정하고 관련 구절을 관리합니다.'
+                : '용어를 저장하면 관련 구절을 추가할 수 있습니다.'">용어를 저장하면 관련 구절을 추가할 수 있습니다.</p>
         </div>
 
-        <div id="referencesSection" class="d-none" style="margin-top: 2rem;">
-            <h3>관련 구절 관리</h3>
-            <div class="admin-form mobile-actions" style="margin-bottom: 1rem;">
-                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: flex-end;">
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="refBook">성경책</label>
-                        <select id="refBook" style="min-width: 130px;">
-                            <option value="">선택</option>
-                        </select>
+        <div class="dict-shell">
+            <p class="dict-alert" data-form-alert role="alert" data-tone="error"></p>
+
+            <form class="admin-form mobile-actions" data-dict-form novalidate>
+                <fieldset class="dict-fieldset">
+                    <div class="dict-field" data-field="term">
+                        <div class="dict-label-row">
+                            <label for="term">용어<span class="dict-required" aria-hidden="true">*</span></label>
+                            <span class="dict-counter" data-counter="term" aria-hidden="true">0/255</span>
+                        </div>
+                        <input type="text" id="term" name="term" maxlength="255" required
+                               autocomplete="off" aria-describedby="term-error"
+                               th:value="${dictionary?.term}">
+                        <p class="dict-error" id="term-error" data-error="term"></p>
                     </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="refChapter">장</label>
-                        <input type="number" id="refChapter" min="1" style="width: 70px;" placeholder="1">
+
+                    <div class="dict-field" data-field="description">
+                        <div class="dict-label-row">
+                            <label for="description">설명</label>
+                            <span class="dict-counter" data-counter="description" aria-hidden="true">0자</span>
+                        </div>
+                        <textarea id="description" name="description"
+                                  th:text="${dictionary?.description}"></textarea>
+                        <p class="dict-hint">사전 상세 화면에 그대로 표시됩니다. 줄바꿈이 유지됩니다.</p>
                     </div>
-                    <div class="form-group" style="margin-bottom: 0;">
-                        <label for="refVerse">절</label>
-                        <input type="number" id="refVerse" min="1" style="width: 70px;" placeholder="1">
-                    </div>
-                    <button type="button" class="btn btn-outline-primary btn-sm" id="addRefBtn" style="padding: 0.4rem 0.6rem; font-size: 0.9rem; white-space: nowrap;">추가</button>
+                </fieldset>
+
+                <div class="admin-form-actions mobile-actions">
+                    <button type="submit" class="btn btn-primary btn-sm" data-save-btn>
+                        <span class="dict-save-spinner" aria-hidden="true"></span>
+                        <span data-save-label>저장</span>
+                    </button>
+                    <a href="/web/admin/dictionaries" class="btn btn-outline-secondary btn-sm" data-cancel-link>취소</a>
                 </div>
-            </div>
-            <table class="admin-table" id="referencesTable">
-                <thead>
-                <tr>
-                    <th>순서</th>
-                    <th>라벨</th>
-                    <th>책</th>
-                    <th>장</th>
-                    <th>절</th>
-                    <th>작업</th>
-                </tr>
-                </thead>
-                <tbody id="referencesBody"></tbody>
-            </table>
-            <p id="referencesEmpty" class="text-muted" style="padding: 1rem 0;">등록된 관련 구절이 없습니다.</p>
+            </form>
+
+            <section class="dict-references" aria-labelledby="dict-refs-title">
+                <div class="dict-section-header">
+                    <h3 id="dict-refs-title">
+                        관련 구절
+                        <span class="dict-count-badge" data-ref-count hidden>0</span>
+                    </h3>
+                </div>
+
+                <!-- 신규 등록 모드: 섹션을 감추지 않고 사용할 수 없는 이유를 밝힌다 -->
+                <p class="dict-locked-note" data-ref-locked th:if="${dictionary == null}">
+                    사전을 먼저 저장하면 관련 구절을 추가할 수 있습니다.
+                </p>
+
+                <div data-ref-body th:if="${dictionary != null}">
+                    <form class="dict-ref-form" data-ref-form>
+                        <div class="dict-ref-field" data-field="book">
+                            <label for="refBook">성경책</label>
+                            <select id="refBook" data-ref-book>
+                                <option value="">선택</option>
+                            </select>
+                        </div>
+                        <div class="dict-ref-field" data-field="chapter">
+                            <label for="refChapter">장</label>
+                            <input type="number" id="refChapter" data-ref-chapter min="1" step="1"
+                                   inputmode="numeric" placeholder="1">
+                        </div>
+                        <div class="dict-ref-field" data-field="verse">
+                            <label for="refVerse">절</label>
+                            <input type="number" id="refVerse" data-ref-verse min="1" step="1"
+                                   inputmode="numeric" placeholder="1">
+                        </div>
+                        <button type="submit" class="btn btn-outline-primary btn-sm dict-ref-submit" data-ref-add>추가</button>
+                        <p class="dict-ref-preview" data-ref-preview></p>
+                        <p class="dict-error dict-ref-error" data-error="ref" role="alert"></p>
+                    </form>
+
+                    <div class="dict-state-box" data-ref-state>구절을 불러오는 중…</div>
+
+                    <div class="admin-table-wrapper" data-ref-table-wrapper hidden>
+                        <table class="admin-table">
+                            <caption class="visually-hidden">등록된 관련 구절 목록</caption>
+                            <thead>
+                            <tr>
+                                <th scope="col" class="dict-order-cell">순서</th>
+                                <th scope="col">구절</th>
+                                <th scope="col" class="dict-actions-cell">작업</th>
+                            </tr>
+                            </thead>
+                            <tbody data-ref-tbody></tbody>
+                        </table>
+                    </div>
+
+                    <div class="admin-card-list" data-ref-cards></div>
+                </div>
+            </section>
         </div>
     </main>
 </div>
@@ -81,146 +133,450 @@
 <script type="module">
     import {fetchAdmin, initAdminSidebarToggle} from "/js/admin/admin-common.js";
     import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
+
     initAdminSidebarToggle();
+
+    const TERM_MAX = 255;
+
+    const $ = (selector) => document.querySelector(selector);
+    const escapeHtml = (s) => String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    const formatNumber = (n) => (n ?? 0).toLocaleString("ko-KR");
+
+    /* --------------------------------------------------- 목록으로 돌아갈 주소 */
 
     const savedKeyword = sessionStorage.getItem("adminDictKeyword") || "";
     const listUrl = savedKeyword
         ? `/web/admin/dictionaries?keyword=${encodeURIComponent(savedKeyword)}`
         : "/web/admin/dictionaries";
 
-    // 취소 링크에 키워드 반영
-    const cancelLink = document.querySelector(".admin-form-actions a[href='/web/admin/dictionaries']");
+    const cancelLink = $("[data-cancel-link]");
     if (cancelLink) cancelLink.href = listUrl;
-
-    // breadcrumb 링크에도 키워드 반영
-    const breadcrumbLink = document.querySelector(".admin-breadcrumb a[href='/web/admin/dictionaries']");
+    const breadcrumbLink = $(".admin-breadcrumb a");
     if (breadcrumbLink) breadcrumbLink.href = listUrl;
 
-    // 사전 저장
-    document.getElementById("saveBtn").addEventListener("click", async () => {
-        const body = {
-            term: document.getElementById("term").value,
-            description: document.getElementById("description").value || null,
+    /* ------------------------------------------------------------ 폼 알림/검증 */
+
+    const formAlert = $("[data-form-alert]");
+
+    const showAlert = (message, tone = "error") => {
+        if (!formAlert) return;
+        formAlert.dataset.tone = tone;
+        formAlert.textContent = message;
+        formAlert.classList.add("is-visible");
+    };
+
+    const hideAlert = () => formAlert?.classList.remove("is-visible");
+
+    const setFieldError = (name, message) => {
+        const errorEl = document.querySelector(`[data-error="${name}"]`);
+        const input = name === "ref" ? null : document.getElementById(name);
+        if (errorEl) {
+            errorEl.textContent = message || "";
+            errorEl.classList.toggle("is-visible", Boolean(message));
+        }
+        if (input) {
+            input.classList.toggle("is-invalid", Boolean(message));
+            if (message) input.setAttribute("aria-invalid", "true");
+            else input.removeAttribute("aria-invalid");
+        }
+    };
+
+    /* --------------------------------------------------------------- 글자 수 */
+
+    const bindCounter = (inputId, name, max) => {
+        const input = document.getElementById(inputId);
+        const counter = document.querySelector(`[data-counter="${name}"]`);
+        if (!input || !counter) return;
+        const update = () => {
+            const length = input.value.length;
+            counter.textContent = max ? `${formatNumber(length)}/${max}` : `${formatNumber(length)}자`;
+            if (max) {
+                counter.classList.toggle("is-near-limit", length >= max * 0.9 && length < max);
+                counter.classList.toggle("is-over-limit", length >= max);
+            }
         };
+        input.addEventListener("input", update);
+        update();
+    };
+
+    bindCounter("term", "term", TERM_MAX);
+    bindCounter("description", "description", null);
+
+    /* ------------------------------------------------- 저장하지 않은 변경 감지 */
+
+    const termInput = $("#term");
+    const descriptionInput = $("#description");
+    // 구분자를 직접 넣으면 값 안에 같은 문자가 들어올 때 서로 다른 입력이 같은 문자열이 된다
+    const snapshot = () => JSON.stringify([termInput?.value ?? "", descriptionInput?.value ?? ""]);
+    let cleanSnapshot = snapshot();
+    const isDirty = () => snapshot() !== cleanSnapshot;
+
+    window.addEventListener("beforeunload", (ev) => {
+        if (!isDirty()) return;
+        ev.preventDefault();
+        ev.returnValue = "";
+    });
+
+    // 취소/breadcrumb 로 벗어날 때는 브라우저 기본 경고 대신 우리 확인창을 쓴다
+    const guardNavigation = (link) => {
+        link?.addEventListener("click", async (ev) => {
+            if (!isDirty()) return;
+            ev.preventDefault();
+            const leave = await showConfirm(
+                "저장하지 않은 변경 내용이 있습니다. 이 화면을 벗어나면 변경 내용이 사라집니다.",
+                {title: "변경 내용 삭제", confirmText: "나가기", cancelText: "계속 편집", danger: true},
+            );
+            if (!leave) return;
+            cleanSnapshot = snapshot();
+            location.href = link.href;
+        });
+    };
+
+    guardNavigation(cancelLink);
+    guardNavigation(breadcrumbLink);
+
+    /* --------------------------------------------------------------- 사전 저장 */
+
+    const form = $("[data-dict-form]");
+    const saveBtn = $("[data-save-btn]");
+    const saveLabel = $("[data-save-label]");
+
+    const setSaving = (saving) => {
+        form.classList.toggle("is-saving", saving);
+        saveBtn.disabled = saving;
+        saveLabel.textContent = saving ? "저장 중…" : "저장";
+    };
+
+    form.addEventListener("submit", async (ev) => {
+        ev.preventDefault();
+        hideAlert();
+
+        const term = termInput.value.trim();
+        if (!term) {
+            setFieldError("term", "용어를 입력해 주세요.");
+            termInput.focus();
+            return;
+        }
+        if (term.length > TERM_MAX) {
+            setFieldError("term", `용어는 ${TERM_MAX}자 이내로 입력해 주세요.`);
+            termInput.focus();
+            return;
+        }
+        setFieldError("term", "");
+
+        const body = {
+            term: term,
+            description: descriptionInput.value.trim() || null,
+        };
+
+        setSaving(true);
         try {
             if (editId) {
                 await fetchAdmin(`/api/v1/admin/dictionaries/${editId}`, {method: "PUT", body: JSON.stringify(body)});
             } else {
                 await fetchAdmin("/api/v1/admin/dictionaries", {method: "POST", body: JSON.stringify(body)});
             }
+            cleanSnapshot = snapshot(); // 이탈 경고를 끄고 이동
             location.href = listUrl;
         } catch (e) {
-            alert(e.message);
+            console.error(e);
+            showAlert(`저장하지 못했습니다. ${e.message}`);
+            setSaving(false);
         }
     });
 
-    // 관련 구절 관리 (수정 모드에서만)
-    if (editId) {
-        const section = document.getElementById("referencesSection");
-        const tbody = document.getElementById("referencesBody");
-        const emptyMsg = document.getElementById("referencesEmpty");
-        const addBtn = document.getElementById("addRefBtn");
-        const bookSelect = document.getElementById("refBook");
-        section.classList.remove("d-none");
+    /* ------------------------------------------------- 관련 구절 (수정 모드 전용) */
 
+    if (editId) {
         const apiBase = `/api/v1/admin/dictionaries/${editId}/references`;
 
-        // 성경책 목록 로드
+        const refForm = $("[data-ref-form]");
+        const bookSelect = $("[data-ref-book]");
+        const chapterInput = $("[data-ref-chapter]");
+        const verseInput = $("[data-ref-verse]");
+        const addBtn = $("[data-ref-add]");
+        const preview = $("[data-ref-preview]");
+        const stateBox = $("[data-ref-state]");
+        const tableWrapper = $("[data-ref-table-wrapper]");
+        const tbody = $("[data-ref-tbody]");
+        const cards = $("[data-ref-cards]");
+        const countBadge = $("[data-ref-count]");
+
+        let refs = [];
+        // 목록 조회 실패를 상태로 들고 있는다. renderRefs 는 성경책 목록이 늦게 도착할 때도
+        // 다시 호출되므로, 실패를 기억하지 않으면 "구절 없음" 안내가 오류를 덮어쓴다.
+        let refsError = null;
+
+        const showState = (message, isError = false) => {
+            stateBox.hidden = false;
+            stateBox.textContent = message;
+            stateBox.classList.toggle("is-error", isError);
+            tableWrapper.hidden = true;
+            cards.innerHTML = "";
+            cards.hidden = true;
+        };
+
+        const bookNameOf = (bookOrder) => {
+            const option = [...bookSelect.options].find((o) => o.value === String(bookOrder));
+            return option?.dataset.bookName || `${bookOrder}권`;
+        };
+
+        const renderRefs = () => {
+            if (refsError) {
+                countBadge.hidden = true;
+                showState(refsError, true);
+                return;
+            }
+
+            countBadge.hidden = refs.length === 0;
+            countBadge.textContent = refs.length;
+
+            if (!refs.length) {
+                showState("등록된 관련 구절이 없습니다. 위에서 성경책과 장·절을 선택해 추가해 주세요.");
+                return;
+            }
+
+            stateBox.hidden = true;
+            tableWrapper.hidden = false;
+            cards.hidden = false;
+
+            const actions = (ref, index) => `
+                <div class="dict-row-actions">
+                    <button type="button" class="dict-move-btn" data-move="up" data-index="${index}"
+                            ${index === 0 ? "disabled" : ""}
+                            aria-label="${escapeHtml(ref.verseLabel)} 위로 이동">↑</button>
+                    <button type="button" class="dict-move-btn" data-move="down" data-index="${index}"
+                            ${index === refs.length - 1 ? "disabled" : ""}
+                            aria-label="${escapeHtml(ref.verseLabel)} 아래로 이동">↓</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" data-delete="${ref.referenceId}"
+                            aria-label="${escapeHtml(ref.verseLabel)} 삭제">삭제</button>
+                </div>`;
+
+            // 책/장/절을 각각 열로 두면 라벨과 중복되고 모바일에서 가로 스크롤이 생긴다.
+            // 라벨을 주 정보로, 나머지는 보조 텍스트로 합친다.
+            tbody.innerHTML = refs.map((ref, index) => `
+                <tr>
+                    <td class="dict-order-cell">${index + 1}</td>
+                    <td>
+                        <span class="dict-verse-label">${escapeHtml(ref.verseLabel)}</span>
+                        <span class="dict-verse-meta">${escapeHtml(bookNameOf(ref.bookOrder))} · ${ref.chapterNumber}장 ${ref.verseNumber}절</span>
+                    </td>
+                    <td class="dict-actions-cell">${actions(ref, index)}</td>
+                </tr>
+            `).join("");
+
+            cards.innerHTML = refs.map((ref, index) => `
+                <div class="admin-card">
+                    <div class="admin-card-title">${index + 1}. ${escapeHtml(ref.verseLabel)}</div>
+                    <div class="admin-card-row">
+                        <span class="admin-card-label">위치</span>
+                        <span class="admin-card-value">${escapeHtml(bookNameOf(ref.bookOrder))} ${ref.chapterNumber}장 ${ref.verseNumber}절</span>
+                    </div>
+                    <div class="admin-card-actions">${actions(ref, index)}</div>
+                </div>
+            `).join("");
+
+            bindRowActions();
+        };
+
+        const bindRowActions = () => {
+            document.querySelectorAll("[data-move]").forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    const index = Number(btn.dataset.index);
+                    moveRef(index, btn.dataset.move === "up" ? -1 : 1);
+                });
+            });
+            document.querySelectorAll("[data-delete]").forEach((btn) => {
+                btn.addEventListener("click", () => deleteRef(Number(btn.dataset.delete)));
+            });
+        };
+
+        const setRefBusy = (busy) => {
+            document.querySelectorAll("[data-move], [data-delete]").forEach((el) => {
+                if (busy) el.disabled = true;
+            });
+            if (!busy) renderRefs();
+        };
+
+        const loadRefs = async () => {
+            try {
+                const data = await fetchAdmin(apiBase);
+                refs = data || [];
+                refsError = null;
+            } catch (e) {
+                console.error(e);
+                refs = [];
+                refsError = `관련 구절을 불러오지 못했습니다. ${e.message}`;
+            }
+            renderRefs();
+        };
+
+        /** displayOrder 를 목록 순서대로 다시 매긴다. */
+        const moveRef = async (index, delta) => {
+            const target = index + delta;
+            if (target < 0 || target >= refs.length) return;
+
+            const previous = [...refs];
+            const next = [...refs];
+            [next[index], next[target]] = [next[target], next[index]];
+            refs = next;
+            renderRefs(); // 낙관적 반영 — 실패 시 되돌린다
+            setRefBusy(true);
+
+            try {
+                const updated = await fetchAdmin(`${apiBase}/order`, {
+                    method: "PUT",
+                    body: JSON.stringify({referenceIds: next.map((r) => r.referenceId)}),
+                });
+                refs = updated || next;
+                setFieldError("ref", "");
+            } catch (e) {
+                console.error(e);
+                refs = previous;
+                setFieldError("ref", `순서를 변경하지 못했습니다. ${e.message}`);
+            } finally {
+                setRefBusy(false);
+            }
+        };
+
+        const deleteRef = async (referenceId) => {
+            const ref = refs.find((r) => r.referenceId === referenceId);
+            if (!ref) return;
+            const confirmed = await showConfirm(`"${ref.verseLabel}" 구절을 삭제하시겠습니까?`,
+                {title: "구절 삭제", confirmText: "삭제", danger: true});
+            if (!confirmed) return;
+
+            try {
+                await fetchAdmin(`${apiBase}/${referenceId}`, {method: "DELETE"});
+                setFieldError("ref", "");
+                await loadRefs();
+            } catch (e) {
+                console.error(e);
+                setFieldError("ref", `삭제하지 못했습니다. ${e.message}`);
+            }
+        };
+
+        /* 성경책 목록 */
+
         const loadBookOptions = async () => {
             try {
                 const translations = await fetchAdmin("/api/v1/bibles/translations");
-                if (!translations || translations.length === 0) return;
-                const translationId = translations[0].translationId;
-                const books = await fetchAdmin(`/api/v1/bibles/translations/${translationId}/books`);
+                if (!translations || translations.length === 0) {
+                    setFieldError("ref", "성경 번역본이 없어 구절을 추가할 수 없습니다.");
+                    return;
+                }
+                const books = await fetchAdmin(`/api/v1/bibles/translations/${translations[0].translationId}/books`);
                 if (!books) return;
-                books.forEach(book => {
+                books.forEach((book) => {
                     const option = document.createElement("option");
                     option.value = book.bookOrder;
                     option.textContent = book.bookName;
                     option.dataset.bookName = book.bookName;
                     bookSelect.appendChild(option);
                 });
+                renderRefs(); // 책 이름을 확보한 뒤 보조 텍스트를 다시 그린다
             } catch (e) {
-                console.warn("성경책 목록 로드 실패:", e.message);
-            }
-        };
-        loadBookOptions();
-
-        const renderReferences = (refs) => {
-            tbody.innerHTML = "";
-            if (!refs || refs.length === 0) {
-                emptyMsg.classList.remove("d-none");
-                document.getElementById("referencesTable").querySelector("thead").classList.add("d-none");
-                return;
-            }
-            emptyMsg.classList.add("d-none");
-            document.getElementById("referencesTable").querySelector("thead").classList.remove("d-none");
-            refs.forEach((ref, idx) => {
-                const tr = document.createElement("tr");
-                const cells = [idx + 1, ref.verseLabel, ref.bookOrder, ref.chapterNumber, ref.verseNumber];
-                cells.forEach(value => {
-                    const td = document.createElement("td");
-                    td.textContent = value;
-                    tr.appendChild(td);
-                });
-                const actionTd = document.createElement("td");
-                const deleteBtn = document.createElement("button");
-                deleteBtn.type = "button";
-                deleteBtn.className = "btn btn-outline-danger btn-sm";
-                deleteBtn.textContent = "삭제";
-                actionTd.appendChild(deleteBtn);
-                tr.appendChild(actionTd);
-                deleteBtn.addEventListener("click", async () => {
-                    if (!await showConfirm(`"${ref.verseLabel}" 구절을 삭제하시겠습니까?`, {title:"구절 삭제", confirmText:"삭제", danger:true})) return;
-                    try {
-                        await fetchAdmin(`${apiBase}/${ref.referenceId}`, {method: "DELETE"});
-                        await loadReferences();
-                    } catch (e) {
-                        alert(e.message);
-                    }
-                });
-                tbody.appendChild(tr);
-            });
-        };
-
-        const loadReferences = async () => {
-            try {
-                const refs = await fetchAdmin(apiBase);
-                renderReferences(refs || []);
-            } catch (e) {
-                console.warn("관련 구절 로드 실패:", e.message);
+                console.error(e);
+                // 조용히 넘기면 왜 추가가 안 되는지 알 수 없다
+                setFieldError("ref", `성경책 목록을 불러오지 못했습니다. ${e.message}`);
             }
         };
 
-        addBtn.addEventListener("click", async () => {
-            const selectedOption = bookSelect.options[bookSelect.selectedIndex];
-            const bookOrder = parseInt(bookSelect.value, 10);
-            const bookName = selectedOption?.dataset?.bookName || "";
-            const chapterNumber = parseInt(document.getElementById("refChapter").value, 10);
-            const verseNumber = parseInt(document.getElementById("refVerse").value, 10);
+        /* 구절 추가 */
 
+        const readRefInput = () => ({
+            bookOrder: parseInt(bookSelect.value, 10),
+            chapterNumber: parseInt(chapterInput.value, 10),
+            verseNumber: parseInt(verseInput.value, 10),
+            bookName: bookSelect.options[bookSelect.selectedIndex]?.dataset?.bookName || "",
+        });
+
+        const updatePreview = () => {
+            const {bookOrder, chapterNumber, verseNumber, bookName} = readRefInput();
             if (!bookOrder || !chapterNumber || !verseNumber) {
-                alert("성경책, 장, 절을 모두 입력해 주세요.");
+                preview.textContent = "";
+                return;
+            }
+            preview.innerHTML = `추가될 구절: <b>${escapeHtml(`${bookName} ${chapterNumber}:${verseNumber}`)}</b>`;
+        };
+
+        [bookSelect, chapterInput, verseInput].forEach((el) => {
+            el.addEventListener("input", () => {
+                updatePreview();
+                setFieldError("ref", "");
+            });
+        });
+
+        // 절 입력 후 Enter 로 바로 추가할 수 있게 한다
+        [chapterInput, verseInput].forEach((el) => {
+            el.addEventListener("keydown", (ev) => {
+                if (ev.key !== "Enter") return;
+                ev.preventDefault();
+                refForm.requestSubmit(addBtn);
+            });
+        });
+
+        refForm.addEventListener("submit", async (ev) => {
+            ev.preventDefault();
+            const {bookOrder, chapterNumber, verseNumber, bookName} = readRefInput();
+
+            if (!bookOrder) {
+                setFieldError("ref", "성경책을 선택해 주세요.");
+                bookSelect.focus();
+                return;
+            }
+            if (!chapterNumber || chapterNumber < 1) {
+                setFieldError("ref", "장을 1 이상으로 입력해 주세요.");
+                chapterInput.focus();
+                return;
+            }
+            if (!verseNumber || verseNumber < 1) {
+                setFieldError("ref", "절을 1 이상으로 입력해 주세요.");
+                verseInput.focus();
                 return;
             }
 
-            const verseLabel = `${bookName} ${chapterNumber}:${verseNumber}`;
+            const duplicate = refs.some((r) =>
+                r.bookOrder === bookOrder && r.chapterNumber === chapterNumber && r.verseNumber === verseNumber);
+            if (duplicate) {
+                setFieldError("ref", "이미 등록된 구절입니다.");
+                return;
+            }
 
+            setFieldError("ref", "");
+            addBtn.disabled = true;
             try {
                 await fetchAdmin(apiBase, {
                     method: "POST",
-                    body: JSON.stringify({bookOrder, chapterNumber, verseNumber, verseLabel})
+                    body: JSON.stringify({
+                        bookOrder: bookOrder,
+                        chapterNumber: chapterNumber,
+                        verseNumber: verseNumber,
+                        verseLabel: `${bookName} ${chapterNumber}:${verseNumber}`,
+                        // 지정하지 않으면 전부 0 이 되어 순서가 사실상 무작위가 된다
+                        displayOrder: refs.length,
+                    }),
                 });
-                bookSelect.value = "";
-                document.getElementById("refChapter").value = "";
-                document.getElementById("refVerse").value = "";
-                await loadReferences();
+                chapterInput.value = "";
+                verseInput.value = "";
+                updatePreview();
+                await loadRefs();
+                bookSelect.focus();
             } catch (e) {
-                alert(e.message);
+                console.error(e);
+                setFieldError("ref", `추가하지 못했습니다. ${e.message}`);
+            } finally {
+                addBtn.disabled = false;
             }
         });
 
-        loadReferences();
+        loadBookOptions();
+        loadRefs();
     }
 </script>
 </body>

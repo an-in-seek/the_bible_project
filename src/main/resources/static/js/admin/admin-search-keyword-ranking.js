@@ -35,25 +35,43 @@ const getSectionElements = key => ({
     refreshedEl: document.querySelector(`[data-keyword-refreshed="${key}"]`),
 });
 
+const showState = (tbody, message, isError = false) => {
+    tbody.innerHTML = `<tr><td colspan="3" class="analytics-state-cell${isError ? " is-error" : ""}">${escapeHtml(message)}</td></tr>`;
+};
+
 const renderTable = (key, data) => {
     const { tbody, refreshedEl } = getSectionElements(key);
     if (!tbody) return;
 
     const items = data?.items ?? [];
     if (!items.length) {
-        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">데이터가 없습니다.</td></tr>`;
+        showState(tbody, "집계된 검색어가 없습니다.");
         if (refreshedEl) refreshedEl.textContent = "";
         return;
     }
+
+    // 1위 대비 비율 바를 함께 보여 주면 순위 간 격차가 숫자보다 빨리 읽힌다.
+    const maxCount = Math.max(...items.map(item => item.searchCount ?? 0), 1);
+
     tbody.innerHTML = items
-        .map((item) => `
+        .map((item) => {
+            const ratio = Math.round(((item.searchCount ?? 0) / maxCount) * 100);
+            const topAttr = item.rank <= 3 ? ` data-top="${item.rank}"` : "";
+            return `
             <tr>
-                <td>${item.rank}</td>
-                <td>${escapeHtml(item.keyword)}</td>
-                <td>${formatNumber(item.searchCount)}</td>
+                <td class="analytics-rank-cell"><span class="analytics-rank-badge"${topAttr}>${escapeHtml(item.rank)}</span></td>
+                <td class="analytics-keyword-cell">${escapeHtml(item.keyword)}</td>
+                <td class="analytics-bar-cell">
+                    <span class="analytics-bar">
+                        <span class="analytics-bar-track" aria-hidden="true"><span class="analytics-bar-fill" style="width:${ratio}%"></span></span>
+                        <span class="analytics-bar-value">${formatNumber(item.searchCount)}</span>
+                    </span>
+                </td>
             </tr>
-        `)
+        `;
+        })
         .join("");
+
     if (refreshedEl && data.refreshedAt) {
         const localized = new Date(data.refreshedAt).toLocaleString("ko-KR");
         refreshedEl.textContent = `갱신 시각: ${localized}`;
@@ -65,15 +83,15 @@ const load = async section => {
     const { tbody } = getSectionElements(key);
     if (!tbody) return;
 
+    tbody.closest(".admin-table-wrapper")?.setAttribute("aria-busy", "true");
     try {
         const data = await fetchRanking(apiUrl, state[key].limit);
         renderTable(key, data);
     } catch (e) {
         console.error(e);
-        if (tbody) {
-            tbody.innerHTML =
-                `<tr><td colspan="3" class="text-center text-danger">조회 실패: ${escapeHtml(e.message)}</td></tr>`;
-        }
+        showState(tbody, `조회 실패: ${e.message}`, true);
+    } finally {
+        tbody.closest(".admin-table-wrapper")?.setAttribute("aria-busy", "false");
     }
 };
 
