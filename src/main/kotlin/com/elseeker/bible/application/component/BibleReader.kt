@@ -37,7 +37,8 @@ class BibleReader(
             setOf(
                 BibleTranslationType.KRV,
                 BibleTranslationType.NKRV,
-                BibleTranslationType.KJV
+                BibleTranslationType.KJV,
+                BibleTranslationType.WEB,
             )
         ).map(BibleResult.Translation::from)
 
