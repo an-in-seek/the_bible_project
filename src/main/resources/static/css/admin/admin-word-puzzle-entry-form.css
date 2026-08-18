@@ -1,0 +1,687 @@
+/* 성경 Word Puzzle 단서 등록/수정 화면
+ * 이 파일은 admin-word-puzzle-entry-form.html 에서만 사용한다.
+ * admin 화면은 theme.css 를 로드하지 않으므로 라이트 컬러를 하드코딩한다. */
+
+.admin-entry-form {
+    --wp-surface: #ffffff;
+    --wp-sunken: #f9fafb;
+    --wp-border: #e5e7eb;
+    --wp-border-strong: #ced4da;
+    --wp-text: #212529;
+    --wp-text-muted: #6b7280;
+    --wp-text-subtle: #9ca3af;
+    --wp-accent: #2563eb;
+    --wp-accent-soft: #dbeafe;
+    --wp-warn: #92400e;
+    --wp-warn-soft: #fef3c7;
+    --wp-warn-border: #fcd34d;
+    --wp-danger: #dc2626;
+    --wp-danger-soft: #fef2f2;
+    --wp-ok: #15803d;
+    --wp-empty: #212529;
+    --wp-radius: 10px;
+    --wp-radius-sm: 8px;
+    --wp-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+    --bp-cell: 32px;
+}
+
+/* ---------------------------------------------------------------- 페이지 헤더 */
+
+.wp-header {
+    margin-bottom: 16px;
+}
+
+.wp-header h2 {
+    margin: 0 0 4px;
+    font-size: 1.375rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.wp-header-desc {
+    margin: 0;
+    font-size: 0.8125rem;
+    color: var(--wp-text-muted);
+}
+
+/* ------------------------------------------------------------------- 레이아웃 */
+
+.entry-form-layout {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+.entry-form-left {
+    flex: 1;
+    min-width: 0;
+}
+
+.entry-form-right {
+    flex: 0 0 auto;
+    position: sticky;
+    top: 12px;
+    min-width: 0;
+}
+
+/* ------------------------------------------------------------- 폼 그룹(fieldset) */
+
+.wp-fieldset {
+    border: 0;
+    padding: 0;
+    margin: 0 0 22px;
+}
+
+.wp-fieldset:last-of-type {
+    margin-bottom: 0;
+}
+
+.wp-legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 0 0 10px;
+    margin: 0 0 14px;
+    border-bottom: 1px solid var(--wp-border);
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--wp-text);
+}
+
+.wp-legend-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--wp-accent-soft);
+    color: #1d4ed8;
+    font-size: 0.6875rem;
+    font-weight: 700;
+}
+
+/* 세로 리듬 — 위아래로 이어지는 필드/행 사이 간격 */
+.wp-field + .wp-field,
+.wp-field + .wp-field-row,
+.wp-field-row + .wp-field,
+.wp-field-row + .wp-field-row {
+    margin-top: 16px;
+}
+
+/* 나란히 놓인 필드는 같은 높이에서 시작해야 한다.
+   위 인접 규칙이 그리드 두 번째 칼럼까지 16px 밀어 내려 라벨과 입력이 어긋났다. */
+.wp-field-row > .wp-field {
+    margin-top: 0;
+}
+
+.wp-label-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    margin-bottom: 6px;
+}
+
+.admin-entry-form .admin-form label {
+    margin-bottom: 0;
+}
+
+/* fieldset 안의 묶음 제목. label 이 아니라 span 이므로 서식을 직접 준다
+   (input 두 개를 묶는 제목이라 for 를 한쪽에만 걸 수 없다). */
+.wp-group-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--wp-text);
+}
+
+/* 행/열처럼 값이 채워지면 placeholder 가 사라지는 칸은 상시 라벨이 필요하다.
+   admin.css 의 `.admin-form label` 이 (0,1,1) 이라 클래스 하나로는 못 이긴다.
+   .admin-entry-form .admin-form 까지 붙여 (0,3,0) 으로 올린다. */
+.admin-entry-form .admin-form .wp-sublabel {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--wp-text-muted);
+}
+
+.wp-required {
+    color: var(--wp-danger);
+    margin-left: 2px;
+}
+
+.wp-counter {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--wp-text-subtle);
+    font-variant-numeric: tabular-nums;
+}
+
+.wp-counter.is-over-limit {
+    color: var(--wp-danger);
+    font-weight: 700;
+}
+
+/* 좌표는 한 쌍이므로 나란히 둔다. 위아래로 쌓으면 관계가 드러나지 않는다. */
+.wp-field-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.wp-hint {
+    margin: 6px 0 0;
+    font-size: 0.75rem;
+    color: var(--wp-text-subtle);
+}
+
+.wp-error {
+    display: none;
+    margin: 6px 0 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--wp-danger);
+}
+
+.wp-error.is-visible {
+    display: block;
+}
+
+.admin-entry-form .admin-form .is-invalid {
+    border-color: var(--wp-danger);
+    background: var(--wp-danger-soft);
+}
+
+.admin-entry-form .admin-form .is-invalid:focus {
+    border-color: var(--wp-danger);
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+}
+
+/* -------------------------------------------------------------- 폼 전체 알림 */
+
+.wp-alert {
+    display: none;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding: 10px 12px;
+    border-radius: var(--wp-radius-sm);
+    font-size: 0.8125rem;
+    font-weight: 600;
+}
+
+.wp-alert.is-visible {
+    display: flex;
+}
+
+.wp-alert[data-tone="error"] {
+    background: var(--wp-danger-soft);
+    border: 1px solid #fecaca;
+    color: #991b1b;
+}
+
+.wp-alert[data-tone="warn"] {
+    background: var(--wp-warn-soft);
+    border: 1px solid var(--wp-warn-border);
+    color: var(--wp-warn);
+}
+
+/* ---------------------------------------------------------------- 사전 검색 */
+
+.wp-search-row {
+    display: flex;
+    gap: 8px;
+}
+
+.wp-search-row input {
+    flex: 1;
+    min-width: 0;
+}
+
+.wp-search-btn {
+    flex: 0 0 auto;
+    min-width: 64px;
+}
+
+.wp-results-wrap {
+    position: relative;
+}
+
+.wp-results {
+    display: none;
+    position: absolute;
+    z-index: 20;
+    left: 0;
+    right: 0;
+    top: 4px;
+    max-height: 260px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 4px;
+    list-style: none;
+    background: var(--wp-surface);
+    border: 1px solid var(--wp-border-strong);
+    border-radius: var(--wp-radius-sm);
+    box-shadow: 0 8px 20px rgba(16, 24, 40, 0.12);
+}
+
+.wp-results.is-open {
+    display: block;
+}
+
+.wp-result-item {
+    padding: 8px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+/* 키보드 이동과 마우스 hover 가 같은 표시를 쓰도록 클래스로 통일한다 */
+.wp-result-item.is-active {
+    background: var(--wp-accent-soft);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .wp-result-item:hover {
+        background: #f3f4f6;
+    }
+
+    .wp-result-item.is-active:hover {
+        background: var(--wp-accent-soft);
+    }
+}
+
+.wp-result-term {
+    font-weight: 700;
+    color: var(--wp-text);
+}
+
+.wp-result-id {
+    margin-right: 4px;
+    color: var(--wp-text-subtle);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.wp-result-desc {
+    display: block;
+    margin-top: 2px;
+    color: var(--wp-text-muted);
+    font-size: 0.75rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wp-results-state {
+    padding: 12px 10px;
+    color: var(--wp-text-subtle);
+    font-size: 0.8125rem;
+    text-align: center;
+}
+
+/* 선택된 용어는 회색 문장이 아니라 지울 수 있는 칩으로 보여 준다 */
+.wp-selected {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 6px 8px 6px 10px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    max-width: 100%;
+}
+
+.wp-selected.is-visible {
+    display: inline-flex;
+}
+
+.wp-selected-label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #1d4ed8;
+}
+
+.wp-selected-id {
+    color: #60a5fa;
+    font-variant-numeric: tabular-nums;
+}
+
+.wp-selected-clear {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    color: #1d4ed8;
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .wp-selected-clear:hover {
+        background: #dbeafe;
+    }
+}
+
+.wp-fill-answer {
+    margin-left: 4px;
+    font-size: 0.75rem;
+}
+
+/* ---------------------------------------------------------------- 보드 프리뷰 */
+
+.board-preview-card {
+    background: var(--wp-surface);
+    border: 1px solid var(--wp-border);
+    border-radius: var(--wp-radius);
+    box-shadow: var(--wp-shadow);
+    padding: 14px;
+}
+
+.board-preview-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.board-preview-title {
+    margin: 0;
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: var(--wp-text);
+}
+
+.board-preview-dims {
+    font-size: 0.75rem;
+    color: var(--wp-text-subtle);
+    font-variant-numeric: tabular-nums;
+}
+
+.board-preview-help {
+    margin: 0 0 10px;
+    font-size: 0.75rem;
+    color: var(--wp-text-muted);
+}
+
+/* inline-grid 에 직접 overflow 를 걸면 스크롤이 생기지 않는다. 래퍼가 필요하다. */
+.board-preview-scroll {
+    overflow: auto;
+    max-width: 100%;
+    padding-bottom: 2px;
+    overscroll-behavior: contain;
+}
+
+.board-preview-grid {
+    display: grid;
+    gap: 1px;
+    width: max-content;
+    background: #adb5bd;
+    border: 1px solid #adb5bd;
+    border-radius: 3px;
+    line-height: 1;
+}
+
+.board-preview-grid:focus-visible {
+    outline: 2px solid var(--wp-accent);
+    outline-offset: 3px;
+}
+
+.bp-cell {
+    position: relative;
+    width: var(--bp-cell);
+    height: var(--bp-cell);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: var(--wp-empty);
+    color: transparent;
+    cursor: pointer;
+}
+
+.bp-cell.bp-active {
+    background: var(--wp-surface);
+    color: #adb5bd;
+}
+
+.bp-cell.bp-current {
+    background: var(--wp-accent-soft);
+    color: #1d4ed8;
+}
+
+.bp-cell.bp-overlap {
+    background: var(--wp-warn-soft);
+    color: var(--wp-warn);
+}
+
+/* 교차 지점의 글자가 서로 다르면 퍼즐이 풀 수 없게 된다. 경고와 구분해 표시한다. */
+.bp-cell.bp-conflict {
+    background: #fecaca;
+    color: #991b1b;
+}
+
+.bp-cell.bp-conflict::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border: 2px solid var(--wp-danger);
+}
+
+.bp-cell.bp-selected {
+    outline: 2px solid var(--wp-accent);
+    outline-offset: -2px;
+    z-index: 1;
+}
+
+.bp-cell-num {
+    position: absolute;
+    top: 1px;
+    left: 2px;
+    font-size: 0.5625rem;
+    font-weight: 700;
+    color: var(--wp-text-muted);
+    line-height: 1;
+}
+
+.bp-cell.bp-current .bp-cell-num {
+    color: #1d4ed8;
+}
+
+.bp-cell.bp-conflict .bp-cell-num {
+    color: #991b1b;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .bp-cell:hover {
+        box-shadow: inset 0 0 0 2px rgba(37, 99, 235, 0.55);
+    }
+}
+
+.board-preview-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 12px;
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: var(--wp-text-muted);
+}
+
+.bp-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.bp-legend-swatch {
+    width: 13px;
+    height: 13px;
+    border-radius: 2px;
+    border: 1px solid var(--wp-border);
+}
+
+.bp-legend-swatch[data-kind="current"] {
+    background: var(--wp-accent-soft);
+    border-color: #93c5fd;
+}
+
+.bp-legend-swatch[data-kind="existing"] {
+    background: var(--wp-surface);
+}
+
+.bp-legend-swatch[data-kind="overlap"] {
+    background: var(--wp-warn-soft);
+    border-color: var(--wp-warn-border);
+}
+
+.bp-legend-swatch[data-kind="conflict"] {
+    background: #fecaca;
+    border-color: var(--wp-danger);
+}
+
+.bp-legend-swatch[data-kind="empty"] {
+    background: var(--wp-empty);
+}
+
+.board-preview-info {
+    margin-top: 10px;
+    padding: 8px 10px;
+    background: var(--wp-sunken);
+    border-radius: 6px;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: #495057;
+    font-variant-numeric: tabular-nums;
+}
+
+.board-preview-info[data-tone="ok"] {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.board-preview-info[data-tone="error"] {
+    background: var(--wp-danger-soft);
+    color: #991b1b;
+    font-weight: 600;
+}
+
+.board-preview-issues {
+    margin: 6px 0 0;
+    padding-left: 18px;
+    font-size: 0.75rem;
+    line-height: 1.6;
+}
+
+.board-preview-issues:empty {
+    display: none;
+}
+
+/* 저장 중 표시 */
+.wp-save-spinner {
+    display: none;
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: wp-spin 0.7s linear infinite;
+    vertical-align: -2px;
+}
+
+.is-saving .wp-save-spinner {
+    display: inline-block;
+}
+
+@keyframes wp-spin {
+    to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wp-save-spinner {
+        animation-duration: 2s;
+    }
+}
+
+/* ============================================================== 반응형 조정 */
+
+@media (max-width: 1200px) {
+    .admin-entry-form {
+        --bp-cell: 28px;
+    }
+}
+
+@media (max-width: 992px) {
+    /* 보드를 먼저 보여 주고 그 아래에서 값을 조정하게 한다 */
+    .entry-form-layout {
+        flex-direction: column-reverse;
+        gap: 16px;
+    }
+
+    .entry-form-right {
+        position: static;
+        width: 100%;
+    }
+}
+
+@media (max-width: 768px) {
+    .wp-header h2 {
+        font-size: 1.1875rem;
+    }
+
+    .admin-entry-form {
+        --bp-cell: 30px; /* 터치 목표를 줄이지 않는다. 대신 래퍼가 스크롤된다. */
+    }
+
+    .admin-entry-form .admin-form input[type="text"],
+    .admin-entry-form .admin-form input[type="number"],
+    .admin-entry-form .admin-form select {
+        min-height: 44px;
+        font-size: 1rem; /* iOS 는 16px 미만이면 포커스 시 화면을 확대한다 */
+    }
+
+    .admin-entry-form .admin-form textarea {
+        font-size: 1rem;
+    }
+
+    .wp-search-btn {
+        min-height: 44px;
+    }
+
+    /* 하단 고정 저장 바가 마지막 콘텐츠를 덮지 않도록 컨테이너에서 확보한다 */
+    .admin-entry-form .entry-form-layout {
+        padding-bottom: calc(1rem + 4.5rem);
+    }
+
+    .admin-entry-form .admin-form.mobile-actions {
+        padding-bottom: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .wp-field-row {
+        gap: 10px;
+    }
+
+    .board-preview-card {
+        padding: 12px;
+    }
+}

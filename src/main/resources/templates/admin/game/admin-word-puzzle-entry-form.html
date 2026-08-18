@@ -6,204 +6,189 @@
     <title>단서 등록/수정 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
-    <style>
-        .entry-form-layout {
-            display: flex;
-            gap: 1.5rem;
-            align-items: flex-start;
-        }
-        .entry-form-left { flex: 1; min-width: 0; }
-        .entry-form-right {
-            flex: 0 0 auto;
-            position: sticky;
-            top: 1rem;
-        }
-        .board-preview-card {
-            background: #fff;
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
-            padding: 1rem;
-        }
-        .board-preview-title {
-            font-size: 0.85rem;
-            font-weight: 700;
-            color: #495057;
-            margin-bottom: 0.5rem;
-        }
-        .board-preview-grid {
-            display: inline-grid;
-            gap: 1px;
-            background: #adb5bd;
-            border: 1px solid #adb5bd;
-            border-radius: 3px;
-            line-height: 1;
-        }
-        .bp-cell {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.75rem;
-            font-weight: 600;
-            position: relative;
-            background: #212529;
-            color: transparent;
-        }
-        .bp-cell.bp-active {
-            background: #fff;
-            color: #adb5bd;
-        }
-        .bp-cell.bp-current {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-        .bp-cell.bp-overlap {
-            background: #fef3c7;
-            color: #92400e;
-        }
-        .bp-cell.bp-selected {
-            outline: 2px solid #2563eb;
-            outline-offset: -2px;
-            z-index: 1;
-        }
-        .bp-cell-num {
-            position: absolute;
-            top: 1px;
-            left: 2px;
-            font-size: 0.55rem;
-            font-weight: 700;
-            color: #6b7280;
-            line-height: 1;
-        }
-        .bp-cell.bp-current .bp-cell-num { color: #1d4ed8; }
-        .board-preview-legend {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.75rem;
-            margin-top: 0.6rem;
-            font-size: 0.75rem;
-            color: #6c757d;
-        }
-        .bp-legend-item {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-        .bp-legend-swatch {
-            width: 14px;
-            height: 14px;
-            border-radius: 2px;
-            border: 1px solid #dee2e6;
-        }
-        .board-preview-info {
-            margin-top: 0.5rem;
-            font-size: 0.8rem;
-            color: #495057;
-            background: #f8f9fa;
-            border-radius: 4px;
-            padding: 0.4rem 0.6rem;
-        }
-        @media (max-width: 992px) {
-            .entry-form-layout { flex-direction: column-reverse; }
-            .entry-form-right {
-                position: static;
-                width: 100%;
-            }
-            .board-preview-grid { max-width: 100%; overflow-x: auto; }
-            .bp-cell { width: 28px; height: 28px; font-size: 0.7rem; }
-            .bp-cell-num { font-size: 0.5rem; }
-        }
-    </style>
+    <link href="/css/admin/admin-word-puzzle-entry-form.css?v=1.0" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
     <aside th:replace="~{admin/fragments/admin-sidebar :: sidebar}"></aside>
     <div class="admin-sidebar-overlay" data-admin-sidebar-close></div>
-    <main class="admin-content">
+    <main class="admin-content admin-entry-form">
         <div class="admin-topbar">
             <button class="admin-sidebar-toggle" type="button" aria-label="메뉴 열기" data-admin-sidebar-toggle>
                 <span></span>
             </button>
             <span class="admin-topbar-title">관리자</span>
         </div>
-        <div class="admin-breadcrumb">
-            <a href="/web/admin/word-puzzles">퍼즐 목록</a> &gt;
-            <a th:href="@{/web/admin/word-puzzles/{id}/entries(id=${puzzleId})}">단서 목록</a> &gt;
+
+        <nav class="admin-breadcrumb" aria-label="현재 위치">
+            <a href="/web/admin/word-puzzles">퍼즐 목록</a>
+            <span aria-hidden="true">&gt;</span>
+            <a th:href="@{/web/admin/word-puzzles/{id}/entries(id=${puzzleId})}">단서 목록</a>
+            <span aria-hidden="true">&gt;</span>
             <span th:text="${entry != null} ? '수정' : '등록'">등록</span>
+        </nav>
+
+        <div class="wp-header">
+            <h2 th:text="${entry != null} ? '단서 수정' : '단서 등록'">단서 등록</h2>
+            <p class="wp-header-desc">보드에서 칸을 클릭하면 시작 위치가 지정됩니다. 교차 글자와 범위는 저장 전에 검사합니다.</p>
         </div>
-        <h2 th:text="${entry != null} ? '단서 수정' : '단서 등록'">단서 등록</h2>
+
+        <p class="visually-hidden" role="status" aria-live="polite" data-wp-status></p>
 
         <div class="entry-form-layout">
             <!-- 왼쪽: 입력 폼 -->
             <div class="entry-form-left">
-                <div class="admin-form mobile-actions">
-                    <!-- 사전 검색 -->
-                    <div class="form-group">
-                        <label for="dictSearchInput">사전 검색</label>
-                        <div class="d-flex gap-2">
-                            <input type="text" id="dictSearchInput" placeholder="용어 검색" class="form-control form-control-sm" style="flex:1">
-                            <button type="button" class="btn btn-outline-secondary btn-sm" id="dictSearchBtn">검색</button>
+                <p class="wp-alert" data-form-alert role="alert" data-tone="error"></p>
+
+                <form class="admin-form mobile-actions" data-entry-form novalidate>
+                    <fieldset class="wp-fieldset">
+                        <legend class="wp-legend">
+                            <span class="wp-legend-step" aria-hidden="true">1</span>정답 단어
+                        </legend>
+
+                        <div class="wp-field">
+                            <div class="wp-label-row">
+                                <label for="dictSearchInput">사전 검색<span class="wp-required" aria-hidden="true">*</span></label>
+                            </div>
+                            <div class="wp-search-row">
+                                <input type="text" id="dictSearchInput" placeholder="용어 검색" autocomplete="off"
+                                       role="combobox" aria-expanded="false" aria-controls="dictResults"
+                                       aria-describedby="dict-error" data-dict-search>
+                                <button type="button" class="btn btn-outline-secondary btn-sm wp-search-btn" data-dict-search-btn>검색</button>
+                            </div>
+                            <div class="wp-results-wrap">
+                                <ul class="wp-results" id="dictResults" role="listbox" aria-label="사전 검색 결과" data-dict-results></ul>
+                            </div>
+                            <input type="hidden" id="dictionaryId" th:value="${entry?.dictionary?.id}" data-dict-id>
+                            <span class="wp-selected" data-dict-selected>
+                                <span class="wp-selected-label" data-dict-selected-label></span>
+                                <button type="button" class="wp-selected-clear" data-dict-clear aria-label="선택한 용어 지우기">&times;</button>
+                            </span>
+                            <p class="wp-error" id="dict-error" data-error="dict"></p>
                         </div>
-                        <div id="dictResults" style="margin-top:8px; max-height:200px; overflow-y:auto; border:1px solid #ddd; border-radius:4px; display:none;"></div>
-                        <input type="hidden" id="dictionaryId" th:value="${entry?.dictionary?.id}">
-                        <div id="selectedDict" style="margin-top:4px; font-size:0.9rem; color:#555;">
-                            <span th:if="${entry != null}" th:text="'선택: [' + ${entry.dictionary.id} + '] ' + ${entry.dictionary.term}"></span>
+
+                        <div class="wp-field">
+                            <div class="wp-label-row">
+                                <label for="answerText">정답 텍스트<span class="wp-required" aria-hidden="true">*</span></label>
+                                <span>
+                                    <button type="button" class="btn btn-link btn-sm wp-fill-answer p-0" data-fill-answer hidden>선택한 용어로 채우기</button>
+                                    <span class="wp-counter" data-counter="answerText" aria-hidden="true">0/100</span>
+                                </span>
+                            </div>
+                            <input type="text" id="answerText" maxlength="100" required autocomplete="off"
+                                   aria-describedby="answer-error" th:value="${entry?.answerText}">
+                            <p class="wp-hint">보드에 채워지는 글자입니다. 사전 용어와 다를 수 있습니다.</p>
+                            <p class="wp-error" id="answer-error" data-error="answerText"></p>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="answerText">정답 텍스트</label>
-                        <input type="text" id="answerText" th:value="${entry?.answerText}" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="clueNumber">단서 번호</label>
-                        <input type="number" id="clueNumber" th:value="${entry?.clueNumber}" min="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="directionCode">방향</label>
-                        <select id="directionCode">
-                            <option value="ACROSS" th:selected="${entry != null and entry.directionCode.name() == 'ACROSS'}">가로</option>
-                            <option value="DOWN" th:selected="${entry != null and entry.directionCode.name() == 'DOWN'}">세로</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="startRow">시작 행 (0-based)</label>
-                        <input type="number" id="startRow" th:value="${entry?.startRow}" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="startCol">시작 열 (0-based)</label>
-                        <input type="number" id="startCol" th:value="${entry?.startCol}" min="0" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="clueTypeCode">단서 유형</label>
-                        <select id="clueTypeCode">
-                            <option value="DEFINITION" th:selected="${entry != null and entry.clueTypeCode.name() == 'DEFINITION'}">정의형</option>
-                            <option value="VERSE" th:selected="${entry != null and entry.clueTypeCode.name() == 'VERSE'}">구절형</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="clueText">단서 텍스트</label>
-                        <textarea id="clueText" th:text="${entry?.clueText}"></textarea>
-                    </div>
+                    </fieldset>
+
+                    <fieldset class="wp-fieldset">
+                        <legend class="wp-legend">
+                            <span class="wp-legend-step" aria-hidden="true">2</span>보드 배치
+                        </legend>
+
+                        <div class="wp-field-row">
+                            <div class="wp-field">
+                                <div class="wp-label-row">
+                                    <label for="clueNumber">단서 번호<span class="wp-required" aria-hidden="true">*</span></label>
+                                </div>
+                                <input type="number" id="clueNumber" min="1" step="1" inputmode="numeric" required
+                                       aria-describedby="clueNumber-error" th:value="${entry?.clueNumber}">
+                                <p class="wp-error" id="clueNumber-error" data-error="clueNumber"></p>
+                            </div>
+                            <div class="wp-field">
+                                <div class="wp-label-row">
+                                    <label for="directionCode">방향<span class="wp-required" aria-hidden="true">*</span></label>
+                                </div>
+                                <select id="directionCode">
+                                    <option value="ACROSS" th:selected="${entry != null and entry.directionCode.name() == 'ACROSS'}">가로</option>
+                                    <option value="DOWN" th:selected="${entry != null and entry.directionCode.name() == 'DOWN'}">세로</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="wp-field">
+                            <div class="wp-label-row">
+                                <span class="wp-group-label" id="wp-pos-label">시작 위치<span class="wp-required" aria-hidden="true">*</span></span>
+                            </div>
+                            <div class="wp-field-row">
+                                <div>
+                                    <label class="wp-sublabel" id="wp-row-label" for="startRow">행</label>
+                                    <input type="number" id="startRow" min="0" step="1" inputmode="numeric" required
+                                           aria-labelledby="wp-pos-label wp-row-label" th:value="${entry?.startRow}">
+                                </div>
+                                <div>
+                                    <label class="wp-sublabel" id="wp-col-label" for="startCol">열</label>
+                                    <input type="number" id="startCol" min="0" step="1" inputmode="numeric" required
+                                           aria-labelledby="wp-pos-label wp-col-label" th:value="${entry?.startCol}">
+                                </div>
+                            </div>
+                            <p class="wp-hint">왼쪽 위가 행 0, 열 0 입니다. 보드에서 칸을 클릭해 지정할 수도 있습니다.</p>
+                            <p class="wp-error" data-error="position"></p>
+                        </div>
+                    </fieldset>
+
+                    <fieldset class="wp-fieldset">
+                        <legend class="wp-legend">
+                            <span class="wp-legend-step" aria-hidden="true">3</span>단서
+                        </legend>
+
+                        <div class="wp-field">
+                            <div class="wp-label-row">
+                                <label for="clueTypeCode">단서 유형<span class="wp-required" aria-hidden="true">*</span></label>
+                            </div>
+                            <select id="clueTypeCode">
+                                <option value="DEFINITION" th:selected="${entry != null and entry.clueTypeCode.name() == 'DEFINITION'}">정의형</option>
+                                <option value="VERSE" th:selected="${entry != null and entry.clueTypeCode.name() == 'VERSE'}">구절형</option>
+                            </select>
+                        </div>
+
+                        <div class="wp-field">
+                            <div class="wp-label-row">
+                                <label for="clueText">단서 텍스트<span class="wp-required" aria-hidden="true">*</span></label>
+                                <span class="wp-counter" data-counter="clueText" aria-hidden="true">0자</span>
+                            </div>
+                            <textarea id="clueText" required aria-describedby="clueText-error"
+                                      th:text="${entry?.clueText}"></textarea>
+                            <p class="wp-hint">사용자에게 보여지는 문제 문장입니다.</p>
+                            <p class="wp-error" id="clueText-error" data-error="clueText"></p>
+                        </div>
+                    </fieldset>
+
                     <div class="admin-form-actions mobile-actions">
-                        <button type="button" class="btn btn-primary btn-sm" id="saveBtn">저장</button>
-                        <a th:href="@{/web/admin/word-puzzles/{id}/entries(id=${puzzleId})}" class="btn btn-outline-secondary btn-sm">취소</a>
+                        <button type="submit" class="btn btn-primary btn-sm" data-save-btn>
+                            <span class="wp-save-spinner" aria-hidden="true"></span>
+                            <span data-save-label>저장</span>
+                        </button>
+                        <a th:href="@{/web/admin/word-puzzles/{id}/entries(id=${puzzleId})}"
+                           class="btn btn-outline-secondary btn-sm" data-cancel-link>취소</a>
                     </div>
-                </div>
+                </form>
             </div>
 
             <!-- 오른쪽: 보드 프리뷰 -->
             <div class="entry-form-right">
                 <div class="board-preview-card">
-                    <div class="board-preview-title">보드 프리뷰</div>
-                    <div id="boardPreview" class="board-preview-grid"></div>
-                    <div class="board-preview-legend">
-                        <div class="bp-legend-item"><span class="bp-legend-swatch" style="background:#dbeafe;border-color:#93c5fd"></span> 현재 단서</div>
-                        <div class="bp-legend-item"><span class="bp-legend-swatch" style="background:#fff"></span> 기존 단서</div>
-                        <div class="bp-legend-item"><span class="bp-legend-swatch" style="background:#fef3c7;border-color:#fcd34d"></span> 겹침</div>
-                        <div class="bp-legend-item"><span class="bp-legend-swatch" style="background:#212529"></span> 빈 칸</div>
+                    <div class="board-preview-head">
+                        <h3 class="board-preview-title">보드 프리뷰</h3>
+                        <span class="board-preview-dims" data-board-dims></span>
                     </div>
-                    <div id="boardPreviewInfo" class="board-preview-info d-none"></div>
+                    <p class="board-preview-help">칸을 클릭하면 시작 위치가 지정됩니다. 방향키로도 옮길 수 있습니다.</p>
+                    <div class="board-preview-scroll">
+                        <div id="boardPreview" class="board-preview-grid" role="grid"
+                             aria-label="퍼즐 보드 프리뷰" tabindex="0" data-board-grid></div>
+                    </div>
+                    <div class="board-preview-legend">
+                        <span class="bp-legend-item"><span class="bp-legend-swatch" data-kind="current" aria-hidden="true"></span>현재 단서</span>
+                        <span class="bp-legend-item"><span class="bp-legend-swatch" data-kind="existing" aria-hidden="true"></span>기존 단서</span>
+                        <span class="bp-legend-item"><span class="bp-legend-swatch" data-kind="overlap" aria-hidden="true"></span>교차(일치)</span>
+                        <span class="bp-legend-item"><span class="bp-legend-swatch" data-kind="conflict" aria-hidden="true"></span>교차 충돌</span>
+                        <span class="bp-legend-item"><span class="bp-legend-swatch" data-kind="empty" aria-hidden="true"></span>빈 칸</span>
+                    </div>
+                    <div class="board-preview-info" data-board-info aria-live="polite" hidden>
+                        <span data-board-info-text></span>
+                        <ul class="board-preview-issues" data-board-issues></ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -215,199 +200,636 @@
 </script>
 <script type="module">
     import {fetchAdmin, initAdminSidebarToggle} from "/js/admin/admin-common.js";
+    import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
+
     initAdminSidebarToggle();
 
-    // ── Board Preview State ──
-    let boardWidth = 0, boardHeight = 0;
-    let existingEntries = [];
+    const ANSWER_MAX = 100;
+    const ENTRY_FETCH_SIZE = 500;
 
-    const previewGrid = document.getElementById("boardPreview");
-    const previewInfo = document.getElementById("boardPreviewInfo");
+    const $ = (s) => document.querySelector(s);
+    const escapeHtml = (s) => String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    const formatNumber = (n) => (n ?? 0).toLocaleString("ko-KR");
+    const announce = (msg) => {
+        const el = $("[data-wp-status]");
+        if (el) el.textContent = msg;
+    };
 
-    async function loadBoardData() {
-        try {
-            const puzzle = await fetchAdmin(`/api/v1/admin/word-puzzles/${puzzleId}`);
-            boardWidth = puzzle.boardWidth;
-            boardHeight = puzzle.boardHeight;
+    /* ------------------------------------------------------------------ 요소 */
 
-            const entryPage = await fetchAdmin(`/api/v1/admin/word-puzzles/${puzzleId}/entries?size=200`);
-            existingEntries = entryPage.content.filter(e => !editId || e.id !== editId);
-            renderPreview();
-        } catch (e) {
-            previewGrid.textContent = '보드 정보를 불러올 수 없습니다.';
+    const form = $("[data-entry-form]");
+    const answerInput = $("#answerText");
+    const clueNumberInput = $("#clueNumber");
+    const directionSelect = $("#directionCode");
+    const rowInput = $("#startRow");
+    const colInput = $("#startCol");
+    const clueTypeSelect = $("#clueTypeCode");
+    const clueTextInput = $("#clueText");
+    const dictIdInput = $("[data-dict-id]");
+
+    const grid = $("[data-board-grid]");
+    const boardInfo = $("[data-board-info]");
+    const boardInfoText = $("[data-board-info-text]");
+    const boardIssues = $("[data-board-issues]");
+    const boardDims = $("[data-board-dims]");
+
+    /* ------------------------------------------------------------ 검증 표시 */
+
+    const formAlert = $("[data-form-alert]");
+
+    const showAlert = (message, tone = "error") => {
+        formAlert.dataset.tone = tone;
+        formAlert.textContent = message;
+        formAlert.classList.add("is-visible");
+    };
+    const hideAlert = () => formAlert.classList.remove("is-visible");
+
+    const FIELD_INPUTS = {
+        dict: null,
+        answerText: answerInput,
+        clueNumber: clueNumberInput,
+        clueText: clueTextInput,
+        position: null,
+    };
+
+    const setFieldError = (name, message) => {
+        const errorEl = document.querySelector(`[data-error="${name}"]`);
+        if (errorEl) {
+            errorEl.textContent = message || "";
+            errorEl.classList.toggle("is-visible", Boolean(message));
         }
-    }
+        const input = FIELD_INPUTS[name];
+        if (input) {
+            input.classList.toggle("is-invalid", Boolean(message));
+            if (message) input.setAttribute("aria-invalid", "true");
+            else input.removeAttribute("aria-invalid");
+        }
+        if (name === "position") {
+            [rowInput, colInput].forEach((el) => el.classList.toggle("is-invalid", Boolean(message)));
+        }
+    };
 
-    function getCurrentEntry() {
-        const answer = document.getElementById("answerText").value || '';
-        const direction = document.getElementById("directionCode").value;
-        const startRow = parseInt(document.getElementById("startRow").value);
-        const startCol = parseInt(document.getElementById("startCol").value);
-        const clueNum = parseInt(document.getElementById("clueNumber").value);
-        if (isNaN(startRow) || isNaN(startCol) || !answer) return null;
-        return { answerText: answer, directionCode: direction, startRow, startCol, clueNumber: clueNum || 0 };
-    }
+    const clearAllFieldErrors = () => Object.keys(FIELD_INPUTS).forEach((k) => setFieldError(k, ""));
 
-    function renderPreview() {
-        if (!boardWidth || !boardHeight) return;
-        previewGrid.style.gridTemplateColumns = `repeat(${boardWidth}, 1fr)`;
-        previewGrid.innerHTML = '';
+    /* --------------------------------------------------------------- 글자 수 */
 
-        // Build cell data: { letter, clueNumber, type: 'existing'|'current'|'overlap' }
-        const cellData = {};
+    const bindCounter = (input, name, max) => {
+        const counter = document.querySelector(`[data-counter="${name}"]`);
+        if (!input || !counter) return;
+        const update = () => {
+            const len = input.value.length;
+            counter.textContent = max ? `${formatNumber(len)}/${max}` : `${formatNumber(len)}자`;
+            if (max) counter.classList.toggle("is-over-limit", len >= max);
+        };
+        input.addEventListener("input", update);
+        update();
+    };
 
-        // 기존 entries
-        existingEntries.forEach(e => {
-            for (let i = 0; i < e.answerText.length; i++) {
-                const r = e.directionCode === 'ACROSS' ? e.startRow : e.startRow + i;
-                const c = e.directionCode === 'ACROSS' ? e.startCol + i : e.startCol;
-                const key = `${r},${c}`;
-                if (!cellData[key]) cellData[key] = { letter: '', clueNum: null, type: 'existing' };
-                cellData[key].letter = e.answerText[i];
-                if (i === 0 && !cellData[key].clueNum) cellData[key].clueNum = e.clueNumber;
+    bindCounter(answerInput, "answerText", ANSWER_MAX);
+    bindCounter(clueTextInput, "clueText", null);
+
+    /* --------------------------------------------------------- 보드 상태/검증 */
+
+    const board = {
+        width: 0,
+        height: 0,
+        entries: [],
+        ready: false,
+    };
+
+    const cellsOf = (answer, direction, startRow, startCol) => {
+        const cells = [];
+        for (let i = 0; i < answer.length; i += 1) {
+            cells.push({
+                r: direction === "ACROSS" ? startRow : startRow + i,
+                c: direction === "ACROSS" ? startCol + i : startCol,
+                letter: answer[i],
+                index: i,
+            });
+        }
+        return cells;
+    };
+
+    /** 입력값이 프리뷰를 그릴 만큼 갖춰졌는지. 좌표가 비면 배치를 그릴 수 없다. */
+    const readCurrent = () => {
+        const answer = answerInput.value.trim();
+        const startRow = parseInt(rowInput.value, 10);
+        const startCol = parseInt(colInput.value, 10);
+        if (!answer || Number.isNaN(startRow) || Number.isNaN(startCol)) return null;
+        return {
+            answer,
+            direction: directionSelect.value,
+            startRow,
+            startCol,
+            clueNumber: parseInt(clueNumberInput.value, 10) || 0,
+        };
+    };
+
+    /**
+     * 현재 입력의 배치 문제를 모두 모은다.
+     * 크로스워드는 교차 지점의 글자가 반드시 같아야 하므로, 겹침 자체가 아니라
+     * '글자가 다른 겹침'을 오류로 본다.
+     */
+    const analyze = (cur) => {
+        const issues = [];
+        const conflicts = new Set();
+        if (!cur || !board.ready) return {issues, conflicts, outOfBounds: false};
+
+        // 기존 단서의 글자 배치
+        const occupied = new Map();
+        board.entries.forEach((e) => {
+            cellsOf(e.answerText, e.directionCode, e.startRow, e.startCol).forEach((cell) => {
+                occupied.set(`${cell.r},${cell.c}`, {letter: cell.letter, entry: e});
+            });
+        });
+
+        let outOfBounds = false;
+        cellsOf(cur.answer, cur.direction, cur.startRow, cur.startCol).forEach((cell) => {
+            if (cell.r < 0 || cell.r >= board.height || cell.c < 0 || cell.c >= board.width) {
+                outOfBounds = true;
+                return;
+            }
+            const existing = occupied.get(`${cell.r},${cell.c}`);
+            if (existing && existing.letter !== cell.letter) {
+                conflicts.add(`${cell.r},${cell.c}`);
+                issues.push(
+                    `(${cell.r},${cell.c}) 교차 충돌: 기존 '${existing.letter}'(${existing.entry.clueNumber}번 ${existing.entry.directionCode === "ACROSS" ? "가로" : "세로"}) ↔ 입력 '${cell.letter}'`,
+                );
             }
         });
 
-        // 현재 입력 중인 entry
-        const cur = getCurrentEntry();
-        let outOfBounds = false;
+        if (outOfBounds) {
+            const endR = cur.direction === "ACROSS" ? cur.startRow : cur.startRow + cur.answer.length - 1;
+            const endC = cur.direction === "ACROSS" ? cur.startCol + cur.answer.length - 1 : cur.startCol;
+            issues.push(`보드 범위를 벗어납니다. 끝 위치 (${endR},${endC}) / 보드 ${board.height}×${board.width}`);
+        }
+
+        // DB 유니크 제약: (퍼즐, 단서 번호, 방향)
+        if (cur.clueNumber > 0) {
+            const dup = board.entries.find(
+                (e) => e.clueNumber === cur.clueNumber && e.directionCode === cur.direction,
+            );
+            if (dup) {
+                issues.push(`${cur.clueNumber}번 ${cur.direction === "ACROSS" ? "가로" : "세로"} 단서가 이미 있습니다 (${dup.answerText}).`);
+            }
+        }
+
+        return {issues, conflicts, outOfBounds};
+    };
+
+    /* ------------------------------------------------------------ 프리뷰 렌더 */
+
+    const renderPreview = () => {
+        if (!board.ready) return;
+
+        const cur = readCurrent();
+        const {issues, conflicts, outOfBounds} = analyze(cur);
+
+        // 셀 데이터 구성
+        const cellData = new Map();
+        board.entries.forEach((e) => {
+            cellsOf(e.answerText, e.directionCode, e.startRow, e.startCol).forEach((cell) => {
+                const key = `${cell.r},${cell.c}`;
+                const prev = cellData.get(key) || {letter: "", clueNum: null, type: "existing"};
+                prev.letter = cell.letter;
+                if (cell.index === 0 && !prev.clueNum) prev.clueNum = e.clueNumber;
+                cellData.set(key, prev);
+            });
+        });
+
         if (cur) {
-            for (let i = 0; i < cur.answerText.length; i++) {
-                const r = cur.directionCode === 'ACROSS' ? cur.startRow : cur.startRow + i;
-                const c = cur.directionCode === 'ACROSS' ? cur.startCol + i : cur.startCol;
-                if (r < 0 || r >= boardHeight || c < 0 || c >= boardWidth) { outOfBounds = true; continue; }
-                const key = `${r},${c}`;
-                const isExisting = !!cellData[key];
-                cellData[key] = cellData[key] || { letter: '', clueNum: null, type: 'current' };
-                cellData[key].letter = cur.answerText[i];
-                cellData[key].type = isExisting ? 'overlap' : 'current';
-                if (i === 0) cellData[key].clueNum = cur.clueNumber;
-            }
+            cellsOf(cur.answer, cur.direction, cur.startRow, cur.startCol).forEach((cell) => {
+                if (cell.r < 0 || cell.r >= board.height || cell.c < 0 || cell.c >= board.width) return;
+                const key = `${cell.r},${cell.c}`;
+                const wasExisting = cellData.has(key);
+                const prev = cellData.get(key) || {letter: "", clueNum: null};
+                prev.letter = cell.letter;
+                prev.type = conflicts.has(key) ? "conflict" : wasExisting ? "overlap" : "current";
+                if (cell.index === 0) prev.clueNum = cur.clueNumber || prev.clueNum;
+                cellData.set(key, prev);
+            });
         }
 
-        // Render grid
-        for (let r = 0; r < boardHeight; r++) {
-            for (let c = 0; c < boardWidth; c++) {
+        grid.style.gridTemplateColumns = `repeat(${board.width}, var(--bp-cell))`;
+
+        const rows = [];
+        for (let r = 0; r < board.height; r += 1) {
+            for (let c = 0; c < board.width; c += 1) {
                 const key = `${r},${c}`;
-                const el = document.createElement('div');
-                el.className = 'bp-cell';
-                const data = cellData[key];
+                const data = cellData.get(key);
+                const classes = ["bp-cell"];
                 if (data) {
-                    el.classList.add(data.type === 'current' ? 'bp-current' : data.type === 'overlap' ? 'bp-overlap' : 'bp-active');
-                    el.textContent = data.letter;
-                    if (data.clueNum) {
-                        const numEl = document.createElement('span');
-                        numEl.className = 'bp-cell-num';
-                        numEl.textContent = data.clueNum;
-                        el.appendChild(numEl);
-                    }
+                    classes.push(data.type === "current" ? "bp-current"
+                        : data.type === "overlap" ? "bp-overlap"
+                            : data.type === "conflict" ? "bp-conflict" : "bp-active");
                 }
-                // Highlight start cell of current entry
-                if (cur && r === cur.startRow && c === cur.startCol) {
-                    el.classList.add('bp-selected');
-                }
-                previewGrid.appendChild(el);
+                if (cur && r === cur.startRow && c === cur.startCol) classes.push("bp-selected");
+                const num = data?.clueNum
+                    ? `<span class="bp-cell-num" aria-hidden="true">${escapeHtml(data.clueNum)}</span>` : "";
+                const label = data?.letter ? `${r}행 ${c}열 ${data.letter}` : `${r}행 ${c}열 빈 칸`;
+                rows.push(
+                    `<div class="${classes.join(" ")}" role="gridcell" data-r="${r}" data-c="${c}" aria-label="${escapeHtml(label)}">${num}${escapeHtml(data?.letter ?? "")}</div>`,
+                );
             }
         }
+        grid.innerHTML = rows.join("");
 
-        // Info message
-        if (cur && outOfBounds) {
-            previewInfo.textContent = '경고: 단어가 보드 범위를 벗어납니다!';
-            previewInfo.className = 'board-preview-info text-danger';
-        } else if (cur) {
-            const endR = cur.directionCode === 'ACROSS' ? cur.startRow : cur.startRow + cur.answerText.length - 1;
-            const endC = cur.directionCode === 'ACROSS' ? cur.startCol + cur.answerText.length - 1 : cur.startCol;
-            previewInfo.textContent = `위치: (${cur.startRow},${cur.startCol}) → (${endR},${endC}) | ${cur.directionCode === 'ACROSS' ? '가로' : '세로'} ${cur.answerText.length}칸`;
-            previewInfo.className = 'board-preview-info';
-        } else {
-            previewInfo.className = 'board-preview-info d-none';
+        // 위치 요약 + 문제 목록
+        if (!cur) {
+            boardInfo.hidden = true;
+            boardIssues.innerHTML = "";
+            return;
         }
-    }
 
-    // 실시간 프리뷰 업데이트
-    ["answerText", "directionCode", "startRow", "startCol", "clueNumber"].forEach(id => {
-        const el = document.getElementById(id);
+        const endR = cur.direction === "ACROSS" ? cur.startRow : cur.startRow + cur.answer.length - 1;
+        const endC = cur.direction === "ACROSS" ? cur.startCol + cur.answer.length - 1 : cur.startCol;
+        const dirLabel = cur.direction === "ACROSS" ? "가로" : "세로";
+        boardInfo.hidden = false;
+        boardInfoText.textContent =
+            `(${cur.startRow},${cur.startCol}) → (${endR},${endC}) · ${dirLabel} ${cur.answer.length}칸`;
+        boardInfo.dataset.tone = issues.length ? "error" : "ok";
+        boardIssues.innerHTML = issues.map((t) => `<li>${escapeHtml(t)}</li>`).join("");
+
+        // 배치 문제는 좌표 필드 아래에도 요약해 준다
+        setFieldError("position", outOfBounds || conflicts.size
+            ? "보드 배치에 문제가 있습니다. 프리뷰의 안내를 확인해 주세요." : "");
+    };
+
+    /* -------------------------------------------------------- 보드 데이터 로드 */
+
+    const loadBoard = async () => {
+        try {
+            const puzzle = await fetchAdmin(`/api/v1/admin/word-puzzles/${puzzleId}`);
+            board.width = puzzle.boardWidth;
+            board.height = puzzle.boardHeight;
+
+            const page = await fetchAdmin(`/api/v1/admin/word-puzzles/${puzzleId}/entries?size=${ENTRY_FETCH_SIZE}`);
+            const all = page?.content ?? [];
+            board.entries = all.filter((e) => !editId || e.id !== editId);
+            board.ready = true;
+
+            boardDims.textContent = `${board.height}행 × ${board.width}열 · 단서 ${formatNumber(all.length)}개`;
+            rowInput.max = String(board.height - 1);
+            colInput.max = String(board.width - 1);
+
+            // 페이지 크기를 넘겨 잘렸다면 조용히 넘기지 않는다
+            if ((page?.totalElements ?? 0) > all.length) {
+                showAlert(
+                    `단서가 ${formatNumber(page.totalElements)}개인데 ${formatNumber(all.length)}개만 불러왔습니다. 프리뷰의 교차 검사가 일부 누락될 수 있습니다.`,
+                    "warn",
+                );
+            }
+            renderPreview();
+        } catch (e) {
+            console.error(e);
+            board.ready = false;
+            boardDims.textContent = "";
+            grid.innerHTML = "";
+            boardInfo.hidden = false;
+            boardInfo.dataset.tone = "error";
+            boardInfoText.textContent = `보드 정보를 불러오지 못했습니다. ${e.message}`;
+            boardIssues.innerHTML = "";
+        }
+    };
+
+    /* ------------------------------------------------- 보드 클릭/키보드로 배치 */
+
+    const setStart = (r, c) => {
+        rowInput.value = String(r);
+        colInput.value = String(c);
+        renderPreview();
+        announce(`시작 위치를 ${r}행 ${c}열로 지정했습니다.`);
+    };
+
+    grid.addEventListener("click", (ev) => {
+        const cell = ev.target.closest("[data-r]");
+        if (!cell) return;
+        setStart(Number(cell.dataset.r), Number(cell.dataset.c));
+    });
+
+    // 방향키로 시작 칸을 옮긴다. 셀마다 tabindex 를 주면 탭 이동이 수백 번 걸린다.
+    grid.addEventListener("keydown", (ev) => {
+        const deltas = {
+            ArrowUp: [-1, 0], ArrowDown: [1, 0], ArrowLeft: [0, -1], ArrowRight: [0, 1],
+        };
+        const delta = deltas[ev.key];
+        if (!delta || !board.ready) return;
+        ev.preventDefault();
+        const r = parseInt(rowInput.value, 10);
+        const c = parseInt(colInput.value, 10);
+        const nextR = Math.min(Math.max((Number.isNaN(r) ? 0 : r) + delta[0], 0), board.height - 1);
+        const nextC = Math.min(Math.max((Number.isNaN(c) ? 0 : c) + delta[1], 0), board.width - 1);
+        setStart(nextR, nextC);
+    });
+
+    [answerInput, directionSelect, rowInput, colInput, clueNumberInput].forEach((el) => {
         el.addEventListener("input", renderPreview);
         el.addEventListener("change", renderPreview);
     });
 
-    loadBoardData();
+    /* ---------------------------------------------------------------- 사전 검색 */
 
-    // ── 사전 검색 ──
-    const searchInput = document.getElementById("dictSearchInput");
-    const searchBtn = document.getElementById("dictSearchBtn");
-    const resultsDiv = document.getElementById("dictResults");
-    const dictIdInput = document.getElementById("dictionaryId");
-    const selectedDiv = document.getElementById("selectedDict");
+    const searchInput = $("[data-dict-search]");
+    const searchBtn = $("[data-dict-search-btn]");
+    const results = $("[data-dict-results]");
+    const selectedChip = $("[data-dict-selected]");
+    const selectedLabel = $("[data-dict-selected-label]");
+    const fillAnswerBtn = $("[data-fill-answer]");
+
+    let resultItems = [];
+    let activeIndex = -1;
+    let selectedTerm = null;
+
+    const closeResults = () => {
+        results.classList.remove("is-open");
+        searchInput.setAttribute("aria-expanded", "false");
+        activeIndex = -1;
+    };
+
+    const openResults = () => {
+        results.classList.add("is-open");
+        searchInput.setAttribute("aria-expanded", "true");
+    };
+
+    const paintActive = () => {
+        [...results.querySelectorAll(".wp-result-item")].forEach((el, i) => {
+            el.classList.toggle("is-active", i === activeIndex);
+            el.setAttribute("aria-selected", i === activeIndex ? "true" : "false");
+            if (i === activeIndex) el.scrollIntoView({block: "nearest"});
+        });
+    };
+
+    const applySelection = (item) => {
+        dictIdInput.value = item.id;
+        selectedTerm = item.term;
+        selectedLabel.innerHTML =
+            `<span class="wp-selected-id">[${escapeHtml(item.id)}]</span> ${escapeHtml(item.term)}`;
+        selectedChip.classList.add("is-visible");
+        setFieldError("dict", "");
+        closeResults();
+
+        // 정답이 비어 있을 때만 자동으로 채운다. 이미 쓴 값을 덮어쓰지 않는다.
+        if (!answerInput.value.trim()) {
+            answerInput.value = item.term;
+            answerInput.dispatchEvent(new Event("input", {bubbles: true}));
+        }
+        fillAnswerBtn.hidden = answerInput.value.trim() === item.term;
+        announce(`사전 용어 ${item.term}을 선택했습니다.`);
+    };
+
+    const clearSelection = () => {
+        dictIdInput.value = "";
+        selectedTerm = null;
+        selectedChip.classList.remove("is-visible");
+        selectedLabel.textContent = "";
+        fillAnswerBtn.hidden = true;
+        searchInput.focus();
+    };
+
+    const renderResults = (items) => {
+        resultItems = items;
+        if (!items.length) {
+            results.innerHTML = `<li class="wp-results-state" role="presentation">검색 결과가 없습니다.</li>`;
+            openResults();
+            return;
+        }
+        results.innerHTML = items.map((d, i) => `
+            <li class="wp-result-item" role="option" aria-selected="false" data-index="${i}">
+                <span class="wp-result-term"><span class="wp-result-id">[${escapeHtml(d.id)}]</span>${escapeHtml(d.term)}</span>
+                ${d.description ? `<span class="wp-result-desc">${escapeHtml(d.description)}</span>` : ""}
+            </li>
+        `).join("");
+        activeIndex = 0;
+        paintActive();
+        openResults();
+    };
 
     const doSearch = async () => {
         const term = searchInput.value.trim();
-        if (!term) return;
+        if (!term) {
+            setFieldError("dict", "검색할 용어를 입력해 주세요.");
+            return;
+        }
+        setFieldError("dict", "");
+        results.innerHTML = `<li class="wp-results-state" role="presentation">검색 중…</li>`;
+        openResults();
+        searchBtn.disabled = true;
         try {
-            const res = await fetchAdmin(`/api/v1/admin/word-puzzles/dictionaries?term=${encodeURIComponent(term)}&size=10`);
-            if (res.content.length === 0) {
-                resultsDiv.innerHTML = '<div style="padding:8px;color:#999">결과 없음</div>';
-            } else {
-                resultsDiv.innerHTML = '';
-                res.content.forEach(d => {
-                    const row = document.createElement('div');
-                    row.className = 'dict-item';
-                    row.dataset.id = d.id;
-                    row.dataset.term = d.term;
-                    row.style.cssText = 'padding:6px 10px;cursor:pointer;border-bottom:1px solid #eee';
-                    const strong = document.createElement('strong');
-                    strong.textContent = `[${d.id}] ${d.term}`;
-                    const span = document.createElement('span');
-                    span.style.cssText = 'color:#888;font-size:0.85rem';
-                    span.textContent = d.description ? ' — ' + d.description.substring(0, 60) : '';
-                    row.appendChild(strong);
-                    row.appendChild(span);
-                    row.addEventListener('click', () => {
-                        dictIdInput.value = d.id;
-                        selectedDiv.textContent = `선택: [${d.id}] ${d.term}`;
-                        resultsDiv.style.display = 'none';
-                    });
-                    resultsDiv.appendChild(row);
-                });
-            }
-            resultsDiv.style.display = 'block';
+            const res = await fetchAdmin(
+                `/api/v1/admin/word-puzzles/dictionaries?term=${encodeURIComponent(term)}&size=10`);
+            renderResults(res?.content ?? []);
         } catch (e) {
-            alert(e.message);
+            console.error(e);
+            results.innerHTML = `<li class="wp-results-state" role="presentation">검색에 실패했습니다. ${escapeHtml(e.message)}</li>`;
+        } finally {
+            searchBtn.disabled = false;
         }
     };
+
     searchBtn.addEventListener("click", doSearch);
-    searchInput.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); doSearch(); } });
-    document.addEventListener("click", (e) => {
-        if (!resultsDiv.contains(e.target) && e.target !== searchInput && e.target !== searchBtn) {
-            resultsDiv.style.display = 'none';
+
+    results.addEventListener("click", (ev) => {
+        const item = ev.target.closest("[data-index]");
+        if (!item) return;
+        applySelection(resultItems[Number(item.dataset.index)]);
+    });
+
+    searchInput.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter") {
+            ev.preventDefault();
+            if (results.classList.contains("is-open") && activeIndex >= 0 && resultItems[activeIndex]) {
+                applySelection(resultItems[activeIndex]);
+            } else {
+                doSearch();
+            }
+            return;
+        }
+        if (ev.key === "Escape") {
+            closeResults();
+            return;
+        }
+        if (!results.classList.contains("is-open") || !resultItems.length) return;
+        if (ev.key === "ArrowDown") {
+            ev.preventDefault();
+            activeIndex = (activeIndex + 1) % resultItems.length;
+            paintActive();
+        } else if (ev.key === "ArrowUp") {
+            ev.preventDefault();
+            activeIndex = (activeIndex - 1 + resultItems.length) % resultItems.length;
+            paintActive();
         }
     });
 
-    // ── 저장 ──
-    document.getElementById("saveBtn").addEventListener("click", async () => {
-        const dictionaryId = parseInt(dictIdInput.value);
-        if (!dictionaryId) { alert("사전 용어를 선택해주세요."); return; }
-        const body = {
-            dictionaryId,
-            answerText: document.getElementById("answerText").value,
-            directionCode: document.getElementById("directionCode").value,
-            startRow: parseInt(document.getElementById("startRow").value),
-            startCol: parseInt(document.getElementById("startCol").value),
-            clueNumber: parseInt(document.getElementById("clueNumber").value),
-            clueTypeCode: document.getElementById("clueTypeCode").value,
-            clueText: document.getElementById("clueText").value,
-        };
-        try {
-            if (editId) {
-                await fetchAdmin(`/api/v1/admin/word-puzzles/${puzzleId}/entries/${editId}`, {method: "PUT", body: JSON.stringify(body)});
-            } else {
-                await fetchAdmin(`/api/v1/admin/word-puzzles/${puzzleId}/entries`, {method: "POST", body: JSON.stringify(body)});
-            }
-            location.href = `/web/admin/word-puzzles/${puzzleId}/entries`;
-        } catch (e) {
-            alert(e.message);
+    document.addEventListener("click", (ev) => {
+        if (!results.contains(ev.target) && ev.target !== searchInput && ev.target !== searchBtn) {
+            closeResults();
         }
     });
+
+    $("[data-dict-clear]").addEventListener("click", clearSelection);
+
+    fillAnswerBtn.addEventListener("click", () => {
+        if (!selectedTerm) return;
+        answerInput.value = selectedTerm;
+        answerInput.dispatchEvent(new Event("input", {bubbles: true}));
+        fillAnswerBtn.hidden = true;
+        renderPreview();
+    });
+
+    answerInput.addEventListener("input", () => {
+        fillAnswerBtn.hidden = !selectedTerm || answerInput.value.trim() === selectedTerm;
+    });
+
+    // 수정 모드: 서버가 넣어 준 사전 값을 칩으로 바꿔 준다
+    if (dictIdInput.value) {
+        selectedChip.classList.add("is-visible");
+        selectedLabel.innerHTML = `<span class="wp-selected-id">[${escapeHtml(dictIdInput.value)}]</span> 선택됨`;
+        fetchAdmin(`/api/v1/admin/word-puzzles/${puzzleId}/entries/${editId}`)
+            .then((detail) => {
+                if (!detail) return;
+                selectedTerm = detail.dictionaryTerm;
+                selectedLabel.innerHTML =
+                    `<span class="wp-selected-id">[${escapeHtml(detail.dictionaryId)}]</span> ${escapeHtml(detail.dictionaryTerm)}`;
+                fillAnswerBtn.hidden = answerInput.value.trim() === selectedTerm;
+            })
+            .catch((e) => console.warn("사전 용어 이름을 불러오지 못했습니다:", e.message));
+    }
+
+    /* --------------------------------------------------- 미저장 변경 이탈 경고 */
+
+    const snapshot = () => JSON.stringify([
+        dictIdInput.value, answerInput.value, clueNumberInput.value, directionSelect.value,
+        rowInput.value, colInput.value, clueTypeSelect.value, clueTextInput.value,
+    ]);
+    let cleanSnapshot = snapshot();
+    const isDirty = () => snapshot() !== cleanSnapshot;
+
+    window.addEventListener("beforeunload", (ev) => {
+        if (!isDirty()) return;
+        ev.preventDefault();
+        ev.returnValue = "";
+    });
+
+    const guardNavigation = (link) => {
+        link?.addEventListener("click", async (ev) => {
+            if (!isDirty()) return;
+            ev.preventDefault();
+            const leave = await showConfirm(
+                "저장하지 않은 변경 내용이 있습니다. 이 화면을 벗어나면 변경 내용이 사라집니다.",
+                {title: "변경 내용 삭제", confirmText: "나가기", cancelText: "계속 편집", danger: true},
+            );
+            if (!leave) return;
+            cleanSnapshot = snapshot();
+            location.href = link.href;
+        });
+    };
+
+    guardNavigation($("[data-cancel-link]"));
+    document.querySelectorAll(".admin-breadcrumb a").forEach(guardNavigation);
+
+    /* --------------------------------------------------------------------- 저장 */
+
+    const saveBtn = $("[data-save-btn]");
+    const saveLabel = $("[data-save-label]");
+
+    const setSaving = (saving) => {
+        form.classList.toggle("is-saving", saving);
+        saveBtn.disabled = saving;
+        saveLabel.textContent = saving ? "저장 중…" : "저장";
+    };
+
+    /** 첫 번째 문제 필드로 포커스를 옮겨 어디를 고쳐야 하는지 바로 보이게 한다. */
+    const validate = () => {
+        clearAllFieldErrors();
+        const problems = [];
+
+        if (!dictIdInput.value) {
+            setFieldError("dict", "사전 용어를 선택해 주세요.");
+            problems.push(searchInput);
+        }
+        const answer = answerInput.value.trim();
+        if (!answer) {
+            setFieldError("answerText", "정답 텍스트를 입력해 주세요.");
+            problems.push(answerInput);
+        } else if (answer.length > ANSWER_MAX) {
+            setFieldError("answerText", `정답 텍스트는 ${ANSWER_MAX}자 이내로 입력해 주세요.`);
+            problems.push(answerInput);
+        }
+        const clueNumber = parseInt(clueNumberInput.value, 10);
+        if (!clueNumber || clueNumber < 1) {
+            setFieldError("clueNumber", "단서 번호를 1 이상으로 입력해 주세요.");
+            problems.push(clueNumberInput);
+        }
+        const startRow = parseInt(rowInput.value, 10);
+        const startCol = parseInt(colInput.value, 10);
+        if (Number.isNaN(startRow) || Number.isNaN(startCol) || startRow < 0 || startCol < 0) {
+            setFieldError("position", "시작 행과 열을 0 이상으로 입력해 주세요.");
+            problems.push(rowInput);
+        }
+        // clueText 는 DB 가 non-null 이고, 빈 단서는 화면에 문제 없이 저장돼 버린다
+        if (!clueTextInput.value.trim()) {
+            setFieldError("clueText", "단서 텍스트를 입력해 주세요.");
+            problems.push(clueTextInput);
+        }
+
+        if (problems.length) {
+            problems[0].focus();
+            return false;
+        }
+
+        // 배치 무결성은 프리뷰와 같은 로직으로 판정한다
+        const cur = readCurrent();
+        const {issues, conflicts, outOfBounds} = analyze(cur);
+        if (outOfBounds || conflicts.size || issues.length) {
+            setFieldError("position", "보드 배치를 확인해 주세요.");
+            showAlert(`저장할 수 없습니다. ${issues[0]}`);
+            rowInput.focus();
+            return false;
+        }
+        return true;
+    };
+
+    form.addEventListener("submit", async (ev) => {
+        ev.preventDefault();
+        hideAlert();
+        if (!validate()) return;
+
+        const body = {
+            dictionaryId: parseInt(dictIdInput.value, 10),
+            answerText: answerInput.value.trim(),
+            directionCode: directionSelect.value,
+            startRow: parseInt(rowInput.value, 10),
+            startCol: parseInt(colInput.value, 10),
+            clueNumber: parseInt(clueNumberInput.value, 10),
+            clueTypeCode: clueTypeSelect.value,
+            clueText: clueTextInput.value.trim(),
+        };
+        const listUrl = `/web/admin/word-puzzles/${puzzleId}/entries`;
+
+        setSaving(true);
+        try {
+            if (editId) {
+                await fetchAdmin(`/api/v1/admin/word-puzzles/${puzzleId}/entries/${editId}`,
+                    {method: "PUT", body: JSON.stringify(body)});
+            } else {
+                await fetchAdmin(`/api/v1/admin/word-puzzles/${puzzleId}/entries`,
+                    {method: "POST", body: JSON.stringify(body)});
+            }
+            cleanSnapshot = snapshot();
+            location.href = listUrl;
+        } catch (e) {
+            console.error(e);
+            showAlert(`저장하지 못했습니다. ${e.message}`);
+            setSaving(false);
+        }
+    });
+
+    loadBoard();
 </script>
 </body>
 </html>
