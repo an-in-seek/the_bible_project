@@ -39,6 +39,7 @@ class BibleReader(
                 BibleTranslationType.NKRV,
                 BibleTranslationType.KJV,
                 BibleTranslationType.WEB,
+                BibleTranslationType.ASV,
             )
         ).map(BibleResult.Translation::from)
 
