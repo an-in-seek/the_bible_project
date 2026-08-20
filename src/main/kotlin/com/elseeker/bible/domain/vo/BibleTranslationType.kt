@@ -25,6 +25,7 @@ enum class BibleTranslationType(val abbreviation: String, val displayName: Strin
     BBE("BBE", "Bible in Basic English"),
     YLT("YLT", "Young's Literal Translation"),
     LBLA("LBLA", "La Biblia de las Américas"),
+    RVR1909("RVR1909", "RVR1909"),
     RVR1960("RVR1960", "Reina-Valera 1960"),
     LUTH1545("LUTH1545", "Luther Bible 1545"),
     VUL("VUL", "Biblia Sacra Vulgata");
