@@ -2,8 +2,13 @@ package com.elseeker.auth
 
 import com.elseeker.auth.adapter.output.jpa.AppleNotificationAuditRepository
 import com.elseeker.common.IntegrationTest
+import com.github.tomakehurst.wiremock.WireMockServer
+import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.okJson
+import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -11,6 +16,7 @@ import org.springframework.http.MediaType
 import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.wiremock.spring.InjectWireMock
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -27,6 +33,17 @@ class AppleNotificationApiIntegrationTest @Autowired constructor(
     private val mockMvc: MockMvc,
     private val appleNotificationAuditRepository: AppleNotificationAuditRepository,
 ) : IntegrationTest() {
+
+    @InjectWireMock("apple")
+    private lateinit var appleServer: WireMockServer
+
+    @BeforeEach
+    fun stubJwks() {
+        appleServer.stubFor(
+            get(urlEqualTo(AppleTestTokens.JWKS_PATH))
+                .willReturn(okJson(AppleTestTokens.jwksJson()))
+        )
+    }
 
     @Test
     @DisplayName("문서상 형태인 JSON 으로 보내면 인증 없이 200 을 돌려주고 처리한다")
@@ -107,7 +124,10 @@ class AppleNotificationApiIntegrationTest @Autowired constructor(
      * 이 엔드포인트는 실패 사유가 갈린다 — 서명 위조는 401, JWKS 조회 실패는 503 이다
      * (`AppleNotificationVerifier`). 그런데 상태 코드만 비교하면 CI 로그에
      * `AssertionFailedError` 한 줄만 남아 **둘 중 무엇이었는지 알 수 없다.**
-     * 실제로 이 구분이 안 돼 원인 파악이 한 번 막힌 적이 있다.
+     *
+     * 실제로 CI 에서 이 테스트가 간헐적으로 실패했는데, 로그에 상태 코드가 없어
+     * **원인을 확정하지 못했다.** 응답 본문의 `code` 가 `OAUTH_APPLE_JWKS_UNAVAILABLE`
+     * 인지 아닌지만 보이면 바로 갈렸을 문제다. 다음 재발 때는 이 clue 로 판별한다.
      */
     private infix fun MockHttpServletResponse.shouldRespondWith(expected: Int) {
         withClue("실제 상태=$status, 본문=${contentAsString.ifBlank { "(없음)" }}") {

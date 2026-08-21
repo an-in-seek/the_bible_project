@@ -6,14 +6,18 @@ import com.elseeker.common.domain.ErrorType
 import com.elseeker.common.domain.ServiceError
 import com.elseeker.common.security.oauth.apple.AppleNotificationEventParser
 import com.elseeker.common.security.oauth.apple.AppleNotificationVerifier
+import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock.get
+import com.github.tomakehurst.wiremock.client.WireMock.okJson
 import com.github.tomakehurst.wiremock.client.WireMock.serverError
 import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.wiremock.spring.InjectWireMock
 import java.time.Duration
 import java.time.Instant
 
@@ -34,9 +38,16 @@ class AppleNotificationVerifierIntegrationTest @Autowired constructor(
     private val appleNotificationEventParser: AppleNotificationEventParser,
 ) : IntegrationTest() {
 
-    // 정상 JWKS 스텁은 IntegrationTest 가 모든 테스트에 대해 등록한다(그쪽 주석 참고).
-    // 여기서 다시 등록하지 않는다 — 스텁이 Apple 테스트에만 있으면 JWKS 캐시 갱신이
-    // 스텁 없는 구간과 겹쳐 간헐적으로 503 이 난다.
+    @InjectWireMock("apple")
+    private lateinit var appleServer: WireMockServer
+
+    @BeforeEach
+    fun stubJwks() {
+        appleServer.stubFor(
+            get(urlEqualTo(AppleTestTokens.JWKS_PATH))
+                .willReturn(okJson(AppleTestTokens.jwksJson()))
+        )
+    }
 
     @Test
     @DisplayName("Apple 이 서명한 정상 알림이면 이벤트를 돌려준다")

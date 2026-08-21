@@ -4,8 +4,8 @@
  */
 
 .intertestamental-main {
-    --itp-persian: #a9821f;
-    --itp-hellenistic: #a9821f;
+    --itp-persian: #8a6d2f;
+    --itp-hellenistic: #b8912a;
     --itp-ptolemaic: #2c6ea4;
     --itp-seleucid: #96513c;
     --itp-hasmonean: #3f7a52;
@@ -24,8 +24,8 @@
 }
 
 html[data-theme="dark"] .intertestamental-main {
-    --itp-persian: #d4ad4a;
-    --itp-hellenistic: #d4ad4a;
+    --itp-persian: #c2a468;
+    --itp-hellenistic: #e0b545;
     --itp-ptolemaic: #6aa9dd;
     --itp-seleucid: #d08a72;
     --itp-hasmonean: #6cb587;
@@ -198,7 +198,7 @@ html[data-theme="dark"] .intertestamental-main {
     color: var(--itp-ruler-color, var(--color-text-secondary));
 }
 
-/* 상세 패널은 가로 스크롤 목록(.itp-ruler-scroll) 바깥, 전체 너비 영역에 둔다.
+/* 상세 패널은 가로 스크롤 목록(.itp-rulers-scroll) 바깥, 전체 너비 영역에 둔다.
  * flex 아이템(<li>) 안에 두면 패널이 카드 한 칸 너비(약 120px)로 짜부라진다. */
 .itp-ruler-panels {
     margin-top: 0.75rem;
@@ -215,11 +215,6 @@ html[data-theme="dark"] .intertestamental-main {
 
 .itp-ruler-detail[hidden] {
     display: none;
-}
-
-.itp-ruler-detail h3 {
-    font-size: 1rem;
-    font-weight: 600;
 }
 
 .itp-ruler-detail ul {
@@ -394,7 +389,7 @@ html[data-theme="dark"] .intertestamental-main {
 }
 
 .itp-stage-card,
-.itp-bridge-card {
+.itp-nt-bridge-card {
     padding: 1.1rem;
     border: 1px solid var(--color-border);
     border-radius: var(--itp-radius);
@@ -402,7 +397,7 @@ html[data-theme="dark"] .intertestamental-main {
 }
 
 .itp-stage-card h3,
-.itp-bridge-card h3 {
+.itp-nt-bridge-card h3 {
     margin-bottom: 0.4rem;
     font-size: 1rem;
     font-weight: 600;
@@ -420,7 +415,7 @@ html[data-theme="dark"] .intertestamental-main {
 }
 
 /* 수전절 — 페이지의 대표 항목(설계 §5-9) */
-.itp-bridge-card.is-highlight {
+.itp-nt-bridge-card.is-highlight {
     border: 2px solid var(--itp-badge-deuterocanon);
     background: var(--color-bg-elevated-bright);
     grid-column: 1 / -1;
@@ -509,9 +504,64 @@ html[data-theme="dark"] .intertestamental-main {
     }
 }
 
+/* ── 맨 위로 이동 버튼 (search.css 미로드 페이지용 자체 정의) ──
+ * 이 규칙이 없으면 버튼이 position/opacity 를 잃고 문서 흐름에 그대로 남아
+ * 페이지 하단에 항상 보이는 기본 버튼으로 렌더된다. */
+.scroll-to-top-btn {
+    position: fixed;
+    right: 16px;
+    bottom: 24px;
+    width: 48px;
+    height: 48px;
+    border: none;
+    border-radius: 999px;
+    background-color: var(--color-accent);
+    color: var(--color-accent-fg);
+    font-size: 20px;
+    line-height: 1;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease, visibility 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+    z-index: 1030;
+}
+
+.scroll-to-top-btn.is-visible {
+    opacity: 0.65;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .scroll-to-top-btn:hover {
+        opacity: 1;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.24);
+    }
+}
+
+@media (min-width: 992px) {
+    .scroll-to-top-btn {
+        right: max(24px, calc((100vw - (960px + 24px)) / 2 - 48px));
+    }
+}
+
+@media (min-width: 1200px) {
+    .scroll-to-top-btn {
+        right: max(24px, calc((100vw - (1140px + 24px)) / 2 - 48px));
+    }
+}
+
+@media (min-width: 1400px) {
+    .scroll-to-top-btn {
+        right: max(24px, calc((100vw - (1320px + 24px)) / 2 - 48px));
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .itp-ruler-card,
-    .itp-ruler-detail {
+    .scroll-to-top-btn {
         transition: none;
     }
 }
