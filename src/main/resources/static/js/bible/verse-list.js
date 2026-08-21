@@ -22,6 +22,9 @@ const ROUTES = {
     VERSE_LIST: "/web/bible/verse"
 };
 
+// 하단 장 선택 버튼 레이블 자동 축소 범위(px). 최소값 아래로는 줄이지 않고 말줄임 처리한다.
+const CHAPTER_LABEL_MIN_FONT_SIZE = 12;
+
 const HIGHLIGHT_COLORS = [
     {id: "yellow", label: "노랑", className: "verse-highlight-yellow"},
     {id: "green", label: "초록", className: "verse-highlight-green"},
@@ -273,6 +276,8 @@ function bindEvents() {
     }
     document.addEventListener("click", handleGlobalOutsideClick);
     document.addEventListener("keydown", handleFabEscapeKey);
+    window.addEventListener("resize", handleViewportResize);
+    window.addEventListener("orientationchange", handleViewportResize);
 }
 
 function updateLabels() {
@@ -285,10 +290,44 @@ function updateLabels() {
     }
     if (chapterSelectLinkLabel) {
         chapterSelectLinkLabel.textContent = `${state.bookName} ${state.chapterNumber}`;
+        fitChapterSelectLabel();
     }
     if (chapterSelectLink) {
         chapterSelectLink.href = `${ROUTES.CHAPTER_LIST}?translationId=${state.translationId}&bookOrder=${state.bookOrder}`;
     }
+}
+
+/**
+ * 장 선택 버튼의 책 이름이 버튼 폭을 넘치면 폰트 크기를 1px 씩 줄여 맞춘다.
+ * (스페인어 등 책 이름이 긴 번역본 대응. 최소 크기에서도 넘치면 CSS 말줄임이 처리한다.)
+ */
+function fitChapterSelectLabel() {
+    const label = elements.chapterSelectLinkLabel;
+    if (!label) {
+        return;
+    }
+    label.style.fontSize = "";
+    let size = parseFloat(window.getComputedStyle(label).fontSize);
+    if (!size) {
+        return;
+    }
+    while (label.scrollWidth > label.clientWidth && size > CHAPTER_LABEL_MIN_FONT_SIZE) {
+        size = Math.max(CHAPTER_LABEL_MIN_FONT_SIZE, size - 1);
+        label.style.fontSize = `${size}px`;
+    }
+}
+
+let chapterLabelFitFrame = 0;
+
+/** 회전/리사이즈 시 레이블 폭이 바뀌므로 다시 맞춘다. */
+function handleViewportResize() {
+    if (chapterLabelFitFrame) {
+        return;
+    }
+    chapterLabelFitFrame = window.requestAnimationFrame(() => {
+        chapterLabelFitFrame = 0;
+        fitChapterSelectLabel();
+    });
 }
 
 function getStoredTranslation() {

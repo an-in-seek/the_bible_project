@@ -812,3 +812,45 @@ html[data-theme="dark"] .chapter-memo-panel {
         min-width: 110px;
     }
 }
+
+/* ── 하단 네비게이션: 긴 책 이름 대응 ──────────────────────────────
+   flex item 의 기본 min-width:auto 때문에 nowrap 인 책 이름이 길어지면
+   장 선택 버튼이 축소되지 않고 좌우 화살표 버튼을 밀어낸다.
+   장 선택 버튼만 축소 가능하게 만들고 레이블을 말줄임 처리한다. */
+.fixed-bottom-nav .nav-container #chapterSelectLink {
+    min-width: 0;
+    overflow: hidden;
+}
+
+.fixed-bottom-nav .nav-container #chapterSelectLink span[aria-hidden="true"] {
+    flex: 0 0 auto;
+}
+
+.fixed-bottom-nav .nav-container #chapterSelectLinkLabel {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* 모바일: 화살표 버튼은 아이콘 폭만 차지하고 남는 폭은 장 선택 버튼이 가져간다 */
+@media (max-width: 767.98px) {
+    .fixed-bottom-nav .nav-container .btn.prev-next {
+        flex: 0 0 auto;
+        min-width: 56px;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+
+/* 초소형 기기(iPhone SE 1세대 등 320px 대) */
+@media (max-width: 359.98px) {
+    .fixed-bottom-nav .nav-container {
+        gap: 6px;
+        padding: 0 8px;
+    }
+
+    .fixed-bottom-nav .nav-container .btn.prev-next {
+        min-width: 48px;
+    }
+}
