@@ -2,19 +2,15 @@ package com.elseeker.auth
 
 import com.elseeker.auth.adapter.output.jpa.AppleNotificationAuditRepository
 import com.elseeker.common.IntegrationTest
-import com.github.tomakehurst.wiremock.WireMockServer
-import com.github.tomakehurst.wiremock.client.WireMock.get
-import com.github.tomakehurst.wiremock.client.WireMock.okJson
-import com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo
+import io.kotest.assertions.withClue
 import io.kotest.matchers.shouldBe
-import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.mock.web.MockHttpServletResponse
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
-import org.wiremock.spring.InjectWireMock
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
 
@@ -32,17 +28,6 @@ class AppleNotificationApiIntegrationTest @Autowired constructor(
     private val appleNotificationAuditRepository: AppleNotificationAuditRepository,
 ) : IntegrationTest() {
 
-    @InjectWireMock("apple")
-    private lateinit var appleServer: WireMockServer
-
-    @BeforeEach
-    fun stubJwks() {
-        appleServer.stubFor(
-            get(urlEqualTo(AppleTestTokens.JWKS_PATH))
-                .willReturn(okJson(AppleTestTokens.jwksJson()))
-        )
-    }
-
     @Test
     @DisplayName("문서상 형태인 JSON 으로 보내면 인증 없이 200 을 돌려주고 처리한다")
     fun receiveJsonNotification() {
@@ -50,9 +35,7 @@ class AppleNotificationApiIntegrationTest @Autowired constructor(
         val body = """{"payload":"${AppleTestTokens.signedToken()}"}"""
 
         // when & then
-        mockMvc.perform(
-            post(ENDPOINT).contentType(MediaType.APPLICATION_JSON).content(body)
-        ).andExpect { it.response.status shouldBe 200 }
+        postNotification(MediaType.APPLICATION_JSON, body) shouldRespondWith 200
 
         appleNotificationAuditRepository.count() shouldBe 1
     }
@@ -64,9 +47,7 @@ class AppleNotificationApiIntegrationTest @Autowired constructor(
         val body = "payload=" + URLEncoder.encode(AppleTestTokens.signedToken(), StandardCharsets.UTF_8)
 
         // when & then
-        mockMvc.perform(
-            post(ENDPOINT).contentType(MediaType.APPLICATION_FORM_URLENCODED).content(body)
-        ).andExpect { it.response.status shouldBe 200 }
+        postNotification(MediaType.APPLICATION_FORM_URLENCODED, body) shouldRespondWith 200
 
         appleNotificationAuditRepository.count() shouldBe 1
     }
@@ -78,9 +59,7 @@ class AppleNotificationApiIntegrationTest @Autowired constructor(
         val body = """{"payload":"${AppleTestTokens.signedToken()}"}"""
 
         // when & then
-        mockMvc.perform(
-            post(ENDPOINT).contentType(MediaType.TEXT_PLAIN).content(body)
-        ).andExpect { it.response.status shouldBe 200 }
+        postNotification(MediaType.TEXT_PLAIN, body) shouldRespondWith 200
 
         appleNotificationAuditRepository.count() shouldBe 1
     }
@@ -92,9 +71,7 @@ class AppleNotificationApiIntegrationTest @Autowired constructor(
         val body = AppleTestTokens.signedToken()
 
         // when & then
-        mockMvc.perform(
-            post(ENDPOINT).contentType(MediaType.TEXT_PLAIN).content(body)
-        ).andExpect { it.response.status shouldBe 200 }
+        postNotification(MediaType.TEXT_PLAIN, body) shouldRespondWith 200
 
         appleNotificationAuditRepository.count() shouldBe 1
     }
@@ -107,9 +84,7 @@ class AppleNotificationApiIntegrationTest @Autowired constructor(
         val body = """{"payload":"$forged"}"""
 
         // when & then
-        mockMvc.perform(
-            post(ENDPOINT).contentType(MediaType.APPLICATION_JSON).content(body)
-        ).andExpect { it.response.status shouldBe 401 }
+        postNotification(MediaType.APPLICATION_JSON, body) shouldRespondWith 401
 
         appleNotificationAuditRepository.count() shouldBe 0
     }
@@ -118,11 +93,26 @@ class AppleNotificationApiIntegrationTest @Autowired constructor(
     @DisplayName("payload 가 없으면 400 으로 거부한다")
     fun rejectMissingPayload() {
         // when & then
-        mockMvc.perform(
-            post(ENDPOINT).contentType(MediaType.APPLICATION_JSON).content("{}")
-        ).andExpect { it.response.status shouldBe 400 }
+        postNotification(MediaType.APPLICATION_JSON, "{}") shouldRespondWith 400
 
         appleNotificationAuditRepository.count() shouldBe 0
+    }
+
+    private fun postNotification(contentType: MediaType, body: String) =
+        mockMvc.perform(post(ENDPOINT).contentType(contentType).content(body)).andReturn().response
+
+    /**
+     * 상태 코드를 비교하되, 어긋나면 **실제 상태와 응답 본문을 함께 남긴다.**
+     *
+     * 이 엔드포인트는 실패 사유가 갈린다 — 서명 위조는 401, JWKS 조회 실패는 503 이다
+     * (`AppleNotificationVerifier`). 그런데 상태 코드만 비교하면 CI 로그에
+     * `AssertionFailedError` 한 줄만 남아 **둘 중 무엇이었는지 알 수 없다.**
+     * 실제로 이 구분이 안 돼 원인 파악이 한 번 막힌 적이 있다.
+     */
+    private infix fun MockHttpServletResponse.shouldRespondWith(expected: Int) {
+        withClue("실제 상태=$status, 본문=${contentAsString.ifBlank { "(없음)" }}") {
+            status shouldBe expected
+        }
     }
 
     companion object {
