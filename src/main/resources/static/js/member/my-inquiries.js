@@ -1,5 +1,5 @@
 import {buildLoginRedirectUrl, checkAuthStatus} from "/js/auth/auth-check.js";
-import {fetchWithAuthRetry} from "/js/common-util.js?v=2.3";
+import {fetchWithAuthRetry} from "/js/common-util.js?v=2.4";
 
 const PAGE_SIZE = 20;
 const VALID_STATUSES = ["", "RECEIVED", "ANSWERED", "CLOSED"];

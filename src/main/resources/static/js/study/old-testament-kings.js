@@ -8,7 +8,7 @@
  * - bookOrder: 사무엘상=9, 사무엘하=10, 열왕기상=11, 열왕기하=12, 역대상=13, 역대하=14
  */
 
-import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+import {setupDialogScrollLock} from "/js/common-util.js?v=2.4";
 import {readDeepLinkParams, syncDeepLinkParams} from "/js/deep-link-util.js?v=1.0";
 
 const KINGDOMS = {

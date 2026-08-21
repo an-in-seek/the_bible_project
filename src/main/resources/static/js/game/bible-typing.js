@@ -1,4 +1,4 @@
-import {fetchWithAuthRetry} from "/js/common-util.js?v=2.3";
+import {fetchWithAuthRetry} from "/js/common-util.js?v=2.4";
 import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
 
 const apiBase = "/api/v1/bible";

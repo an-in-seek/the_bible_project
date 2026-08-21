@@ -1,4 +1,4 @@
-import {fetchWithAuthRetry} from "/js/common-util.js?v=2.3";
+import {fetchWithAuthRetry} from "/js/common-util.js?v=2.4";
 
 /**
  * Configuration constants

@@ -13,7 +13,7 @@
  * → 동의 체크 상태가 보존되고, SIGNUP 사용자가 다른 경로로 이탈해 ConsentGateFilter 403을 만나는 일도 없다.
  */
 
-import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+import {setupDialogScrollLock} from "/js/common-util.js?v=2.4";
 
 const errorBox = document.getElementById("consentError");
 const submitBtn = document.getElementById("consentSubmit");

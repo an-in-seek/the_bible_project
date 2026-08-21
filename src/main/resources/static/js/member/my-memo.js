@@ -1,5 +1,5 @@
 import {buildLoginRedirectUrl, checkAuthStatus} from "/js/auth/auth-check.js";
-import {fetchWithAuthRetry} from "/js/common-util.js?v=2.3";
+import {fetchWithAuthRetry} from "/js/common-util.js?v=2.4";
 import { createRestoreStore, restoreScroll } from "/js/nav-restore.js?v=1.0";
 
 const PAGE_SIZE = 20;

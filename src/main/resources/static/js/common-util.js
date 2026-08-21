@@ -47,3 +47,50 @@ export const setupDialogScrollLock = (dialog) => {
     dialog.addEventListener("close", unlockBodyScroll);
     dialog.dataset.scrollLockBound = "true";
 };
+
+const NAV_SELECT_LABEL_MIN_FONT_SIZE = 12;
+
+/**
+ * 하단 네비게이션 가운데 선택 버튼(.nav-select-btn)의 레이블이 버튼 폭을 넘치면
+ * 폰트 크기를 1px 씩 줄여 맞춥니다. (책 이름이 긴 번역본 대응)
+ * 최소 크기에서도 넘치면 CSS 말줄임(text-overflow)이 처리합니다.
+ * @param {HTMLElement|null} label - .nav-select-btn-label 요소
+ * @param {number} [minFontSize=12] - 더 이상 줄이지 않을 최소 폰트 크기(px)
+ */
+export const fitNavSelectLabel = (label, minFontSize = NAV_SELECT_LABEL_MIN_FONT_SIZE) => {
+    if (!label) {
+        return;
+    }
+    label.style.fontSize = "";
+    let size = parseFloat(window.getComputedStyle(label).fontSize);
+    if (!size) {
+        return;
+    }
+    while (label.scrollWidth > label.clientWidth && size > minFontSize) {
+        size = Math.max(minFontSize, size - 1);
+        label.style.fontSize = `${size}px`;
+    }
+};
+
+/**
+ * 화면 회전/리사이즈로 버튼 폭이 바뀌면 레이블 크기를 다시 맞춥니다.
+ * @param {HTMLElement|null} label - .nav-select-btn-label 요소
+ * @param {number} [minFontSize=12] - 더 이상 줄이지 않을 최소 폰트 크기(px)
+ */
+export const bindNavSelectLabelFit = (label, minFontSize = NAV_SELECT_LABEL_MIN_FONT_SIZE) => {
+    if (!label) {
+        return;
+    }
+    let frame = 0;
+    const schedule = () => {
+        if (frame) {
+            return;
+        }
+        frame = window.requestAnimationFrame(() => {
+            frame = 0;
+            fitNavSelectLabel(label, minFontSize);
+        });
+    };
+    window.addEventListener("resize", schedule);
+    window.addEventListener("orientationchange", schedule);
+};

@@ -1,6 +1,6 @@
 import {BookStore, ChapterStore, TranslationStore} from "/js/storage-util.js?v=2.7";
 import {checkAuthStatus} from "/js/auth/auth-check.js";
-import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+import {bindNavSelectLabelFit, fitNavSelectLabel, setupDialogScrollLock} from "/js/common-util.js?v=2.4";
 import {bindFromBackButton} from "/js/nav-restore.js?v=1.1";
 
 const UI_CLASSES = {
@@ -184,7 +184,7 @@ const App = {
     },
 
     initNav: () => {
-        const {backButton, translationLink, searchLink, pageTitleLabel} = App.elements;
+        const {backButton, translationLink, searchLink, pageTitleLabel, bookSelectLinkLabel} = App.elements;
         App.setupBackButton(backButton);
         if (translationLink) {
             translationLink.classList.remove(UI_CLASSES.HIDDEN);
@@ -205,6 +205,7 @@ const App = {
         if (pageTitleLabel) {
             pageTitleLabel.classList.remove(UI_CLASSES.HIDDEN);
         }
+        bindNavSelectLabelFit(bookSelectLinkLabel);
     },
 
     setupBackButton: (button) => {
@@ -314,6 +315,7 @@ const App = {
         }
         if (bookSelectLinkLabel) {
             bookSelectLinkLabel.textContent = bookName;
+            fitNavSelectLabel(bookSelectLinkLabel);
         }
         if (bookSelectLink) {
             bookSelectLink.href = `${ROUTES.BOOK_LIST}?translationId=${App.state.translationId}`;
@@ -386,6 +388,7 @@ const App = {
         } = App.elements;
         if (bookSelectLinkLabel) {
             bookSelectLinkLabel.textContent = data.book.bookName;
+            fitNavSelectLabel(bookSelectLinkLabel);
         }
         if (pageTitleLabel) {
             pageTitleLabel.textContent = data.book.bookName;

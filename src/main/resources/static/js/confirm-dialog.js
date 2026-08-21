@@ -1,4 +1,4 @@
-import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+import {setupDialogScrollLock} from "/js/common-util.js?v=2.4";
 
 /**
  * 네이티브 window.confirm 대체: 커스텀 <dialog> 기반 확인 모달.

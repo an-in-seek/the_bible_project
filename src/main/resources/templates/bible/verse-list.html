@@ -96,10 +96,10 @@
         <!-- 장 선택 (페이지 이동) -->
         <a id="chapterSelectLink"
            href="/web/bible/chapter"
-           class="btn btn-lg btn-primary"
+           class="btn btn-lg btn-primary nav-select-btn"
            aria-label="장 선택">
             <span aria-hidden="true">📖</span>
-            <span id="chapterSelectLinkLabel" class="ms-2"></span>
+            <span id="chapterSelectLinkLabel" class="ms-2 nav-select-btn-label"></span>
         </a>
 
         <!-- 다음 장 버튼 -->
@@ -114,7 +114,7 @@
     </div>
 </div>
 
-<script type="module" src="/js/bible/verse-list.js?v=4.8"></script>
+<script type="module" src="/js/bible/verse-list.js?v=4.9"></script>
 <div th:replace="~{fragments/section-nav :: section-nav}"></div>
 </body>
 </html>

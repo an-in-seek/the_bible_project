@@ -1,4 +1,4 @@
-import {setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+import {setupDialogScrollLock} from "/js/common-util.js?v=2.4";
 
 const TIMEOUT_MS = 5000;
 const HOME_INITIAL_LIMIT = 5;

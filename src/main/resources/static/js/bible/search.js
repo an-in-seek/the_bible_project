@@ -1,5 +1,5 @@
 import {BookStore, ChapterStore, TranslationStore, VerseStore} from "/js/storage-util.js?v=2.7";
-import {formatNumberWithComma} from "/js/common-util.js?v=2.3";
+import {formatNumberWithComma} from "/js/common-util.js?v=2.4";
 import {initPopularSearchDialog} from "/js/popular-search.js?v=1.3";
 import {createRestoreStore, restoreScroll} from "/js/nav-restore.js?v=1.0";
 

@@ -1,4 +1,4 @@
-import {fetchWithAuthRetry, formatNumberWithComma, setupDialogScrollLock} from "/js/common-util.js?v=2.3";
+import {fetchWithAuthRetry, formatNumberWithComma, setupDialogScrollLock} from "/js/common-util.js?v=2.4";
 import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
 import {buildLoginRedirectUrl, checkAuthStatus} from "/js/auth/auth-check.js";
 import { createRestoreStore, restoreScroll } from "/js/nav-restore.js?v=1.0";
