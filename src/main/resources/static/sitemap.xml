@@ -110,6 +110,13 @@
         <priority>0.7</priority>
     </url>
 
+    <!-- 성경 중간사 -->
+    <url>
+        <loc>https://elseeker.com/web/study/intertestamental</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+
     <!-- 성경 주석 사이트 큐레이션 -->
     <url>
         <loc>https://elseeker.com/web/study/bible-commentary</loc>

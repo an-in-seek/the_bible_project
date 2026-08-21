@@ -23,6 +23,11 @@
             th:text="${figure}"></span>
     </div>
     <p class="era-detail-intro">선택한 시대의 주요 사건을 연대순으로 확인하세요.</p>
+    <a th:if="${currentEraSlug == 'intertestamental'}"
+       th:href="@{/web/study/intertestamental}"
+       class="btn btn-outline-primary btn-sm mt-2">
+      성경 중간사 자세히 보기
+    </a>
   </section>
 
   <section aria-label="시대별 주요 사건 목록">

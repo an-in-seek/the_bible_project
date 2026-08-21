@@ -77,4 +77,9 @@ class StudyWebController {
     fun showBibleHistoryMap(): String {
         return "study/bible-history-map"
     }
+
+    @GetMapping("/intertestamental")
+    fun showIntertestamental(): String {
+        return "study/intertestamental"
+    }
 }
