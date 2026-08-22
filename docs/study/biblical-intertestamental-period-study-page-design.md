@@ -780,8 +780,21 @@ src/main/resources/
 ### 6-7. 성경 본문 딥링크
 
 ```text
-/web/bible/verse?translationId=1&bookOrder={bookOrder}&chapterNumber={chapterNumber}&from=intertestamental
+/web/bible/verse?translationId=1&bookOrder={bookOrder}&chapterNumber={chapterNumber}[&verseNumber={verseNumber}]&from=intertestamental
 ```
+
+> `[...]`는 **선택 구간**이다. 라벨이 `N장`인 장 단위 링크에는 `verseNumber`를 넣지 않는다(아래 규칙 참고).
+
+#### `verseNumber` — 절 단위 링크는 스포트라이트로 열린다
+
+`verse-list.js`는 `verseNumber` 쿼리 파라미터를 읽어 **해당 절에 스포트라이트를 띄운다.** 화면을 어둡게 덮는 오버레이를 깔고 대상 절만 강조한 뒤 그 위치로 부드럽게 스크롤한다(`highlightVerse`, `.verse-spotlight-overlay` / `.verse-spotlight-target`). 이 동작은 `from` 값과 무관하게 항상 적용된다.
+
+- **라벨에 절이 있으면 `verseNumber`를 붙인다.** 라벨과 실제로 열리는 위치가 어긋나면 안 되므로, 값은 **라벨에 적힌 절 번호를 그대로 쓴다.**
+- **범위·복수 인용은 첫 절을 쓴다.** `행 4:5-15` → `5`, `요 4:9, 4:20` → `9`. 스포트라이트는 한 절만 잡으므로 시작 절이 기준이다.
+- **라벨이 `N장`이면 붙이지 않는다.** 가리키는 절이 없는 장 단위 링크이므로, 억지로 1절을 넣으면 라벨이 약속하지 않은 곳으로 이동한다.
+- 파라미터 순서는 `chapterNumber` 다음에 `verseNumber`를 둔다(`bible-story.js`의 기존 관례).
+
+> 절 번호를 잘못 넣으면 **엉뚱한 구절에 스포트라이트가 뜬다.** 링크를 추가·수정할 때는 `db/seed/krv/`의 본문과 대조해 라벨과 실제 절이 일치하는지 확인한다.
 
 > ⚠️ 반드시 `/web/bible/verse`를 사용한다. `/web/bible/chapter`는 **장 선택 목록** 화면이며, `chapter-list.js`가 `translationId`·`bookOrder`만 읽고 `chapterNumber`를 무시하므로
 > 특정 장 본문으로 이동하지 않는다. 실제 본문(구절) 읽기 화면은 `/web/bible/verse`이다(`verse-list.js`가 `chapterNumber`를 읽어 해당 장을 연다).
@@ -1142,6 +1155,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 - [ ] 모든 성경 링크가 `/web/bible/verse`로 이동하며 지정한 장 본문이 실제로 열린다. (`/web/bible/chapter` 아님)
 - [ ] 모든 링크에 `from=intertestamental`이 붙어 있다.
+- [ ] **라벨에 절이 적힌 링크는 `verseNumber`를 가지며, 클릭 시 해당 절에 스포트라이트가 뜬다.**
+- [ ] **라벨이 `N장`인 링크에는 `verseNumber`가 없다.** (장 단위로 열린다)
+- [ ] 각 링크의 `verseNumber`가 라벨의 절 번호와 일치한다(`db/seed/krv/` 본문 대조).
 - [ ] Bridge Strip 양 끝(말라기 39·1 / 마태복음 40·1) 링크가 동작한다.
 - [ ] 요 10:22(수전절) 링크가 동작한다.
 
