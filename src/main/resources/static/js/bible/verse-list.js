@@ -244,7 +244,7 @@ function setupBackButton(button) {
     }
     button.classList.remove(UI_CLASSES.HIDDEN);
     bindFromBackButton(button, {
-        backOn: ["search", "mypage", "dictionary", "my-memo", "history"],
+        backOn: ["search", "mypage", "dictionary", "my-memo", "history", "intertestamental"],
         // 기본 동작: 장(chapter) 리스트로 이동. backOn 의 특수 케이스만 history.back() 유지.
         fallback: () => {
             window.location.href = state.translationId && state.bookOrder
