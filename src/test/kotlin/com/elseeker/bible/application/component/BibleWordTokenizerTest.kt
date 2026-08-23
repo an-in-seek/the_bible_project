@@ -46,6 +46,29 @@ class BibleWordTokenizerTest {
     }
 
     @Test
+    @DisplayName("'풀'·'뭍' 도 1음절 명사로 살린다")
+    fun keepPlantAndDryLandNouns() {
+        // given — 목록에 없을 때는 줄기가 1음절이라 조사를 떼지 못하고
+        //         '풀과'·'뭍이' 라는 어절이 그대로 통계에 올라왔다(창세기 1장에서 관측).
+        // when & then
+        normalize("풀과") shouldBe "풀"
+        normalize("풀을") shouldBe "풀"
+        normalize("뭍이") shouldBe "뭍"
+        normalize("뭍을") shouldBe "뭍"
+    }
+
+    @Test
+    @DisplayName("복수 접미사 '들' 은 떼지 않는다 — 알려진 한계")
+    fun pluralSuffixIsNotStripped() {
+        // given — '들' 은 조사가 아니라 접미사다. 조사 목록에 넣으면 '버들' 이 '버' 가 된다.
+        //         그래서 '별' 이 1음절 명사 목록에 있어도 '별들을' 은 '별' 로 합쳐지지 않는다.
+        // when & then
+        normalize("별들을") shouldBe "별들"
+        normalize("새들도") shouldBe "새들"
+        normalize("물들은") shouldBe "물들"
+    }
+
+    @Test
     @DisplayName("조사를 뗀 결과가 불용어면 버린다")
     fun dropStopwordAfterStrippingJosa() {
         // given — 이 재검사가 없으면 '것을'·'때에' 가 어절 그대로 통계에 올라온다

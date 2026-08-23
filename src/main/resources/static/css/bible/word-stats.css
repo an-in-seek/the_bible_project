@@ -3,10 +3,19 @@
  * 설계 문서: docs/bible/word-frequency-design.md §10
  *
  * 색상은 전부 theme.css 토큰으로 참조한다(raw hex 금지).
- * 빈도는 색이 아니라 '크기'로 표현한다. 색은 보조 수단이다.
+ *
+ * 클라우드와 목록은 같은 데이터를 두 번 보여 주는 것이 아니라 역할이 다르다.
+ * 클라우드는 인상(무엇이 이 장을 지배하는가), 목록은 사실(정확히 몇 번인가)이다.
+ * 그래서 목록에는 **빈도 비례 막대**를 깔았다. 워드클라우드는 글자 길이가 크기 인식에
+ * 섞여 들어 '하나님(30)' 과 '땅(18)' 의 차이를 제대로 못 읽게 하는데, 막대는 길이 하나로만
+ * 인코딩하므로 그 약점을 정확히 메운다.
  */
 
 .word-stats-dialog {
+    /* 목록 막대. 글자를 가리지 않을 만큼만 옅게. */
+    --word-stats-bar: color-mix(in srgb, var(--color-accent) 15%, transparent);
+    --word-stats-bar-top: color-mix(in srgb, var(--color-accent) 26%, transparent);
+
     width: min(680px, calc(100vw - 24px));
     max-height: min(86vh, 900px);
     padding: 0;
@@ -51,12 +60,36 @@
     font-size: 0.9rem;
 }
 
+/* ---------- 요약 ---------- */
+
+.word-stats-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2px 12px;
+    margin-bottom: 12px;
+}
+
+.word-stats-summary-main {
+    font-size: 0.9rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.word-stats-summary-meta {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+}
+
 /* ---------- 워드 클라우드 ---------- */
 
 .word-stats-cloud-wrap {
-    margin-bottom: 16px;
-    padding: 8px 0 14px;
-    border-bottom: 1px solid var(--color-border);
+    margin-bottom: 18px;
+    padding: 12px 10px 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background-color: var(--color-bg-elevated);
 }
 
 .word-stats-cloud {
@@ -67,12 +100,23 @@
     overflow: visible;
 }
 
+/* 누를 수 있다는 신호. 클라우드 글자에는 밑줄·테두리를 상시로 줄 수 없어 문구로 대신한다. */
+.word-stats-cloud-hint {
+    margin: 10px 0 0;
+    text-align: center;
+    font-size: 0.74rem;
+    color: var(--color-text-muted);
+}
+
 .word-stats-cloud-word {
     font-weight: 700;
     cursor: pointer;
 }
 
-/* 빈도 4단계. 가장 흐린 단계도 --color-text-secondary 까지만 내려 대비를 지킨다. */
+/* 빈도 4단계. **단계 구분은 크기가 하고 색은 보조다.**
+   4색으로 갈라 보려고 tier-4 를 --color-text-muted 까지 내렸다가 되돌렸다.
+   #adb5bd 를 elevated 배경(#f8f9fa) 위에 얹으면 대비가 2:1 남짓으로 WCAG 를 통과하지 못한다.
+   가장 흐린 단계도 --color-text-secondary 까지만 내린다. */
 .word-stats-cloud-word.tier-1 { fill: var(--color-accent); }
 .word-stats-cloud-word.tier-2 { fill: var(--color-text-primary); }
 .word-stats-cloud-word.tier-3 { fill: var(--color-text-primary); opacity: 0.82; }
@@ -80,44 +124,93 @@
 
 /* ---------- 빈도 목록 (접근성의 본체) ---------- */
 
+.word-stats-section-title {
+    margin: 0 0 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--color-text-secondary);
+}
+
+/* 다이얼로그 폭 680px 에서 2열, 모바일에서 1열. 3열까지 가면 막대가 너무 짧아져
+   길이 비교라는 목적을 잃는다. */
 .word-stats-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px 10px;
-    align-items: baseline;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 250px), 1fr));
+    gap: 2px 10px;
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
 .word-stats-item {
-    display: inline-flex;
+    display: block;
 }
 
 .word-stats-link {
-    display: inline-flex;
+    --ratio: 0;
+
+    display: flex;
     align-items: baseline;
-    gap: 3px;
-    padding: 2px 4px;
-    border-radius: 6px;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 5px 9px;
+    border-radius: 7px;
     text-decoration: none;
     color: var(--color-text-primary);
+    /* 빈도 비례 막대. 배경으로 깔아 DOM 요소를 늘리지 않는다. */
+    background-image: linear-gradient(
+        to right,
+        var(--word-stats-bar) calc(var(--ratio) * 100%),
+        transparent calc(var(--ratio) * 100%)
+    );
+    background-repeat: no-repeat;
 }
 
-.word-stats-link.tier-1 { font-size: 1.15rem; font-weight: 700; color: var(--color-accent); }
-.word-stats-link.tier-2 { font-size: 1.02rem; font-weight: 600; }
-.word-stats-link.tier-3 { font-size: 0.94rem; }
-.word-stats-link.tier-4 { font-size: 0.86rem; color: var(--color-text-secondary); }
+/* 크기 차이는 클라우드가 이미 표현했다. 목록은 막대가 정량을 맡으므로
+   글자 크기를 좁게 유지해 행 리듬을 지킨다. */
+.word-stats-link.tier-1 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--color-accent);
+    background-image: linear-gradient(
+        to right,
+        var(--word-stats-bar-top) calc(var(--ratio) * 100%),
+        transparent calc(var(--ratio) * 100%)
+    );
+}
+
+.word-stats-link.tier-2 { font-size: 0.96rem; font-weight: 600; }
+.word-stats-link.tier-3 { font-size: 0.92rem; }
+.word-stats-link.tier-4 { font-size: 0.88rem; color: var(--color-text-secondary); }
+
+.word-stats-term {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
 
 .word-stats-count {
+    flex: none;
     font-size: 0.78em;
     color: var(--color-text-secondary);
+    /* 자릿수가 달라도 오른쪽 끝이 흔들리지 않게 */
+    font-variant-numeric: tabular-nums;
+}
+
+.word-stats-link:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
 }
 
 .word-stats-footnote {
-    margin: 16px 0 0;
-    font-size: 0.8rem;
-    color: var(--color-text-muted);
+    margin: 14px 0 0;
+    padding: 8px 10px;
+    border-radius: 8px;
+    background-color: var(--color-bg-elevated);
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
 }
 
 /* ---------- 단어 팝오버 ---------- */
@@ -127,6 +220,8 @@
     left: 16px;
     right: 16px;
     bottom: 16px;
+    max-width: 420px;
+    margin-inline: auto;
     padding: 12px 14px;
     border: 1px solid var(--color-border);
     border-radius: 12px;
@@ -142,6 +237,19 @@
     margin-bottom: 6px;
 }
 
+.word-stats-popover-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+}
+
+.word-stats-popover-count {
+    font-size: 0.8rem;
+    color: var(--color-text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
 .word-stats-popover-desc {
     margin: 0 0 10px;
     font-size: 0.86rem;
@@ -149,6 +257,10 @@
     color: var(--color-text-secondary);
     max-height: 6.5em;
     overflow-y: auto;
+}
+
+.word-stats-popover-desc:empty {
+    margin: 0;
 }
 
 .word-stats-popover-actions {
@@ -160,8 +272,12 @@
 /* ---------- 반응형 ---------- */
 
 @media (max-width: 480px) {
-    .word-stats-cloud { max-height: 240px; }
+    .word-stats-cloud { max-height: 260px; }
     .word-stats-body { padding: 12px 12px 18px; }
+    .word-stats-cloud-wrap { padding: 10px 6px 6px; }
+
+    /* 한 손 조작에서 누르기 쉽도록 행 높이를 키운다 */
+    .word-stats-link { padding: 7px 9px; }
 }
 
 /* 터치 기기에서 hover 가 눌린 채 남는 문제 때문에 데스크톱에서만 적용한다 */
@@ -171,6 +287,7 @@
     }
 
     .word-stats-cloud-word:hover {
+        fill: var(--color-accent);
         opacity: 1;
         text-decoration: underline;
     }
@@ -178,6 +295,10 @@
 
 @media (prefers-reduced-motion: no-preference) {
     .word-stats-cloud-word {
-        transition: opacity 0.15s ease;
+        transition: fill 0.15s ease, opacity 0.15s ease;
+    }
+
+    .word-stats-link {
+        transition: background-color 0.15s ease;
     }
 }
