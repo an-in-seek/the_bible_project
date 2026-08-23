@@ -3,6 +3,7 @@ import {applyOAuthBackGuardIfNeeded, buildLoginRedirectUrl, checkAuthStatus, ref
 import {bindNavSelectLabelFit, fitNavSelectLabel, setupDialogScrollLock} from "/js/common-util.js?v=2.4";
 import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
 import {bindFromBackButton} from "/js/nav-restore.js?v=1.1";
+import {initWordStats} from "/js/bible/word-stats.js?v=1.1";
 
 const UI_CLASSES = {
     HIDDEN: "d-none"
@@ -19,7 +20,8 @@ const ROUTES = {
     TRANSLATION_LIST: "/web/bible/translation",
     BOOK_LIST: "/web/bible/book",
     CHAPTER_LIST: "/web/bible/chapter",
-    VERSE_LIST: "/web/bible/verse"
+    VERSE_LIST: "/web/bible/verse",
+    SEARCH: "/web/bible/search"
 };
 
 const HIGHLIGHT_COLORS = [
@@ -214,11 +216,26 @@ async function init() {
     updateVerseUrl();
     saveLastRead();
     bindEvents();
+    initWordStatsDialog();
     initFabMenu();
     syncFontStepFromBoot();
     bindFontControlEvents();
 
     await loadChapter("CURRENT");
+}
+
+// 장 단위 단어 빈도 통계 (설계 문서: docs/bible/word-frequency-design.md)
+function initWordStatsDialog() {
+    initWordStats({
+        triggerId: "wordStatsBtn",
+        buildEndpoint: () =>
+            `/api/v1/bibles/translations/${state.translationId}/books/${state.bookOrder}`
+            + `/chapters/${state.chapterNumber}/word-stats?limit=300`,
+        buildTitle: () => `${state.bookName} ${state.chapterNumber}장 단어 통계`,
+        buildSearchUrl: (word) =>
+            `${ROUTES.SEARCH}?keyword=${encodeURIComponent(word)}`
+            + `&translationId=${state.translationId}&bookOrder=${state.bookOrder}`,
+    });
 }
 
 function initNav() {

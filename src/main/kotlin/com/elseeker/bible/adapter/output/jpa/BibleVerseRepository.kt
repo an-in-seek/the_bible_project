@@ -117,4 +117,50 @@ interface BibleVerseRepository : JpaRepository<BibleVerse, Long> {
         @Param("verseNumber") verseNumber: Int
     ): String?
 
+    /**
+     * 단어 빈도 재계산용 본문 조회. 텍스트 컬럼만 뽑으므로 엔티티를 만들지 않고 N+1 도 없다.
+     *
+     * 빈도 집계에 순서는 무의미하므로 `ORDER BY` 를 넣지 않는다. 시편이면 2,461행을 괜히
+     * 정렬하게 된다.
+     */
+    @Query(
+        """
+        SELECT new com.elseeker.bible.adapter.output.jpa.ChapterVerseText(c.chapterNumber, v.text)
+        FROM BibleVerse v
+        JOIN BibleChapter c ON v.chapterId = c.id
+        JOIN BibleBook b ON c.bookId = b.id
+        WHERE b.translationId = :translationId
+          AND b.bookOrder = :bookOrder
+        """
+    )
+    fun findChapterTextsByBook(
+        @Param("translationId") translationId: Long,
+        @Param("bookOrder") bookOrder: Int
+    ): List<ChapterVerseText>
+
+    @Query(
+        """
+        SELECT v.text
+        FROM BibleVerse v
+        JOIN BibleChapter c ON v.chapterId = c.id
+        JOIN BibleBook b ON c.bookId = b.id
+        WHERE b.translationId = :translationId
+          AND b.bookOrder = :bookOrder
+          AND c.chapterNumber = :chapterNumber
+        """
+    )
+    fun findTextsByChapter(
+        @Param("translationId") translationId: Long,
+        @Param("bookOrder") bookOrder: Int,
+        @Param("chapterNumber") chapterNumber: Int
+    ): List<String>
+
 }
+
+/**
+ * 장 번호 + 절 본문. JPQL 생성자 프로젝션 대상이라 파라미터 순서를 바꾸면 깨진다.
+ */
+data class ChapterVerseText(
+    val chapterNumber: Int,
+    val text: String,
+)

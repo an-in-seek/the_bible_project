@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>단어 어휘 등록/수정 | ElSeeker</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
+</head>
+<body>
+<div class="admin-layout">
+    <aside th:replace="~{admin/fragments/admin-sidebar :: sidebar}"></aside>
+    <div class="admin-sidebar-overlay" data-admin-sidebar-close></div>
+    <main class="admin-content">
+        <div class="admin-topbar">
+            <button class="admin-sidebar-toggle" type="button" aria-label="메뉴 열기" data-admin-sidebar-toggle>
+                <span></span>
+            </button>
+            <span class="admin-topbar-title">관리자</span>
+        </div>
+        <div class="admin-breadcrumb">
+            <a th:href="@{/web/admin/bible/words(translationId=${translationId})}">단어 어휘</a> &gt;
+            <span th:text="${word != null} ? '수정' : '등록'">등록</span>
+        </div>
+        <h2 th:text="${word != null} ? '어휘 수정' : '어휘 등록'">어휘 등록</h2>
+
+        <div class="admin-form mobile-actions">
+            <div class="form-group">
+                <label for="term">표제어</label>
+                <input type="text" id="term" th:value="${word?.term}" required>
+            </div>
+            <div class="form-group">
+                <label for="category">분류</label>
+                <select id="category">
+                    <option th:each="c : ${categories}" th:value="${c}" th:text="${c.displayName}"
+                            th:selected="${word != null and c == word.category}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="status">상태</label>
+                <select id="status">
+                    <option th:each="s : ${statuses}" th:value="${s}" th:text="${s.displayName}"
+                            th:selected="${word != null and s == word.status}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="dictionaryId">성경 사전 ID</label>
+                <input type="number" id="dictionaryId" th:value="${word?.dictionaryId}"
+                       placeholder="연결할 사전 항목 ID (선택)">
+            </div>
+            <div class="form-group">
+                <label for="aliases">별칭</label>
+                <input type="text" id="aliases" th:value="${aliases}" placeholder="쉼표로 구분">
+                <small class="text-muted">
+                    <strong>표기 자체가 다른 경우만</strong> 넣으세요 (하나님/하느님, 여호와/야훼).
+                    조사 결합형(땅에, 땅을)은 별칭이 아닙니다 — 정규화 규칙에서 고칠 문제이고,
+                    여기 넣기 시작하면 표제어 하나에 수십 개가 붙습니다.
+                </small>
+            </div>
+            <div class="form-group">
+                <label for="note">관리자 메모</label>
+                <textarea id="note" rows="3" th:text="${word?.note}"
+                          placeholder="조사 출처 등. 사용자에게 노출되지 않습니다."></textarea>
+            </div>
+
+            <p class="text-danger small" th:if="${manualStatCount != null and manualStatCount > 0}"
+               th:text="'이 어휘에는 관리자가 직접 입력한 통계가 ' + ${manualStatCount} + '건 있습니다. 삭제하면 함께 사라집니다.'"></p>
+
+            <div class="admin-form-actions mobile-actions">
+                <button type="button" class="btn btn-primary btn-sm" id="saveBtn">저장</button>
+                <button type="button" class="btn btn-outline-danger btn-sm" id="deleteBtn"
+                        th:if="${word != null}">삭제</button>
+                <a th:href="@{/web/admin/bible/words(translationId=${translationId})}"
+                   class="btn btn-outline-secondary btn-sm">취소</a>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:inline="javascript">
+    const editId = /*[[${word?.id}]]*/ null;
+    const translationId = /*[[${translationId}]]*/ null;
+    const manualStatCount = /*[[${manualStatCount}]]*/ 0;
+</script>
+<script type="module">
+    import {fetchAdmin, initAdminSidebarToggle, initAdminSidebarGroups} from "/js/admin/admin-common.js";
+    import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
+
+    initAdminSidebarToggle();
+    initAdminSidebarGroups();
+
+    const buildBody = () => {
+        const dictValue = document.getElementById("dictionaryId").value;
+        return {
+            term: document.getElementById("term").value,
+            category: document.getElementById("category").value,
+            status: document.getElementById("status").value,
+            dictionaryId: dictValue === "" ? null : parseInt(dictValue, 10),
+            note: document.getElementById("note").value || null,
+            aliases: document.getElementById("aliases").value
+                .split(",").map(v => v.trim()).filter(v => v.length > 0),
+        };
+    };
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+        try {
+            const body = JSON.stringify(buildBody());
+            if (editId) {
+                await fetchAdmin(`/api/v1/admin/bible/words/${editId}`, {method: "PUT", body});
+            } else {
+                await fetchAdmin(`/api/v1/admin/bible/words?translationId=${translationId}`, {method: "POST", body});
+            }
+            location.href = `/web/admin/bible/words?translationId=${translationId}`;
+        } catch (e) {
+            alert(e.message);
+        }
+    });
+
+    document.getElementById("deleteBtn")?.addEventListener("click", async () => {
+        const warn = manualStatCount > 0
+            ? `\n관리자가 입력한 통계 ${manualStatCount}건도 함께 삭제됩니다.`
+            : "";
+        const ok = await showConfirm(`이 어휘를 삭제하시겠습니까?${warn}\n대부분의 경우 삭제보다 '차단'이 맞습니다.`,
+            {title: "삭제", confirmText: "삭제", danger: true});
+        if (!ok) return;
+        try {
+            await fetchAdmin(`/api/v1/admin/bible/words/${editId}`, {method: "DELETE"});
+            location.href = `/web/admin/bible/words?translationId=${translationId}`;
+        } catch (e) {
+            alert(e.message);
+        }
+    });
+</script>
+</body>
+</html>

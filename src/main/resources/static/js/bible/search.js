@@ -91,6 +91,7 @@ const App = {
         App.elements = DomHelper.getElements();
         App.state.translationId = App.getTranslationId();
         App.state.initialKeyword = App.getInitialKeyword();
+        App.state.selectedBookOrder = App.getInitialBookOrder();
 
         if (!App.state.translationId) {
             App.redirectToTranslation();
@@ -148,6 +149,14 @@ const App = {
     getInitialKeyword: () => {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get("keyword") ?? "";
+    },
+
+    // 단어 빈도 통계에서 "이 단어로 검색" 으로 넘어오면 책 범위가 함께 온다.
+    // 이 처리가 없으면 책 화면에서 넘어간 검색이 전권 검색이 되어 맥락이 끊긴다.
+    getInitialBookOrder: () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const parsed = parseInt(urlParams.get("bookOrder"), 10);
+        return Number.isNaN(parsed) ? null : parsed;
     },
 
     initNav: () => {
@@ -644,6 +653,15 @@ const App = {
 
         bookFilterSelect.addEventListener("change", App.handleBookFilterChange);
         bookFilterContainer.classList.remove(UI_CLASSES.HIDDEN);
+
+        // URL 로 들어온 책 범위를 필터 초기값으로 반영한다
+        if (App.state.selectedBookOrder !== null) {
+            bookFilterSelect.value = String(App.state.selectedBookOrder);
+            // 목록에 없는 값이면 선택되지 않으므로 상태를 되돌린다
+            if (bookFilterSelect.value === "") {
+                App.state.selectedBookOrder = null;
+            }
+        }
     },
 
     resetBookFilter: () => {

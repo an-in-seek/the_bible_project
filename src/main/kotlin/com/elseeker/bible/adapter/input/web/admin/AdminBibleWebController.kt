@@ -5,7 +5,11 @@ import com.elseeker.bible.application.service.AdminBibleBookService
 import com.elseeker.bible.application.service.AdminBibleChapterService
 import com.elseeker.bible.application.service.AdminBibleTranslationService
 import com.elseeker.bible.application.service.AdminBibleVerseService
+import com.elseeker.bible.application.service.AdminBibleWordService
+import com.elseeker.bible.application.service.AdminBibleWordStatService
 import com.elseeker.bible.domain.vo.BibleBookKey
+import com.elseeker.bible.domain.vo.BibleWordCategory
+import com.elseeker.bible.domain.vo.BibleWordStatus
 import com.neovisionaries.i18n.LanguageCode
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
@@ -24,7 +28,18 @@ class AdminBibleWebController(
     private val adminBibleBookDescriptionService: AdminBibleBookDescriptionService,
     private val adminBibleChapterService: AdminBibleChapterService,
     private val adminBibleVerseService: AdminBibleVerseService,
+    private val adminBibleWordService: AdminBibleWordService,
+    private val adminBibleWordStatService: AdminBibleWordStatService,
 ) {
+
+    /** 어휘·통계 화면은 번역본을 먼저 골라야 한다. 어휘가 번역본별이기 때문이다. */
+    private fun addTranslationOptions(model: Model, selectedId: Long?) {
+        val translations = adminBibleTranslationService
+            .findAll(PageRequest.of(0, TRANSLATION_OPTION_SIZE, Sort.by("translationOrder")))
+            .content
+        model.addAttribute("translations", translations)
+        model.addAttribute("selectedTranslationId", selectedId)
+    }
 
     // ── 대시보드 ──
 
@@ -142,6 +157,90 @@ class AdminBibleWebController(
         return "admin/bible/admin-bible-chapter-form"
     }
 
+    // ── BibleWord (단어 빈도 통계) ──
+    // 설계 문서: docs/bible/word-frequency-design.md §7.1
+
+    @GetMapping("/bible/words")
+    fun wordList(
+        @RequestParam(required = false) translationId: Long?,
+        @RequestParam(required = false) status: BibleWordStatus?,
+        @RequestParam(required = false) category: BibleWordCategory?,
+        @RequestParam(required = false) term: String?,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "50") size: Int,
+        model: Model,
+    ): String {
+        addTranslationOptions(model, translationId)
+        if (translationId != null) {
+            val pageable = PageRequest.of(page, size, Sort.by("term"))
+            model.addAttribute("page", adminBibleWordService.findAll(translationId, status, category, term, pageable))
+        }
+        model.addAttribute("translationId", translationId)
+        model.addAttribute("status", status)
+        model.addAttribute("category", category)
+        model.addAttribute("term", term)
+        model.addAttribute("statuses", BibleWordStatus.entries)
+        model.addAttribute("categories", BibleWordCategory.entries)
+        return "admin/bible/admin-bible-word-list"
+    }
+
+    @GetMapping("/bible/words/new")
+    fun wordNewForm(@RequestParam translationId: Long, model: Model): String {
+        model.addAttribute("translationId", translationId)
+        model.addAttribute("statuses", BibleWordStatus.entries)
+        model.addAttribute("categories", BibleWordCategory.entries)
+        return "admin/bible/admin-bible-word-form"
+    }
+
+    @GetMapping("/bible/words/{id}/edit")
+    fun wordEditForm(@PathVariable id: Long, model: Model): String {
+        val word = adminBibleWordService.findById(id)
+        model.addAttribute("word", word)
+        model.addAttribute("translationId", word.translationId)
+        model.addAttribute("aliases", adminBibleWordService.findAliases(id).joinToString(", ") { it.alias })
+        model.addAttribute("manualStatCount", adminBibleWordService.countManualStats(id))
+        model.addAttribute("statuses", BibleWordStatus.entries)
+        model.addAttribute("categories", BibleWordCategory.entries)
+        return "admin/bible/admin-bible-word-form"
+    }
+
+    @GetMapping("/bible/word-stats")
+    fun wordStatList(
+        @RequestParam(required = false) translationId: Long?,
+        @RequestParam(required = false) bookOrder: Int?,
+        @RequestParam(required = false) chapterNumber: Int?,
+        @RequestParam(defaultValue = "0") page: Int,
+        @RequestParam(defaultValue = "50") size: Int,
+        model: Model,
+    ): String {
+        addTranslationOptions(model, translationId)
+        if (translationId != null && bookOrder != null) {
+            model.addAttribute(
+                "statPage",
+                adminBibleWordStatService.findRows(translationId, bookOrder, chapterNumber, page, size)
+            )
+            model.addAttribute("runs", adminBibleWordStatService.findRuns(translationId))
+        }
+        model.addAttribute("translationId", translationId)
+        model.addAttribute("bookOrder", bookOrder)
+        model.addAttribute("chapterNumber", chapterNumber)
+        model.addAttribute("page", page)
+        model.addAttribute("size", size)
+        return "admin/bible/admin-bible-word-stat-list"
+    }
+
+    @GetMapping("/bible/word-candidates")
+    fun wordCandidateList(
+        @RequestParam(required = false) translationId: Long?,
+        @RequestParam(required = false) bookOrder: Int?,
+        model: Model,
+    ): String {
+        addTranslationOptions(model, translationId)
+        model.addAttribute("translationId", translationId)
+        model.addAttribute("bookOrder", bookOrder)
+        return "admin/bible/admin-bible-word-candidate-list"
+    }
+
     // ── BibleVerse ──
 
     @GetMapping("/bible/chapters/{chapterId}/verses")
@@ -169,5 +268,9 @@ class AdminBibleWebController(
         model.addAttribute("chapterId", chapterId)
         model.addAttribute("verse", adminBibleVerseService.findById(id))
         return "admin/bible/admin-bible-verse-form"
+    }
+
+    companion object {
+        private const val TRANSLATION_OPTION_SIZE = 100
     }
 }

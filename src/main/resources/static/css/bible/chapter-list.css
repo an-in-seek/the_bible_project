@@ -152,6 +152,19 @@ html[data-theme="dark"] .book-memo-panel {
     font-size: 0.85rem;
 }
 
+/* 버튼이 5개가 되어 320~360px 에서는 버튼당 폭이 최소 폭(약 64px)에 못 미친다.
+   이 규칙이 없으면 구형 기기에서 줄바꿈되거나 잘린다. */
+@media (max-width: 360px) {
+    .book-action-btn {
+        padding: 10px 4px;
+        gap: 4px;
+    }
+
+    .book-action-btn-label {
+        font-size: 0.78rem;
+    }
+}
+
 @media (hover: hover) and (pointer: fine) {
     .book-action-btn:hover {
         background-color: var(--color-bg-elevated-strong-hover);

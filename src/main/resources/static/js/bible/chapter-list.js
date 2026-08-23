@@ -2,6 +2,7 @@ import {BookStore, ChapterStore, TranslationStore} from "/js/storage-util.js?v=2
 import {checkAuthStatus} from "/js/auth/auth-check.js";
 import {bindNavSelectLabelFit, fitNavSelectLabel, setupDialogScrollLock} from "/js/common-util.js?v=2.4";
 import {bindFromBackButton} from "/js/nav-restore.js?v=1.1";
+import {initWordStats} from "/js/bible/word-stats.js?v=1.1";
 
 const UI_CLASSES = {
     HIDDEN: "d-none"
@@ -25,7 +26,8 @@ const ROUTES = {
     CHAPTER_DESCRIPTION: "/web/bible/book/description",
     VERSE_LIST: "/web/bible/verse",
     OVERVIEW_VIDEO: "/web/study/bible-overview-video",
-    PUBLIC_READING: "/web/study/public-reading-of-scripture"
+    PUBLIC_READING: "/web/study/public-reading-of-scripture",
+    SEARCH: "/web/bible/search"
 };
 
 const DomHelper = {
@@ -93,6 +95,7 @@ const App = {
         }
 
         App.updateHeader(translationInfo.type, bookName);
+        App.initWordStatsDialog();
         App.setupPrevNext(books);
 
         await App.initAuthStatus();
@@ -454,6 +457,24 @@ const App = {
         bookMemoState.loaded = false;
         App.updateBookMemoButton();
         App.loadBookMemo();
+    },
+
+    // 책 단위 단어 빈도 통계 (설계 문서: docs/bible/word-frequency-design.md)
+    // 이 화면은 새로고침 없이 이전/다음 책으로 이동하므로, 제목을 캡처하지 않고
+    // 열 때마다 현재 상태에서 읽는다. 리스너는 한 번만 등록한다.
+    initWordStatsDialog: () => {
+        initWordStats({
+            triggerId: "wordStatsBtn",
+            buildEndpoint: () =>
+                `/api/v1/bibles/translations/${App.state.translationId}/books/${App.state.bookOrder}/word-stats?limit=100`,
+            buildTitle: () => {
+                const name = BookStore.getBookName(App.state.translationId, App.state.bookOrder);
+                return name ? `${name} 단어 통계` : "단어 통계";
+            },
+            buildSearchUrl: (word) =>
+                `${ROUTES.SEARCH}?keyword=${encodeURIComponent(word)}`
+                + `&translationId=${App.state.translationId}&bookOrder=${App.state.bookOrder}`,
+        });
     },
 
     bindBookMemoEvents: () => {

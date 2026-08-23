@@ -1,0 +1,183 @@
+/*
+ * 성경 단어 빈도 통계 다이얼로그
+ * 설계 문서: docs/bible/word-frequency-design.md §10
+ *
+ * 색상은 전부 theme.css 토큰으로 참조한다(raw hex 금지).
+ * 빈도는 색이 아니라 '크기'로 표현한다. 색은 보조 수단이다.
+ */
+
+.word-stats-dialog {
+    width: min(680px, calc(100vw - 24px));
+    max-height: min(86vh, 900px);
+    padding: 0;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background-color: var(--color-bg-base);
+    color: var(--color-text-primary);
+    box-shadow: 0 10px 30px var(--color-shadow);
+    overflow: hidden;
+}
+
+.word-stats-dialog::backdrop {
+    background-color: rgba(0, 0, 0, 0.45);
+}
+
+.word-stats-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--color-border);
+    background-color: var(--color-bg-elevated);
+}
+
+.word-stats-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 700;
+}
+
+.word-stats-body {
+    padding: 14px 16px 20px;
+    max-height: calc(86vh - 60px);
+    overflow-y: auto;
+}
+
+.word-stats-status {
+    margin: 24px 0;
+    text-align: center;
+    color: var(--color-text-secondary);
+    font-size: 0.9rem;
+}
+
+/* ---------- 워드 클라우드 ---------- */
+
+.word-stats-cloud-wrap {
+    margin-bottom: 16px;
+    padding: 8px 0 14px;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.word-stats-cloud {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 320px;
+    overflow: visible;
+}
+
+.word-stats-cloud-word {
+    font-weight: 700;
+    cursor: pointer;
+}
+
+/* 빈도 4단계. 가장 흐린 단계도 --color-text-secondary 까지만 내려 대비를 지킨다. */
+.word-stats-cloud-word.tier-1 { fill: var(--color-accent); }
+.word-stats-cloud-word.tier-2 { fill: var(--color-text-primary); }
+.word-stats-cloud-word.tier-3 { fill: var(--color-text-primary); opacity: 0.82; }
+.word-stats-cloud-word.tier-4 { fill: var(--color-text-secondary); }
+
+/* ---------- 빈도 목록 (접근성의 본체) ---------- */
+
+.word-stats-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    align-items: baseline;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.word-stats-item {
+    display: inline-flex;
+}
+
+.word-stats-link {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 3px;
+    padding: 2px 4px;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--color-text-primary);
+}
+
+.word-stats-link.tier-1 { font-size: 1.15rem; font-weight: 700; color: var(--color-accent); }
+.word-stats-link.tier-2 { font-size: 1.02rem; font-weight: 600; }
+.word-stats-link.tier-3 { font-size: 0.94rem; }
+.word-stats-link.tier-4 { font-size: 0.86rem; color: var(--color-text-secondary); }
+
+.word-stats-count {
+    font-size: 0.78em;
+    color: var(--color-text-secondary);
+}
+
+.word-stats-footnote {
+    margin: 16px 0 0;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+/* ---------- 단어 팝오버 ---------- */
+
+.word-stats-popover {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    padding: 12px 14px;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background-color: var(--color-bg-elevated-bright);
+    box-shadow: 0 6px 18px var(--color-shadow);
+}
+
+.word-stats-popover-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 6px;
+}
+
+.word-stats-popover-desc {
+    margin: 0 0 10px;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--color-text-secondary);
+    max-height: 6.5em;
+    overflow-y: auto;
+}
+
+.word-stats-popover-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+
+/* ---------- 반응형 ---------- */
+
+@media (max-width: 480px) {
+    .word-stats-cloud { max-height: 240px; }
+    .word-stats-body { padding: 12px 12px 18px; }
+}
+
+/* 터치 기기에서 hover 가 눌린 채 남는 문제 때문에 데스크톱에서만 적용한다 */
+@media (hover: hover) and (pointer: fine) {
+    .word-stats-link:hover {
+        background-color: var(--color-bg-elevated-strong-hover);
+    }
+
+    .word-stats-cloud-word:hover {
+        opacity: 1;
+        text-decoration: underline;
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .word-stats-cloud-word {
+        transition: opacity 0.15s ease;
+    }
+}

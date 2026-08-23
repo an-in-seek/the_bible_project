@@ -200,7 +200,7 @@ html[data-theme="dark"] .verse-font-dot[aria-checked="true"] {
 }
 
 /* 장 메모 / 읽음 버튼 50:50 균등 배치 */
-.flex-half {
+.flex-equal {
     flex: 1 1 0;
     min-width: 0;
 }

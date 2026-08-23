@@ -57,6 +57,24 @@
                             성경 사전
                         </a>
                     </li>
+                    <li>
+                        <a href="/web/admin/bible/words" class="admin-sidebar-link"
+                           th:classappend="${#strings.startsWith(currentPath, '/web/admin/bible/words')} ? 'active'">
+                            단어 어휘
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/web/admin/bible/word-stats" class="admin-sidebar-link"
+                           th:classappend="${#strings.startsWith(currentPath, '/web/admin/bible/word-stats')} ? 'active'">
+                            단어 통계
+                        </a>
+                    </li>
+                    <li>
+                        <a href="/web/admin/bible/word-candidates" class="admin-sidebar-link"
+                           th:classappend="${#strings.startsWith(currentPath, '/web/admin/bible/word-candidates')} ? 'active'">
+                            미매칭 후보
+                        </a>
+                    </li>
                 </ul>
             </div>
         </li>

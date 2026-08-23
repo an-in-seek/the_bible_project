@@ -2,7 +2,24 @@
 
 ## 구현 상태
 
-설계 완료, 미구현.
+**Phase 1·2 구현 완료 / 운영 초기 구축(§7.4) 미실행.**
+
+| 구분 | 상태 |
+|---|---|
+| DB 스키마 4개 (`db/schema/bible_word*.sql`) | 작성 완료 — **운영 적용은 배포 직전 수동** |
+| 엔티티·VO·Repository | 완료 |
+| 정규화 규칙 리소스 + `WordStatRules` | 완료 |
+| `BibleWordTokenizer` / `BibleWordMatcher` | 완료 (단위 22건 + 골든 테스트 통과) |
+| 관리자 API·화면 4개 | 완료 |
+| 사용자 조회 API + 워드클라우드 화면 | 완료 |
+| 통합 테스트 4건 | 통과 |
+| 운영 스키마 적용 | **완료** (2026-08-23) — 테이블 4개, 컬럼·인덱스는 Hibernate 생성본과 대조 확인 |
+| 운영 어휘 — 사전 가져오기 | **완료** (2026-08-23) — KRV 313건, APPROVED·dictionary 연결 |
+| **운영 후보 등록·재계산 (§7.4 의 3~5번)** | **미실행** — 배포 후 관리자 화면에서 실행해야 화면에 값이 나온다 |
+
+> 운영 스키마와 1차 어휘는 배포 **전에** 미리 넣어 두었다(`db/README.md` 의 "해당 기능 배포 직전"
+> 규칙). 배포 직후 관리자 화면에서 후보 일괄 등록 → 책별 재계산만 돌리면 바로 켜진다.
+> NKRV 는 어휘를 새로 만들지 말고 `다른 번역본에서 복사` 를 쓴다(§3.7).
 
 - book example: 창세기 책 화면 → 언급되는 단어들 통계 시각화 (책 단위)
 - chapter example: 창세기 1장 화면 → 언급되는 단어들 통계 시각화 (장 단위)
@@ -201,8 +218,9 @@
 매칭은 **표제어와 별칭을 같은 해시 테이블에 넣고 조회**한다. 별칭을 추가하면 다음 재계산부터
 그 표기가 표제어 카운트에 합산된다.
 
-- `bible_word` 는 `language_code` 를 가진다. 어휘는 언어별로 별도다(`하나님` / `God` / `Dios`).
-- 별칭은 **같은 언어 안에서 유일**해야 한다. 두 표제어가 같은 별칭을 가지면 어느 쪽으로 셀지
+- `bible_word` 는 `translation_id` 를 가진다. **어휘는 번역본별로 별도다**(§3.7). 언어는
+  `bible_translation.language_code` 에서 끌어오므로 어휘 테이블에 중복 저장하지 않는다.
+- 별칭은 **같은 번역본 안에서 유일**해야 한다. 두 표제어가 같은 별칭을 가지면 어느 쪽으로 셀지
   결정할 수 없다. 저장 시 검증하고 `BIBLE_WORD_DUPLICATED` 로 막는다.
 
 ### 3.4 외부 조사 작업 지침
@@ -292,23 +310,24 @@ ALTER TABLE dictionary ADD  CONSTRAINT uk_dictionary_term UNIQUE (language_code,
 
 #### 이 설계가 이미 대비하고 있는 것
 
-- `bible_word.language_code` 가 있고 유니크 제약이 `(language_code, term)` 이다(§5.1). 어휘는
-  처음부터 언어별로 분리된다.
-- `bible_word_alias` 의 유니크도 `(language_code, alias)` 다(§5.2).
+- `bible_word.translation_id` 가 있고 유니크 제약이 `(translation_id, term)` 이다(§5.1). 어휘는
+  처음부터 번역본별로 분리되므로 언어별 분리는 자동으로 따라온다(§3.7).
+- `bible_word_alias` 의 유니크도 `(translation_id, alias)` 다(§5.2).
 - 불용어·조사·어미 규칙 파일이 언어별로 나뉘어 있다(§4.5, §6).
-- 매칭 시 번역본의 `languageCode` 로 어휘를 고르므로, 한국어 어휘가 영어 번역본에 섞이지 않는다.
+- 매칭 대상 어휘를 번역본으로 고르므로, 한국어 어휘가 영어 번역본에 섞일 수 없다.
 
 **즉 통계 쪽 스키마는 손댈 것이 없다.** 사전이 다국어가 될 때 바뀌는 것은 "사전 → 어휘" 가져오기
 경로 하나뿐이다.
 
 #### 가져오기 API 의 언어 처리
 
-`POST /words/import-from-dictionary` 는 **`languageCode` 를 필수 파라미터로 받는다**(§7.2).
-그 값이 그대로 `bible_word.language_code` 가 된다. 사전 쪽 필터는 두 단계로 간다.
+`POST /words/import-from-dictionary` 는 **`translationId` 를 필수 파라미터로 받는다**(§7.2).
+어휘가 번역본별이므로 어디로 넣을지 지정해야 한다. 사전 쪽에서 어떤 행을 가져올지는 그 번역본의
+언어(`bible_translation.language_code`)로 정하며, 필터는 두 단계로 간다.
 
 | 시점 | 사전에서 가져올 행을 고르는 기준 |
 |---|---|
-| 언어 컬럼 추가 **전** (지금) | **문자 종류로 판별.** `languageCode=ko` 면 `term ~ '[가-힣]'` 인 행만. 현재 313건 전부 해당 |
+| 언어 컬럼 추가 **전** (지금) | **문자 종류로 판별.** 대상 번역본이 한국어면 `term ~ '[가-힣]'` 인 행만. 현재 313건 전부 해당 |
 | 언어 컬럼 추가 **후** | `dictionary.language_code = :languageCode`. **문자 판별 코드는 삭제한다** |
 
 문자 판별은 **명시적으로 한시적인 코드**다. 언어 컬럼이 확정된 계획인 만큼 오래 남을 이유가
@@ -317,7 +336,7 @@ ALTER TABLE dictionary ADD  CONSTRAINT uk_dictionary_term UNIQUE (language_code,
 
 그래서 두 가지를 못 박는다.
 
-1. **언어 컬럼이 생기기 전까지 `languageCode != ko` 가져오기를 거부한다**
+1. **언어 컬럼이 생기기 전까지 한국어 번역본이 아닌 대상의 가져오기를 거부한다**
    (`INVALID_PARAMETER`). 잘못 동작할 수 있는 경로를 아예 막아 둔다.
 2. **판별 술어를 한 곳에만 둔다.** `DictionaryImportFilter` 같은 단일 지점에 격리해, 컬럼이
    생기면 그 한 곳만 교체하고 위 1번 제한을 푸는 것으로 전환이 끝나게 한다.
@@ -341,6 +360,33 @@ ALTER TABLE dictionary ADD  CONSTRAINT uk_dictionary_term UNIQUE (language_code,
 이냐" 를 정하는 부담이 생긴다. 나중에 필요해지면 `bible_word` 에 `concept_id` 를 추가하는
 방식으로 뒤에 붙일 수 있다 — 언어별로 행이 분리돼 있으므로 기존 데이터를 옮길 필요가 없다.
 
+### 3.7 어휘는 번역본별로 관리한다
+
+`bible_word.translation_id` 로 어휘를 **번역본 단위**로 분리한다. 같은 한국어라도 KRV 와 NKRV 는
+각자의 어휘를 갖는다.
+
+**언어 단위 공유가 아니라 번역본 단위인 이유**
+
+- 번역본마다 표기가 다르다. KRV `가라사대` / NKRV `이르시되`, 인명·지명 표기도 갈린다. 공유
+  어휘로 묶으면 한쪽에서만 쓰는 표기가 다른 쪽 후보 리포트에 계속 미매칭으로 남는다.
+- 통계 값이 번역본별로 다른데 어휘만 공유하면, 어떤 표제어가 어느 번역본에서 유효한지 알 수
+  없다. KRV 에만 있는 단어가 NKRV 화면의 어휘 목록에도 보인다.
+- 차단(`BLOCKED`) 판단도 번역본마다 다를 수 있다. 한쪽에서 쓰레기인 활용형이 다른 쪽에서는
+  정상 표제어인 경우를 공유 어휘로는 표현하지 못한다.
+
+**언어는 어휘에 저장하지 않는다.** `translation_id` → `bible_translation.language_code` 로
+1:1 결정되므로 중복 저장하면 어긋날 여지만 생긴다. 토크나이저 규칙 선택은 번역본을 조회할 때
+같이 얻는 `languageCode` 로 한다.
+
+**대가와 완화책**
+
+어휘 구축을 번역본 수만큼 반복해야 한다. 다만 같은 언어의 두 번역본은 어휘가 대부분 겹치므로,
+관리자 API 에 **어휘 복사**(`POST /words/copy-from`)를 둔다. KRV 어휘를 NKRV 로 복사한 뒤
+후보 리포트로 차이만 메우는 것이 현실적인 순서다(§7.4).
+
+어휘 행 수는 6,093 × 번역본 수라 2개면 12,186행이다. 통계 행(번역본당 146,311)에 비하면 무시할
+수준이므로 저장 용량 판단(§5.5)에는 영향이 없다.
+
 ---
 
 ## 4. 카운트 계산 규칙
@@ -352,17 +398,22 @@ ALTER TABLE dictionary ADD  CONSTRAINT uk_dictionary_term UNIQUE (language_code,
 
 ```
 1. 절 본문을 어절로 자른다
-2. 어절 원형을 어휘+별칭 해시에서 먼저 조회한다  → 매칭되면 확정, 3~4 를 건너뛴다
-3. 매칭 안 되면 §4.2 규칙으로 정규화한다
-4. 정규화 결과를 다시 해시에서 조회한다          → 매칭되면 확정
-5. 매칭된 표제어가 BLOCKED 면 카운트도 후보 적립도 하지 않고 버린다 (§7.3 억제 집합)
-6. 그 외 매칭이면 표제어 카운트를 1 증가
-7. 끝내 매칭 안 되면 '미매칭 후보' 카운터에 적립 (§4.3)
+2. 어절 원형을 어휘+별칭 해시에서 조회한다        → 매칭되면 확정
+3. 조사만 떼어 낸 형태로 다시 조회한다            → 매칭되면 확정
+4. 그래도 안 되면 §4.2 규칙으로 정규화한다
+5. 정규화 결과를 다시 해시에서 조회한다           → 매칭되면 확정
+6. 매칭된 표제어가 BLOCKED 면 카운트도 후보 적립도 하지 않고 버린다 (§7.3 억제 집합)
+7. 그 외 매칭이면 표제어 카운트를 1 증가
+8. 끝내 매칭 안 되면 '미매칭 후보' 카운터에 적립 (§4.3)
 ```
 
-- **정규화보다 원형 조회가 먼저다.** 순서가 반대이면 `바다`·`고기` 같은 2음절 명사가 어미
-  규칙(§4.2)에 걸려 *정규화 단계에서 이미 버려진 뒤*라 조회할 것이 남지 않는다. 어휘에 등록된
-  표제어는 어떤 규칙보다 우선한다.
+- **어휘 조회를 규칙보다 먼저, 그것도 두 번 한다.** 어휘에 등록된 표제어는 어떤 규칙보다
+  우선해야 한다.
+  - 2번(원형)만으로는 부족하다. 어휘에 `여자` 가 있어도 본문에는 `여자를`·`여자가` 로 나오고,
+    조사를 뗀 `여자` 는 2음절 어미 규칙('자')에 걸려 정규화 단계에서 버려진다.
+  - 그래서 3번에서 **조사만 떼고 필터는 적용하지 않은 형태**로 한 번 더 조회한다. 이 단계가
+    빠지면 어휘에 멀쩡히 등록한 단어가 조사가 붙었다는 이유로 0회로 집계된다.
+    (구현 중 통합 전 단위 테스트에서 실제로 잡힌 결함이다.)
 
   > 표제어 두 개가 원형/정규형으로 겹치면 원형이 이긴다. 예를 들어 `주` 와 `주의` 가 모두
   > 어휘에 있으면 어절 `주의` 는 `주의` 로 세고 `주` 로는 세지 않는다. 이런 겹침은 관리자가
@@ -430,8 +481,11 @@ ALTER TABLE dictionary ADD  CONSTRAINT uk_dictionary_term UNIQUE (language_code,
 2음절 전용: 는 니 며 고 게 지 되 면 서 어 아 자
 ```
 
-2음절 목록은 `바다`·`고기`·`창고` 같은 명사를 잘못 버릴 위험이 있다. **어휘에 등록된 표제어는
-이 규칙보다 먼저 확정**시켜 방어한다(§4.1 의 3번에서 원본 어절을 먼저 조회하는 이유).
+2음절 목록은 명사를 잘못 버린다. 목록의 `자`·`고`·`지` 때문에 **`여자`·`남자`·`제자`·`창고`**
+가 전부 걸린다(단위 테스트로 확인). 반면 `바다`·`고기` 는 `다`·`기` 가 목록에 없어 안전하다 —
+오탐 범위를 좁게 유지한 결과다.
+
+**어휘에 등록된 표제어는 이 규칙보다 먼저 확정**시켜 방어한다(§4.1 의 2·3번 조회).
 
 **불용어**: 대명사(`그`, `우리`, `너희`, `내가`), 지시어(`이것`, `여기`), 접속·부사(`그리고`,
 `또한`, `다시`), 의존명사(`것`, `수`, `때`, `곳`, `중`), 초고빈도 서술어(`가로되`, `이르되`,
@@ -448,6 +502,15 @@ ALTER TABLE dictionary ADD  CONSTRAINT uk_dictionary_term UNIQUE (language_code,
 
 ④에서도 `나뉘게(4)`, `가진(3)` 같은 활용형이 남는다. **테이블 방식에서는 이것들이 어휘에
 없으므로 화면에 나오지 않는다.** 후보 리포트에 뜨면 관리자가 `BLOCKED` 로 내리면 끝이다.
+
+> ⚠️ **`여호와` → `여호` 는 특별히 기억해 둘 것.** `와` 가 조사 목록에 있어 **조사 없이 홀로 나온
+> `여호와` 의 끝 글자가 떨어진다.** 조사가 붙은 `여호와께서`·`여호와의` 는 긴 조사가 먼저 매칭돼
+> 멀쩡하다. 로컬 화면 확인에서 목록에 `여호와(132)` 와 `여호(28)` 이 나란히 잡혀 드러났다.
+>
+> 어휘에 `여호와` 를 등록하면 매처의 원형 조회(§4.1 의 2번)가 먼저 잡으므로 **운영에서는 문제가
+> 되지 않는다.** 다만 후보 리포트에 `여호` 가 뜨므로 관리자가 차단해야 한다. "정규화 오류가 화면
+> 오류가 아니라 데이터 품질 지표가 된다"(§2.3)는 주장이 실제로 그렇게 동작함을 보여 준 사례다.
+> `BibleWordTokenizerTest.waJosaDamagesYahweh` 가 이 동작을 고정한다.
 
 **형태소 분석기(KOMORAN/Kiwi)를 도입하지 않는 이유**: 사전 기반 분석기는 수십 MB 를 상주시키고
 콜드 스타트를 늘린다. 이 저장소는 Spring Boot 4 / Jackson 3 / Testcontainers 2 로 이미 한 번
@@ -482,7 +545,7 @@ ALTER TABLE dictionary ADD  CONSTRAINT uk_dictionary_term UNIQUE (language_code,
 
 ### 4.5 영어·스페인어
 
-`BibleTranslation.languageCode` 로 분기한다.
+대상 번역본의 `BibleTranslation.languageCode` 로 규칙을 분기한다(어휘 자체는 번역본별 — §3.7).
 
 - 소유격 `'s` 절단 → 소문자화 → 알파벳 외 제거 → 공백 분할
 - 불용어에 **KJV 계열 고어(`thou`, `thee`, `hath`, `shalt`, `unto`)를 반드시 포함**한다. 일반
@@ -516,19 +579,19 @@ ALTER TABLE dictionary ADD  CONSTRAINT uk_dictionary_term UNIQUE (language_code,
 
 CREATE TABLE IF NOT EXISTS bible_word (
     id            BIGINT       GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
+    translation_id BIGINT      NOT NULL,         -- 번역본별 어휘 (§3.7)
     term          VARCHAR(50)  NOT NULL,
-    language_code VARCHAR(4)   NOT NULL,
     category      VARCHAR(20)  NOT NULL,          -- PERSON/PLACE/CONCEPT/OBJECT/MEASURE/ETC
     status        VARCHAR(20)  NOT NULL,          -- APPROVED/CANDIDATE/BLOCKED
     dictionary_id BIGINT       NULL,              -- 성경 사전 연결 (있으면 뜻풀이 노출)
     note          TEXT         NULL,              -- 조사 출처 등 관리자 메모 (사용자 비노출)
     created_at    TIMESTAMP(6) NOT NULL,
     updated_at    TIMESTAMP(6) NOT NULL,
-    CONSTRAINT uk_bible_word_term_lang UNIQUE (language_code, term)
+    CONSTRAINT uk_bible_word_term UNIQUE (translation_id, term)
 );
 
 CREATE INDEX IF NOT EXISTS idx_bible_word_status
-    ON bible_word (language_code, status);
+    ON bible_word (translation_id, status);
 
 COMMENT ON TABLE  bible_word               IS '성경 단어 통계 표제어 어휘';
 COMMENT ON COLUMN bible_word.status        IS 'APPROVED=노출, CANDIDATE=미검수, BLOCKED=영구 제외';
@@ -556,12 +619,12 @@ CANDIDATE` 가 "아직 손대지 않은 후보" 를 뜻한다 — 관리자 목�
 
 CREATE TABLE IF NOT EXISTS bible_word_alias (
     id            BIGINT       GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
-    bible_word_id BIGINT       NOT NULL,
+    bible_word_id  BIGINT      NOT NULL,
+    translation_id BIGINT      NOT NULL,
     alias         VARCHAR(50)  NOT NULL,
-    language_code VARCHAR(4)   NOT NULL,
     created_at    TIMESTAMP(6) NOT NULL,
     updated_at    TIMESTAMP(6) NOT NULL,
-    CONSTRAINT uk_bible_word_alias UNIQUE (language_code, alias)
+    CONSTRAINT uk_bible_word_alias UNIQUE (translation_id, alias)
 );
 
 CREATE INDEX IF NOT EXISTS idx_bible_word_alias_word
@@ -570,8 +633,8 @@ CREATE INDEX IF NOT EXISTS idx_bible_word_alias_word
 COMMENT ON TABLE bible_word_alias IS '표제어 별칭·이형태 (같은 언어 안에서 유일해야 함)';
 ```
 
-`language_code` 를 별칭 행에도 복제해 두는 이유는 유니크 제약을 언어 단위로 걸기 위해서다.
-저장 시 부모 `bible_word.language_code` 와 같은 값인지 검증한다.
+`translation_id` 를 별칭 행에도 복제해 두는 이유는 유니크 제약을 번역본 단위로 걸기 위해서다.
+저장 시 부모 `bible_word.translation_id` 와 같은 값인지 검증한다.
 
 ### 5.3 `db/schema/bible_word_stat.sql`
 
@@ -726,9 +789,9 @@ KRV 66권(1,189장)에 정규화를 돌려 **어휘별로 실제 매칭되는 �
 → **권장: 한국어 2개(KRV, NKRV)로 시작한다.** 근거는 세 가지다.
 
 1. DB 가 캐시 안에 남는다(126MB < 210MB).
-2. 어휘는 **언어 단위**라 KRV·NKRV 가 같은 어휘를 공유한다. 한국어 어휘 6,100개 하나만
-   구축하면 두 번역본이 동시에 켜진다. 영어를 켜려면 영어 어휘 6,000여 개를 처음부터 다시
-   구축해야 한다(§13 Phase 3).
+2. 어휘는 번역본별이지만(§3.7) **같은 언어면 어휘 복사로 대부분 재사용된다.** KRV 어휘
+   6,100개를 만들어 NKRV 로 복사하고 차이만 메우면 된다. 영어를 켜려면 규칙도 어휘도
+   처음부터 새로 만들어야 한다(§13 Phase 3).
 3. 효과를 먼저 확인하고 확장 여부를 정할 수 있다.
 
 > ⚠️ **초안의 "본문 보유 번역본 3개" 는 틀렸다.** `db/seed/` 에 KRV 만 전량 있어서 그렇게 적었는데,
@@ -784,8 +847,10 @@ bible/
 └─ domain/result/BibleWordStatResult.kt                        -- WordFrequencyStat 을 같은 파일에 둔다
 
 src/main/resources/word-stats/
-├─ stopwords-ko.txt   josa-ko.txt   verb-tails-ko.txt   one-char-nouns-ko.txt
-└─ stopwords-en.txt   stopwords-es.txt
+├─ josa-ko.txt          one-char-nouns-ko.txt   stopwords-ko.txt
+├─ verb-tails-ko.txt    (3음절 이상 전용)
+├─ verb-tails2-ko.txt   (2음절 전용 — 오탐 위험이 커서 목록을 분리했다)
+└─ stopwords-en.txt     stopwords-es.txt
 ```
 
 **엔티티는 세터를 두지 않는다**(`naming.md`). 상태 변경은 의도가 드러나는 메서드로 한다.
@@ -852,14 +917,15 @@ BIBLE_WORD_DUPLICATED(HttpStatus.CONFLICT, "이미 등록된 단어 또는 별�
 
 | Method | Path | 설명 |
 |---|---|---|
-| `GET` | `` | 목록 (status/category/languageCode/term 필터, 페이지네이션) |
+| `GET` | `?translationId=` | 목록 (translationId 필수, status/category/term 필터, 페이지네이션) |
 | `GET` | `/{id}` | 상세 (별칭 포함) |
 | `POST` | `` | 등록 (별칭 동시 등록) |
 | `PUT` | `/{id}` | 수정 |
 | `PATCH` | `/{id}/status` | `APPROVED` / `CANDIDATE` / `BLOCKED` 전환 |
 | `DELETE` | `/{id}` | 삭제 — 연결된 `bible_word_stat` 행도 함께 삭제 |
-| `POST` | `/import-from-dictionary?languageCode=ko` | `dictionary` 일괄 가져오기. 이미 있으면 건너뜀(멱등). `languageCode` 필수 — 현재는 `ko` 만 허용(§3.6) |
+| `POST` | `/import-from-dictionary?translationId=` | `dictionary` 일괄 가져오기. 이미 있으면 건너뜀(멱등). 현재는 한국어 번역본만 허용(§3.6) |
 | `POST` | `/bulk` | 후보 일괄 등록 (초기 구축용 — 6,100건 규모, §7.4) |
+| `POST` | `/copy-from` | 다른 번역본의 어휘·별칭 복사 (§3.7). 이미 있는 표제어는 건너뜀(멱등) |
 
 **`PATCH /{id}/status` 로 `BLOCKED` 로 내리면 그 어휘의 `bible_word_stat` 행을 즉시 삭제한다.**
 재계산을 기다리면 차단한 단어가 그때까지 화면에 계속 보인다. `idx_bible_word_stat_word` 로
@@ -937,7 +1003,7 @@ BIBLE_WORD_DUPLICATED(HttpStatus.CONFLICT, "이미 등록된 단어 또는 별�
 ### 7.4 초기 구축 순서 (운영 작업)
 
 1. 스키마 4개 적용(§5.7)
-2. `POST /words/import-from-dictionary?languageCode=ko` — 사전 313건 등록
+2. `POST /words/import-from-dictionary?translationId=1` — 사전 313건 등록
 3. `GET /word-stats/candidates?translationId=1` (책 미지정 = 전체) 로 후보 확인
 4. 빈도 5회 이상 후보를 일괄 `CANDIDATE` 로 등록 — **약 6,100개**(§3.5 실측)
 5. `POST /word-stats/recalculate?translationId=1&bookOrder=N` 을 책 단위로 66회 실행
@@ -948,6 +1014,9 @@ BIBLE_WORD_DUPLICATED(HttpStatus.CONFLICT, "이미 등록된 단어 또는 별�
 4번은 6,100건 일괄 등록이므로 화면에서 한 건씩 누를 수 없다. **후보 목록의 "빈도 N회 이상 일괄
 등록" 기능이 필요하다**(§7.2 의 `POST /words/bulk` 에 해당). 이것이 없으면 초기 구축이 사실상
 불가능하다.
+
+**두 번째 번역본(NKRV)은 처음부터 다시 만들지 않는다.** `POST /words/copy-from` 으로 KRV 어휘를
+복사한 뒤(§3.7), 3~5번만 다시 돌려 표기 차이(`가라사대` / `이르시되` 등)를 후보 리포트로 메운다.
 
 **신규 번역본을 추가할 때마다 5번을 다시 돌려야 한다.** 잊으면 그 번역본에서는 통계가 빈다.
 관리자 목록 화면에 `bible_word_stat_run.calculated_at` 을 번역본×책 단위로 표시해 누락을 눈에
@@ -1217,7 +1286,7 @@ CSS/JS 를 수정하면 참조 템플릿의 `?v=` 를 **전부** 올려야 한�
 | `static/css/bible/word-stats.css` (신규) | — | `v=1.0` |
 | `static/js/bible/word-stats.js` (신규) | — | `v=1.0` |
 | `static/js/bible/search.js` (§10.5 보완) | 참조 템플릿 확인 후 +0.1 | |
-| `static/css/admin/admin.css` (관리자 화면 추가 시) | `v=5.1` | `v=5.2` |
+| `static/css/admin/admin.css` | `v=5.1` | 변경 없음 — 관리자 화면은 기존 CSS 만 쓴다 |
 
 `head` 프래그먼트의 `extraCss` 는 쉼표로 여러 개를 받는다(`#strings.arraySplit`).
 
@@ -1335,6 +1404,6 @@ th:replace="~{fragments/head :: head('성경 구절 읽기 - 본문 보기 | ElS
    요구사항대로 직접 세팅을 허용하면 `SUM(장) ≠ 책` 이 될 수 있다. 관리자 화면에서 불일치를
    경고로 표시할지, 아예 막을지 결정이 필요하다. 참고로 책 행 상위 300 절단(§5.3) 때문에
    **하위 순위 단어는 애초에 책 행이 없다** — 이건 불일치가 아니라 설계된 부재다.
-5. **번역본별 어휘를 따로 관리할 것인가, 언어별로 공유할 것인가?** 현재 설계는 언어별 공유다.
-   KRV 와 NKRV 는 표기가 달라 별칭으로 흡수하는데, 번역본별로 완전히 분리하면 정확하지만 관리
-   부담이 두 배가 된다.
+5. ~~번역본별 어휘를 따로 관리할 것인가, 언어별로 공유할 것인가?~~ → **번역본별로 확정했다
+   (§3.7).** `bible_word.translation_id` 로 분리한다. 번역본마다 표기·차단 판단이 다른데 공유
+   어휘로는 그것을 표현할 수 없다는 것이 이유다. 구축 반복 부담은 어휘 복사 API 로 던다.

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>단어 통계 관리 | ElSeeker</title>
+    <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
+</head>
+<body>
+<div class="admin-layout">
+    <aside th:replace="~{admin/fragments/admin-sidebar :: sidebar}"></aside>
+    <div class="admin-sidebar-overlay" data-admin-sidebar-close></div>
+    <main class="admin-content">
+        <div class="admin-topbar">
+            <button class="admin-sidebar-toggle" type="button" aria-label="메뉴 열기" data-admin-sidebar-toggle>
+                <span></span>
+            </button>
+            <span class="admin-topbar-title">관리자</span>
+        </div>
+        <div class="admin-breadcrumb">단어 통계 관리</div>
+        <h2>단어 통계 관리</h2>
+        <p class="text-muted small">
+            장 번호 <strong>0</strong> 은 책 전체 집계입니다. 값을 직접 고치면 <strong>수동</strong>으로 바뀌어
+            이후 재계산이 건드리지 않습니다.
+        </p>
+
+        <form class="admin-form" method="get" action="/web/admin/bible/word-stats">
+            <div class="form-group">
+                <label for="translationId">번역본</label>
+                <select id="translationId" name="translationId">
+                    <option value="">선택하세요</option>
+                    <option th:each="t : ${translations}" th:value="${t.id}" th:text="${t.name}"
+                            th:selected="${t.id == selectedTranslationId}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="bookOrder">책 순서</label>
+                <input type="number" id="bookOrder" name="bookOrder" th:value="${bookOrder}" placeholder="예: 1">
+            </div>
+            <div class="form-group">
+                <label for="chapterNumber">장 (비우면 전체)</label>
+                <input type="number" id="chapterNumber" name="chapterNumber" th:value="${chapterNumber}">
+            </div>
+            <div class="admin-form-actions">
+                <button type="submit" class="btn btn-primary btn-sm">조회</button>
+            </div>
+        </form>
+
+        <div class="admin-toolbar" th:if="${translationId != null and bookOrder != null}">
+            <div>
+                <button class="btn btn-outline-primary btn-sm" id="recalcBtn">이 책 재계산</button>
+                <a th:href="@{/web/admin/bible/word-candidates(translationId=${translationId},bookOrder=${bookOrder})}"
+                   class="btn btn-outline-secondary btn-sm">미매칭 후보 보기</a>
+            </div>
+            <div></div>
+        </div>
+
+        <div id="recalcResult" class="text-muted small"></div>
+
+        <div class="admin-table-wrapper" th:if="${statPage != null}">
+            <table class="admin-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>장</th>
+                    <th>표제어</th>
+                    <th>횟수</th>
+                    <th>출처</th>
+                    <th>작업</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="r : ${statPage.rows}">
+                    <td th:text="${r.id}"></td>
+                    <td th:text="${r.chapterNumber == 0} ? '책 전체' : ${r.chapterNumber}"></td>
+                    <td th:text="${r.term}"></td>
+                    <td>
+                        <input type="number" class="stat-count" th:value="${r.wordCount}"
+                               th:data-id="${r.id}" style="width: 90px">
+                    </td>
+                    <td>
+                        <span th:text="${r.source.displayName}"></span>
+                        <span th:if="${r.source.name() == 'MANUAL'}" class="badge bg-warning text-dark">수동</span>
+                    </td>
+                    <td class="admin-actions">
+                        <button class="btn btn-outline-primary btn-sm" th:data-id="${r.id}"
+                                onclick="saveCount(this)">저장</button>
+                        <button class="btn btn-outline-secondary btn-sm" th:data-id="${r.id}"
+                                th:if="${r.source.name() == 'MANUAL'}"
+                                onclick="restoreAuto(this)">자동값으로</button>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(statPage.rows)}">
+                    <td colspan="6" class="text-center text-muted">데이터가 없습니다. 재계산을 먼저 실행하세요.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div th:if="${runs != null and !#lists.isEmpty(runs)}">
+            <h3 class="mt-4">재계산 이력</h3>
+            <p class="text-muted small">누락된 책을 찾는 데 씁니다. 신규 번역본은 책마다 한 번씩 돌려야 합니다.</p>
+            <div class="admin-table-wrapper">
+                <table class="admin-table">
+                    <thead>
+                    <tr>
+                        <th>책 순서</th>
+                        <th>마지막 재계산</th>
+                        <th>장 수</th>
+                        <th>행 수</th>
+                        <th>보존한 수동 행</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="run : ${runs}">
+                        <td th:text="${run.bookOrder}"></td>
+                        <td th:text="${run.calculatedAt}"></td>
+                        <td th:text="${run.chapterCount}"></td>
+                        <td th:text="${run.statRowCount}"></td>
+                        <td th:text="${run.manualKept}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+<script th:inline="javascript">
+    const translationId = /*[[${translationId}]]*/ null;
+    const bookOrder = /*[[${bookOrder}]]*/ null;
+</script>
+<script type="module">
+    import {fetchAdmin, initAdminSidebarToggle, initAdminSidebarGroups} from "/js/admin/admin-common.js";
+
+    initAdminSidebarToggle();
+    initAdminSidebarGroups();
+
+    window.saveCount = async (btn) => {
+        const id = btn.dataset.id;
+        const input = document.querySelector(`.stat-count[data-id="${id}"]`);
+        try {
+            await fetchAdmin(`/api/v1/admin/bible/word-stats/${id}`,
+                {method: "PATCH", body: JSON.stringify({wordCount: parseInt(input.value, 10)})});
+            location.reload();
+        } catch (e) {
+            alert(e.message);
+        }
+    };
+
+    // "삭제" 라기보다 자동값 복원이다. 다음 재계산에서 AUTO 행으로 다시 채워진다.
+    window.restoreAuto = async (btn) => {
+        try {
+            await fetchAdmin(`/api/v1/admin/bible/word-stats/${btn.dataset.id}`, {method: "DELETE"});
+            location.reload();
+        } catch (e) {
+            alert(e.message);
+        }
+    };
+
+    document.getElementById("recalcBtn")?.addEventListener("click", async (event) => {
+        const btn = event.currentTarget;
+        btn.disabled = true;
+        const result = document.getElementById("recalcResult");
+        result.textContent = "재계산 중…";
+        try {
+            const r = await fetchAdmin(
+                `/api/v1/admin/bible/word-stats/recalculate?translationId=${translationId}&bookOrder=${bookOrder}`,
+                {method: "POST"});
+            const unmatched = r.topUnmatched.map(u => `${u.term}(${u.count})`).join("  ");
+            result.textContent =
+                `완료 — 장 ${r.chapterCount}개 / 삽입 ${r.insertedRowCount}행 / 수동 보존 ${r.manualKeptCount}행`
+                + (unmatched ? `\n미매칭 상위: ${unmatched}` : "");
+            setTimeout(() => location.reload(), 1500);
+        } catch (e) {
+            result.textContent = "";
+            alert(e.message);
+        } finally {
+            btn.disabled = false;
+        }
+    });
+</script>
+</body>
+</html>
