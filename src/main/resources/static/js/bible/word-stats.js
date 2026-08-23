@@ -382,10 +382,30 @@ export const initWordStats = (config) => {
         closePopover();
     });
 
-    // 팝오버 바깥을 누르면 닫는다. 단어를 누른 경우는 그 단어의 팝오버로 교체돼야 하므로 제외한다.
+    /*
+     * 바깥 클릭 처리.
+     *
+     * `::backdrop` 을 누르면 이벤트의 target 이 다이얼로그 자신이 된다. 내부는 헤더와 본문이
+     * 남김없이 덮고 있고 다이얼로그의 padding 도 0 이라, target 비교만으로 안팎을 가를 수 있다.
+     * 좌표(getBoundingClientRect)로 판정하는 흔한 방법은 키보드로 버튼을 눌렀을 때
+     * clientX/Y 가 0 으로 들어와 '바깥'으로 오인하고 창을 닫아 버린다.
+     *
+     * mousedown 위치를 함께 보는 것은 드래그 때문이다. 목록에서 글자를 긁다가 손을 바깥에서
+     * 떼면 click 의 target 이 다이얼로그가 되어, 선택만 하려던 사용자의 창이 닫힌다.
+     */
+    let pressedOnBackdrop = false;
+    els.dialog.addEventListener("mousedown", (event) => {
+        pressedOnBackdrop = event.target === els.dialog;
+    });
+
     els.dialog.addEventListener("click", (event) => {
-        if (!isPopoverOpen()) return;
         const target = event.target;
+        if (target === els.dialog && pressedOnBackdrop) {
+            els.dialog.close();
+            return;
+        }
+        // 팝오버 바깥을 누르면 팝오버만 닫는다. 단어를 누른 경우는 그 단어의 팝오버로 교체된다.
+        if (!isPopoverOpen()) return;
         if (!(target instanceof Element)) return;
         if (target.closest(".word-stats-popover, .word-stats-link")) return;
         if (target.classList.contains("word-stats-cloud-word")) return;
@@ -407,7 +427,18 @@ export const initWordStats = (config) => {
         state.popoverOpener = null;
 
         els.dialog.showModal();
-        els.closeBtn?.focus();
+        /*
+         * 닫기 버튼이 아니라 **다이얼로그 자신**에 포커스를 준다.
+         *
+         * showModal() 은 기본적으로 첫 번째 포커스 가능한 요소를 잡는데 그게 X 버튼이라,
+         * 창을 열자마자 '닫기'가 선택된 상태로 보인다. 내용을 보러 연 사람에게 첫 제안이
+         * 닫기인 셈이라 어색하고, 엔터를 잘못 누르면 바로 닫힌다.
+         *
+         * 컨테이너에 포커스를 두면 스크린리더가 aria-labelledby 로 연결된 제목을 읽어 주고,
+         * Tab 을 누르면 DOM 순서대로 닫기 버튼부터 이어진다(WAI-ARIA APG 의 정보성
+         * 다이얼로그 권장 방식).
+         */
+        els.dialog.focus();
 
         const data = await fetchStats(config.buildEndpoint());
         if (data === null) {

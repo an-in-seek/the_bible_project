@@ -4,15 +4,16 @@
 <!--
   단어 빈도 통계 다이얼로그 (설계 문서: docs/bible/word-frequency-design.md §10.2)
   사용법: 페이지 body 에 <div th:replace="~{fragments/word-stats-dialog :: wordStatsDialog}"></div> 포함 후,
-         JS 에서 import {initWordStats} from "/js/bible/word-stats.js?v=1.4";
+         JS 에서 import {initWordStats} from "/js/bible/word-stats.js?v=1.5";
 
   Bootstrap JS 는 이 프로젝트에 없다. 네이티브 <dialog>.showModal() 로 연다.
 
   클라우드와 목록은 같은 데이터를 두 번 보여 주는 것이 아니라 역할이 다르다.
   클라우드는 인상(무엇이 이 장을 지배하는가), 목록은 사실(정확히 몇 번인가)이다.
 -->
+<!-- tabindex="-1" 은 열릴 때 다이얼로그 자신에게 포커스를 주기 위한 것이다(§10.6) -->
 <dialog th:fragment="wordStatsDialog" id="wordStatsDialog" class="word-stats-dialog"
-        aria-labelledby="wordStatsTitle">
+        aria-labelledby="wordStatsTitle" tabindex="-1">
     <div class="word-stats-header">
         <h5 id="wordStatsTitle" class="word-stats-title">단어 통계</h5>
         <button type="button" class="btn-close" id="wordStatsCloseBtn" aria-label="닫기"></button>
