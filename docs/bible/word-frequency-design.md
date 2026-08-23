@@ -1332,6 +1332,12 @@ SVG 는 페이지 상속 폰트로 조용히 갈라진다.
 돌리면 읽기가 급격히 나빠진다. 밀도 몇 퍼센트를 위해 읽을 수 없는 단어를 만드는 거래는
 성립하지 않는다.
 
+**SVG `<text>` 에 `text-decoration` 을 쓰지 않는다.** 클라우드 글자는
+`dominant-baseline: central` 로 y 좌표 중앙에 맞추는데, 크롬은 밑줄을 그 보정을 무시한
+자리에 그린다. 글자 위를 지나는 줄이 생겨 밑줄이 아니라 오작동으로 보인다. hover 는
+위치 계산에 기대지 않는 **색(`--color-accent`)과 크기(`scale(1.06)`)로만** 표현한다.
+배율을 더 키우면 충돌 박스의 여백(`PADDING`)을 넘어 옆 단어를 침범한다.
+
 
 - 색상은 전부 `theme.css` 토큰(`--color-text-primary`, `--color-bg-elevated`, `--color-accent`,
   `--color-border`, `--color-text-secondary`)으로 참조한다. raw hex 금지.

@@ -296,15 +296,24 @@
         background-color: var(--color-bg-elevated-strong-hover);
     }
 
+    /*
+     * **SVG <text> 에 text-decoration 을 쓰지 않는다.**
+     * 이 요소는 dominant-baseline: central 로 글자를 y 좌표 중앙에 맞추는데, 크롬은 밑줄을
+     * 그 보정을 무시한 자리에 그린다. 글자 위를 지나는 줄이 생겨 밑줄이 아니라 오작동으로 보인다.
+     * 위치 계산에 기대지 않는 색과 크기로 대신한다.
+     */
     .word-stats-cloud-word:hover {
         fill: var(--color-accent);
-        text-decoration: underline;
+        transform-box: fill-box;
+        transform-origin: center;
+        /* 충돌 박스의 여백(PADDING) 안에서만 커지도록 낮게 잡는다. 더 키우면 옆 단어를 침범한다. */
+        transform: scale(1.06);
     }
 }
 
 @media (prefers-reduced-motion: no-preference) {
     .word-stats-cloud-word {
-        transition: fill 0.15s ease;
+        transition: fill 0.15s ease, transform 0.15s ease;
     }
 
     .word-stats-link {
