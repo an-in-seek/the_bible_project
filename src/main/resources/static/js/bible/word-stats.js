@@ -394,7 +394,9 @@ export const initWordStats = (config) => {
      * 떼면 click 의 target 이 다이얼로그가 되어, 선택만 하려던 사용자의 창이 닫힌다.
      */
     let pressedOnBackdrop = false;
-    els.dialog.addEventListener("mousedown", (event) => {
+    // mousedown 이 아니라 pointerdown 이다. 터치에서 마우스 이벤트는 에뮬레이션이라
+    // 상황에 따라 오지 않을 수 있고, 그러면 배경 탭이 조용히 먹지 않는다.
+    els.dialog.addEventListener("pointerdown", (event) => {
         pressedOnBackdrop = event.target === els.dialog;
     });
 
