@@ -42,6 +42,8 @@ class BibleReader(
                 BibleTranslationType.ASV,
                 BibleTranslationType.RVR1909,
                 BibleTranslationType.SBLM,
+                BibleTranslationType.JPNM,
+                BibleTranslationType.JPN
             )
         ).map(BibleResult.Translation::from)
 
