@@ -48,7 +48,13 @@ class AdminBibleWordService(
         term: String?,
         pageable: Pageable,
     ): Page<BibleWord> =
-        bibleWordRepository.findAllBy(translationId, status, category, term?.trim()?.ifBlank { null }, pageable)
+        bibleWordRepository.findAllBy(
+            translationId,
+            status,
+            category,
+            term?.trim()?.takeIf { it.isNotBlank() }?.let { "%$it%" },
+            pageable
+        )
 
     fun findById(id: Long): BibleWord =
         bibleWordRepository.findByIdOrNull(id) ?: throwError(ErrorType.BIBLE_WORD_NOT_FOUND, "id=$id")
@@ -247,8 +253,14 @@ class AdminBibleWordService(
 
     // ------------ Private Methods ------------
 
+    /**
+     * 언어는 **`BibleTranslationType` enum 이 권위 있는 출처**다. `bible_translation.language_code`
+     * 컬럼은 관리자 API 에서 `translationType` 과 따로 입력받아 KRV + `en` 같은 조합을 막지 못한다.
+     * 그러면 한국어 본문을 영어 규칙으로 토크나이즈하는데, 화면에는 이상한 단어 목록으로만 보여
+     * 알아채기 어렵다.
+     */
     private fun getTranslationLanguage(translationId: Long): LanguageCode =
-        bibleTranslationRepository.findByIdOrNull(translationId)?.languageCode
+        bibleTranslationRepository.findByIdOrNull(translationId)?.translationType?.language
             ?: throwError(ErrorType.TRANSLATION_NOT_FOUND, "translationId=$translationId")
 
     /**

@@ -32,13 +32,14 @@ interface BibleWordRepository : JpaRepository<BibleWord, Long> {
         WHERE w.translationId = :translationId
           AND (:status IS NULL OR w.status = :status)
           AND (:category IS NULL OR w.category = :category)
-          AND (:term IS NULL OR w.term LIKE CONCAT('%', :term, '%'))
+          AND (:term IS NULL OR w.term LIKE :term)
         """
     )
     fun findAllBy(
         @Param("translationId") translationId: Long,
         @Param("status") status: BibleWordStatus?,
         @Param("category") category: BibleWordCategory?,
+        /** `%키워드%` 형태로 이미 감싼 패턴. 호출자가 만든다. */
         @Param("term") term: String?,
         pageable: Pageable,
     ): Page<BibleWord>

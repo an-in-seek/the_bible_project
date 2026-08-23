@@ -203,7 +203,8 @@ class BibleReader(
     private fun getTranslationLanguage(translationId: Long): LanguageCode? =
         bibleTranslationRepository.findById(translationId)
             .orElse(null)
-            ?.languageCode
+            ?.translationType
+            ?.language
 
     fun getDailyRandomVerse(
         translationType: BibleTranslationType,
