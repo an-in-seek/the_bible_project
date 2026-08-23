@@ -18,11 +18,6 @@
 
     width: min(680px, calc(100vw - 24px));
     max-height: min(82vh, 820px);
-    /* 높이는 다이얼로그만 정하고 본문은 남는 만큼 채운다.
-       예전에는 본문에도 calc(86vh - 60px) 를 따로 걸어 뒀는데, 헤더 높이를 60px 로 가정한
-       값이라 실제와 어긋나면 본문이 다이얼로그를 넘어 overflow: hidden 에 잘렸다. */
-    display: flex;
-    flex-direction: column;
     padding: 0;
     border: 1px solid var(--color-border);
     border-radius: 14px;
@@ -30,6 +25,21 @@
     color: var(--color-text-primary);
     box-shadow: 0 10px 30px var(--color-shadow);
     overflow: hidden;
+}
+
+/*
+ * **display 는 반드시 [open] 에만 건다.**
+ * 브라우저 기본 스타일의 `dialog:not([open]) { display: none }` 은 UA 스타일이라
+ * 작성자 스타일에 진다. `.word-stats-dialog { display: flex }` 로 두면 닫힌 다이얼로그가
+ * 문서 흐름에 그대로 그려져, 페이지 하단에 헤더만 잘린 채 노출된다.
+ *
+ * 높이는 다이얼로그만 정하고 본문은 남는 만큼 채운다. 예전에는 본문에도
+ * calc(86vh - 60px) 를 따로 걸어 뒀는데, 헤더 높이를 60px 로 가정한 값이라 실제와
+ * 어긋나면 본문이 다이얼로그를 넘어 overflow: hidden 에 잘렸다.
+ */
+.word-stats-dialog[open] {
+    display: flex;
+    flex-direction: column;
 }
 
 /* 열릴 때 프로그램적으로 포커스를 받는 컨테이너다. tabindex="-1" 이라 Tab 으로는 닿지 않으므로

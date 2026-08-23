@@ -1328,7 +1328,13 @@ SVG 는 페이지 상속 폰트로 조용히 갈라진다.
 ### 10.7 높이 배분
 
 높이는 **다이얼로그만 정하고 본문은 남는 만큼 채운다**(`display: flex` + `flex: 1 1 auto` +
-`min-height: 0`). 예전에는 본문에도 `calc(86vh - 60px)` 를 따로 걸어 뒀는데, 헤더 높이를
+`min-height: 0`).
+
+**`display` 는 반드시 `[open]` 에만 건다.** 브라우저 기본 스타일의
+`dialog:not([open]) { display: none }` 은 UA 스타일이라 작성자 스타일에 진다.
+`.word-stats-dialog { display: flex }` 로 두면 **닫힌 다이얼로그가 문서 흐름에 그대로 그려져**
+구절 목록 화면 하단에 헤더만 잘린 채 노출된다. 이 저장소의 다른 다이얼로그
+(`story-match-dialog[open]`, `otk-detail-dialog[open]`)가 이미 지키던 규칙이다. 예전에는 본문에도 `calc(86vh - 60px)` 를 따로 걸어 뒀는데, 헤더 높이를
 60px 로 가정한 값이라 실제와 어긋나면 본문이 다이얼로그를 넘어 `overflow: hidden` 에 잘렸다.
 
 **좁은 화면에서는 클라우드를 190px 로 줄인다.** 클라우드는 장식이고 정보는 아래 목록에
