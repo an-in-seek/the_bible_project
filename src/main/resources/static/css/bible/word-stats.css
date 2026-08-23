@@ -96,8 +96,12 @@
     display: block;
     width: 100%;
     height: auto;
-    max-height: 320px;
+    max-height: 360px;
     overflow: visible;
+    /* **word-stats.js 의 CLOUD_FONT_FAMILY 와 반드시 같아야 한다.**
+       충돌 박스는 캔버스로 재고 그리기는 여기서 하므로, 다르면 글자가 겹치거나 헛되이 벌어진다. */
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto,
+        "Malgun Gothic", "Apple SD Gothic Neo", sans-serif;
 }
 
 /* 누를 수 있다는 신호. 클라우드 글자에는 밑줄·테두리를 상시로 줄 수 없어 문구로 대신한다. */
@@ -108,19 +112,25 @@
     color: var(--color-text-muted);
 }
 
+/*
+ * 색은 빈도에 따라 **연속으로** 보간한다. `--t` 는 JS 가 넣는 0~1 값이고,
+ * 글자 크기를 정한 것과 같은 값이라 색과 크기가 서로 어긋나지 않는다.
+ *
+ * 4단계로 끊었을 때는 6회와 5회 사이에 설명할 수 없는 색 절벽이 생겼다.
+ *
+ * 양 끝점을 --color-accent 와 --color-text-secondary 로 잡은 것이 대비 안전장치다.
+ * 두 토큰 모두 라이트·다크에서 본문 대비를 통과하므로 그 사이 어떤 혼합도 안전하다.
+ * 예전에 가장 흐린 단계를 --color-text-muted 까지 내렸다가 되돌린 적이 있다.
+ * #adb5bd 를 카드 배경(#f8f9fa) 위에 얹으면 대비가 2:1 남짓이라 WCAG 를 통과하지 못한다.
+ */
 .word-stats-cloud-word {
+    --t: 0;
+
     font-weight: 700;
     cursor: pointer;
+    fill: var(--color-text-secondary);   /* color-mix 미지원 환경 대비 */
+    fill: color-mix(in srgb, var(--color-accent) calc(var(--t) * 100%), var(--color-text-secondary));
 }
-
-/* 빈도 4단계. **단계 구분은 크기가 하고 색은 보조다.**
-   4색으로 갈라 보려고 tier-4 를 --color-text-muted 까지 내렸다가 되돌렸다.
-   #adb5bd 를 elevated 배경(#f8f9fa) 위에 얹으면 대비가 2:1 남짓으로 WCAG 를 통과하지 못한다.
-   가장 흐린 단계도 --color-text-secondary 까지만 내린다. */
-.word-stats-cloud-word.tier-1 { fill: var(--color-accent); }
-.word-stats-cloud-word.tier-2 { fill: var(--color-text-primary); }
-.word-stats-cloud-word.tier-3 { fill: var(--color-text-primary); opacity: 0.82; }
-.word-stats-cloud-word.tier-4 { fill: var(--color-text-secondary); }
 
 /* ---------- 빈도 목록 (접근성의 본체) ---------- */
 
@@ -272,7 +282,7 @@
 /* ---------- 반응형 ---------- */
 
 @media (max-width: 480px) {
-    .word-stats-cloud { max-height: 260px; }
+    .word-stats-cloud { max-height: 280px; }
     .word-stats-body { padding: 12px 12px 18px; }
     .word-stats-cloud-wrap { padding: 10px 6px 6px; }
 
@@ -288,14 +298,13 @@
 
     .word-stats-cloud-word:hover {
         fill: var(--color-accent);
-        opacity: 1;
         text-decoration: underline;
     }
 }
 
 @media (prefers-reduced-motion: no-preference) {
     .word-stats-cloud-word {
-        transition: fill 0.15s ease, opacity 0.15s ease;
+        transition: fill 0.15s ease;
     }
 
     .word-stats-link {

@@ -2,7 +2,7 @@ import {BookStore, ChapterStore, TranslationStore} from "/js/storage-util.js?v=2
 import {checkAuthStatus} from "/js/auth/auth-check.js";
 import {bindNavSelectLabelFit, fitNavSelectLabel, setupDialogScrollLock} from "/js/common-util.js?v=2.4";
 import {bindFromBackButton} from "/js/nav-restore.js?v=1.1";
-import {initWordStats} from "/js/bible/word-stats.js?v=1.3";
+import {initWordStats} from "/js/bible/word-stats.js?v=1.4";
 
 const UI_CLASSES = {
     HIDDEN: "d-none"

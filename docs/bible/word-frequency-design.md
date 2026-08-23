@@ -1213,6 +1213,22 @@ private val wordStatCacheControl = CacheControl.maxAge(1, TimeUnit.HOURS).cacheP
 
 ### 10.3 워드 클라우드 배치 알고리즘
 
+**측정과 렌더의 폰트가 같아야 한다.** 충돌 박스는 오프스크린 캔버스 `measureText` 로 재고
+그리기는 SVG 가 한다. 둘이 다른 폰트를 쓰면 박스가 실제 글자와 어긋나 단어가 겹치거나
+헛되이 벌어진다. `word-stats.js` 의 `CLOUD_FONT_FAMILY` 와 CSS `.word-stats-cloud` 의
+`font-family` 는 **같은 문자열이어야 한다.** 지정을 빼 두면 캔버스는 generic `sans-serif`,
+SVG 는 페이지 상속 폰트로 조용히 갈라진다.
+
+**나선의 각 스텝은 반지름에 반비례시킨다.** 고정 각 스텝은 바깥으로 갈수록 한 번에 수십 px
+씩 건너뛰어 빈자리를 지나쳐 버린다. 글자 크기 상한을 40 → 52px 로 올렸을 때 43개 중 8개가
+배치되지 못하고 사라진 원인이 이것이었다.
+
+**표시 개수·글자 크기 분기의 기준은 다이얼로그 본문 폭이지 뷰포트 폭이 아니다.** 다이얼로그
+최대 폭이 680px 이라 본문은 아무리 넓은 화면에서도 ~646px 를 넘지 못한다. 뷰포트를 가정한
+값(700/400)을 쓰던 동안 45개 구간에는 영원히 도달하지 못했고, 데스크톱도 늘 좁은 화면용
+글자 크기로 그려지고 있었다.
+
+
 라이브러리를 쓰지 않는다. 번들러가 없고 `admin-analytics-visitors.js` 도 SVG 차트를 직접 그린다.
 
 ```
@@ -1298,13 +1314,23 @@ private val wordStatCacheControl = CacheControl.maxAge(1, TimeUnit.HOURS).cacheP
 
 ### 10.7 다크 테마 · hover · 대비
 
-**클라우드의 단계 구분은 크기가 하고 색은 보조다.** 4단계를 색으로도 갈라 보려고 가장 흐린
-단계를 `--color-text-muted` 까지 내렸다가 되돌린 적이 있다. `#adb5bd` 를 카드 배경(`#f8f9fa`)
-위에 얹으면 대비가 2:1 남짓이라 WCAG 를 통과하지 못한다. **가장 흐린 단계도
-`--color-text-secondary` 까지만 내린다.**
+**클라우드 색은 빈도에 따라 연속으로 보간한다.** JS 가 `--t`(0~1)를 넣고 CSS 가
+`color-mix(in srgb, var(--color-accent) calc(var(--t) * 100%), var(--color-text-secondary))`
+로 칠한다. `--t` 는 글자 크기를 정한 값(`sqrt(count / maxCount)`)과 같으므로 색과 크기가
+서로 어긋나지 않는다.
+
+처음에는 4단계로 끊었는데 6회와 5회 사이에 설명할 수 없는 색 절벽이 생겼다. 그렇다고
+단계를 늘리려 가장 흐린 쪽을 `--color-text-muted` 까지 내리면 `#adb5bd` 가 카드
+배경(`#f8f9fa`) 위에서 대비 2:1 남짓이라 WCAG 를 통과하지 못한다. **양 끝점을
+`--color-accent` 와 `--color-text-secondary` 로 고정한 것이 대비 안전장치다** — 두 토큰 모두
+라이트·다크에서 본문 대비를 통과하므로 그 사이 어떤 혼합도 안전하다.
 
 클라우드 단어 사이 여백(`PADDING`)은 8px 이다. 4px 에서는 `땅` 과 `하나님` 이 붙어
-`땅하나님` 한 덩어리로 읽혔다.
+`땅하나님` 한 덩어리로 읽혔다. 한글은 음절이 사각형이라 라틴 문자보다 여백이 더 필요하다.
+
+**회전은 쓰지 않는다.** d3-cloud 류가 단어를 ±90° 돌려 밀도를 높이지만, 한글은 세로로
+돌리면 읽기가 급격히 나빠진다. 밀도 몇 퍼센트를 위해 읽을 수 없는 단어를 만드는 거래는
+성립하지 않는다.
 
 
 - 색상은 전부 `theme.css` 토큰(`--color-text-primary`, `--color-bg-elevated`, `--color-accent`,

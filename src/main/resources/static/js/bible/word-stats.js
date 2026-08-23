@@ -15,22 +15,40 @@ const TIMEOUT_MS = 5000;
 const DICTIONARY_API = "/api/v1/study/dictionaries";
 const DICTIONARY_WEB = "/web/study/dictionary";
 
-const MOBILE_MAX_WIDTH = 700;
+/**
+ * 이 아래 기준값들이 재는 것은 **다이얼로그 본문 폭이지 뷰포트 폭이 아니다.**
+ *
+ * 다이얼로그 최대 폭이 680px 이라 본문은 아무리 넓은 화면에서도 ~646px 를 넘지 못한다.
+ * 뷰포트를 가정한 700/400 을 그대로 쓰던 동안 45개 구간에는 영원히 도달하지 못했고,
+ * 데스크톱도 늘 좁은 화면용 글자 크기로 그려지고 있었다.
+ */
+const NARROW_BODY_WIDTH = 500;
 
 // 클라우드 표시 개수 — 전체 목록이 아래에 그대로 있으므로 줄여도 정보 손실이 없다
-const cloudCountFor = (width) => (width < 400 ? 25 : width < MOBILE_MAX_WIDTH ? 35 : 45);
+const cloudCountFor = (bodyWidth) => (bodyWidth < 360 ? 25 : bodyWidth < NARROW_BODY_WIDTH ? 35 : 45);
 
-// 모바일 하한을 12px 로 두면 터치로 누를 수 없을 만큼 작아진다
-const FONT_MIN_PX_MOBILE = 14;
-const FONT_MIN_PX_DESKTOP = 12;
-const FONT_MAX_PX_MOBILE = 32;
-const FONT_MAX_PX_DESKTOP = 40;
+/**
+ * **CSS 의 `.word-stats-cloud` 와 반드시 같은 값이어야 한다.**
+ * 캔버스로 잰 폭으로 충돌 박스를 만들고 그리기는 SVG 가 하므로, 둘이 다른 폰트를 쓰면
+ * 박스가 실제 글자와 어긋나 단어가 겹치거나 헛되이 벌어진다. 지정을 빼면 캔버스는
+ * generic `sans-serif`(윈도우 Arial), SVG 는 페이지 상속 폰트로 갈라진다.
+ */
+const CLOUD_FONT_FAMILY =
+    'system-ui, -apple-system, "Segoe UI", Roboto, "Malgun Gothic", "Apple SD Gothic Neo", sans-serif';
+
+// 모바일 하한을 12px 로 두면 터치로 누를 수 없을 만큼 작아진다.
+// 최대/최소 비율이 곧 위계의 세기다 — 좁으면 1위 단어가 눈에 띄지 않는다.
+const FONT_MIN_PX_MOBILE = 15;
+const FONT_MIN_PX_DESKTOP = 13;
+const FONT_MAX_PX_MOBILE = 40;
+const FONT_MAX_PX_DESKTOP = 52;
 
 // 아르키메데스 나선 배치 파라미터
-const ANGLE_STEP = 0.15;
+const ANGLE_STEP = 0.15;     // 중심 부근의 각 스텝 상한
+const ARC_STEP_PX = 6;       // 나선을 따라 한 번에 나아가는 호 길이
 const RADIUS_FACTOR = 4;
 const ASPECT = 1.7;          // 가로로 넓은 덩어리를 만든다
-const MAX_ATTEMPTS = 800;
+const MAX_ATTEMPTS = 4000;
 // 단어 사이 여백. 4 로 두면 '땅' 과 '하나님' 이 붙어 '땅하나님' 한 덩어리로 읽힌다.
 const PADDING = 8;
 
@@ -99,22 +117,27 @@ const layoutCloud = (items, maxCount, isMobile) => {
     const placed = [];
 
     items.forEach(item => {
-        const size = fontMin + (fontMax - fontMin) * Math.sqrt(item.count / maxCount);
-        ctx.font = `700 ${size}px sans-serif`;
+        // sqrt 로 압축한 이 값이 크기와 색을 함께 결정한다(같은 축이므로 서로 어긋나지 않는다)
+        const weight = Math.sqrt(item.count / maxCount);
+        const size = fontMin + (fontMax - fontMin) * weight;
+        ctx.font = `700 ${size}px ${CLOUD_FONT_FAMILY}`;
         const w = ctx.measureText(item.word).width + PADDING * 2;
         const h = size * 1.25 + PADDING;
 
         let angle = 0;
         for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-            angle += ANGLE_STEP;
             const r = RADIUS_FACTOR * angle;
             const cx = r * Math.cos(angle) * ASPECT;
             const cy = r * Math.sin(angle);
             const rect = {x: cx - w / 2, y: cy - h / 2, w, h};
             if (!collides(rect, placed)) {
-                placed.push({...rect, word: item.word, count: item.count, size, item});
+                placed.push({...rect, word: item.word, count: item.count, size, weight, item});
                 break;
             }
+            // 각 스텝을 반지름에 반비례시켜 **호 길이를 일정하게** 유지한다.
+            // 고정 각 스텝은 바깥으로 갈수록 한 번에 수십 px 씩 건너뛰어 빈자리를 지나쳐 버린다.
+            // 글자를 키운 뒤 43개 중 8개가 배치되지 못하고 사라지던 원인이 이것이었다.
+            angle += r < 1 ? ANGLE_STEP : Math.min(ANGLE_STEP, ARC_STEP_PX / r);
         }
     });
 
@@ -133,7 +156,7 @@ const renderCloud = (items, maxCount, containerWidth) => {
     if (!svg || !wrap) return;
 
     const count = cloudCountFor(containerWidth);
-    const layout = layoutCloud(items.slice(0, count), maxCount, containerWidth < MOBILE_MAX_WIDTH);
+    const layout = layoutCloud(items.slice(0, count), maxCount, containerWidth < NARROW_BODY_WIDTH);
     if (!layout) {
         // canvas 측정이 안 되는 환경 — 클라우드를 숨기고 목록만 보여 준다
         wrap.classList.add("d-none");
@@ -154,7 +177,9 @@ const renderCloud = (items, maxCount, containerWidth) => {
         text.setAttribute("text-anchor", "middle");
         text.setAttribute("dominant-baseline", "central");
         text.setAttribute("font-size", String(p.size));
-        text.setAttribute("class", `word-stats-cloud-word tier-${tierOf(p.count, maxCount)}`);
+        text.setAttribute("class", "word-stats-cloud-word");
+        // 4단계로 끊으면 6회와 5회 사이에 눈에 띄는 색 절벽이 생긴다. 연속 보간으로 없앤다.
+        text.style.setProperty("--t", p.weight.toFixed(3));
         // 클라우드는 장식이다. 접근성 경로는 아래 목록으로 통일한다.
         text.setAttribute("aria-hidden", "true");
         text.setAttribute("tabindex", "-1");
