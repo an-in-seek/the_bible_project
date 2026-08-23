@@ -41,6 +41,42 @@ class BibleWordMatcherTest {
     }
 
     @Test
+    @DisplayName("어휘의 표제어가 '하다' 동사로 쓰인 형태도 합산된다")
+    fun countsHadaVerbFormOfTerm() {
+        // given — 창세기 1장에 '창조' 는 한 번도 홀로 나오지 않는다. 전부 활용형이다.
+        val index = sut.buildIndex(
+            words = listOf(word(1L, "창조")),
+            aliases = emptyList(),
+            languageCode = LanguageCode.ko,
+        )
+
+        // when
+        val counted = sut.countBook(listOf(text(1, "천지를 창조하시니라 창조하시되 창조하시고")), index)
+
+        // then — 이 단계가 없으면 셋 다 서술어로 버려져 0 이 된다
+        counted.chapterCounts[1]!![1L] shouldBe 3
+    }
+
+    @Test
+    @DisplayName("어휘에 없는 어근은 '하다' 활용형이어도 만들어 내지 않는다")
+    fun doesNotInventStemsOutsideVocabulary() {
+        // given — 무분별한 어간 추출이 아니라 어휘 조회 전용이라는 계약이다
+        val index = sut.buildIndex(
+            words = listOf(word(1L, "하나님")),
+            aliases = emptyList(),
+            languageCode = LanguageCode.ko,
+        )
+
+        // when
+        val counted = sut.countBook(listOf(text(1, "번성하여 생육하고")), index)
+
+        // then
+        counted.chapterCounts[1].orEmpty() shouldNotContainKey 1L
+        counted.unmatched shouldNotContainKey "번성"
+        counted.unmatched shouldNotContainKey "생육"
+    }
+
+    @Test
     @DisplayName("차단한 어휘는 카운트도 후보 리포트도 되지 않는다")
     fun blockedWordIsSuppressed() {
         // given — 그냥 로드하지 않으면 미매칭 후보로 되살아나 관리자가 무한히 다시 차단하게 된다

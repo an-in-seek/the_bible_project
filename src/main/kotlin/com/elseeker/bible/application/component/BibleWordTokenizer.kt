@@ -67,6 +67,22 @@ class BibleWordTokenizer(
         if (languageCode == LanguageCode.ko) term.trim() else term.trim().lowercase()
 
     /**
+     * `하다` 동사로 쓰인 어근 후보. `창조하시니라` → `창조`.
+     *
+     * **반드시 어휘에 있는지 확인한 뒤에만 써야 한다.** 무조건 자르면 명사가 아닌 것을 명사로
+     * 만든다. 라틴 문자권 복수형([singularCandidate])과 같은 구조다.
+     *
+     * 어근이 2음절 미만이면 돌려주지 않는다. `말하니` → `말`, `서하고` → `서` 처럼
+     * 1음절 어근은 오탐이 크고, 그 1음절들은 대개 1음절 명사 허용 목록에 들어 있어 더 위험하다.
+     */
+    fun verbStemCandidate(word: String, languageCode: LanguageCode): String? {
+        if (languageCode != LanguageCode.ko) return null
+        val index = word.indexOf(HA)
+        if (index < MIN_KOREAN_LENGTH) return null
+        return word.substring(0, index)
+    }
+
+    /**
      * 라틴 문자권 복수형 후보. `-s`/`-es` 를 떼어 본 형태를 돌려준다.
      *
      * **반드시 어휘에 있는지 확인한 뒤에만 써야 한다.** 무조건 떼는 stemming 은
@@ -123,6 +139,9 @@ class BibleWordTokenizer(
 
     companion object {
         private const val MIN_KOREAN_LENGTH = 2
+
+        /** `X하다` 활용형에서 어근과 어미를 가르는 글자 */
+        private const val HA = '하'
         private const val MIN_LATIN_LENGTH = 3
 
         private val NON_HANGUL = Regex("[^가-힣\\s]")

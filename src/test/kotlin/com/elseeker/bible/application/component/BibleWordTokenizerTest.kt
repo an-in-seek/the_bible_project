@@ -156,6 +156,27 @@ class BibleWordTokenizerTest {
     }
 
     @Test
+    @DisplayName("'하다' 동사 어근 후보를 뽑는다 — 어휘 확인 전용")
+    fun verbStemCandidate() {
+        // when & then
+        sut.verbStemCandidate("창조하시니라", LanguageCode.ko) shouldBe "창조"
+        sut.verbStemCandidate("충만하라", LanguageCode.ko) shouldBe "충만"
+        sut.verbStemCandidate("주관하게", LanguageCode.ko) shouldBe "주관"
+    }
+
+    @Test
+    @DisplayName("어근이 1음절이거나 '하'가 없으면 후보를 만들지 않는다")
+    fun verbStemCandidateGuards() {
+        // given — '말하니' 를 '말' 로 만들면 1음절 명사 목록에 있는 '말'(word)로 잘못 집계된다
+        // when & then
+        sut.verbStemCandidate("말하니", LanguageCode.ko) shouldBe null
+        sut.verbStemCandidate("하나님이", LanguageCode.ko) shouldBe null   // '하' 가 맨 앞
+        sut.verbStemCandidate("천하의", LanguageCode.ko) shouldBe null     // 어근이 1음절
+        sut.verbStemCandidate("형상대로", LanguageCode.ko) shouldBe null   // '하' 가 없음
+        sut.verbStemCandidate("creating", LanguageCode.en) shouldBe null
+    }
+
+    @Test
     @DisplayName("복수형 후보는 어휘 확인 전용이며 무조건 자르지 않는다")
     fun singularCandidate() {
         // when & then

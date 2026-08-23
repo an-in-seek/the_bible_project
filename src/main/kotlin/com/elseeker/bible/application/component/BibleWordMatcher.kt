@@ -91,6 +91,15 @@ class BibleWordMatcher(
             index.countable[stemKey]?.let { return WordMatch.Matched(it) }
         }
 
+        // 어휘의 표제어가 '하다' 동사로 쓰인 형태를 살린다. 본문에 '창조' 는 한 번도 홀로 나오지
+        // 않고 전부 '창조하시니라'·'창조하시되' 라서, 이 단계가 없으면 어휘에 있는 '창조' 가
+        // 창세기 1장에서 0회로 나온다. 어휘에 있을 때만 채택하므로 무분별한 어간 추출이 아니다.
+        tokenizer.verbStemCandidate(rawWord, index.languageCode)?.let { stem ->
+            val stemKey = tokenizer.matchKey(stem, index.languageCode)
+            if (stemKey in index.blocked) return WordMatch.Suppressed
+            index.countable[stemKey]?.let { return WordMatch.Matched(it) }
+        }
+
         val normalized = tokenizer.normalize(rawWord, index.languageCode)
             ?: return WordMatch.Dropped // 불용어·서술어 어미 — 후보로도 올리지 않는다
 
