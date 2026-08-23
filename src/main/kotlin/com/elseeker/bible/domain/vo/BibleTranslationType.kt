@@ -29,7 +29,9 @@ enum class BibleTranslationType(val abbreviation: String, val displayName: Strin
     RVR1960("RVR1960", "Santa Biblia: Reina-Valera (Revisión de 1960)"),
     SBLM("SBLM", "Santa Biblia libre para el mundo"),
     LUTH1545("LUTH1545", "Luther Bible 1545"),
-    VUL("VUL", "Biblia Sacra Vulgata");
+    VUL("VUL", "Biblia Sacra Vulgata"),
+    JPNM("JPNM", "Japanese Literary / Bungo Bible (Meiji-Taisho)"),
+    JPN("JPN", "Japanese Colloquial Bible (1954/1955)");
 
     companion object {
         fun fromAbbreviation(abbr: String): BibleTranslationType {
