@@ -26,7 +26,7 @@
             <form method="get" action="/web/admin/bible/book-descriptions" class="d-flex gap-2 flex-wrap">
                 <select name="bookKey" class="form-select form-select-sm admin-search-input" style="max-width: 180px;">
                     <option value="">책 키 전체</option>
-                    <option th:each="key : ${bookKeys}" th:value="${key}" th:text="${key}"
+                    <option th:each="key : ${bookKeys}" th:value="${key}" th:text="${key.displayName}"
                             th:selected="${bookKey != null} ? ${key.name() == bookKey.name()} : false"></option>
                 </select>
                 <select name="languageCode" class="form-select form-select-sm admin-search-input" style="max-width: 140px;">

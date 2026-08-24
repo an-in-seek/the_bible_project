@@ -27,7 +27,7 @@
             <div class="form-group">
                 <label for="bookKey">책 키</label>
                 <select id="bookKey">
-                    <option th:each="key : ${bookKeys}" th:value="${key}" th:text="${key}"
+                    <option th:each="key : ${bookKeys}" th:value="${key}" th:text="${key.displayName}"
                             th:selected="${description?.bookKey?.name() == key.name()}"></option>
                 </select>
             </div>
