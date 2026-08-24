@@ -47,17 +47,23 @@
 
         <div class="admin-toolbar">
             <div>
-                <label for="minCount">최소 빈도</label>
-                <input type="number" id="minCount" value="5" style="width: 80px">
-                <button class="btn btn-outline-primary btn-sm" id="bulkBtn">이 조건으로 일괄 등록</button>
+                <button class="btn btn-primary btn-sm" id="approveSelectedBtn">선택 승인 등록</button>
+                <button class="btn btn-outline-danger btn-sm" id="blockSelectedBtn">선택 차단</button>
+                <span id="selectedCount" class="text-muted small ms-2">0건 선택</span>
             </div>
             <div id="loadStatus" class="text-muted small"></div>
         </div>
 
+        <!--
+          검수는 등록 시점에 끝내는 것이 맞다. CANDIDATE 로 크게 넣고 나중에 승인하는 흐름은
+          승인 수단이 한 건씩뿐이라 6천 건 규모에서 성립하지 않는다. 2026-08-24 에 아래 빈도
+          일괄 등록으로 705건을 검수 없이 넣었다가 통계를 통째로 다시 만들었다.
+        -->
         <div class="admin-table-wrapper">
             <table class="admin-table">
                 <thead>
                 <tr>
+                    <th style="width: 36px"><input type="checkbox" id="selectAll" aria-label="전체 선택"></th>
                     <th>단어</th>
                     <th>빈도</th>
                     <th>작업</th>
@@ -65,11 +71,27 @@
                 </thead>
                 <tbody id="candidateBody">
                 <tr>
-                    <td colspan="3" class="text-center text-muted">"후보 불러오기" 를 눌러 주세요.</td>
+                    <td colspan="4" class="text-center text-muted">"후보 불러오기" 를 눌러 주세요.</td>
                 </tr>
                 </tbody>
             </table>
         </div>
+
+        <details class="mt-3">
+            <summary class="text-muted small">빈도 조건으로 쓸어 담기 (검수 없이 CANDIDATE 로 등록)</summary>
+            <div class="admin-toolbar mt-2">
+                <div>
+                    <label for="minCount">최소 빈도</label>
+                    <input type="number" id="minCount" value="5" style="width: 80px">
+                    <button class="btn btn-outline-secondary btn-sm" id="bulkBtn">이 조건으로 일괄 등록</button>
+                </div>
+            </div>
+            <p class="text-muted small mb-0">
+                빈도는 <strong>몇 번 나왔는지일 뿐 품질과 무관합니다.</strong> 활용형은 오히려 빈도가 높습니다.
+                여기서 넣은 것은 <code>CANDIDATE</code> 라 노출 정책
+                (<code>el-seeker.word-stats.include-candidate</code>)에 걸립니다.
+            </p>
+        </details>
     </main>
 </div>
 <script th:inline="javascript">
@@ -83,15 +105,35 @@
     initAdminSidebarGroups();
 
     let candidates = [];
+    const selected = new Set();
+
+    const updateSelectedCount = () => {
+        document.getElementById("selectedCount").textContent = `${selected.size}건 선택`;
+        const all = document.getElementById("selectAll");
+        all.checked = candidates.length > 0 && selected.size === candidates.length;
+        all.indeterminate = selected.size > 0 && selected.size < candidates.length;
+    };
 
     const render = () => {
         const body = document.getElementById("candidateBody");
         if (candidates.length === 0) {
-            body.innerHTML = '<tr><td colspan="3" class="text-center text-muted">후보가 없습니다.</td></tr>';
+            body.innerHTML = '<tr><td colspan="4" class="text-center text-muted">후보가 없습니다.</td></tr>';
+            updateSelectedCount();
             return;
         }
         body.replaceChildren(...candidates.map(c => {
             const tr = document.createElement("tr");
+
+            const pick = document.createElement("td");
+            const box = document.createElement("input");
+            box.type = "checkbox";
+            box.checked = selected.has(c.term);
+            box.setAttribute("aria-label", `${c.term} 선택`);
+            box.addEventListener("change", () => {
+                if (box.checked) selected.add(c.term); else selected.delete(c.term);
+                updateSelectedCount();
+            });
+            pick.append(box);
 
             const term = document.createElement("td");
             term.textContent = c.term;
@@ -104,8 +146,8 @@
 
             const addBtn = document.createElement("button");
             addBtn.className = "btn btn-outline-primary btn-sm";
-            addBtn.textContent = "어휘 등록";
-            addBtn.addEventListener("click", () => registerOne(c.term, "CANDIDATE"));
+            addBtn.textContent = "승인 등록";
+            addBtn.addEventListener("click", () => registerOne(c.term, "APPROVED"));
 
             const blockBtn = document.createElement("button");
             blockBtn.className = "btn btn-outline-danger btn-sm";
@@ -114,9 +156,17 @@
             blockBtn.addEventListener("click", () => registerOne(c.term, "BLOCKED"));
 
             actions.append(addBtn, blockBtn);
-            tr.append(term, count, actions);
+            tr.append(pick, term, count, actions);
             return tr;
         }));
+        updateSelectedCount();
+    };
+
+    const drop = (terms) => {
+        const gone = new Set(terms);
+        candidates = candidates.filter(c => !gone.has(c.term));
+        gone.forEach(t => selected.delete(t));
+        render();
     };
 
     const registerOne = async (term, status) => {
@@ -125,12 +175,41 @@
                 method: "POST",
                 body: JSON.stringify({term, category: "ETC", status, aliases: []}),
             });
-            candidates = candidates.filter(c => c.term !== term);
-            render();
+            drop([term]);
         } catch (e) {
             alert(e.message);
         }
     };
+
+    // 선택한 것만 등록한다. 검수를 등록 시점에 끝내는 경로이고, 이것이 어휘를 키우는 주 경로다.
+    const registerSelected = async (status, label) => {
+        const terms = [...selected];
+        if (terms.length === 0) {
+            alert("선택된 후보가 없습니다.");
+            return;
+        }
+        if (!confirm(`${terms.length}건을 ${label}합니다.`)) return;
+        try {
+            const r = await fetchAdmin(`/api/v1/admin/bible/words/bulk?translationId=${translationId}`,
+                {method: "POST", body: JSON.stringify({terms, status})});
+            const rejected = r.rejected ? ` / 거부 ${r.rejected}건(조사·활용형)` : "";
+            alert(`${label} ${r.imported}건 / 건너뜀 ${r.skipped}건${rejected}`);
+            drop(terms);
+        } catch (e) {
+            alert(e.message);
+        }
+    };
+
+    document.getElementById("selectAll").addEventListener("change", (e) => {
+        selected.clear();
+        if (e.target.checked) candidates.forEach(c => selected.add(c.term));
+        render();
+    });
+
+    document.getElementById("approveSelectedBtn")
+        .addEventListener("click", () => registerSelected("APPROVED", "승인 등록"));
+    document.getElementById("blockSelectedBtn")
+        .addEventListener("click", () => registerSelected("BLOCKED", "차단"));
 
     document.getElementById("loadBtn").addEventListener("click", async () => {
         if (!translationId) {
@@ -143,6 +222,7 @@
             const query = bookOrder ? `&bookOrder=${bookOrder}` : "";
             candidates = await fetchAdmin(
                 `/api/v1/admin/bible/word-stats/candidates?translationId=${translationId}${query}&limit=1000`);
+            selected.clear();
             status.textContent = `${candidates.length}건`;
             render();
         } catch (e) {
@@ -151,7 +231,7 @@
         }
     });
 
-    // 초기 구축은 6천 건 규모다. 한 건씩 누를 수 없으므로 일괄 등록이 필수다.
+    // 검수 없이 쓸어 담는 경로. CANDIDATE 로만 들어가므로 노출 정책에 걸린다.
     document.getElementById("bulkBtn").addEventListener("click", async () => {
         const min = parseInt(document.getElementById("minCount").value, 10) || 1;
         const terms = candidates.filter(c => c.count >= min).map(c => c.term);
@@ -159,15 +239,15 @@
             alert("조건에 맞는 후보가 없습니다. 먼저 후보를 불러오세요.");
             return;
         }
-        if (!confirm(`${terms.length}건을 후보(CANDIDATE)로 등록합니다.`)) return;
+        if (!confirm(`${terms.length}건을 검수 없이 후보(CANDIDATE)로 등록합니다.\n`
+            + `활용형·조사가 섞여 들어갑니다. 화면에 내보내려면 승인 등록을 쓰세요.`)) return;
         try {
             const r = await fetchAdmin(`/api/v1/admin/bible/words/bulk?translationId=${translationId}`,
-                {method: "POST", body: JSON.stringify({terms})});
+                {method: "POST", body: JSON.stringify({terms, status: "CANDIDATE"})});
             // 거부 건수를 보여 줘야 한다. 조용히 빠지면 "왜 6천 건이 아니지" 를 알 방법이 없다.
             const rejected = r.rejected ? ` / 거부 ${r.rejected}건(조사·활용형)` : "";
             alert(`등록 ${r.imported}건 / 건너뜀 ${r.skipped}건${rejected}`);
-            candidates = candidates.filter(c => c.count < min);
-            render();
+            drop(terms);
         } catch (e) {
             alert(e.message);
         }

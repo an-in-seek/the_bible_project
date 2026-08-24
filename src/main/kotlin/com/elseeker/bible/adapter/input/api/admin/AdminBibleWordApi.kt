@@ -116,7 +116,7 @@ class AdminBibleWordApi(
         @RequestParam translationId: Long,
         @RequestBody request: AdminBibleWordBulkRequest,
     ): ResponseEntity<ImportResultResponse> {
-        val result = adminBibleWordService.bulkCreateCandidates(translationId, request.terms)
+        val result = adminBibleWordService.bulkCreate(translationId, request.terms, request.status)
         return ResponseEntity.ok(ImportResultResponse(result.imported, result.skipped, result.rejected))
     }
 

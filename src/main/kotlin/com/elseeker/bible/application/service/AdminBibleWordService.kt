@@ -180,7 +180,18 @@ class AdminBibleWordService(
     }
 
     /**
-     * 후보를 일괄 등록한다. 초기 구축에서 6천 건 규모를 넣어야 하므로 한 건씩 누를 수 없다.
+     * 표제어를 일괄 등록한다. 초기 구축에서 6천 건 규모를 넣어야 하므로 한 건씩 누를 수 없다.
+     *
+     * [status] 로 세 가지 용도를 겸한다.
+     *
+     * | status | 쓰임 |
+     * |---|---|
+     * | `CANDIDATE` | 빈도 조건으로 쓸어 담기. **화면 노출 정책에 걸린다**(설계 문서 §3.2) |
+     * | `APPROVED` | 후보 화면에서 사람이 **골라서** 넣기. 검수가 등록 시점에 끝난다 |
+     * | `BLOCKED` | 쓰레기를 쓸어 담아 재추출을 막기 |
+     *
+     * **`APPROVED` 로 골라 넣는 경로가 실제 운영에서 필요한 것이다.** `CANDIDATE` 를 크게 넣고
+     * 나중에 승인하는 흐름은 승인 수단이 한 건씩뿐이라 6천 건 규모에서 성립하지 않는다.
      *
      * **정규화가 스스로에게 수렴하지 않는 표제어는 거부한다.** 이 방어가 없으면 한 번의
      * 일괄 등록으로 통계 전체가 망가진다. 매처는 어휘 조회를 정규화보다 먼저 하므로
@@ -207,15 +218,25 @@ class AdminBibleWordService(
      * 이 필터가 모든 쓰레기를 막지는 못한다. `올라가니`·`죽으매` 처럼 어미 목록에 없는
      * 3음절 이상 활용형은 통과한다. 규칙 기반의 한계이고, 형태소 분석기를 도입할 때까지는
      * **후보를 사람이 훑는 단계를 건너뛸 수 없다**(설계 문서 §3.2).
+     *
+     * **`BLOCKED` 에는 이 필터를 적용하지 않는다.** 차단하려는 것은 대개 `하라` 처럼 필터가
+     * 거부하는 형태다. 걸러 버리면 정작 막아야 할 단어를 막지 못한다.
+     *
+     * 필터가 정상 단어를 거부하면 한 건씩 등록하는 [create] 를 쓰면 된다. 그쪽에는 필터가 없다.
      */
     @Transactional
-    fun bulkCreateCandidates(translationId: Long, terms: List<String>): ImportResult {
+    fun bulkCreate(
+        translationId: Long,
+        terms: List<String>,
+        status: BibleWordStatus,
+    ): ImportResult {
         val languageCode = getTranslationLanguage(translationId)
         val existingTerms = bibleWordRepository.findTermsByTranslationId(translationId).toHashSet()
         val incoming = terms.map { it.trim() }.filter { it.isNotEmpty() }
 
         // 조사 판정용 어휘. 들어오는 목록까지 합쳐 두어야 `몸` 과 `몸에` 의 순서에 좌우되지 않는다.
         val vocabulary = existingTerms + incoming
+        val filtered = status != BibleWordStatus.BLOCKED
 
         var imported = 0
         var skipped = 0
@@ -226,17 +247,26 @@ class AdminBibleWordService(
                 skipped++
                 return@forEach
             }
-            val normalized = bibleWordTokenizer.normalize(term, languageCode)
-            if (normalized == null || (normalized != term && normalized in vocabulary)) {
-                rejected += term
-                return@forEach
+            if (filtered) {
+                val normalized = bibleWordTokenizer.normalize(term, languageCode)
+                if (normalized == null || (normalized != term && normalized in vocabulary)) {
+                    rejected += term
+                    return@forEach
+                }
             }
-            bibleWordRepository.save(BibleWord.candidateOf(translationId, term))
+            bibleWordRepository.save(
+                BibleWord(
+                    translationId = translationId,
+                    term = term,
+                    category = BibleWordCategory.ETC,
+                    status = status,
+                )
+            )
             imported++
         }
 
         logger.info {
-            "후보 일괄 등록: translationId=$translationId, imported=$imported, " +
+            "어휘 일괄 등록: translationId=$translationId, status=$status, imported=$imported, " +
                 "skipped=$skipped, rejected=${rejected.size}"
         }
         if (rejected.isNotEmpty()) {

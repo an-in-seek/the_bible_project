@@ -63,7 +63,12 @@ interface AdminBibleWordApiDocument {
     )
     fun importFromDictionary(translationId: Long): ResponseEntity<AdminBibleWordApi.ImportResultResponse>
 
-    @Operation(summary = "후보 일괄 등록", description = "초기 구축용. 후보 리포트에서 뽑은 표제어를 한 번에 등록합니다.")
+    @Operation(
+        summary = "표제어 일괄 등록",
+        description = "후보 리포트에서 뽑은 표제어를 한 번에 등록합니다. status 로 CANDIDATE(기본) / " +
+            "APPROVED(골라 넣기) / BLOCKED(쓸어 담아 차단) 를 정합니다. " +
+            "조사가 붙었거나 활용형인 표제어는 거부되며 rejected 로 돌려줍니다(BLOCKED 는 예외)."
+    )
     fun bulkCreate(
         translationId: Long,
         request: AdminBibleWordBulkRequest,
