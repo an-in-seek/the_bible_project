@@ -2,6 +2,19 @@ package com.elseeker.bible.domain.vo
 
 import com.neovisionaries.i18n.LanguageCode
 
+/**
+ * 번역본 종류.
+ *
+ * **상수 이름이 곧 저장 값이다.** `BibleTranslation.translationType` 이 `@Enumerated(STRING)` 이라
+ * `bible_translation.translation_type` 컬럼에 상수 이름 그대로 들어간다. 따라서 상수를 rename 하는 것은
+ * 코드 리팩터링이 아니라 **데이터 마이그레이션**이다. 이름만 바꾸면 이미 저장된 행을 읽는 순간
+ * `IllegalArgumentException: No enum constant ...` 로 500 이 난다. Hibernate 가 행을 엔티티로
+ * 만드는 시점에 터지므로 `GlobalExceptionHandler` 도 손대지 못하고, 컴파일과 테스트는 멀쩡히 통과한다.
+ * (테스트 DB 는 컨테이너에 새로 만들어져 비어 있으므로 이 어긋남을 잡아 주지 못한다.)
+ *
+ * 상수를 바꿔야 한다면 `UPDATE bible_translation SET translation_type = ...` 를 함께 적용하고
+ * `db/migration/` 에 스크립트를 남긴다.
+ */
 enum class BibleTranslationType(
     val abbreviation: String,
     val displayName: String,
@@ -37,7 +50,16 @@ enum class BibleTranslationType(
     LUTH1545("LUTH1545", "Luther Bible 1545", LanguageCode.de),
     VUL("VUL", "Biblia Sacra Vulgata", LanguageCode.la),
     JPNMEB("JPNMEB", "Japanese Freedom Bible", LanguageCode.ja),
-    JPN1965("JPN", "The New Testament in Japanese, 1965 Shinkaiyaku Seisho (New Japanese Bible) Translation", LanguageCode.ja);
+
+    /**
+     * 口語訳聖書. 신약만 있는 新改訳(1965)이 아니라 **구약까지 갖춘 1954/1955 구어역**이다.
+     * DB 에 실린 본문으로 확인했다 — 요한복음 3:16 이 "神はそのひとり子を賜わったほどに…"(구어역)이고
+     * 창세기 1:1 도 들어 있다(구약 23,146절 + 신약 7,958절, 66권).
+     *
+     * 구어역은 일본에서 퍼블릭 도메인이고 新改訳 은 저작권이 살아 있다. 이 상수 이름과 설명은
+     * 어떤 본문을 싣고 있는지에 대한 기록이므로 본문을 바꾸지 않는 한 함께 바꾸지 않는다.
+     */
+    KOUGO("KOUGO", "Japanese Colloquial Bible (1954/1955)", LanguageCode.ja);
 
     companion object {
         fun fromAbbreviation(abbr: String): BibleTranslationType {

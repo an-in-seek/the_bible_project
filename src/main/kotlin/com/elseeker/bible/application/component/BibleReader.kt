@@ -43,7 +43,7 @@ class BibleReader(
                 BibleTranslationType.RVR1909,
                 BibleTranslationType.SBLM,
                 BibleTranslationType.JPNMEB,
-                BibleTranslationType.JPN1965
+                BibleTranslationType.KOUGO
             )
         ).map(BibleResult.Translation::from)
 
