@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>미매칭 후보 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.2" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
@@ -26,7 +26,7 @@
             결과는 저장하지 않고 요청할 때마다 계산합니다.
         </p>
 
-        <form class="admin-form" method="get" action="/web/admin/bible/word-candidates">
+        <form class="admin-form admin-form-grid" method="get" action="/web/admin/bible/word-candidates">
             <div class="form-group">
                 <label for="translationId">번역본</label>
                 <select id="translationId" name="translationId">
@@ -46,12 +46,21 @@
         </form>
 
         <div class="admin-toolbar">
-            <div>
-                <button class="btn btn-primary btn-sm" id="approveSelectedBtn">선택 승인 등록</button>
-                <button class="btn btn-outline-danger btn-sm" id="blockSelectedBtn">선택 차단</button>
-                <span id="selectedCount" class="text-muted small ms-2">0건 선택</span>
+            <div class="admin-toolbar-group">
+                <label class="admin-check">
+                    <input type="checkbox" id="selectAll">
+                    전체 선택
+                </label>
             </div>
             <div id="loadStatus" class="text-muted small"></div>
+        </div>
+
+        <!-- 휴대폰에서는 선택이 생겼을 때만 화면 아래에서 올라온다.
+             후보가 수백 건이라 위에 고정해 두면 스크롤한 뒤 손이 닿지 않는다. -->
+        <div class="admin-selection-bar" id="selectionBar">
+            <button class="btn btn-primary btn-sm" id="approveSelectedBtn">선택 승인 등록</button>
+            <button class="btn btn-outline-danger btn-sm" id="blockSelectedBtn">선택 차단</button>
+            <span id="selectedCount" class="admin-selection-count text-muted small">0건 선택</span>
         </div>
 
         <!--
@@ -63,7 +72,7 @@
             <table class="admin-table">
                 <thead>
                 <tr>
-                    <th style="width: 36px"><input type="checkbox" id="selectAll" aria-label="전체 선택"></th>
+                    <th style="width: 36px"><span class="visually-hidden">선택</span></th>
                     <th>단어</th>
                     <th>빈도</th>
                     <th>작업</th>
@@ -76,11 +85,14 @@
                 </tbody>
             </table>
         </div>
+        <div class="admin-card-list" id="candidateCards">
+            <div class="admin-card text-center text-muted">"후보 불러오기" 를 눌러 주세요.</div>
+        </div>
 
         <details class="mt-3">
             <summary class="text-muted small">빈도 조건으로 쓸어 담기 (검수 없이 CANDIDATE 로 등록)</summary>
             <div class="admin-toolbar mt-2">
-                <div>
+                <div class="admin-toolbar-group">
                     <label for="minCount">최소 빈도</label>
                     <input type="number" id="minCount" value="5" style="width: 80px">
                     <button class="btn btn-outline-secondary btn-sm" id="bulkBtn">이 조건으로 일괄 등록</button>
@@ -106,59 +118,120 @@
 
     let candidates = [];
     const selected = new Set();
+    // 같은 단어의 체크박스가 표와 카드에 하나씩 있다. term 으로 묶어 두 개를 함께 갱신한다.
+    // 클릭마다 전체를 다시 그리면 후보 1000건에서 눈에 띄게 버벅인다.
+    const boxesByTerm = new Map();
 
     const updateSelectedCount = () => {
         document.getElementById("selectedCount").textContent = `${selected.size}건 선택`;
         const all = document.getElementById("selectAll");
         all.checked = candidates.length > 0 && selected.size === candidates.length;
         all.indeterminate = selected.size > 0 && selected.size < candidates.length;
+        // 모바일 하단 액션 바는 선택이 있을 때만 올라온다.
+        document.getElementById("selectionBar").classList.toggle("is-active", selected.size > 0);
+        document.body.classList.toggle("admin-selection-active", selected.size > 0);
+    };
+
+    const toggle = (term, checked) => {
+        if (checked) selected.add(term); else selected.delete(term);
+        (boxesByTerm.get(term) || []).forEach(b => { b.checked = checked; });
+        updateSelectedCount();
+    };
+
+    const makeBox = (term) => {
+        const box = document.createElement("input");
+        box.type = "checkbox";
+        box.checked = selected.has(term);
+        box.setAttribute("aria-label", `${term} 선택`);
+        box.addEventListener("change", () => toggle(term, box.checked));
+        const known = boxesByTerm.get(term);
+        if (known) known.push(box); else boxesByTerm.set(term, [box]);
+        return box;
+    };
+
+    const makeActions = (term) => {
+        const addBtn = document.createElement("button");
+        addBtn.className = "btn btn-outline-primary btn-sm";
+        addBtn.textContent = "승인 등록";
+        addBtn.addEventListener("click", () => registerOne(term, "APPROVED"));
+
+        const blockBtn = document.createElement("button");
+        blockBtn.className = "btn btn-outline-danger btn-sm";
+        blockBtn.textContent = "차단";
+        // 차단은 재추출을 막는 장치다. 이게 없으면 같은 쓰레기 단어가 재계산마다 되살아난다.
+        blockBtn.addEventListener("click", () => registerOne(term, "BLOCKED"));
+        return [addBtn, blockBtn];
+    };
+
+    const makeRow = (c) => {
+        const tr = document.createElement("tr");
+
+        const pick = document.createElement("td");
+        pick.append(makeBox(c.term));
+
+        const term = document.createElement("td");
+        term.textContent = c.term;
+
+        const count = document.createElement("td");
+        count.textContent = String(c.count);
+
+        const actions = document.createElement("td");
+        actions.className = "admin-actions";
+        actions.append(...makeActions(c.term));
+
+        tr.append(pick, term, count, actions);
+        return tr;
+    };
+
+    const makeCard = (c) => {
+        const card = document.createElement("div");
+        card.className = "admin-card";
+
+        const pick = document.createElement("div");
+        pick.className = "admin-card-pick";
+        const title = document.createElement("div");
+        title.className = "admin-card-title";
+        title.textContent = c.term;
+        pick.append(makeBox(c.term), title);
+
+        const row = document.createElement("div");
+        row.className = "admin-card-row";
+        const label = document.createElement("span");
+        label.className = "admin-card-label";
+        label.textContent = "빈도";
+        const value = document.createElement("span");
+        value.className = "admin-card-value";
+        value.textContent = String(c.count);
+        row.append(label, value);
+
+        const actions = document.createElement("div");
+        actions.className = "admin-card-actions";
+        actions.append(...makeActions(c.term));
+
+        card.append(pick, row, actions);
+        return card;
+    };
+
+    const emptyCard = (text) => {
+        const card = document.createElement("div");
+        card.className = "admin-card text-center text-muted";
+        card.textContent = text;
+        return card;
     };
 
     const render = () => {
         const body = document.getElementById("candidateBody");
+        const cards = document.getElementById("candidateCards");
+        boxesByTerm.clear();
         if (candidates.length === 0) {
             body.innerHTML = '<tr><td colspan="4" class="text-center text-muted">후보가 없습니다.</td></tr>';
+            cards.replaceChildren(emptyCard("후보가 없습니다."));
             updateSelectedCount();
             return;
         }
-        body.replaceChildren(...candidates.map(c => {
-            const tr = document.createElement("tr");
-
-            const pick = document.createElement("td");
-            const box = document.createElement("input");
-            box.type = "checkbox";
-            box.checked = selected.has(c.term);
-            box.setAttribute("aria-label", `${c.term} 선택`);
-            box.addEventListener("change", () => {
-                if (box.checked) selected.add(c.term); else selected.delete(c.term);
-                updateSelectedCount();
-            });
-            pick.append(box);
-
-            const term = document.createElement("td");
-            term.textContent = c.term;
-
-            const count = document.createElement("td");
-            count.textContent = String(c.count);
-
-            const actions = document.createElement("td");
-            actions.className = "admin-actions";
-
-            const addBtn = document.createElement("button");
-            addBtn.className = "btn btn-outline-primary btn-sm";
-            addBtn.textContent = "승인 등록";
-            addBtn.addEventListener("click", () => registerOne(c.term, "APPROVED"));
-
-            const blockBtn = document.createElement("button");
-            blockBtn.className = "btn btn-outline-danger btn-sm";
-            blockBtn.textContent = "차단";
-            // 차단은 재추출을 막는 장치다. 이게 없으면 같은 쓰레기 단어가 재계산마다 되살아난다.
-            blockBtn.addEventListener("click", () => registerOne(c.term, "BLOCKED"));
-
-            actions.append(addBtn, blockBtn);
-            tr.append(pick, term, count, actions);
-            return tr;
-        }));
+        // 표와 카드는 같은 배열에서 만든다. 한쪽만 그리면 그 폭에서 화면이 빈다.
+        body.replaceChildren(...candidates.map(makeRow));
+        cards.replaceChildren(...candidates.map(makeCard));
         updateSelectedCount();
     };
 

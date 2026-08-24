@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>단어 어휘 관리 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.2" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
@@ -25,7 +25,7 @@
             후보 리포트로 표기 차이만 메우는 것이 빠릅니다.
         </p>
 
-        <form class="admin-form" method="get" action="/web/admin/bible/words">
+        <form class="admin-form admin-form-grid" method="get" action="/web/admin/bible/words">
             <div class="form-group">
                 <label for="translationId">번역본</label>
                 <select id="translationId" name="translationId" onchange="this.form.submit()">
@@ -62,7 +62,7 @@
         </form>
 
         <div class="admin-toolbar" th:if="${translationId != null}">
-            <div>
+            <div class="admin-toolbar-group">
                 <button class="btn btn-outline-secondary btn-sm" id="importDictBtn">사전에서 가져오기</button>
                 <button class="btn btn-outline-secondary btn-sm" id="copyFromBtn">다른 번역본에서 복사</button>
             </div>
@@ -103,8 +103,50 @@
             </table>
         </div>
 
+        <!-- 768px 이하에서는 위 표가 숨겨지고 이 카드 목록이 대신 뜬다. 하나만 두면 빈 화면이 된다. -->
+        <div class="admin-card-list" th:if="${page != null}">
+            <div class="admin-card" th:each="w : ${page.content}">
+                <div class="admin-card-title" th:text="${w.term}">표제어</div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">ID</span>
+                    <span class="admin-card-value" th:text="${w.id}"></span>
+                </div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">분류</span>
+                    <span class="admin-card-value" th:text="${w.category.displayName}"></span>
+                </div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">상태</span>
+                    <span class="admin-card-value" th:text="${w.status.displayName}"></span>
+                </div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">사전</span>
+                    <span class="admin-card-value" th:text="${w.dictionaryId != null} ? '연결됨' : '-'"></span>
+                </div>
+                <div class="admin-card-actions">
+                    <a th:href="@{/web/admin/bible/words/{id}/edit(id=${w.id})}"
+                       class="btn btn-outline-primary btn-sm">수정</a>
+                    <button class="btn btn-outline-warning btn-sm" th:data-id="${w.id}"
+                            th:data-name="${w.term}" onclick="blockWord(this)">차단</button>
+                </div>
+            </div>
+            <div class="admin-card text-center text-muted"
+                 th:if="${#lists.isEmpty(page.content)}">데이터가 없습니다.</div>
+        </div>
+
+        <!-- 이전에는 "1 / 7" 을 글자로만 찍어 2페이지로 갈 수단이 아예 없었다. -->
         <div class="admin-pagination" th:if="${page != null and page.totalPages > 1}">
-            <span th:text="${page.number + 1} + ' / ' + ${page.totalPages}"></span>
+            <a th:if="${page.number > 0}"
+               th:href="@{/web/admin/bible/words(translationId=${translationId},status=${status},category=${category},term=${term},page=${page.number - 1},size=${page.size})}">이전</a>
+            <th:block th:each="i : ${#numbers.sequence(0, page.totalPages - 1)}"
+                      th:if="${i >= page.number - 2 and i <= page.number + 2}">
+                <a th:if="${i != page.number}"
+                   th:href="@{/web/admin/bible/words(translationId=${translationId},status=${status},category=${category},term=${term},page=${i},size=${page.size})}"
+                   th:text="${i + 1}"></a>
+                <span th:if="${i == page.number}" class="active" th:text="${i + 1}"></span>
+            </th:block>
+            <a th:if="${page.number + 1 < page.totalPages}"
+               th:href="@{/web/admin/bible/words(translationId=${translationId},status=${status},category=${category},term=${term},page=${page.number + 1},size=${page.size})}">다음</a>
         </div>
     </main>
 </div>

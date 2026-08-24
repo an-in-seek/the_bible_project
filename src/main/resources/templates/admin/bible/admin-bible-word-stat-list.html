@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>단어 통계 관리 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.2" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
@@ -25,7 +25,7 @@
             이후 재계산이 건드리지 않습니다.
         </p>
 
-        <form class="admin-form" method="get" action="/web/admin/bible/word-stats">
+        <form class="admin-form admin-form-grid" method="get" action="/web/admin/bible/word-stats">
             <div class="form-group">
                 <label for="translationId">번역본</label>
                 <select id="translationId" name="translationId">
@@ -48,12 +48,11 @@
         </form>
 
         <div class="admin-toolbar" th:if="${translationId != null and bookOrder != null}">
-            <div>
+            <div class="admin-toolbar-group">
                 <button class="btn btn-outline-primary btn-sm" id="recalcBtn">이 책 재계산</button>
                 <a th:href="@{/web/admin/bible/word-candidates(translationId=${translationId},bookOrder=${bookOrder})}"
                    class="btn btn-outline-secondary btn-sm">미매칭 후보 보기</a>
             </div>
-            <div></div>
         </div>
 
         <div id="recalcResult" class="text-muted small"></div>
@@ -77,7 +76,7 @@
                     <td th:text="${r.term}"></td>
                     <td>
                         <input type="number" class="stat-count" th:value="${r.wordCount}"
-                               th:data-id="${r.id}" style="width: 90px">
+                               th:data-id="${r.id}">
                     </td>
                     <td>
                         <span th:text="${r.source.displayName}"></span>
@@ -96,6 +95,56 @@
                 </tr>
                 </tbody>
             </table>
+        </div>
+
+        <!-- 768px 이하에서는 위 표가 숨겨진다. 카드 목록이 없으면 통계 화면이 통째로 빈다. -->
+        <div class="admin-card-list" th:if="${statPage != null}">
+            <div class="admin-card" th:each="r : ${statPage.rows}">
+                <div class="admin-card-title" th:text="${r.term}">표제어</div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">장</span>
+                    <span class="admin-card-value"
+                          th:text="${r.chapterNumber == 0} ? '책 전체' : ${r.chapterNumber}"></span>
+                </div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">출처</span>
+                    <span class="admin-card-value">
+                        <span th:text="${r.source.displayName}"></span>
+                        <span th:if="${r.source.name() == 'MANUAL'}" class="badge bg-warning text-dark">수동</span>
+                    </span>
+                </div>
+                <div class="admin-card-row">
+                    <span class="admin-card-label">횟수</span>
+                    <span class="admin-card-value">
+                        <input type="number" class="stat-count" th:value="${r.wordCount}"
+                               th:data-id="${r.id}" th:aria-label="${r.term} + ' 횟수'">
+                    </span>
+                </div>
+                <div class="admin-card-actions">
+                    <button class="btn btn-outline-primary btn-sm" th:data-id="${r.id}"
+                            onclick="saveCount(this)">저장</button>
+                    <button class="btn btn-outline-secondary btn-sm" th:data-id="${r.id}"
+                            th:if="${r.source.name() == 'MANUAL'}"
+                            onclick="restoreAuto(this)">자동값으로</button>
+                </div>
+            </div>
+            <div class="admin-card text-center text-muted" th:if="${#lists.isEmpty(statPage.rows)}">
+                데이터가 없습니다. 재계산을 먼저 실행하세요.
+            </div>
+        </div>
+
+        <div class="admin-pagination" th:if="${statPage != null and statPage.totalPages > 1}">
+            <a th:if="${statPage.page > 0}"
+               th:href="@{/web/admin/bible/word-stats(translationId=${translationId},bookOrder=${bookOrder},chapterNumber=${chapterNumber},page=${statPage.page - 1},size=${statPage.size})}">이전</a>
+            <th:block th:each="i : ${#numbers.sequence(0, statPage.totalPages - 1)}"
+                      th:if="${i >= statPage.page - 2 and i <= statPage.page + 2}">
+                <a th:if="${i != statPage.page}"
+                   th:href="@{/web/admin/bible/word-stats(translationId=${translationId},bookOrder=${bookOrder},chapterNumber=${chapterNumber},page=${i},size=${statPage.size})}"
+                   th:text="${i + 1}"></a>
+                <span th:if="${i == statPage.page}" class="active" th:text="${i + 1}"></span>
+            </th:block>
+            <a th:if="${statPage.page + 1 < statPage.totalPages}"
+               th:href="@{/web/admin/bible/word-stats(translationId=${translationId},bookOrder=${bookOrder},chapterNumber=${chapterNumber},page=${statPage.page + 1},size=${statPage.size})}">다음</a>
         </div>
 
         <div th:if="${runs != null and !#lists.isEmpty(runs)}">
@@ -123,6 +172,27 @@
                     </tbody>
                 </table>
             </div>
+            <div class="admin-card-list">
+                <div class="admin-card" th:each="run : ${runs}">
+                    <div class="admin-card-title" th:text="'책 ' + ${run.bookOrder}">책</div>
+                    <div class="admin-card-row">
+                        <span class="admin-card-label">재계산</span>
+                        <span class="admin-card-value" th:text="${run.calculatedAt}"></span>
+                    </div>
+                    <div class="admin-card-row">
+                        <span class="admin-card-label">장 수</span>
+                        <span class="admin-card-value" th:text="${run.chapterCount}"></span>
+                    </div>
+                    <div class="admin-card-row">
+                        <span class="admin-card-label">행 수</span>
+                        <span class="admin-card-value" th:text="${run.statRowCount}"></span>
+                    </div>
+                    <div class="admin-card-row">
+                        <span class="admin-card-label">수동 보존</span>
+                        <span class="admin-card-value" th:text="${run.manualKept}"></span>
+                    </div>
+                </div>
+            </div>
         </div>
     </main>
 </div>
@@ -138,7 +208,9 @@
 
     window.saveCount = async (btn) => {
         const id = btn.dataset.id;
-        const input = document.querySelector(`.stat-count[data-id="${id}"]`);
+        // 같은 data-id 를 가진 입력칸이 표와 카드에 하나씩 있다. 전역으로 찾으면
+        // 화면에 보이지 않는 쪽(표)의 값을 저장하게 되므로 자기 행/카드 안에서만 찾는다.
+        const input = btn.closest("tr, .admin-card").querySelector(`.stat-count[data-id="${id}"]`);
         try {
             await fetchAdmin(`/api/v1/admin/bible/word-stats/${id}`,
                 {method: "PATCH", body: JSON.stringify({wordCount: parseInt(input.value, 10)})});

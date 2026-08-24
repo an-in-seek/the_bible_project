@@ -276,7 +276,11 @@ class AdminBibleWordStatService(
         val totalElements: Long,
         val page: Int,
         val size: Int,
-    )
+    ) {
+        /** 화면의 페이지 이동 링크가 쓴다. 템플릿에서 나눗셈을 하면 올림 처리를 매번 틀린다. */
+        val totalPages: Int
+            get() = if (size <= 0) 0 else ((totalElements + size - 1) / size).toInt()
+    }
 
     data class RecalculateResult(
         val chapterCount: Int,

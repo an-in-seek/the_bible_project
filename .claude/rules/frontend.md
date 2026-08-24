@@ -63,6 +63,53 @@ On touch devices hover sticks after a tap. Do not build UX that depends on hover
 features reachable only through a tooltip) — it becomes unreachable on mobile. 45 CSS files use
 this media query today.
 
+## Admin list screens need a table *and* a card list
+
+`admin/admin.css` swaps the two at 768px:
+
+```css
+@media (max-width: 768px) {
+  .admin-table-wrapper { display: none; }
+  .admin-card-list { display: flex; }
+}
+```
+
+**A screen that only has `.admin-table-wrapper` renders nothing at all on a phone.** Not a broken
+layout — a blank page, because the only thing on it is `display: none`. Nothing errors and the
+desktop view stays perfect, so it survives review. Three of the word-vocabulary screens shipped
+that way and were blank on mobile until 2026-08-24.
+
+So every list screen carries both, built from the same data:
+
+```html
+<div class="admin-table-wrapper"><table class="admin-table"> ... </table></div>
+<div class="admin-card-list">
+  <div class="admin-card" th:each="w : ${page.content}">
+    <div class="admin-card-title" th:text="${w.term}"></div>
+    <div class="admin-card-row">
+      <span class="admin-card-label">상태</span>
+      <span class="admin-card-value" th:text="${w.status.displayName}"></span>
+    </div>
+    <div class="admin-card-actions"> ... </div>
+  </div>
+</div>
+```
+
+Points that bite:
+
+- **A JS-rendered list has to render both.** Build the row and the card from the same array in one
+  `render()`. See `admin-bible-word-candidate-list.html`.
+- **Controls in `<thead>` disappear on mobile.** A "select all" checkbox in a `<th>` is unreachable
+  on a phone. Put it in the toolbar instead.
+- **Duplicate `data-id` between the table and the card.** `document.querySelector('[data-id="x"]')`
+  finds the hidden table's element first, so a handler reads a value the user cannot see. Scope the
+  lookup with `btn.closest("tr, .admin-card")`.
+- `.admin-card-label` is 80px wide. Keep labels short (`수동 보존`, not `보존한 수동 행`).
+
+Related helper classes: `.admin-form-grid` (filter forms lay out in columns instead of one tall
+stack), `.admin-toolbar-group` (button rows that wrap instead of overflowing), `.admin-selection-bar`
+(selection actions that dock to the bottom of a phone screen while a selection exists).
+
 ## Authenticated fetches
 
 Token refresh is handled by `fetchWithAuthRetry()` in `common-util.js`. Calling `fetch` directly

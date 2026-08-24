@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>단어 어휘 등록/수정 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-    <link href="/css/admin/admin.css?v=5.1" rel="stylesheet">
+    <link href="/css/admin/admin.css?v=5.2" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
@@ -27,7 +27,8 @@
         <div class="admin-form mobile-actions">
             <div class="form-group">
                 <label for="term">표제어</label>
-                <input type="text" id="term" th:value="${word?.term}" required>
+                <input type="text" id="term" th:value="${word?.term}" required
+                       autocapitalize="none" autocomplete="off" spellcheck="false">
             </div>
             <div class="form-group">
                 <label for="category">분류</label>
@@ -50,7 +51,8 @@
             </div>
             <div class="form-group">
                 <label for="aliases">별칭</label>
-                <input type="text" id="aliases" th:value="${aliases}" placeholder="쉼표로 구분">
+                <input type="text" id="aliases" th:value="${aliases}" placeholder="쉼표로 구분"
+                       autocapitalize="none" autocomplete="off" spellcheck="false">
                 <small class="text-muted">
                     <strong>표기 자체가 다른 경우만</strong> 넣으세요 (하나님/하느님, 여호와/야훼).
                     조사 결합형(땅에, 땅을)은 별칭이 아닙니다 — 정규화 규칙에서 고칠 문제이고,
@@ -59,19 +61,21 @@
             </div>
             <div class="form-group">
                 <label for="note">관리자 메모</label>
-                <textarea id="note" rows="3" th:text="${word?.note}"
+                <textarea id="note" rows="3" class="admin-textarea-sm" th:text="${word?.note}"
                           placeholder="조사 출처 등. 사용자에게 노출되지 않습니다."></textarea>
             </div>
 
-            <p class="text-danger small" th:if="${manualStatCount != null and manualStatCount > 0}"
-               th:text="'이 어휘에는 관리자가 직접 입력한 통계가 ' + ${manualStatCount} + '건 있습니다. 삭제하면 함께 사라집니다.'"></p>
-
             <div class="admin-form-actions mobile-actions">
                 <button type="button" class="btn btn-primary btn-sm" id="saveBtn">저장</button>
-                <button type="button" class="btn btn-outline-danger btn-sm" id="deleteBtn"
-                        th:if="${word != null}">삭제</button>
                 <a th:href="@{/web/admin/bible/words(translationId=${translationId})}"
                    class="btn btn-outline-secondary btn-sm">취소</a>
+            </div>
+
+            <div class="admin-form-danger" th:if="${word != null}">
+                <p class="text-danger small" th:if="${manualStatCount != null and manualStatCount > 0}"
+                   th:text="'이 어휘에는 관리자가 직접 입력한 통계가 ' + ${manualStatCount} + '건 있습니다. 삭제하면 함께 사라집니다.'"></p>
+                <p class="text-muted small">대부분의 경우 삭제보다 <strong>차단</strong>이 맞습니다.</p>
+                <button type="button" class="btn btn-outline-danger btn-sm" id="deleteBtn">이 어휘 삭제</button>
             </div>
         </div>
     </main>

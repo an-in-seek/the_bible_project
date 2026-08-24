@@ -610,3 +610,175 @@ body.admin-sidebar-open {
         display: flex;
     }
 }
+
+/* ──────────────────────────────────────────────────────────────
+   반응형 보강 (v5.2)
+
+   표는 768px 이하에서 `display: none` 이 되고 `.admin-card-list` 가 대신 뜬다.
+   **표만 있고 카드 목록이 없는 화면은 휴대폰에서 통째로 빈 화면이 된다.**
+   목록 화면을 새로 만들 때는 표와 카드를 항상 같이 둔다.
+   ────────────────────────────────────────────────────────────── */
+
+/* 조회 조건 폼. 필드가 3~4개면 세로로만 쌓여 표까지 스크롤이 너무 길다.
+   auto-fit 이라 좁아지면 저절로 1열이 되므로 미디어쿼리가 따로 필요 없다. */
+.admin-form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 0 1rem;
+    align-items: end;
+}
+
+.admin-form-grid .admin-form-actions {
+    grid-column: 1 / -1;
+}
+
+/* 툴바 안의 버튼 묶음. div 를 그대로 두면 폭이 좁을 때 버튼이 삐져나간다. */
+.admin-toolbar-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* 선택 후 실행하는 액션 바. 데스크톱에서는 평범한 툴바처럼 흐르고,
+   휴대폰에서는 선택이 생겼을 때만 아래에서 올라온다. 후보가 수백 건이라
+   위쪽에 고정해 두면 스크롤한 뒤에는 손이 닿지 않는다. */
+.admin-selection-bar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.admin-card-pick {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.5rem;
+}
+
+.admin-card-pick input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.admin-card-pick .admin-card-title {
+    margin-bottom: 0;
+}
+
+.admin-table .stat-count {
+    width: 90px;
+}
+
+.admin-card .stat-count {
+    width: 100%;
+    max-width: 130px;
+    padding: 0.35rem 0.5rem;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+/* 짧은 메모용. `.admin-form textarea` 의 min-height(모바일 50vh)를 덮는다.
+   3줄짜리 메모가 화면 절반을 먹는 것을 막는다. */
+.admin-form textarea.admin-textarea-sm {
+    min-height: 5.5rem;
+}
+
+/* 되돌릴 수 없는 동작은 저장 버튼 옆이 아니라 폼 맨 아래 따로 둔다.
+   모바일 고정 액션 바는 폭이 좁아 오탭이 실제로 난다. */
+.admin-form-danger {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px dashed #dee2e6;
+}
+
+.admin-form-danger p {
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 992px) {
+    /* 태블릿에서는 표가 min-width 640px 이라 가로 스크롤이 생긴다.
+       칸 여백을 줄여 스크롤 구간을 줄인다. */
+    .admin-table th,
+    .admin-table td {
+        padding: 0.45rem 0.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    /* 손가락 기준. btn-sm 은 높이가 31px 남짓이라 그대로 두면 오탭이 난다. */
+    .admin-card-actions .btn,
+    .admin-toolbar-group > .btn,
+    .admin-toolbar > .btn,
+    .admin-toolbar > a.btn {
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .admin-toolbar-group > .btn {
+        flex: 1 1 auto;
+    }
+
+    .admin-card-actions .btn {
+        flex: 1 1 auto;
+    }
+
+    .admin-selection-bar {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 8;
+        margin: 0;
+        padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
+        background: #fff;
+        border-top: 1px solid #dee2e6;
+        box-shadow: 0 -8px 16px rgba(15, 23, 42, 0.08);
+        transform: translateY(110%);
+        transition: transform 0.18s ease;
+    }
+
+    .admin-selection-bar.is-active {
+        transform: none;
+    }
+
+    .admin-selection-bar .btn {
+        flex: 1 1 0;
+        min-height: 44px;
+    }
+
+    .admin-selection-bar .admin-selection-count {
+        flex: 1 0 100%;
+        order: -1;
+        margin: 0;
+    }
+
+    .admin-check input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* 액션 바가 올라와 있는 동안 마지막 카드가 가리지 않도록 자리를 비운다. */
+    body.admin-selection-active .admin-content {
+        padding-bottom: calc(1rem + 5.5rem);
+    }
+
+    .admin-pagination {
+        justify-content: center;
+    }
+
+    .admin-pagination a,
+    .admin-pagination span {
+        min-width: 40px;
+        min-height: 40px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
