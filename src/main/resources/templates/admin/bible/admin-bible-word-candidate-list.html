@@ -29,15 +29,24 @@
         <form class="admin-form admin-form-grid" method="get" action="/web/admin/bible/word-candidates">
             <div class="form-group">
                 <label for="translationId">번역본</label>
-                <select id="translationId" name="translationId">
+                <select id="translationId" name="translationId" onchange="this.form.submit()">
                     <option value="">선택하세요</option>
                     <option th:each="t : ${translations}" th:value="${t.id}" th:text="${t.name}"
                             th:selected="${t.id == selectedTranslationId}"></option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="bookOrder">책 순서 (비우면 전체)</label>
-                <input type="number" id="bookOrder" name="bookOrder" th:value="${bookOrder}">
+                <label for="bookOrder">책 (비우면 전체)</label>
+                <!-- 값은 bookOrder 그대로지만 보이는 이름은 한글이다. bible_book.name 은 번역본
+                     언어를 따라가므로(일본어 번역본이면 「創世記」) 관리자가 고르기 어렵다.
+                     목록은 서버가 번역본별로 채운다 — 신약만 있는 번역본에 구약을 늘어놓지 않는다. -->
+                <select id="bookOrder" name="bookOrder">
+                    <option value=""
+                            th:text="${translationId == null} ? '번역본을 먼저 선택하세요' : '전체'"></option>
+                    <option th:each="b : ${books}" th:value="${b.bookOrder}"
+                            th:text="${b.bookKey.displayName}"
+                            th:selected="${b.bookOrder == bookOrder}"></option>
+                </select>
             </div>
             <div class="admin-form-actions">
                 <button type="submit" class="btn btn-primary btn-sm">화면 이동</button>
@@ -115,6 +124,20 @@
 
     initAdminSidebarToggle();
     initAdminSidebarGroups();
+
+    // 서버가 그려 준 값은 **페이지를 연 시점**의 것이다. 셀렉트를 바꾸고 "후보 불러오기" 만
+    // 누르면 예전 번역본을 훑게 되고, 화면의 선택과 실제로 본 것이 어긋난다.
+    // 그래서 불러올 때 폼에서 읽어 loaded 에 박고, **등록도 loaded 의 번역본으로** 한다.
+    // 등록만 예전 값을 쓰면 눈앞의 후보를 엉뚱한 번역본에 집어넣는다.
+    let loaded = {translationId, bookOrder};
+
+    const readForm = () => ({
+        translationId: document.getElementById("translationId").value || null,
+        bookOrder: document.getElementById("bookOrder").value || null,
+    });
+
+    // 서버는 빈도 내림차순으로 정렬한 뒤 이 개수만큼 자를 뿐, 잘렸는지 알려 주지 않는다.
+    const CANDIDATE_LIMIT = 1000;
 
     let candidates = [];
     const selected = new Set();
@@ -244,7 +267,7 @@
 
     const registerOne = async (term, status) => {
         try {
-            await fetchAdmin(`/api/v1/admin/bible/words?translationId=${translationId}`, {
+            await fetchAdmin(`/api/v1/admin/bible/words?translationId=${loaded.translationId}`, {
                 method: "POST",
                 body: JSON.stringify({term, category: "ETC", status, aliases: []}),
             });
@@ -263,7 +286,8 @@
         }
         if (!confirm(`${terms.length}건을 ${label}합니다.`)) return;
         try {
-            const r = await fetchAdmin(`/api/v1/admin/bible/words/bulk?translationId=${translationId}`,
+            const r = await fetchAdmin(
+                `/api/v1/admin/bible/words/bulk?translationId=${loaded.translationId}`,
                 {method: "POST", body: JSON.stringify({terms, status})});
             const rejected = r.rejected ? ` / 거부 ${r.rejected}건(조사·활용형)` : "";
             alert(`${label} ${r.imported}건 / 건너뜀 ${r.skipped}건${rejected}`);
@@ -284,23 +308,39 @@
     document.getElementById("blockSelectedBtn")
         .addEventListener("click", () => registerSelected("BLOCKED", "차단"));
 
-    document.getElementById("loadBtn").addEventListener("click", async () => {
-        if (!translationId) {
-            alert("번역본을 먼저 선택하고 '화면 이동' 을 눌러 주세요.");
+    const loadBtn = document.getElementById("loadBtn");
+    loadBtn.addEventListener("click", async () => {
+        const target = readForm();
+        if (!target.translationId) {
+            alert("번역본을 먼저 선택해 주세요.");
             return;
         }
         const status = document.getElementById("loadStatus");
+        // 책을 지정하지 않으면 번역본 전체를 훑어 수 초가 걸린다. 막아 두지 않으면
+        // 반응이 없는 줄 알고 한 번 더 눌러 서버가 같은 스캔을 두 번 한다.
+        loadBtn.disabled = true;
         status.textContent = "계산 중… (번역본 전체는 수 초 걸립니다)";
         try {
-            const query = bookOrder ? `&bookOrder=${bookOrder}` : "";
+            const query = target.bookOrder ? `&bookOrder=${target.bookOrder}` : "";
             candidates = await fetchAdmin(
-                `/api/v1/admin/bible/word-stats/candidates?translationId=${translationId}${query}&limit=1000`);
+                `/api/v1/admin/bible/word-stats/candidates?translationId=${target.translationId}`
+                + `${query}&limit=${CANDIDATE_LIMIT}`);
+            loaded = target;
             selected.clear();
-            status.textContent = `${candidates.length}건`;
+            // 잘렸는지 말해 주지 않으면 "왜 이 단어가 후보에 없지" 를 알 방법이 없다.
+            status.textContent = candidates.length >= CANDIDATE_LIMIT
+                ? `상위 ${CANDIDATE_LIMIT}건만 표시 — 책을 지정해 좁혀 보세요`
+                : `${candidates.length}건`;
             render();
         } catch (e) {
-            status.textContent = "";
+            // 실패했는데 이전 결과를 남기면 지금 선택과 다른 것을 보여 주게 된다.
+            candidates = [];
+            selected.clear();
+            render();
+            status.textContent = "불러오지 못했습니다.";
             alert(e.message);
+        } finally {
+            loadBtn.disabled = false;
         }
     });
 
@@ -315,7 +355,8 @@
         if (!confirm(`${terms.length}건을 검수 없이 후보(CANDIDATE)로 등록합니다.\n`
             + `활용형·조사가 섞여 들어갑니다. 화면에 내보내려면 승인 등록을 쓰세요.`)) return;
         try {
-            const r = await fetchAdmin(`/api/v1/admin/bible/words/bulk?translationId=${translationId}`,
+            const r = await fetchAdmin(
+                `/api/v1/admin/bible/words/bulk?translationId=${loaded.translationId}`,
                 {method: "POST", body: JSON.stringify({terms, status: "CANDIDATE"})});
             // 거부 건수를 보여 줘야 한다. 조용히 빠지면 "왜 6천 건이 아니지" 를 알 방법이 없다.
             const rejected = r.rejected ? ` / 거부 ${r.rejected}건(조사·활용형)` : "";

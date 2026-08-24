@@ -41,6 +41,27 @@ class AdminBibleWebController(
         model.addAttribute("selectedTranslationId", selectedId)
     }
 
+    /**
+     * 책 선택 목록. 화면에 보이는 이름은 **한글**이다.
+     *
+     * `bible_book.name` 은 번역본의 언어를 따라간다 — 일본어 번역본이면 「創世記」 가 들어 있어
+     * 관리자가 고르기 어렵다. [BibleBookKey.displayName] 은 번역본과 무관한 한글 정본이므로
+     * 표시는 그쪽을 쓴다. 값(`bookOrder`)은 그대로다.
+     *
+     * 목록 자체는 DB 에서 가져온다. 66권을 코드에 늘어놓으면 신약만 있는 번역본에서도
+     * 구약이 다 보이고, 고르면 빈 결과가 나온다.
+     */
+    private fun addBookOptions(model: Model, translationId: Long?) {
+        val books = translationId?.let {
+            adminBibleBookService
+                .findByTranslationId(it, PageRequest.of(0, BOOK_OPTION_SIZE, Sort.by("bookOrder")))
+                .content
+        } ?: emptyList()
+        model.addAttribute("books", books)
+        // 재계산 이력처럼 bookOrder 만 들고 있는 곳에서 한글 이름을 찾는 표.
+        model.addAttribute("bookNames", books.associate { it.bookOrder to it.bookKey.displayName })
+    }
+
     // ── 대시보드 ──
 
     @GetMapping
@@ -214,6 +235,7 @@ class AdminBibleWebController(
         model: Model,
     ): String {
         addTranslationOptions(model, translationId)
+        addBookOptions(model, translationId)
         if (translationId != null && bookOrder != null) {
             model.addAttribute(
                 "statPage",
@@ -236,6 +258,7 @@ class AdminBibleWebController(
         model: Model,
     ): String {
         addTranslationOptions(model, translationId)
+        addBookOptions(model, translationId)
         model.addAttribute("translationId", translationId)
         model.addAttribute("bookOrder", bookOrder)
         return "admin/bible/admin-bible-word-candidate-list"
@@ -272,5 +295,6 @@ class AdminBibleWebController(
 
     companion object {
         private const val TRANSLATION_OPTION_SIZE = 100
+        private const val BOOK_OPTION_SIZE = 100
     }
 }

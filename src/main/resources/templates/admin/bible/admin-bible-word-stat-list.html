@@ -28,15 +28,24 @@
         <form class="admin-form admin-form-grid" method="get" action="/web/admin/bible/word-stats">
             <div class="form-group">
                 <label for="translationId">번역본</label>
-                <select id="translationId" name="translationId">
+                <select id="translationId" name="translationId" onchange="this.form.submit()">
                     <option value="">선택하세요</option>
                     <option th:each="t : ${translations}" th:value="${t.id}" th:text="${t.name}"
                             th:selected="${t.id == selectedTranslationId}"></option>
                 </select>
             </div>
             <div class="form-group">
-                <label for="bookOrder">책 순서</label>
-                <input type="number" id="bookOrder" name="bookOrder" th:value="${bookOrder}" placeholder="예: 1">
+                <label for="bookOrder">책</label>
+                <!-- 값은 bookOrder 그대로지만 보이는 이름은 한글이다. bible_book.name 은 번역본
+                     언어를 따라가므로(일본어 번역본이면 「創世記」) 관리자가 고르기 어렵다.
+                     목록은 서버가 번역본별로 채운다 — 신약만 있는 번역본에 구약을 늘어놓지 않는다. -->
+                <select id="bookOrder" name="bookOrder">
+                    <option value=""
+                            th:text="${translationId == null} ? '번역본을 먼저 선택하세요' : '선택하세요'"></option>
+                    <option th:each="b : ${books}" th:value="${b.bookOrder}"
+                            th:text="${b.bookKey.displayName}"
+                            th:selected="${b.bookOrder == bookOrder}"></option>
+                </select>
             </div>
             <div class="form-group">
                 <label for="chapterNumber">장 (비우면 전체)</label>
@@ -154,7 +163,7 @@
                 <table class="admin-table">
                     <thead>
                     <tr>
-                        <th>책 순서</th>
+                        <th>책</th>
                         <th>마지막 재계산</th>
                         <th>장 수</th>
                         <th>행 수</th>
@@ -163,7 +172,10 @@
                     </thead>
                     <tbody>
                     <tr th:each="run : ${runs}">
-                        <td th:text="${run.bookOrder}"></td>
+                        <!-- 이력은 bookOrder 만 들고 있다. 조회 폼이 한글 이름을 보여 주는데
+                             여기만 숫자면 같은 책인지 알아보기 어렵다. 번역본에서 빠진 책이면
+                             이름을 못 찾으므로 숫자로 되돌아간다. -->
+                        <td th:text="${bookNames[run.bookOrder] ?: ('책 ' + run.bookOrder)}"></td>
                         <td th:text="${run.calculatedAt}"></td>
                         <td th:text="${run.chapterCount}"></td>
                         <td th:text="${run.statRowCount}"></td>
@@ -174,7 +186,8 @@
             </div>
             <div class="admin-card-list">
                 <div class="admin-card" th:each="run : ${runs}">
-                    <div class="admin-card-title" th:text="'책 ' + ${run.bookOrder}">책</div>
+                    <div class="admin-card-title"
+                         th:text="${bookNames[run.bookOrder] ?: ('책 ' + run.bookOrder)}">책</div>
                     <div class="admin-card-row">
                         <span class="admin-card-label">재계산</span>
                         <span class="admin-card-value" th:text="${run.calculatedAt}"></span>
