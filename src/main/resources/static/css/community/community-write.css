@@ -1,4 +1,4 @@
-/* Community Write Styles v1.1 */
+/* Community Write Styles v1.2 */
 
 :root {
     --write-primary: #4f46e5;
@@ -154,6 +154,45 @@ html[data-theme="dark"] .form-textarea:focus {
     transform: none;
 }
 
+/* ── 화면 키보드 대응 ────────────────────────────────────────────────────
+   긴 글을 쓸 때 커서가 키보드에 가려지던 문제를 여기서 막는다.
+
+   `--visual-viewport-height` 와 `--keyboard-inset` 은 mobile-keyboard.js 가
+   visualViewport 를 읽어 심는다. 왜 dvh 로 대신할 수 없는지, 왜 iOS 와 Android 의
+   증상이 다른지는 그 파일의 주석에 있다. 스크립트가 없거나 visualViewport 를
+   지원하지 않으면 var() 의 기본값으로 떨어져 기존 동작 그대로다.
+   ──────────────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+    /* 입력칸 상자가 보이는 영역보다 크면 커서가 어디에 있든 가려질 수 있다.
+       보이는 높이 안으로 묶어 두면 넘치는 본문은 입력칸 **안에서** 스크롤되고,
+       커서를 따라가는 일은 브라우저가 알아서 한다.
+
+       min-height 를 같이 낮춰야 한다. CSS 에서는 min-height 가 max-height 를
+       이기므로, 200px 을 그대로 두면 좁은 화면에서 상한이 통째로 무시된다. */
+    .form-textarea {
+        min-height: 7rem;
+        max-height: calc(var(--visual-viewport-height, 100dvh) - 10rem);
+    }
+
+    /* 브라우저가 커서를 보이게 스크롤할 때 하단 고정 요소만큼 덜 스크롤하게 한다.
+       이게 없으면 커서가 "보이는" 위치인 액션 바 뒤로 들어간다. */
+    html {
+        scroll-padding-bottom: calc(var(--keyboard-inset, 0px) + 7rem);
+    }
+
+    /* 높이를 묶는 것만으로는 부족하다. iOS 는 키보드가 떠도 문서가 짧아지지 않아
+       **애초에 더 스크롤할 여지가 생기지 않는다.** 입력칸이 화면 중간부터 시작하면
+       위로 끌어올릴 방법이 없어 아래쪽이 그대로 가린다. 가려진 높이만큼 아래에
+       자리를 만들어 줘야 한다.
+
+       Android 는 레이아웃 뷰포트가 함께 줄어 스크롤 범위가 저절로 그만큼 늘어나므로
+       --keyboard-inset 이 0 이고, 이 규칙도 아무 일도 하지 않는다. */
+    body.keyboard-open .write-layout {
+        padding-bottom: var(--keyboard-inset, 0px);
+    }
+}
+
 /* Responsive */
 @media (max-width: 576px) {
     .write-form {
@@ -166,7 +205,9 @@ html[data-theme="dark"] .form-textarea:focus {
         position: fixed;
         left: 0;
         right: 0;
-        bottom: 0;
+        /* iOS 는 키보드가 떠도 레이아웃 뷰포트가 그대로라 bottom: 0 이 키보드 뒤가 된다.
+           가려진 높이만큼 올려 준다. Android 는 이 값이 0 이라 지금과 같다. */
+        bottom: var(--keyboard-inset, 0px);
         z-index: 100;
         margin: 0;
         padding: 0.75rem 1rem calc(0.75rem + env(safe-area-inset-bottom));
@@ -184,5 +225,26 @@ html[data-theme="dark"] .form-textarea:focus {
 
     .btn-submit {
         flex: 2;
+    }
+
+    /* 입력 중에는 액션 바를 낮춘다. 키보드가 화면 절반을 먹은 상태에서 5rem 은 크다.
+
+       아래 여백은 화면 키보드가 실제로 떠 있을 때만 뺀다. keyboard-open 은 포커스로
+       판단하는 값이라 하드웨어 키보드를 붙인 아이패드에서도 붙는데, 그때는 바가
+       화면 맨 아래에 그대로 있어 안전 영역을 지워 버리면 홈 인디케이터와 겹친다.
+       --keyboard-inset 이 0 보다 크면(= 화면 키보드가 떠 있으면) 뺄셈이 크게 음수가
+       되어 max() 가 0.5rem 을 고르고, 0 이면 안전 영역이 그대로 남는다. */
+    body.keyboard-open .form-actions {
+        padding-top: 0.5rem;
+        padding-bottom: max(
+            0.5rem,
+            calc(0.5rem + env(safe-area-inset-bottom) - var(--keyboard-inset, 0px))
+        );
+    }
+
+    body.keyboard-open .btn-cancel,
+    body.keyboard-open .btn-submit {
+        padding-top: 0.5rem;
+        padding-bottom: 0.5rem;
     }
 }

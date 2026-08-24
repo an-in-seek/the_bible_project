@@ -1,5 +1,6 @@
 import { fetchWithAuthRetry } from "/js/common-util.js";
 import { buildLoginRedirectUrl, checkAuthStatus } from "/js/auth/auth-check.js";
+import { keepFieldVisible, observeViewportInsets, trackEditingState } from "/js/mobile-keyboard.js?v=1.0";
 
 const API_POSTS = "/api/v1/community/posts";
 
@@ -15,10 +16,36 @@ const App = {
         App.bindBackButton();
         App.bindForm();
         App.bindCancel();
+        App.bindKeyboardHandling();
 
         if (App.state.editPostId) {
             App.loadPostForEdit(App.state.editPostId);
         }
+    },
+
+    /**
+     * 화면 키보드가 입력 중인 줄을 가리지 않게 한다.
+     *
+     * 본문이 길어지면 커서가 키보드 뒤(iOS)나 하단 액션 바 뒤(Android)로 들어가
+     * 자기가 친 글자가 보이지 않았다. 높이 제한은 CSS 가 하고
+     * (`community-write.css` 의 화면 키보드 대응 블록), 여기서는 그 CSS 가 쓸
+     * 값을 심고 입력칸 상자가 보이는 영역 밖으로 밀려나지 않게 지킨다.
+     */
+    bindKeyboardHandling() {
+        observeViewportInsets();
+        trackEditingState();
+
+        const actions = document.querySelector(".form-actions");
+        // 액션 바는 좁은 화면에서만 고정이다. 흐름에 있을 때는 아무것도 덮지 않으므로 0.
+        const reservedBottom = () =>
+            actions && window.getComputedStyle(actions).position === "fixed"
+                ? actions.offsetHeight
+                : 0;
+
+        ["postTitle", "postContent"].forEach((id) => {
+            const field = document.getElementById(id);
+            if (field) keepFieldVisible(field, { reservedBottom });
+        });
     },
 
     getEditPostId() {
