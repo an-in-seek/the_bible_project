@@ -117,7 +117,7 @@ class AdminBibleWordApi(
         @RequestBody request: AdminBibleWordBulkRequest,
     ): ResponseEntity<ImportResultResponse> {
         val result = adminBibleWordService.bulkCreateCandidates(translationId, request.terms)
-        return ResponseEntity.ok(ImportResultResponse(result.imported, result.skipped))
+        return ResponseEntity.ok(ImportResultResponse(result.imported, result.skipped, result.rejected))
     }
 
     @PostMapping("/copy-from")
@@ -176,8 +176,10 @@ class AdminBibleWordApi(
         }
     }
 
+    /** @param rejected 표제어가 될 수 없어 거부한 건수(조사가 붙어 있거나 활용형) */
     data class ImportResultResponse(
         val imported: Int,
         val skipped: Int,
+        val rejected: Int = 0,
     )
 }

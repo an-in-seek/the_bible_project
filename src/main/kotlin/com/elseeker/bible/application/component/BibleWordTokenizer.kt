@@ -131,9 +131,21 @@ class BibleWordTokenizer(
         return word
     }
 
+    /**
+     * 서술어 활용형인지 본다.
+     *
+     * 2음절은 [WordStatRules.verbTails2Ko] 의 접미사 검사에 **어미 목록 전체 일치 검사를 더한다.**
+     * 접미사 검사만 하면 `하라`·`하매`·`하여`·`하사`·`하신`·`하실`·`하기` 가 빠져나간다 —
+     * 일곱 개 모두 `verb-tails-ko.txt` 에 그대로 들어 있는데도 그 목록이 3음절 이상에만
+     * 적용되기 때문이다. (창세기 후보 추출에서 실제로 전부 어휘로 올라왔다.)
+     *
+     * 대신 `라`·`매` 를 [WordStatRules.verbTails2Ko] 에 넣는 방법은 쓸 수 없다. `사라`·`고매` 처럼
+     * 그 글자로 끝나는 2음절 명사가 통째로 사라진다. 그래서 **접미사가 아니라 정확히 일치할
+     * 때만** 버린다.
+     */
     private fun isKoreanVerbForm(word: String): Boolean = when {
         word.length >= 3 -> rules.verbTailsKo.any { word.endsWith(it) }
-        word.length == 2 -> rules.verbTails2Ko.any { word.endsWith(it) }
+        word.length == 2 -> word in rules.verbTailsKo || rules.verbTails2Ko.any { word.endsWith(it) }
         else -> false
     }
 

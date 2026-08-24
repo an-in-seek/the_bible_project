@@ -4,6 +4,7 @@ import com.elseeker.bible.adapter.output.jpa.BibleTranslationRepository
 import com.elseeker.bible.adapter.output.jpa.BibleWordAliasRepository
 import com.elseeker.bible.adapter.output.jpa.BibleWordRepository
 import com.elseeker.bible.adapter.output.jpa.BibleWordStatRepository
+import com.elseeker.bible.application.component.BibleWordTokenizer
 import com.elseeker.bible.application.component.DictionaryImportFilter
 import com.elseeker.bible.domain.model.BibleWord
 import com.elseeker.bible.domain.model.BibleWordAlias
@@ -37,6 +38,7 @@ class AdminBibleWordService(
     private val bibleTranslationRepository: BibleTranslationRepository,
     private val dictionaryRepository: DictionaryRepository,
     private val dictionaryImportFilter: DictionaryImportFilter,
+    private val bibleWordTokenizer: BibleWordTokenizer,
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -179,27 +181,68 @@ class AdminBibleWordService(
 
     /**
      * 후보를 일괄 등록한다. 초기 구축에서 6천 건 규모를 넣어야 하므로 한 건씩 누를 수 없다.
+     *
+     * **정규화가 스스로에게 수렴하지 않는 표제어는 거부한다.** 이 방어가 없으면 한 번의
+     * 일괄 등록으로 통계 전체가 망가진다. 매처는 어휘 조회를 정규화보다 먼저 하므로
+     * (`여자를` 을 살리려고 일부러 그렇게 만든 순서다) 어휘에 `하라`·`몸에` 가 들어가는 순간
+     * 그것들이 모든 필터를 건너뛰고 그대로 집계된다. 규칙을 고쳐도 소용이 없다.
+     *
+     * 실제로 2026-08-24 운영 재계산에서 705건이 검수 없이 들어가 `하라(3)`·`몸에(2)`·
+     * `하였으므(1)` 같은 것이 화면에 올라왔다. 화면의 "최소 빈도" 는 몇 번 나왔는지일 뿐
+     * 품질과 무관하다.
+     *
+     * 거부 조건은 둘이다.
+     *
+     * 1. `normalize(term) == null` — 토크나이저가 애초에 내놓지 않는 형태다(`하라`, `것을`).
+     * 2. 정규화 결과가 term 과 다르고 **그 결과가 어휘에 이미 있다** — 조사가 붙은 형태다.
+     *    `몸에` → `몸` 이고 `몸` 이 어휘에 있으니 `몸에` 는 표제어가 아니다.
+     *
+     * 2번에 어휘 확인을 붙인 이유가 중요하다. "정규화 결과가 다르면 거부" 로만 하면
+     * `리브가`·`구덩이`·`지팡이` 가 함께 죽는다. 정규화는 이것들의 끝 글자를 조사로 보고
+     * `리브`·`구덩`·`지팡` 으로 깎기 때문이다. 반대로 `구덩이에` 에서 뽑힌 후보는 `구덩이` 라서,
+     * **같은 단어가 조사 유무에 따라 다르게 정규화된다.** 그래서 정규화 결과를 그대로
+     * 신뢰할 수 없고, 어휘에 있는지로 한 번 더 걸러야 한다. 매처가 `verbStemCandidate`·
+     * `singularCandidate` 를 어휘 확인 뒤에만 쓰는 것과 같은 이유다.
+     *
+     * 이 필터가 모든 쓰레기를 막지는 못한다. `올라가니`·`죽으매` 처럼 어미 목록에 없는
+     * 3음절 이상 활용형은 통과한다. 규칙 기반의 한계이고, 형태소 분석기를 도입할 때까지는
+     * **후보를 사람이 훑는 단계를 건너뛸 수 없다**(설계 문서 §3.2).
      */
     @Transactional
     fun bulkCreateCandidates(translationId: Long, terms: List<String>): ImportResult {
+        val languageCode = getTranslationLanguage(translationId)
         val existingTerms = bibleWordRepository.findTermsByTranslationId(translationId).toHashSet()
+        val incoming = terms.map { it.trim() }.filter { it.isNotEmpty() }
+
+        // 조사 판정용 어휘. 들어오는 목록까지 합쳐 두어야 `몸` 과 `몸에` 의 순서에 좌우되지 않는다.
+        val vocabulary = existingTerms + incoming
+
         var imported = 0
         var skipped = 0
+        val rejected = ArrayList<String>()
 
-        terms.asSequence()
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .forEach { term ->
-                if (!existingTerms.add(term)) {
-                    skipped++
-                    return@forEach
-                }
-                bibleWordRepository.save(BibleWord.candidateOf(translationId, term))
-                imported++
+        incoming.forEach { term ->
+            if (!existingTerms.add(term)) {
+                skipped++
+                return@forEach
             }
+            val normalized = bibleWordTokenizer.normalize(term, languageCode)
+            if (normalized == null || (normalized != term && normalized in vocabulary)) {
+                rejected += term
+                return@forEach
+            }
+            bibleWordRepository.save(BibleWord.candidateOf(translationId, term))
+            imported++
+        }
 
-        logger.info { "후보 일괄 등록: translationId=$translationId, imported=$imported, skipped=$skipped" }
-        return ImportResult(imported = imported, skipped = skipped)
+        logger.info {
+            "후보 일괄 등록: translationId=$translationId, imported=$imported, " +
+                "skipped=$skipped, rejected=${rejected.size}"
+        }
+        if (rejected.isNotEmpty()) {
+            logger.info { "표제어가 될 수 없어 거부: ${rejected.take(REJECTED_LOG_LIMIT)}" }
+        }
+        return ImportResult(imported = imported, skipped = skipped, rejected = rejected.size)
     }
 
     /**
@@ -289,8 +332,17 @@ class AdminBibleWordService(
         }
     }
 
+    /**
+     * @param skipped 이미 있는 표제어라 건너뜀
+     * @param rejected 표제어가 될 수 없어 거부 (조사가 붙어 있거나 활용형)
+     */
     data class ImportResult(
         val imported: Int,
         val skipped: Int,
+        val rejected: Int = 0,
     )
+
+    companion object {
+        private const val REJECTED_LOG_LIMIT = 50
+    }
 }

@@ -90,6 +90,70 @@ class BibleWordTokenizerTest {
     }
 
     @Test
+    @DisplayName("어미 목록과 정확히 일치하는 2음절 어절도 버린다")
+    fun dropTwoSyllableVerbTailExactMatch() {
+        // given — 일곱 개 모두 verb-tails-ko.txt 에 있는데도 그 목록이 3음절 이상에만 적용돼
+        //         후보로 올라왔다. 창세기 후보 705건에 전부 섞여 있었고, 어휘 조회가 정규화보다
+        //         먼저라 등록된 뒤에는 '하라(3회)' 처럼 통계에 그대로 노출됐다.
+        // when & then
+        normalize("하라") shouldBe null
+        normalize("하매") shouldBe null
+        normalize("하여") shouldBe null
+        normalize("하사") shouldBe null
+        normalize("하신") shouldBe null
+        normalize("하실") shouldBe null
+        normalize("하기") shouldBe null
+    }
+
+    @Test
+    @DisplayName("'라'·'매'로 끝나는 2음절 명사는 살아남는다")
+    fun twoSyllableNounEndingWithVerbTailChar() {
+        // given — '라'·'매' 를 2음절 어미 목록에 넣는 방법으로 위를 고치면 여기가 깨진다.
+        //         그래서 접미사 검사가 아니라 목록 전체 일치 검사를 쓴다.
+        // when & then
+        normalize("사라") shouldBe "사라"
+        normalize("고라") shouldBe "고라"
+        normalize("자매") shouldBe "자매"
+    }
+
+    @Test
+    @DisplayName("1음절 명사를 보강해 조사별로 갈라지지 않는다")
+    fun oneCharNounNoLongerSplits() {
+        // given — 목록에 없을 때 창세기에서 롯이 롯이(12)·롯을(6)·롯의(5)·롯도(4)·롯과(3) 로
+        //         표제어 5개가 됐고, 승인 어휘 '몸' 은 0회인데 몸을(7)·몸에(4)·몸과(3) 이 따로 잡혔다.
+        // when & then
+        normalize("롯이") shouldBe "롯"
+        normalize("롯과") shouldBe "롯"
+        normalize("몸에") shouldBe "몸"
+        normalize("몸을") shouldBe "몸"
+        normalize("떼가") shouldBe "떼"
+        normalize("딸을") shouldBe "딸"
+        normalize("굴에") shouldBe "굴"
+        normalize("세를") shouldBe "세"
+        normalize("세에") shouldBe "세"
+    }
+
+    @Test
+    @DisplayName("긴 조사가 길이 가드에 걸려도 짧은 조사로 조각을 만들지 않는다")
+    fun noFragmentFromJosaFallback() {
+        // given — '돈' 이 목록에 없을 때 '돈으로' 는 '으로' 가드에 걸린 뒤 '로' 만 떨어져
+        //         '돈으' 라는 조각이 됐다. 같은 방식으로 '흙으'·'선으' 도 어휘에 올라왔다.
+        // when & then
+        normalize("돈으로") shouldBe "돈"
+        normalize("몸으로") shouldBe "몸"
+    }
+
+    @Test
+    @DisplayName("1음절 명사 목록에 넣지 않기로 한 글자는 2음절 명사를 깎지 않는다")
+    fun deliberatelyExcludedOneCharNouns() {
+        // given — '실'·'태' 를 넣으면 '실과'(열매)가 '실' 로, '태도' 가 '태' 로 깎인다.
+        //         목록 추가는 그 글자로 끝나는 2음절 명사를 확인한 뒤에만 한다.
+        // when & then
+        normalize("실과") shouldBe "실과"
+        normalize("태도") shouldBe "태도"
+    }
+
+    @Test
     @DisplayName("불용어는 그대로 버린다")
     fun dropStopwords() {
         // when & then — 정규화만으로는 절대 사라지지 않는 상위권 노이즈다

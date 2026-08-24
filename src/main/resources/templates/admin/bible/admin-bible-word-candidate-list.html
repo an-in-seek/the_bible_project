@@ -163,7 +163,9 @@
         try {
             const r = await fetchAdmin(`/api/v1/admin/bible/words/bulk?translationId=${translationId}`,
                 {method: "POST", body: JSON.stringify({terms})});
-            alert(`등록 ${r.imported}건 / 건너뜀 ${r.skipped}건`);
+            // 거부 건수를 보여 줘야 한다. 조용히 빠지면 "왜 6천 건이 아니지" 를 알 방법이 없다.
+            const rejected = r.rejected ? ` / 거부 ${r.rejected}건(조사·활용형)` : "";
+            alert(`등록 ${r.imported}건 / 건너뜀 ${r.skipped}건${rejected}`);
             candidates = candidates.filter(c => c.count < min);
             render();
         } catch (e) {
