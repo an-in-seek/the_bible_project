@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="ko">
 
 <head
-        th:replace="~{fragments/head :: head('글쓰기 | ElSeeker', true, '/css/community/community-write.css?v=5.2')}"
+        th:replace="~{fragments/head :: head('글쓰기 | ElSeeker', true, '/css/community/community-write.css?v=5.3')}"
         th:with="robotsContent='noindex'">
 </head>
 
@@ -13,32 +13,39 @@
     <div class="write-layout">
         <div class="write-main">
             <form id="writeForm" class="write-form" novalidate>
-                <!-- Category Select -->
-                <div class="form-group">
-                    <label for="postType" class="form-label">카테고리</label>
-                    <select id="postType" class="form-select" required>
-                        <option value="" disabled selected>카테고리를 선택하세요</option>
-                        <option value="FREE">자유</option>
-                        <option value="QUESTION">질문</option>
-                        <option value="PRAY">기도나눔</option>
-                    </select>
-                    <div class="form-error" id="postTypeError"></div>
-                </div>
+                <!-- write-fields: 키보드가 떴을 때 스크롤되는 영역. 액션 바를 밖에 두어야
+                     칸이 아무리 좁아져도 등록 버튼이 밀려나지 않는다.
+                     평소에는 아무 스타일도 없는 블록이라 배치가 달라지지 않는다.
+                     community-write.css 의 패널 모드 참고. -->
+                <div class="write-fields">
+                    <!-- Category Select -->
+                    <div class="form-group">
+                        <label for="postType" class="form-label">카테고리</label>
+                        <select id="postType" class="form-select" required>
+                            <option value="" disabled selected>카테고리를 선택하세요</option>
+                            <option value="FREE">자유</option>
+                            <option value="QUESTION">질문</option>
+                            <option value="PRAY">기도나눔</option>
+                        </select>
+                        <div class="form-error" id="postTypeError"></div>
+                    </div>
 
-                <!-- Title -->
-                <div class="form-group">
-                    <label for="postTitle" class="form-label">제목</label>
-                    <input id="postTitle" type="text" class="form-input" placeholder="제목을 입력하세요"
-                           required>
-                    <div class="form-error" id="postTitleError"></div>
-                </div>
+                    <!-- Title -->
+                    <div class="form-group">
+                        <label for="postTitle" class="form-label">제목</label>
+                        <input id="postTitle" type="text" class="form-input" placeholder="제목을 입력하세요"
+                               required>
+                        <div class="form-error" id="postTitleError"></div>
+                    </div>
 
-                <!-- Content -->
-                <div class="form-group">
-                    <label for="postContent" class="form-label">내용</label>
-                    <textarea id="postContent" class="form-textarea" placeholder="내용을 입력하세요"
-                              rows="12" required></textarea>
-                    <div class="form-error" id="postContentError"></div>
+                    <!-- Content -->
+                    <!-- form-group-content: 키보드가 떴을 때 이 칸이 남는 높이를 전부 가져간다. -->
+                    <div class="form-group form-group-content">
+                        <label for="postContent" class="form-label">내용</label>
+                        <textarea id="postContent" class="form-textarea" placeholder="내용을 입력하세요"
+                                  rows="12" required></textarea>
+                        <div class="form-error" id="postContentError"></div>
+                    </div>
                 </div>
 
                 <!-- Actions -->
@@ -51,7 +58,7 @@
     </div>
 </main>
 
-<script type="module" src="/js/community/community-write.js?v=3.2"></script>
+<script type="module" src="/js/community/community-write.js?v=3.3"></script>
 </body>
 
 </html>

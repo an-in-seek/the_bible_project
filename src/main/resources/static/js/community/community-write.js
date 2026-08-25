@@ -1,6 +1,6 @@
 import { fetchWithAuthRetry } from "/js/common-util.js";
 import { buildLoginRedirectUrl, checkAuthStatus } from "/js/auth/auth-check.js";
-import { keepFieldVisible, observeViewportInsets, trackEditingState } from "/js/mobile-keyboard.js?v=1.0";
+import { keepFieldVisible, observeSoftKeyboard } from "/js/mobile-keyboard.js?v=2.0";
 
 const API_POSTS = "/api/v1/community/posts";
 
@@ -24,18 +24,21 @@ const App = {
     },
 
     /**
-     * 화면 키보드가 입력 중인 줄을 가리지 않게 한다.
+     * 화면 키보드가 본문 입력칸과 등록 버튼을 가리지 않게 한다.
      *
-     * 본문이 길어지면 커서가 키보드 뒤(iOS)나 하단 액션 바 뒤(Android)로 들어가
-     * 자기가 친 글자가 보이지 않았다. 높이 제한은 CSS 가 하고
-     * (`community-write.css` 의 화면 키보드 대응 블록), 여기서는 그 CSS 가 쓸
-     * 값을 심고 입력칸 상자가 보이는 영역 밖으로 밀려나지 않게 지킨다.
+     * 실제 배치는 CSS 가 한다(`community-write.css` 의 화면 키보드 대응 블록).
+     * 여기서는 그 CSS 가 쓸 값을 심고, 패널 모드가 아닌 화면에서만 입력칸이 보이는
+     * 영역 밖으로 밀려나지 않게 지킨다.
      */
     bindKeyboardHandling() {
-        observeViewportInsets();
-        trackEditingState();
+        observeSoftKeyboard();
 
+        const layout = document.querySelector(".write-layout");
         const actions = document.querySelector(".form-actions");
+        // 패널 모드에서는 폼이 이미 보이는 띠 안에 있다. 거기서 문서를 스크롤하면
+        // 고정된 패널은 그대로인 채 뒤 문서만 움직여 아무 소용이 없다.
+        const isPanelMode = () =>
+            !!layout && window.getComputedStyle(layout).position === "fixed";
         // 액션 바는 좁은 화면에서만 고정이다. 흐름에 있을 때는 아무것도 덮지 않으므로 0.
         const reservedBottom = () =>
             actions && window.getComputedStyle(actions).position === "fixed"
@@ -44,7 +47,9 @@ const App = {
 
         ["postTitle", "postContent"].forEach((id) => {
             const field = document.getElementById(id);
-            if (field) keepFieldVisible(field, { reservedBottom });
+            if (field) {
+                keepFieldVisible(field, { reservedBottom, enabled: () => !isPanelMode() });
+            }
         });
     },
 

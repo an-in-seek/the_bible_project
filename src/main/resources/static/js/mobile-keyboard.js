@@ -1,27 +1,50 @@
 /**
- * 화면 키보드(soft keyboard)가 가리는 영역을 CSS 와 스크롤 계산에 노출한다.
+ * 화면 키보드(soft keyboard)가 가리는 영역을 CSS 에 노출한다.
  *
  * ## 왜 필요한가
  *
- * 긴 글을 쓸 때 커서가 키보드에 가려지는 증상은 브라우저마다 원인이 다르다.
+ * 키보드가 떴을 때 브라우저가 뷰포트를 어떻게 줄이는지는 두 갈래다.
  *
- * - **iOS Safari** 는 키보드가 올라와도 **레이아웃 뷰포트를 줄이지 않는다.**
- *   `window.innerHeight` 가 그대로여서 `position: fixed; bottom: 0` 인 요소는 키보드 뒤로
- *   들어가 버리고, 화면 아래쪽에 있던 입력칸도 그대로 가려진다.
- * - **Android** 는 반대로 레이아웃 뷰포트까지 줄어든다. 고정 바는 키보드 위에 얹히는데,
- *   이번에는 그 바가 입력칸 아래쪽을 덮는다. 브라우저가 커서를 보이게 스크롤해도
- *   "보이는 곳" 판단에 고정 바는 안 들어가므로 커서가 바 밑으로 들어간다.
+ * - **레이아웃 뷰포트까지 줄이는 쪽**(`resizes-content`). `window.innerHeight` 가 함께
+ *   줄어서 `position: fixed; bottom: 0` 은 저절로 키보드 위에 얹히고, 문서에도 스크롤
+ *   여지가 생긴다.
+ * - **시각 뷰포트만 줄이는 쪽**(`resizes-visual`, iOS Safari 와 최근 안드로이드 브라우저).
+ *   `window.innerHeight` 가 그대로여서 `bottom: 0` 은 키보드 **뒤** 가 되고, 문서도
+ *   짧아지지 않으니 스크롤로 끌어올릴 수도 없다.
  *
- * 증상이 달라 보여도 뿌리는 하나다 — **CSS 가 "지금 실제로 보이는 높이" 를 모른다.**
- * `dvh` 로는 대신할 수 없다. 동적 뷰포트 단위는 주소창 같은 브라우저 UI 만 반영하고
- * 화면 키보드는 반영하지 않는다(viewport meta 의 `interactive-widget` 을 바꾸지 않는 한).
+ * 어느 쪽이든 뿌리는 하나다 — **CSS 가 "지금 실제로 보이는 띠" 를 모른다.** `dvh` 로는
+ * 대신할 수 없다. 동적 뷰포트 단위는 주소창 같은 브라우저 UI 만 반영하고 화면 키보드는
+ * 반영하지 않는다(viewport meta 의 `interactive-widget` 을 바꾸지 않는 한).
  *
- * 그래서 `visualViewport` 를 읽어 CSS 변수 두 개를 `<html>` 에 심는다.
+ * 그래서 `visualViewport` 를 읽어 `<html>` 에 CSS 변수를 심는다.
  *
  * | 변수 | 뜻 |
  * |---|---|
- * | `--visual-viewport-height` | 지금 실제로 보이는 높이(키보드가 먹은 만큼 빠진 값) |
- * | `--keyboard-inset` | 레이아웃 뷰포트 바닥에서 키보드에 가려진 높이. iOS 만 0 이 아니다 |
+ * | `--visual-viewport-height` | 지금 실제로 보이는 높이 |
+ * | `--visual-viewport-offset-top` | 레이아웃 뷰포트 위쪽에서 잘려 나간 높이 |
+ * | `--keyboard-inset` | 레이아웃 뷰포트 바닥에서 키보드에 가려진 높이 |
+ *
+ * 앞의 두 값이 곧 "보이는 띠" 다. `top: var(--visual-viewport-offset-top)` +
+ * `height: var(--visual-viewport-height)` 인 `position: fixed` 상자는 두 방식 어디서나
+ * 정확히 보이는 영역을 덮는다. 뷰포트를 어떻게 줄이는 브라우저인지 알 필요가 없다.
+ *
+ * ## 갱신이 한 번이라도 어긋나면 조용히 전부 무너진다
+ *
+ * 2026-08-24 의 첫 시도가 실기기에서 그대로 실패한 이유가 이것이다. 값이 낡으면
+ * `bottom: var(--keyboard-inset)` 은 `bottom: 0` 이 되어 액션 바가 키보드 뒤로 들어가고,
+ * 스크롤 여지를 만들어 주던 padding 도 0 이 되어 끌어올릴 수도 없다. 아무 오류도 나지
+ * 않고 화면만 잘린다. 실제로 재현하면 액션 바가 화면 밖 859~915px 에 놓이고 본문
+ * 입력칸이 196px 잘린 채 문서 스크롤 여지는 0 이었다.
+ *
+ * 그래서 읽기를 세 겹으로 두껍게 깔았다.
+ *
+ * - `visualViewport` 의 resize/scroll 뿐 아니라 **`window` 의 resize 도 듣는다.**
+ *   레이아웃 뷰포트까지 줄이는 브라우저에서는 그쪽이 실제 신호다.
+ * - 포커스가 들어오면 잠시 동안 여러 번 다시 잰다. 키보드는 애니메이션으로 올라오므로
+ *   첫 이벤트의 높이는 아직 키보드가 다 올라오기 전 값일 수 있다.
+ * - **0 이하는 버린다.** 레이아웃 전에 읽으면 0 이 나오는 브라우저가 있는데, 0 을 한 번
+ *   심으면 `calc(var(--visual-viewport-height) - 10rem)` 이 통째로 음수가 되어 입력칸이
+ *   min-height 로 주저앉는다.
  *
  * `visualViewport` 가 없는 환경에서는 아무것도 하지 않는다. CSS 는 `var(--x, 기본값)` 의
  * 기본값으로 떨어지므로 기존 동작 그대로다.
@@ -35,67 +58,103 @@ const EDITABLE_SELECTOR = [
     '[contenteditable="true"]',
 ].join(", ");
 
+/**
+ * 이만큼 줄어들어야 화면 키보드로 본다.
+ *
+ * 주소창이 접히고 펴질 때도 뷰포트 높이는 변한다(안드로이드 크롬 기준 56px 안팎).
+ * 그보다 넉넉히 위에 선을 그어야 스크롤만으로 레이아웃이 튀지 않는다.
+ */
+const MIN_KEYBOARD_HEIGHT = 150;
+
+/** 포커스 후 다시 재는 시점(ms). 키보드가 다 올라올 때까지 걸리는 시간을 덮는다. */
+const SETTLE_DELAYS = [0, 60, 160, 320, 560, 900];
+
 const isEditable = (el) => !!el && typeof el.matches === "function" && el.matches(EDITABLE_SELECTOR);
 
 /**
- * `--visual-viewport-height` / `--keyboard-inset` 를 유지한다.
+ * 보이는 띠를 CSS 변수로, 키보드 표시 여부를 `body.keyboard-open` 으로 유지한다.
+ *
+ * 키보드가 떴는지 알려 주는 API 는 없다. 포커스로 판단할 수도 있지만 그러면 **누르는
+ * 순간 레이아웃이 바뀐다** — 입력칸에서 손을 떼기도 전에 focusout 이 먼저 오므로,
+ * 화면 아래 고정된 등록 버튼을 누르면 버튼이 먼저 움직여 탭이 엉뚱한 곳에 떨어진다.
+ * 높이로 판단하면 키보드가 실제로 내려가는 시점에 맞춰 바뀌므로 그 문제가 없고,
+ * 하드웨어 키보드를 붙인 태블릿에서 헛되이 켜지지도 않는다.
  *
  * @returns {() => void} 구독 해제 함수
  */
-export function observeViewportInsets() {
+export function observeSoftKeyboard() {
     const vv = window.visualViewport;
     if (!vv) return () => {};
 
     const root = document.documentElement;
+    /** 키보드가 없을 때의 높이. 주소창이 접히면 커지므로 본 것 중 가장 큰 값을 쓴다. */
+    let restHeight = 0;
+    let timers = [];
+
+    const setVar = (name, value) => {
+        if (root.style.getPropertyValue(name) !== value) root.style.setProperty(name, value);
+    };
 
     const update = () => {
-        root.style.setProperty("--visual-viewport-height", `${Math.round(vv.height)}px`);
-        // 레이아웃 뷰포트 바닥에서 잘려 나간 높이.
-        // Android 처럼 레이아웃 뷰포트까지 줄어드는 브라우저에서는 자연히 0 이 된다.
-        const inset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-        root.style.setProperty("--keyboard-inset", `${Math.round(inset)}px`);
+        const height = vv.height;
+        if (!(height > 0)) return;
+
+        const offsetTop = Math.max(0, vv.offsetTop);
+        // innerHeight 도 후보에 넣는다. 시각 뷰포트만 줄이는 브라우저에서는 키보드가
+        // 이미 올라온 채로 처음 재더라도 이 값이 키보드 없는 높이를 알려 준다.
+        restHeight = Math.max(restHeight, height, window.innerHeight);
+
+        setVar("--visual-viewport-height", `${Math.round(height)}px`);
+        setVar("--visual-viewport-offset-top", `${Math.round(offsetTop)}px`);
+        setVar("--keyboard-inset", `${Math.round(Math.max(0, window.innerHeight - height - offsetTop))}px`);
+
+        // 켜고 끄는 조건이 다르다.
+        //
+        // 켤 때는 입력 중인지까지 본다. 높이만 보면 데스크톱에서 창을 줄이는 것도
+        // 키보드로 오인한다.
+        //
+        // 끌 때는 높이만 본다. 포커스가 빠졌다고 바로 끄면, 화면 아래 등록 버튼을
+        // 누르는 순간 — 손을 떼기도 전에 focusout 이 먼저 온다 — 레이아웃이 접히면서
+        // 버튼이 손가락 밑에서 사라져 탭이 엉뚱한 곳에 떨어진다. 키보드가 실제로
+        // 내려갈 때까지 유지하면 클릭이 먼저 끝난다.
+        const keyboardVisible = restHeight - height >= MIN_KEYBOARD_HEIGHT;
+        if (!keyboardVisible) {
+            document.body.classList.remove("keyboard-open");
+        } else if (isEditable(document.activeElement)) {
+            document.body.classList.add("keyboard-open");
+        }
+    };
+
+    // 키보드는 애니메이션으로 올라온다. 첫 이벤트의 높이는 아직 중간값일 수 있다.
+    const settle = () => {
+        clearTimers();
+        timers = SETTLE_DELAYS.map((delay) => setTimeout(update, delay));
+    };
+
+    const clearTimers = () => {
+        timers.forEach(clearTimeout);
+        timers = [];
     };
 
     update();
     vv.addEventListener("resize", update);
     vv.addEventListener("scroll", update);
-    window.addEventListener("orientationchange", update);
+    // 레이아웃 뷰포트까지 줄이는 브라우저에서는 이쪽이 실제 신호다.
+    window.addEventListener("resize", update);
+    window.addEventListener("orientationchange", settle);
+    window.addEventListener("load", settle);
+    document.addEventListener("focusin", settle);
+    document.addEventListener("focusout", settle);
 
     return () => {
+        clearTimers();
         vv.removeEventListener("resize", update);
         vv.removeEventListener("scroll", update);
-        window.removeEventListener("orientationchange", update);
-    };
-}
-
-/**
- * 입력 중이면 `body.keyboard-open` 을 붙인다.
- *
- * 키보드가 실제로 떴는지 알려 주는 API 는 없다. 높이 변화로 추정할 수도 있지만 주소창
- * 접힘과 구분이 안 된다. 어차피 스타일을 바꾸고 싶은 상태는 "사용자가 입력 중" 이므로
- * 포커스로 판단하는 편이 정확하고 단순하다.
- *
- * @returns {() => void} 구독 해제 함수
- */
-export function trackEditingState() {
-    const onFocusIn = (event) => {
-        if (isEditable(event.target)) document.body.classList.add("keyboard-open");
-    };
-
-    // 입력칸에서 입력칸으로 옮겨 갈 때 focusout 이 focusin 보다 먼저 온다.
-    // 바로 지우면 그 사이에 고정 바가 한 번 깜빡이므로 다음 틱에 활성 요소를 보고 정한다.
-    const onFocusOut = () => {
-        setTimeout(() => {
-            if (!isEditable(document.activeElement)) document.body.classList.remove("keyboard-open");
-        }, 0);
-    };
-
-    document.addEventListener("focusin", onFocusIn);
-    document.addEventListener("focusout", onFocusOut);
-
-    return () => {
-        document.removeEventListener("focusin", onFocusIn);
-        document.removeEventListener("focusout", onFocusOut);
+        window.removeEventListener("resize", update);
+        window.removeEventListener("orientationchange", settle);
+        window.removeEventListener("load", settle);
+        document.removeEventListener("focusin", settle);
+        document.removeEventListener("focusout", settle);
         document.body.classList.remove("keyboard-open");
     };
 }
@@ -103,14 +162,16 @@ export function trackEditingState() {
 /**
  * 포커스된 입력칸이 키보드·고정 바에 가리지 않도록 필요한 만큼만 페이지를 스크롤한다.
  *
- * 입력칸 높이를 CSS 에서 보이는 영역 안으로 묶어 두면(`max-height`), 커서를 보이게 하는
- * 일은 브라우저가 입력칸 **안에서** 알아서 한다. 이 함수는 그 전제 — *입력칸 상자 자체가
- * 보이는 영역 안에 있을 것* — 을 지키는 역할만 한다. 어긋났을 때만 움직이므로 타이핑
- * 중에 화면이 계속 흔들리지 않는다.
+ * 보이는 띠에 폼을 통째로 맞추는 화면(→ `community-write.css` 의 패널 모드)에는 필요
+ * 없다. 그쪽은 애초에 입력칸이 띠 밖으로 나가지 않는다. 이 함수는 문서가 평범하게
+ * 흐르는 화면 — 데스크톱 폭이나 패널 모드를 켜지 않는 기기 — 를 위한 것이다.
+ *
+ * 어긋났을 때만 움직이므로 타이핑 중에 화면이 계속 흔들리지 않는다.
  *
  * @param {HTMLElement} field 감시할 입력칸
- * @param {{reservedBottom?: () => number}} [options]
+ * @param {{reservedBottom?: () => number, enabled?: () => boolean}} [options]
  *        `reservedBottom` 은 화면 아래쪽을 덮는 고정 요소의 높이(px). 기본 0.
+ *        `enabled` 가 false 를 돌려주면 그 순간에는 스크롤하지 않는다.
  * @returns {() => void} 구독 해제 함수
  */
 export function keepFieldVisible(field, options = {}) {
@@ -118,15 +179,16 @@ export function keepFieldVisible(field, options = {}) {
     if (!vv || !field) return () => {};
 
     const reservedBottom = options.reservedBottom || (() => 0);
+    const enabled = options.enabled || (() => true);
     let queued = false;
 
     const run = () => {
         queued = false;
-        if (document.activeElement !== field) return;
+        if (document.activeElement !== field || !enabled()) return;
 
         const rect = field.getBoundingClientRect();
-        // getBoundingClientRect 는 레이아웃 뷰포트 기준이다. iOS 는 키보드가 뜨면 시각
-        // 뷰포트만 움직이므로 offsetTop 을 더해 같은 좌표계로 맞춘다.
+        // getBoundingClientRect 는 레이아웃 뷰포트 기준이다. 시각 뷰포트만 움직이는
+        // 브라우저에서는 offsetTop 을 더해 같은 좌표계로 맞춘다.
         const visibleTop = vv.offsetTop;
         const visibleBottom = vv.offsetTop + vv.height - reservedBottom();
 
