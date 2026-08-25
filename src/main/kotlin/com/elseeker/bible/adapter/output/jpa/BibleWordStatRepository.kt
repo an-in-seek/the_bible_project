@@ -111,6 +111,19 @@ interface BibleWordStatRepository : JpaRepository<BibleWordStat, Long> {
 
     fun countByBibleWordIdAndSource(bibleWordId: Long, source: BibleWordStatSource): Long
 
+    /**
+     * 관리자가 행을 직접 추가할 때의 중복 확인. `uk_bible_word_stat` 과 같은 조합이다.
+     *
+     * 제약에 맡기면 `DataIntegrityViolationException` 이 나는데 `GlobalExceptionHandler` 는
+     * `ServiceError` 만 잡으므로 500 + ERROR 로그가 된다. 관리자 입력 실수는 400 대여야 한다.
+     */
+    fun existsByTranslationIdAndBookOrderAndChapterNumberAndBibleWordId(
+        translationId: Long,
+        bookOrder: Int,
+        chapterNumber: Int,
+        bibleWordId: Long,
+    ): Boolean
+
     fun countByTranslationIdAndBookOrder(translationId: Long, bookOrder: Int): Long
 }
 

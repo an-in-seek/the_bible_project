@@ -66,6 +66,45 @@
 
         <div id="recalcResult" class="text-muted small"></div>
 
+        <!-- 자동 매칭이 잡지 못한 표제어를 넣는 유일한 입구다. 재계산은 AUTO 행만 지우고 다시
+             넣으므로 여기서 만든 수동 행은 다음 재계산에서도 살아남는다.
+             표제어는 글자가 아니라 id 로 넣는다 — 같은 글자의 표제어가 번역본마다 따로 있다. -->
+        <section class="mt-3" th:if="${translationId != null and bookOrder != null}">
+            <h3 class="h6">수동 행 추가</h3>
+            <div class="admin-form admin-form-grid">
+                <div class="form-group">
+                    <label for="manualTerm">표제어 검색</label>
+                    <input type="text" id="manualTerm" placeholder="일부만 입력해도 됩니다">
+                </div>
+                <div class="form-group">
+                    <label for="manualWordId">표제어</label>
+                    <select id="manualWordId">
+                        <option value="">검색을 먼저 실행하세요</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="manualChapter">장 (0 = 책 전체)</label>
+                    <input type="number" id="manualChapter" min="0"
+                           th:value="${chapterNumber != null} ? ${chapterNumber} : 1">
+                </div>
+                <div class="form-group">
+                    <label for="manualCount">횟수</label>
+                    <input type="number" id="manualCount" min="0" value="1">
+                </div>
+                <div class="admin-form-actions">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" id="manualSearchBtn">표제어 검색</button>
+                    <button type="button" class="btn btn-primary btn-sm" id="manualAddBtn">추가</button>
+                    <!-- .admin-form-actions 는 flex 기본값(stretch)이라 그냥 두면 글자가 위로 붙는다. -->
+                    <span id="manualResult" class="text-muted small align-self-center"></span>
+                </div>
+            </div>
+            <p class="text-muted small mt-2">
+                넣은 행은 <strong>수동</strong>이라 이후 재계산이 건드리지 않습니다.
+                장 행을 넣어도 <strong>책 전체</strong> 합계는 재계산해야 반영됩니다.
+                <strong>차단</strong> 상태의 표제어는 넣어도 사용자 화면에는 나오지 않습니다.
+            </p>
+        </section>
+
         <div class="admin-table-wrapper" th:if="${statPage != null}">
             <table class="admin-table">
                 <thead>
@@ -242,6 +281,73 @@
             alert(e.message);
         }
     };
+
+    // ── 수동 행 추가 ──
+
+    const WORD_SEARCH_SIZE = 50;
+    const STATUS_LABEL = {APPROVED: "승인", CANDIDATE: "후보", BLOCKED: "차단"};
+
+    const manualWordId = document.getElementById("manualWordId");
+    const manualResult = document.getElementById("manualResult");
+
+    document.getElementById("manualSearchBtn")?.addEventListener("click", async (event) => {
+        const btn = event.currentTarget;
+        btn.disabled = true;
+        manualResult.textContent = "검색 중…";
+        try {
+            // 어휘는 번역본별이다. 화면의 번역본으로 제한하지 않으면 옆 번역본의 표제어를 골라
+            // 넣게 되고, 서버는 그것만 거부하므로 관리자는 왜 거부됐는지 알 수 없다.
+            const term = document.getElementById("manualTerm").value.trim();
+            const r = await fetchAdmin(
+                `/api/v1/admin/bible/words?translationId=${translationId}&size=${WORD_SEARCH_SIZE}`
+                + (term ? `&term=${encodeURIComponent(term)}` : ""));
+            manualWordId.replaceChildren();
+            if (r.content.length === 0) {
+                manualWordId.append(new Option("검색 결과가 없습니다", ""));
+            } else {
+                r.content.forEach(w => manualWordId.append(
+                    new Option(`${w.term} (${STATUS_LABEL[w.status] ?? w.status})`, w.id)));
+            }
+            // 서버는 표제어순으로 정렬한 뒤 이 개수만큼 자를 뿐, 잘렸는지 알려 주지 않는다.
+            manualResult.textContent = r.totalElements > r.content.length
+                ? `${r.totalElements}건 중 ${r.content.length}건 — 검색어를 좁혀 주세요`
+                : `${r.content.length}건`;
+        } catch (e) {
+            manualResult.textContent = "";
+            alert(e.message);
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    document.getElementById("manualAddBtn")?.addEventListener("click", async (event) => {
+        const bibleWordId = parseInt(manualWordId.value, 10);
+        const chapterNumber = parseInt(document.getElementById("manualChapter").value, 10);
+        const wordCount = parseInt(document.getElementById("manualCount").value, 10);
+        if (Number.isNaN(bibleWordId)) {
+            alert("표제어를 먼저 검색해서 선택해 주세요.");
+            return;
+        }
+        // 빈 칸은 NaN 이 되고 JSON.stringify 가 null 로 바꾼다. 서버의 Int 는 non-null 이라
+        // 400 으로 떨어지는데, 메시지만으로는 어느 칸이 비었는지 알 수 없다.
+        if (Number.isNaN(chapterNumber) || Number.isNaN(wordCount)) {
+            alert("장과 횟수를 입력해 주세요.");
+            return;
+        }
+        const btn = event.currentTarget;
+        btn.disabled = true;
+        try {
+            await fetchAdmin("/api/v1/admin/bible/word-stats", {
+                method: "POST",
+                body: JSON.stringify({translationId, bookOrder, chapterNumber, bibleWordId, wordCount}),
+            });
+            location.reload();
+        } catch (e) {
+            alert(e.message);
+        } finally {
+            btn.disabled = false;
+        }
+    });
 
     document.getElementById("recalcBtn")?.addEventListener("click", async (event) => {
         const btn = event.currentTarget;

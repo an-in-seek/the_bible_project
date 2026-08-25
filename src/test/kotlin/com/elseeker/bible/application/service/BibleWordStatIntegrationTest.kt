@@ -11,13 +11,18 @@ import com.elseeker.bible.domain.model.BibleChapter
 import com.elseeker.bible.domain.model.BibleTranslation
 import com.elseeker.bible.domain.model.BibleVerse
 import com.elseeker.bible.domain.model.BibleWord
+import com.elseeker.bible.domain.model.BibleWordStat
 import com.elseeker.bible.domain.vo.BibleBookKey
 import com.elseeker.bible.domain.vo.BibleTestamentType
 import com.elseeker.bible.domain.vo.BibleTranslationType
+import com.elseeker.bible.domain.vo.BibleWordCategory
 import com.elseeker.bible.domain.vo.BibleWordStatSource
 import com.elseeker.bible.domain.vo.BibleWordStatus
 import com.elseeker.common.IntegrationTest
+import com.elseeker.common.domain.ErrorType
+import com.elseeker.common.domain.ServiceError
 import com.neovisionaries.i18n.LanguageCode
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.nulls.shouldNotBeNull
 import io.kotest.matchers.shouldBe
@@ -74,9 +79,9 @@ class BibleWordStatIntegrationTest @Autowired constructor(
         verseRepository.save(BibleVerse(chapterId = chapter.id!!, verseNumber = 2, text = "하나님이 빛을 보시니 하나님이 좋았더라"))
 
         godWord = wordRepository.save(
-            BibleWord.approvedOf(translationId, "하나님", com.elseeker.bible.domain.vo.BibleWordCategory.CONCEPT, null)
+            BibleWord.approvedOf(translationId, "하나님", BibleWordCategory.CONCEPT, null)
         )
-        wordRepository.save(BibleWord.approvedOf(translationId, "빛", com.elseeker.bible.domain.vo.BibleWordCategory.CONCEPT, null))
+        wordRepository.save(BibleWord.approvedOf(translationId, "빛", BibleWordCategory.CONCEPT, null))
     }
 
     @Test
@@ -148,6 +153,40 @@ class BibleWordStatIntegrationTest @Autowired constructor(
 
         book.chapterNumber shouldBe null
         book.items.first().term shouldBe "하나님"
+    }
+
+    @Test
+    @DisplayName("관리자가 직접 넣은 장 행은 재계산 후 책 합계에 더해진다")
+    fun manualRowJoinsBookTotal() {
+        // given — 본문에 없어 자동 집계로는 절대 생기지 않는 표제어
+        adminBibleWordStatService.recalculateBook(translationId, BOOK_ORDER)
+        val angel = wordRepository.save(
+            BibleWord.approvedOf(translationId, "천사", BibleWordCategory.CONCEPT, null)
+        )
+
+        // when
+        adminBibleWordStatService.createManual(translationId, BOOK_ORDER, 1, angel.id!!, 5)
+        adminBibleWordStatService.recalculateBook(translationId, BOOK_ORDER)
+
+        // then — 합계를 자동 집계 결과만으로 만들면 손으로 넣은 장이 책 행에서 통째로 빠진다
+        val bookRow = statRepository.findAll()
+            .first { it.bibleWordId == angel.id && it.chapterNumber == BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER }
+        bookRow.wordCount shouldBe 5
+    }
+
+    @Test
+    @DisplayName("같은 장에 같은 표제어를 또 넣으면 거부된다")
+    fun manualRowRejectsDuplicate() {
+        // given
+        adminBibleWordStatService.createManual(translationId, BOOK_ORDER, 1, godWord.id!!, 7)
+
+        // when
+        val error = shouldThrow<ServiceError> {
+            adminBibleWordStatService.createManual(translationId, BOOK_ORDER, 1, godWord.id!!, 9)
+        }
+
+        // then — 유니크 제약에 맡기면 GlobalExceptionHandler 가 못 잡아 500 + ERROR 로그가 된다
+        error.errorType shouldBe ErrorType.BIBLE_WORD_STAT_DUPLICATED
     }
 
     // ------------ Private Methods ------------

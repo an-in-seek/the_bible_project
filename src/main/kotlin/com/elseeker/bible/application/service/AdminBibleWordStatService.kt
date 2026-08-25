@@ -150,6 +150,12 @@ class AdminBibleWordStatService(
         return stat
     }
 
+    /**
+     * 자동 매칭이 잡지 못한 행을 관리자가 직접 넣는다.
+     *
+     * 장 행을 넣어도 책 행(`chapterNumber = 0`)의 합계는 그 자리에서 바뀌지 않는다.
+     * 합계는 재계산이 [buildBookRows] 에서 다시 만든다.
+     */
     @Transactional
     fun createManual(
         translationId: Long,
@@ -166,6 +172,16 @@ class AdminBibleWordStatService(
         if (word.translationId != translationId) {
             throwError(ErrorType.INVALID_PARAMETER, "어휘의 번역본이 다릅니다")
         }
+        // 없는 책 번호로도 행이 만들어진다. 그 행은 어느 화면에도 나오지 않으므로
+        // 관리자는 넣었다고 믿는 값을 영영 찾지 못한다.
+        bibleBookRepository.findByTranslationAndBook(translationId, bookOrder)
+            ?: throwError(ErrorType.BOOK_NOT_FOUND, "translationId=$translationId, bookOrder=$bookOrder")
+
+        val duplicated = bibleWordStatRepository
+            .existsByTranslationIdAndBookOrderAndChapterNumberAndBibleWordId(
+                translationId, bookOrder, chapterNumber, bibleWordId
+            )
+        if (duplicated) throwError(ErrorType.BIBLE_WORD_STAT_DUPLICATED, word.term)
 
         return bibleWordStatRepository.save(
             BibleWordStat.manual(bibleWordId, translationId, bookOrder, chapterNumber, wordCount)

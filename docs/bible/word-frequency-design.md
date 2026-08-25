@@ -1009,7 +1009,7 @@ BIBLE_WORD_DUPLICATED(HttpStatus.CONFLICT, "이미 등록된 단어 또는 별�
 |---|---|---|
 | `/web/admin/bible/words` | `admin-bible-word-list.html` | 어휘 목록. 상태·분류·언어 필터, 검색, 사전 연결 여부 표시 |
 | `/web/admin/bible/words/new`, `/{id}/edit` | `admin-bible-word-form.html` | 어휘 등록·수정. 별칭 편집, 사전 연결, 상태 변경 |
-| `/web/admin/bible/word-stats` | `admin-bible-word-stat-list.html` | 번역본·책·장 선택 → 카운트 목록. 인라인 수정, `MANUAL` 배지, 재계산 버튼 |
+| `/web/admin/bible/word-stats` | `admin-bible-word-stat-list.html` | 번역본·책·장 선택 → 카운트 목록. 인라인 수정, `MANUAL` 배지, 재계산 버튼, 수동 행 추가 |
 | `/web/admin/bible/word-candidates` | `admin-bible-word-candidate-list.html` | 미매칭 후보 목록. 행마다 [어휘 등록] / [차단] |
 
 - 목록 화면 상단 툴바에 **"사전에서 가져오기"**, **"재계산"** 버튼을 둔다.

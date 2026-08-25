@@ -35,6 +35,11 @@ enum class ErrorType(
     BIBLE_WORD_NOT_FOUND(HttpStatus.NOT_FOUND, "단어를 찾을 수 없습니다.", LogLevel.WARN),
     BIBLE_WORD_STAT_NOT_FOUND(HttpStatus.NOT_FOUND, "단어 통계를 찾을 수 없습니다.", LogLevel.WARN),
     BIBLE_WORD_DUPLICATED(HttpStatus.CONFLICT, "이미 등록된 단어 또는 별칭입니다.", LogLevel.WARN),
+    BIBLE_WORD_STAT_DUPLICATED(
+        HttpStatus.CONFLICT,
+        "해당 장에 그 표제어의 통계 행이 이미 있습니다. 목록에서 값을 고쳐 주세요.",
+        LogLevel.WARN
+    ),
     DICTIONARY_NOT_FOUND(HttpStatus.NOT_FOUND, "성경 사전 용어를 찾을 수 없습니다.", LogLevel.WARN),
     QUIZ_STAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "퀴즈 스테이지를 찾을 수 없습니다.", LogLevel.WARN),
     QUIZ_QUESTION_NOT_FOUND(HttpStatus.NOT_FOUND, "퀴즈 문제를 찾을 수 없습니다.", LogLevel.WARN),
