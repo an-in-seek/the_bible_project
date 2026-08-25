@@ -181,6 +181,24 @@ html[data-theme="dark"] .form-textarea:focus {
     html {
         scroll-padding-bottom: calc(var(--keyboard-inset, 0px) + 7rem);
     }
+
+    /* 입력 중에는 넉넉히 잡는다. --keyboard-inset 이 늦게 도착하거나 0 이면 7rem(112px)
+       으로는 키보드(대개 300~400px)를 못 넘어, 브라우저가 "다 보인다" 고 판단하고 만다. */
+    html:has(.write-form :focus) {
+        scroll-padding-bottom: max(calc(var(--keyboard-inset, 0px) + 7rem), 55vh);
+    }
+
+    /* 스크롤할 여지 자체를 만들어 둔다.
+       브라우저가 커서를 보이게 스크롤하려 해도 내릴 곳이 없으면 아무 일도 못 한다.
+       이 화면은 쉴 때 문서 높이가 뷰포트 높이와 같아(실측 915 = 915) 여지가 0 이었고,
+       그것이 이전 수정이 실기기에서 통째로 무력했던 이유다.
+
+       :focus-within 이라 스크립트가 한 줄도 돌지 않아도 걸린다. 아래 패널 모드는
+       스크립트가 붙이는 클래스에 달려 있으므로, 이 규칙이 마지막 안전망이다.
+       빈 자리는 입력 중에만 생기고 포커스가 빠지면 사라진다. */
+    .write-layout:focus-within {
+        padding-bottom: 60vh;
+    }
 }
 
 /* ── 패널 모드: 키보드가 떠 있는 동안 폼을 보이는 띠에 통째로 맞춘다 ──────
@@ -197,10 +215,14 @@ html[data-theme="dark"] .form-textarea:focus {
    무엇도 키보드 뒤로 넘어갈 수 없다.
 
    터치 기기로 한정한다. 데스크톱에서 창을 줄이는 것을 키보드로 오인하면 안 된다.
+   다만 `(hover: none) and (pointer: coarse)` 로는 안 된다. **S펜을 쓰는 갤럭시는
+   hover: hover / pointer: fine 을 보고한다** — 정작 이 문제가 보고된 기기가 그 계열인데
+   조건에서 빠져 버린다. 그래서 mobile-keyboard.js 가 maxTouchPoints 로 판단해
+   <html> 에 붙이는 `.has-touch` 를 쓴다.
    ──────────────────────────────────────────────────────────────────────── */
 
-@media (max-width: 1024px) and (hover: none) and (pointer: coarse) {
-    body.keyboard-open .write-layout {
+@media (max-width: 1024px) {
+    .has-touch body.keyboard-open .write-layout {
         position: fixed;
         top: var(--visual-viewport-offset-top, 0px);
         left: 0;
@@ -210,13 +232,16 @@ html[data-theme="dark"] .form-textarea:focus {
         height: var(--visual-viewport-height, 100dvh);
         max-width: none;
         margin: 0;
+        /* 위 :focus-within 여백은 패널 모드에서 필요 없다. border-box 라 그대로 두면
+           height 안쪽을 60vh 나 먹어 버린다. */
+        padding: 0;
         /* 헤더(1030)를 덮는다. 글을 쓰는 동안에는 폼이 화면 전부여도 된다. */
         z-index: 1040;
         display: flex;
         background: var(--write-bg-page);
     }
 
-    body.keyboard-open .write-main {
+    .has-touch body.keyboard-open .write-main {
         display: flex;
         flex: 1 1 auto;
         min-width: 0;
@@ -226,7 +251,7 @@ html[data-theme="dark"] .form-textarea:focus {
         margin: 0 auto;
     }
 
-    body.keyboard-open .write-form {
+    .has-touch body.keyboard-open .write-form {
         display: flex;
         flex: 1 1 auto;
         flex-direction: column;
@@ -242,7 +267,7 @@ html[data-theme="dark"] .form-textarea:focus {
     /* 띠가 아주 낮을 때(가로 모드 등)는 입력칸 쪽만 스크롤된다. 액션 바가 이 영역
        바깥에 있으므로, 칸이 아무리 좁아져도 등록 버튼이 밀려나지 않는다.
        sticky 로 대신하면 스크롤이 필요 없는 높이에서도 바가 본문 위로 겹쳐 올라온다. */
-    body.keyboard-open .write-fields {
+    .has-touch body.keyboard-open .write-fields {
         display: flex;
         flex: 1 1 auto;
         flex-direction: column;
@@ -251,30 +276,30 @@ html[data-theme="dark"] .form-textarea:focus {
         overscroll-behavior: contain;
     }
 
-    body.keyboard-open .form-group {
+    .has-touch body.keyboard-open .form-group {
         margin-bottom: 0.6rem;
     }
 
     /* 카테고리·제목 칸이 좁은 띠에서는 본문 자리를 크게 먹는다. 조금 눌러 본문에 준다.
        작은 화면일수록 차이가 크다 — 띠가 350px 안팎이면 본문이 두 줄에서 네 줄이 된다. */
-    body.keyboard-open .form-label {
+    .has-touch body.keyboard-open .form-label {
         margin-bottom: 0.25rem;
         font-size: 0.85rem;
     }
 
-    body.keyboard-open .form-select,
-    body.keyboard-open .form-input {
+    .has-touch body.keyboard-open .form-select,
+    .has-touch body.keyboard-open .form-input {
         padding: 0.5rem 0.75rem;
     }
 
-    body.keyboard-open .form-group-content {
+    .has-touch body.keyboard-open .form-group-content {
         display: flex;
         flex: 1 1 auto;
         flex-direction: column;
         min-height: 0;
     }
 
-    body.keyboard-open .form-textarea {
+    .has-touch body.keyboard-open .form-textarea {
         flex: 1 1 auto;
         min-height: 3.5rem;
         max-height: none;
@@ -284,7 +309,7 @@ html[data-theme="dark"] .form-textarea:focus {
 
     /* 흐름 안으로 되돌린다. 패널 바닥이 곧 키보드 윗변이라 고정할 이유가 없고,
        고정을 유지하면 --keyboard-inset 이 늦게 도착했을 때 다시 키보드 뒤로 간다. */
-    body.keyboard-open .form-actions {
+    .has-touch body.keyboard-open .form-actions {
         position: static;
         flex: 0 0 auto;
         margin-top: 0.6rem;

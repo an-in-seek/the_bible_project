@@ -1,6 +1,6 @@
 import { fetchWithAuthRetry } from "/js/common-util.js";
 import { buildLoginRedirectUrl, checkAuthStatus } from "/js/auth/auth-check.js";
-import { keepFieldVisible, observeSoftKeyboard } from "/js/mobile-keyboard.js?v=2.0";
+import { keepFieldVisible, observeSoftKeyboard } from "/js/mobile-keyboard.js?v=2.1";
 
 const API_POSTS = "/api/v1/community/posts";
 

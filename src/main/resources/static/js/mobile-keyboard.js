@@ -83,10 +83,20 @@ const isEditable = (el) => !!el && typeof el.matches === "function" && el.matche
  * @returns {() => void} 구독 해제 함수
  */
 export function observeSoftKeyboard() {
+    const root = document.documentElement;
+
+    // 화면 키보드가 있는 기기인지 CSS 에 알린다.
+    //
+    // `(hover: none) and (pointer: coarse)` 로는 안 된다. **S펜을 쓰는 갤럭시는
+    // hover: hover / pointer: fine 을 보고한다.** 손가락으로도 쓰는 휴대폰인데 미디어
+    // 쿼리만 보면 데스크톱과 구분되지 않아, 정작 문제가 심한 기기가 대응에서 빠진다.
+    // maxTouchPoints 는 그 기기들에서도 0 보다 크다.
+    if (navigator.maxTouchPoints > 0 || "ontouchstart" in window) {
+        root.classList.add("has-touch");
+    }
+
     const vv = window.visualViewport;
     if (!vv) return () => {};
-
-    const root = document.documentElement;
     /** 키보드가 없을 때의 높이. 주소창이 접히면 커지므로 본 것 중 가장 큰 값을 쓴다. */
     let restHeight = 0;
     let timers = [];
