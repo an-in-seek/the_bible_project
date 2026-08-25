@@ -62,4 +62,19 @@ class BibleTranslationTypeTest {
             BibleTranslationType.JPNMEB
         )
     }
+
+    @Test
+    @DisplayName("중국어 번역본은 CUVT 와 CUVS 두 개다")
+    fun chineseTranslations() {
+        // given — 본문은 실려 있으나 아직 선택 화면에 내보내지 않는다(BibleTranslationType 주석 참고).
+        //         노출을 시작할 때 이 목록을 다시 보게 하려고 고정해 둔다.
+        // when
+        val chinese = BibleTranslationType.entries.filter { it.language == LanguageCode.zh }
+
+        // then
+        chinese shouldContainExactlyInAnyOrder listOf(
+            BibleTranslationType.CUVT,
+            BibleTranslationType.CUVS
+        )
+    }
 }

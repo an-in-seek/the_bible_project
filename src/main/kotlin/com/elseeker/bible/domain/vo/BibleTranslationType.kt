@@ -59,7 +59,28 @@ enum class BibleTranslationType(
      * 구어역은 일본에서 퍼블릭 도메인이고 新改訳 은 저작권이 살아 있다. 이 상수 이름과 설명은
      * 어떤 본문을 싣고 있는지에 대한 기록이므로 본문을 바꾸지 않는 한 함께 바꾸지 않는다.
      */
-    KOUGO("KOUGO", "Japanese Colloquial Bible (1954/1955)", LanguageCode.ja);
+    KOUGO("KOUGO", "Japanese Colloquial Bible (1954/1955)", LanguageCode.ja),
+
+    /**
+     * 和合本(Chinese Union Version). [CUVT] 는 번체, [CUVS] 는 간체다.
+     *
+     * **아직 번역본 선택 화면에는 나오지 않는다.** 본문은 66권이 다 실려 있지만
+     * `BibleReader.getTranslations()` 의 허용 목록에 넣으려면 두 가지가 먼저 필요하다.
+     *
+     * 1. `bible_book_description` 의 `zh` 행. 지금 ko/en/es/ja 만 66건씩 있고 zh 는 0건이라,
+     *    넣는 즉시 책 소개 API 가 **200 에 빈 본문**을 돌려준다(`BibleReader.getBook()` 이
+     *    소개를 못 찾으면 null 을 돌려주고 `BibleApi` 가 그대로 200 으로 싣는다).
+     * 2. 중국어 토큰화. [com.elseeker.bible.application.component.BibleWordTokenizer.splitWords] 는
+     *    한국어가 아니면 `[^a-záéíóúüñç\s]` 를 공백으로 바꾸므로 한자가 통째로 지워진다.
+     *    지금 상태로 단어 통계를 돌리면 오류 없이 0건이 나온다.
+     *
+     * 그래서 상수만 먼저 둔다. 이것이 없으면 `bible_translation` 의 해당 행을 읽는 순간
+     * `No enum constant` 로 500 이 나므로, 노출 여부와 무관하게 상수는 DB 와 맞춰 두어야 한다.
+     *
+     * 간체(29,963절)가 번체(31,102절)보다 1,139절 적다. 원본 자료의 차이이며 확인이 필요하다.
+     */
+    CUVT("CUVT", "Chinese Union Version (Traditional)", LanguageCode.zh),
+    CUVS("CUVS", "Chinese Union Version (Simplified)", LanguageCode.zh);
 
     companion object {
         fun fromAbbreviation(abbr: String): BibleTranslationType {
