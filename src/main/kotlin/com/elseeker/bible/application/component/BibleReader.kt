@@ -43,7 +43,11 @@ class BibleReader(
                 BibleTranslationType.RVR1909,
                 BibleTranslationType.SBLM,
                 BibleTranslationType.JPNMEB,
-                BibleTranslationType.KOUGO
+                BibleTranslationType.KOUGO,
+                // 중국어는 읽기만 연다. 단어 통계는 한자 토큰화가 없어 0건이 나온다
+                // (BibleTranslationType.CUVT 주석 참고).
+                BibleTranslationType.CUVT,
+                BibleTranslationType.CUVS
             )
         ).map(BibleResult.Translation::from)
 

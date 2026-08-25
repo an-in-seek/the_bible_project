@@ -64,18 +64,20 @@ enum class BibleTranslationType(
     /**
      * 和合本(Chinese Union Version). [CUVT] 는 번체, [CUVS] 는 간체다.
      *
-     * **아직 번역본 선택 화면에는 나오지 않는다.** 본문은 66권이 다 실려 있지만
-     * `BibleReader.getTranslations()` 의 허용 목록에 넣으려면 두 가지가 먼저 필요하다.
+     * **읽기만 열려 있다.** 본문 66권과 `bible_book_description` 의 `zh` 66행이 갖춰져
+     * `BibleReader.getTranslations()` 의 허용 목록에 들어가 있지만, **단어 통계는 나오지 않는다.**
+     * [com.elseeker.bible.application.component.BibleWordTokenizer.splitWords] 가 한국어가 아니면
+     * `[^a-záéíóúüñç\s]` 를 공백으로 바꾸므로 한자가 통째로 지워진다. 오류 없이 0건이 되므로
+     * "왜 통계가 비어 있지" 를 여기서 찾을 수 있게 적어 둔다. 중국어는 띄어쓰기가 없어
+     * 어절 분할 자체가 성립하지 않으니, 열려면 n-gram 분할이나 사전 기반 분사가 필요하다.
      *
-     * 1. `bible_book_description` 의 `zh` 행. 지금 ko/en/es/ja 만 66건씩 있고 zh 는 0건이라,
-     *    넣는 즉시 책 소개 API 가 **200 에 빈 본문**을 돌려준다(`BibleReader.getBook()` 이
-     *    소개를 못 찾으면 null 을 돌려주고 `BibleApi` 가 그대로 200 으로 싣는다).
-     * 2. 중국어 토큰화. [com.elseeker.bible.application.component.BibleWordTokenizer.splitWords] 는
-     *    한국어가 아니면 `[^a-záéíóúüñç\s]` 를 공백으로 바꾸므로 한자가 통째로 지워진다.
-     *    지금 상태로 단어 통계를 돌리면 오류 없이 0건이 나온다.
+     * 책 소개는 `zh` 한 벌뿐이다. `language_code` 가 ISO 639-1 [LanguageCode] 이고
+     * `(book_key, language_code)` 유니크 제약이 있어 번체·간체를 갈라 담을 수 없다.
+     * **지금 실린 것은 간체자**라 번체 본문을 읽는 독자도 간체 소개를 보게 된다.
+     * 갈라야 한다면 `LocaleCode`(zh-TW/zh-CN)로 바꾸거나 script 컬럼을 더하는 스키마 변경이 필요하다.
      *
-     * 그래서 상수만 먼저 둔다. 이것이 없으면 `bible_translation` 의 해당 행을 읽는 순간
-     * `No enum constant` 로 500 이 나므로, 노출 여부와 무관하게 상수는 DB 와 맞춰 두어야 한다.
+     * 상수 이름은 노출 여부와 무관하게 DB 와 맞춰 두어야 한다. 없으면 `bible_translation` 의
+     * 해당 행을 읽는 순간 `No enum constant` 로 500 이 난다.
      *
      * 간체(29,963절)가 번체(31,102절)보다 1,139절 적다. 원본 자료의 차이이며 확인이 필요하다.
      */
