@@ -71,14 +71,24 @@
              표제어는 글자가 아니라 id 로 넣는다 — 같은 글자의 표제어가 번역본마다 따로 있다. -->
         <section class="mt-3" th:if="${translationId != null and bookOrder != null}">
             <h3 class="h6">수동 행 추가</h3>
+            <!-- 칸 순서가 곧 손이 움직이는 순서다: 검색어 → 표제어 → 장 → 횟수 → 추가.
+                 검색 버튼은 검색칸 옆에 둔다. 아래 버튼 줄에 두면 검색할 때마다 칸 네 개를
+                 건너뛰었다가 되돌아와야 한다. -->
             <div class="admin-form admin-form-grid">
                 <div class="form-group">
                     <label for="manualTerm">표제어 검색</label>
-                    <input type="text" id="manualTerm" placeholder="일부만 입력해도 됩니다">
+                    <div class="d-flex gap-2">
+                        <input type="text" id="manualTerm" placeholder="일부만 입력해도 됩니다"
+                               autocomplete="off" enterkeyhint="search">
+                        <button type="button" class="btn btn-outline-secondary btn-sm flex-shrink-0"
+                                id="manualSearchBtn">검색</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label for="manualWordId">표제어</label>
-                    <select id="manualWordId">
+                    <!-- 검색 전에는 잠가 둔다. 고를 것이 없는 셀렉트를 열어 두면 "추가" 를
+                         눌러 본 뒤에야 순서를 알게 된다. -->
+                    <select id="manualWordId" disabled>
                         <option value="">검색을 먼저 실행하세요</option>
                     </select>
                 </div>
@@ -91,11 +101,11 @@
                     <label for="manualCount">횟수</label>
                     <input type="number" id="manualCount" min="0" value="1">
                 </div>
+                <!-- 칸 안에 두면 검색 결과가 뜰 때 그 칸만 높아져, align-items:end 인 그리드에서
+                     표제어 셀렉트만 위로 튄다. 전체 폭 한 줄로 빼서 네 칸의 높이를 붙들어 둔다. -->
+                <div id="manualResult" class="text-muted small" style="grid-column: 1 / -1"></div>
                 <div class="admin-form-actions">
-                    <button type="button" class="btn btn-outline-secondary btn-sm" id="manualSearchBtn">표제어 검색</button>
                     <button type="button" class="btn btn-primary btn-sm" id="manualAddBtn">추가</button>
-                    <!-- .admin-form-actions 는 flex 기본값(stretch)이라 그냥 두면 글자가 위로 붙는다. -->
-                    <span id="manualResult" class="text-muted small align-self-center"></span>
                 </div>
             </div>
             <p class="text-muted small mt-2">
@@ -287,67 +297,121 @@
     const WORD_SEARCH_SIZE = 50;
     const STATUS_LABEL = {APPROVED: "승인", CANDIDATE: "후보", BLOCKED: "차단"};
 
-    const manualWordId = document.getElementById("manualWordId");
-    const manualResult = document.getElementById("manualResult");
+    // 추가 직후 새로고침해야 아래 표에 방금 넣은 행이 보인다. 그런데 한 장에 여러 단어를
+    // 넣는 것이 보통이라, 매번 검색어부터 다시 치게 하면 흐름이 거기서 끊긴다.
+    // 검색어와 장을 넘겨 두었다가 새 화면에서 되살리고 검색까지 다시 돌린다.
+    const MANUAL_STASH_KEY = "admin-word-stat-manual";
 
-    document.getElementById("manualSearchBtn")?.addEventListener("click", async (event) => {
-        const btn = event.currentTarget;
-        btn.disabled = true;
+    const manualTerm = document.getElementById("manualTerm");
+    const manualWordId = document.getElementById("manualWordId");
+    const manualChapter = document.getElementById("manualChapter");
+    const manualCount = document.getElementById("manualCount");
+    const manualResult = document.getElementById("manualResult");
+    const manualSearchBtn = document.getElementById("manualSearchBtn");
+    const manualAddBtn = document.getElementById("manualAddBtn");
+
+    const searchWords = async () => {
+        manualSearchBtn.disabled = true;
         manualResult.textContent = "검색 중…";
         try {
             // 어휘는 번역본별이다. 화면의 번역본으로 제한하지 않으면 옆 번역본의 표제어를 골라
             // 넣게 되고, 서버는 그것만 거부하므로 관리자는 왜 거부됐는지 알 수 없다.
-            const term = document.getElementById("manualTerm").value.trim();
+            const term = manualTerm.value.trim();
             const r = await fetchAdmin(
                 `/api/v1/admin/bible/words?translationId=${translationId}&size=${WORD_SEARCH_SIZE}`
                 + (term ? `&term=${encodeURIComponent(term)}` : ""));
+
             manualWordId.replaceChildren();
+            manualWordId.disabled = r.content.length === 0;
             if (r.content.length === 0) {
                 manualWordId.append(new Option("검색 결과가 없습니다", ""));
-            } else {
-                r.content.forEach(w => manualWordId.append(
-                    new Option(`${w.term} (${STATUS_LABEL[w.status] ?? w.status})`, w.id)));
+                manualResult.textContent = "어휘에 없는 단어입니다. 어휘 관리나 미매칭 후보에서 먼저 등록해 주세요.";
+                manualTerm.select();
+                return;
             }
+            // 결과가 하나뿐이면 고를 것이 없으니 바로 잡아 준다. 여럿이면 첫 항목이 저절로
+            // 골라져 있는 편이 위험하다 — 눈으로 확인하지 않고 "추가" 를 누르게 된다.
+            if (r.content.length > 1) manualWordId.append(new Option("표제어를 선택하세요", ""));
+            r.content.forEach(w => manualWordId.append(
+                new Option(`${w.term} (${STATUS_LABEL[w.status] ?? w.status})`, w.id)));
+
             // 서버는 표제어순으로 정렬한 뒤 이 개수만큼 자를 뿐, 잘렸는지 알려 주지 않는다.
             manualResult.textContent = r.totalElements > r.content.length
                 ? `${r.totalElements}건 중 ${r.content.length}건 — 검색어를 좁혀 주세요`
                 : `${r.content.length}건`;
+            manualWordId.focus();
         } catch (e) {
             manualResult.textContent = "";
             alert(e.message);
         } finally {
-            btn.disabled = false;
+            manualSearchBtn.disabled = false;
         }
-    });
+    };
 
-    document.getElementById("manualAddBtn")?.addEventListener("click", async (event) => {
+    const addManualRow = async () => {
         const bibleWordId = parseInt(manualWordId.value, 10);
-        const chapterNumber = parseInt(document.getElementById("manualChapter").value, 10);
-        const wordCount = parseInt(document.getElementById("manualCount").value, 10);
+        const chapterNumber = parseInt(manualChapter.value, 10);
+        const wordCount = parseInt(manualCount.value, 10);
         if (Number.isNaN(bibleWordId)) {
             alert("표제어를 먼저 검색해서 선택해 주세요.");
+            (manualWordId.disabled ? manualTerm : manualWordId).focus();
             return;
         }
         // 빈 칸은 NaN 이 되고 JSON.stringify 가 null 로 바꾼다. 서버의 Int 는 non-null 이라
         // 400 으로 떨어지는데, 메시지만으로는 어느 칸이 비었는지 알 수 없다.
         if (Number.isNaN(chapterNumber) || Number.isNaN(wordCount)) {
             alert("장과 횟수를 입력해 주세요.");
+            (Number.isNaN(chapterNumber) ? manualChapter : manualCount).focus();
             return;
         }
-        const btn = event.currentTarget;
-        btn.disabled = true;
+        manualAddBtn.disabled = true;
         try {
             await fetchAdmin("/api/v1/admin/bible/word-stats", {
                 method: "POST",
                 body: JSON.stringify({translationId, bookOrder, chapterNumber, bibleWordId, wordCount}),
             });
+            try {
+                sessionStorage.setItem(MANUAL_STASH_KEY,
+                    JSON.stringify({term: manualTerm.value, chapterNumber}));
+            } catch { /* 저장이 막혀 있어도 추가 자체는 끝났다 */ }
             location.reload();
         } catch (e) {
             alert(e.message);
         } finally {
-            btn.disabled = false;
+            manualAddBtn.disabled = false;
         }
+    };
+
+    // 한글 조합 중의 엔터는 글자를 확정하는 키다. 여기서 가로채면 마지막 음절이 조합 상태인
+    // 채로 검색어가 나간다.
+    const onEnter = (input, handler) => input.addEventListener("keydown", (event) => {
+        if (event.key !== "Enter" || event.isComposing) return;
+        event.preventDefault();
+        handler();
     });
+
+    if (manualSearchBtn) {
+        manualSearchBtn.addEventListener("click", searchWords);
+        manualAddBtn.addEventListener("click", addManualRow);
+        onEnter(manualTerm, searchWords);
+        // 장에서 엔터는 다음 칸으로 넘어가는 것이지 등록이 아니다. 여기서 바로 등록하면
+        // 아직 손대지 않은 횟수 기본값 1 이 그대로 들어간다.
+        onEnter(manualChapter, () => manualCount.select());
+        onEnter(manualCount, addManualRow);
+
+        // 여기서 예외가 새면 아래의 재계산 버튼까지 등록되지 않는다. 되살리기는 편의일 뿐이라
+        // 실패하면 조용히 포기한다.
+        try {
+            const stashed = sessionStorage.getItem(MANUAL_STASH_KEY);
+            sessionStorage.removeItem(MANUAL_STASH_KEY);
+            if (stashed) {
+                const {term, chapterNumber} = JSON.parse(stashed);
+                manualTerm.value = term ?? "";
+                manualChapter.value = chapterNumber;
+                searchWords();
+            }
+        } catch { /* ignore */ }
+    }
 
     document.getElementById("recalcBtn")?.addEventListener("click", async (event) => {
         const btn = event.currentTarget;
