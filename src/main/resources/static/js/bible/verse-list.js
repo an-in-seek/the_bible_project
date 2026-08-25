@@ -3,7 +3,7 @@ import {applyOAuthBackGuardIfNeeded, buildLoginRedirectUrl, checkAuthStatus, ref
 import {bindNavSelectLabelFit, fitNavSelectLabel, setupDialogScrollLock} from "/js/common-util.js?v=2.4";
 import {showConfirm} from "/js/confirm-dialog.js?v=1.0";
 import {bindFromBackButton} from "/js/nav-restore.js?v=1.1";
-import {initWordStats} from "/js/bible/word-stats.js?v=1.6";
+import {initWordStats} from "/js/bible/word-stats.js?v=1.7";
 
 const UI_CLASSES = {
     HIDDEN: "d-none"

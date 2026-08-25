@@ -54,6 +54,30 @@ const PADDING = 8;
 
 const RESIZE_DEBOUNCE_MS = 200;
 
+/*
+ * 모바일에서는 가운데 카드가 아니라 바텀 시트로 뜬다(word-stats.css 의 같은 이름 블록).
+ * 기준 폭은 top-nav 계정 메뉴와 같은 599.98px 다.
+ */
+const SHEET_MEDIA = "(max-width: 599.98px)";
+const REDUCED_MOTION_MEDIA = "(prefers-reduced-motion: reduce)";
+/** **CSS 의 각 애니메이션 지속 시간과 같아야 한다.** animationend 가 안 올 때의 보정 타이머다. */
+const SHEET_OPEN_MS = 260;
+const SHEET_CLOSE_MS = 220;
+const SHEET_OPEN_ANIMATION = "word-stats-sheet-in";
+const SHEET_CLOSE_ANIMATION = "word-stats-sheet-out";
+// 이만큼 끌어내리면 닫는다. 더 짧게 잡으면 목록을 스크롤하려던 손짓에도 닫힌다.
+const SHEET_SWIPE_CLOSE_PX = 80;
+// 또는 이 속도(px/ms) 이상으로 튕기면 거리와 무관하게 닫는다
+const SHEET_SWIPE_CLOSE_VELOCITY = 0.5;
+// 다만 마지막 움직임이 이보다 오래됐으면 튕긴 것이 아니라 **멈춰 세운** 것이다.
+// 이 조건이 없으면 살짝 튕겼다가 손가락을 멈춰 붙잡고 있어도 뗄 때 그냥 닫힌다.
+const SHEET_FLICK_MAX_IDLE_MS = 120;
+// 이만큼 움직이기 전에는 드래그로 치지 않는다. 목록을 그냥 누른 것과 가르는 값이다.
+const SHEET_DRAG_SLOP_PX = 6;
+
+const isBottomSheet = () => window.matchMedia(SHEET_MEDIA).matches;
+const prefersReducedMotion = () => window.matchMedia(REDUCED_MOTION_MEDIA).matches;
+
 /** 사용자에게 보이는 날짜는 KST 로 고정한다(.claude/rules/time-and-locale.md). */
 const CALCULATED_AT_FORMAT = new Intl.DateTimeFormat("ko-KR", {
     dateStyle: "medium",
@@ -313,6 +337,150 @@ const render = (data) => {
     }
 };
 
+/*
+ * 시트를 닫는 경로는 하나로 모은다 — 닫기 버튼 · 배경 탭 · ESC · 끌어내리기.
+ *
+ * `dialog.close()` 는 [open] 을 즉시 떼어 내므로 그 자체로는 나가는 애니메이션을 재생할 수
+ * 없다. 그래서 먼저 `.is-closing` 을 붙여 CSS 애니메이션을 돌리고, 끝난 뒤에 실제로 닫는다.
+ * 데스크톱과 모션 최소화 설정에서는 이 우회가 필요 없으므로 곧장 close() 한다.
+ */
+let sheetCloseTimer = null;
+let sheetOpenTimer = null;
+
+/**
+ * 들어오는 애니메이션은 **한 번만** 재생되어야 하므로 일회용 클래스로 건다.
+ *
+ * CSS 에서 `[open]` 에 걸어 두면, 드래그가 `animation: none` 으로 껐다가 손을 뗄 때
+ * 되살아나면서 브라우저가 애니메이션을 새로 만든다 — 시트를 건드릴 때마다 화면 밖에서
+ * 다시 올라온다. 그래서 열 때 붙이고 끝나면 뗀다.
+ */
+const startSheetOpen = () => {
+    clearTimeout(sheetOpenTimer);
+    els.dialog.classList.add("is-opening");
+    sheetOpenTimer = setTimeout(finishSheetOpen, SHEET_OPEN_MS + 80);
+};
+
+const finishSheetOpen = () => {
+    clearTimeout(sheetOpenTimer);
+    els.dialog?.classList.remove("is-opening");
+};
+
+const finishSheetClose = () => {
+    if (!els.dialog?.classList.contains("is-closing")) return;
+    clearTimeout(sheetCloseTimer);
+    els.dialog.classList.remove("is-closing");
+    els.dialog.style.removeProperty("--sheet-drag");
+    els.dialog.close();
+};
+
+const closeDialog = () => {
+    if (!els.dialog?.open) return;
+    if (!isBottomSheet() || prefersReducedMotion()) {
+        els.dialog.close();
+        return;
+    }
+    if (els.dialog.classList.contains("is-closing")) return;
+    els.dialog.classList.add("is-closing");
+    // animationend 가 오지 않는 경우(탭 비활성 등)에도 시트가 열린 채 남지 않게 한다
+    sheetCloseTimer = setTimeout(finishSheetClose, SHEET_CLOSE_MS + 80);
+};
+
+/**
+ * 아래로 끌어내려 닫기.
+ *
+ * 손잡이·헤더에서는 언제나 시작하고, 본문에서는 **맨 위에 있을 때만** 시작한다.
+ * 그러지 않으면 목록을 아래로 스크롤하려는 손짓이 매번 시트를 닫아 버린다.
+ *
+ * **`is-dragging` 은 손가락이 실제로 움직인 뒤에 붙인다.** touchstart 에서 바로 붙이면
+ * 그냥 한 번 누르기만 해도 클래스가 붙었다 떨어지고, 그 사이 애니메이션이 취소·재생성되어
+ * 시트가 화면 밖에서 다시 올라온다. 누르기와 끌기를 SHEET_DRAG_SLOP_PX 로 가른다.
+ */
+const bindSheetDrag = () => {
+    let startY = 0;
+    let lastY = 0;
+    let lastT = 0;
+    let velocity = 0;
+    let tracking = false;
+    let dragging = false;
+
+    const stopTracking = () => {
+        tracking = false;
+        if (!dragging) return;
+        dragging = false;
+        els.dialog.classList.remove("is-dragging");
+        els.dialog.style.removeProperty("transform");
+    };
+
+    const onStart = (event) => {
+        if (!els.dialog.open || !isBottomSheet()) return;
+        if (event.touches.length !== 1) return;
+        if (els.dialog.classList.contains("is-closing")) return;
+
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+        if (!target.closest(".word-stats-sheet-grip, .word-stats-header")) {
+            // 팝오버는 자기 안에서 스크롤한다. 여기서 시작하면 뜻풀이를 읽다가 시트가 닫힌다.
+            if (target.closest(".word-stats-popover")) return;
+            if (els.body.scrollTop > 0) return;
+        }
+
+        tracking = true;
+        dragging = false;
+        startY = lastY = event.touches[0].clientY;
+        lastT = event.timeStamp;
+        velocity = 0;
+    };
+
+    const onMove = (event) => {
+        if (!tracking) return;
+        const y = event.touches[0].clientY;
+        const dt = event.timeStamp - lastT;
+        if (dt > 0) velocity = (y - lastY) / dt;
+        lastY = y;
+        lastT = event.timeStamp;
+
+        const delta = y - startY;
+        if (!dragging) {
+            if (Math.abs(delta) < SHEET_DRAG_SLOP_PX) return;
+            dragging = true;
+            // 여는 애니메이션 중에 잡았다면 그것부터 끝낸 것으로 친다. 손가락이 우선이다.
+            finishSheetOpen();
+            els.dialog.classList.add("is-dragging");
+        }
+        // 위로 끌면 따라가지 않는다. 시트는 이미 바닥에 붙어 있다.
+        els.dialog.style.transform = delta > 0 ? `translateY(${delta}px)` : "translateY(0)";
+    };
+
+    const onEnd = (event) => {
+        if (!tracking) return;
+        const wasDragging = dragging;
+        const delta = lastY - startY;
+        // 손을 떼기 직전까지 움직이고 있었을 때만 '튕겼다'로 본다
+        const flicked = velocity > SHEET_SWIPE_CLOSE_VELOCITY
+            && event.timeStamp - lastT <= SHEET_FLICK_MAX_IDLE_MS;
+        stopTracking();
+        if (!wasDragging) return;
+
+        if (delta <= SHEET_SWIPE_CLOSE_PX && !flicked) return;
+        // 손을 뗀 자리에서 이어서 내려가도록 시작점을 넘긴다. 없으면 0 에서 다시 시작해 위로 튄다.
+        els.dialog.style.setProperty("--sheet-drag", `${Math.max(delta, 0)}px`);
+        closeDialog();
+    };
+
+    els.dialog.addEventListener("touchstart", onStart, {passive: true});
+    els.dialog.addEventListener("touchmove", onMove, {passive: true});
+    els.dialog.addEventListener("touchend", onEnd);
+    // 취소는 '손을 뗀 것'이 아니라 '없던 일'이다. 시스템 제스처에 가로채였을 뿐인데
+    // 닫아 버리면 사용자가 의도하지 않은 곳에서 시트가 사라진다. 제자리로 돌린다.
+    els.dialog.addEventListener("touchcancel", stopTracking);
+
+    els.dialog.addEventListener("animationend", (event) => {
+        if (event.target !== els.dialog) return;
+        if (event.animationName === SHEET_OPEN_ANIMATION) finishSheetOpen();
+        if (event.animationName === SHEET_CLOSE_ANIMATION) finishSheetClose();
+    });
+};
+
 const bindResize = () => {
     if (typeof ResizeObserver !== "function" || !els.dialog) return;
     const observer = new ResizeObserver(() => {
@@ -367,19 +535,32 @@ export const initWordStats = (config) => {
     state.config = config;
     setupDialogScrollLock(els.dialog);
     bindResize();
+    bindSheetDrag();
 
-    els.closeBtn?.addEventListener("click", () => els.dialog.close());
+    els.closeBtn?.addEventListener("click", closeDialog);
     els.popoverClose?.addEventListener("click", closePopover);
     els.dialog.addEventListener("close", () => {
         els.popover?.classList.add("d-none");
         state.popoverOpener = null;
+        // 닫는 애니메이션을 거치지 않은 경로(폼 submit, 다른 코드의 close())로도 흔적이 남지 않게
+        clearTimeout(sheetCloseTimer);
+        clearTimeout(sheetOpenTimer);
+        els.dialog.classList.remove("is-opening", "is-closing", "is-dragging");
+        els.dialog.style.removeProperty("transform");
+        els.dialog.style.removeProperty("--sheet-drag");
     });
 
     // ESC 는 팝오버부터 닫는다. 그냥 두면 단어 하나 보려다 다이얼로그가 통째로 닫힌다.
     els.dialog.addEventListener("cancel", (event) => {
-        if (!isPopoverOpen()) return;
+        if (isPopoverOpen()) {
+            event.preventDefault();
+            closePopover();
+            return;
+        }
+        // 시트일 때는 기본 동작(즉시 닫힘)을 막고 내려가는 애니메이션을 태운다
+        if (!isBottomSheet() || prefersReducedMotion()) return;
         event.preventDefault();
-        closePopover();
+        closeDialog();
     });
 
     /*
@@ -403,7 +584,7 @@ export const initWordStats = (config) => {
     els.dialog.addEventListener("click", (event) => {
         const target = event.target;
         if (target === els.dialog && pressedOnBackdrop) {
-            els.dialog.close();
+            closeDialog();
             return;
         }
         // 팝오버 바깥을 누르면 팝오버만 닫는다. 단어를 누른 경우는 그 단어의 팝오버로 교체된다.
@@ -428,6 +609,8 @@ export const initWordStats = (config) => {
         els.popover?.classList.add("d-none");
         state.popoverOpener = null;
 
+        // 시트가 아닐 때는 CSS 에 대응하는 애니메이션이 없어 클래스만 잠깐 붙었다 떨어진다
+        startSheetOpen();
         els.dialog.showModal();
         /*
          * 닫기 버튼이 아니라 **다이얼로그 자신**에 포커스를 준다.

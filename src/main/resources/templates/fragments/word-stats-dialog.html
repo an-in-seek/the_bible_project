@@ -4,7 +4,7 @@
 <!--
   단어 빈도 통계 다이얼로그 (설계 문서: docs/bible/word-frequency-design.md §10.2)
   사용법: 페이지 body 에 <div th:replace="~{fragments/word-stats-dialog :: wordStatsDialog}"></div> 포함 후,
-         JS 에서 import {initWordStats} from "/js/bible/word-stats.js?v=1.6";
+         JS 에서 import {initWordStats} from "/js/bible/word-stats.js?v=1.7";
 
   Bootstrap JS 는 이 프로젝트에 없다. 네이티브 <dialog>.showModal() 로 연다.
 
@@ -14,6 +14,13 @@
 <!-- tabindex="-1" 은 열릴 때 다이얼로그 자신에게 포커스를 주기 위한 것이다(§10.6) -->
 <dialog th:fragment="wordStatsDialog" id="wordStatsDialog" class="word-stats-dialog"
         aria-labelledby="wordStatsTitle" tabindex="-1">
+    <!--
+      모바일(≤599.98px)에서 시트를 끌어내리는 손잡이. 데스크톱에서는 CSS 가 감춘다.
+      의사 요소가 아니라 실제 <div> 인 이유는 word-stats.css 에 적어 두었다 —
+      의사 요소를 누르면 target 이 다이얼로그 자신이 되어 '배경 클릭'으로 오인된다.
+    -->
+    <div class="word-stats-sheet-grip" aria-hidden="true"></div>
+
     <div class="word-stats-header">
         <h5 id="wordStatsTitle" class="word-stats-title">단어 통계</h5>
         <button type="button" class="btn-close" id="wordStatsCloseBtn" aria-label="닫기"></button>

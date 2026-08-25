@@ -351,3 +351,168 @@
         transition: background-color 0.15s ease;
     }
 }
+
+/* ---------- 모바일: 바텀 시트 ---------- */
+
+/*
+ * 좁은 화면에서는 가운데 뜬 카드가 아니라 **아래에서 올라오는 시트**다.
+ * 이 저장소에는 이미 같은 판단이 둘 있다(top-nav 계정 메뉴, 성경 역사 지도 상세 패널).
+ * 기준 폭도 그쪽과 같은 599.98px 로 맞춘다.
+ *
+ * 데스크톱까지 시트로 바꾸지는 않는다. 680px 짜리 2열 목록을 화면 바닥에 붙이면
+ * 클라우드와 목록이 시선에서 멀어지기만 하고 얻는 것이 없다.
+ *
+ * 이 블록은 파일 맨 뒤에 둔다. 위의 `@media (max-width: 480px)` 가 .word-stats-body 의
+ * padding 을 단축 속성으로 덮어쓰므로, 안전 영역을 더한 아래 여백이 뒤에 와야 살아남는다.
+ */
+
+/* 그립은 시트일 때만 존재한다. 데스크톱 다이얼로그에는 잡을 가장자리가 없다. */
+.word-stats-sheet-grip {
+    display: none;
+}
+
+@media (max-width: 599.98px) {
+    .word-stats-dialog {
+        /*
+         * **max-width 를 반드시 none 으로 되돌린다.**
+         * UA 스타일의 `dialog:modal` 은 `max-width: calc(100% - 6px - 2em)` 을 걸어 두므로,
+         * width: 100% 만 써 두면 좌우에 32px 남짓한 틈이 남아 바닥에 붙지 않은 카드가 된다.
+         */
+        width: 100%;
+        max-width: none;
+        max-height: 85vh;
+        max-height: 85dvh;
+        /* 위는 auto 로 밀고 아래는 0 — UA 의 `inset: 0 + margin: auto`(가운데 정렬)를 바닥 정렬로 바꾼다 */
+        margin: auto auto 0;
+        /*
+         * 화면 끝에서 끝까지 붙는 시트라 좌·우·아래 테두리는 그릴 자리가 없다.
+         * 남겨 두면 border-box 가 아닐 때 좌우로 1px 씩 삐져나가기까지 한다.
+         */
+        border-inline: 0;
+        border-bottom: 0;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -8px 28px var(--color-shadow);
+        /* 손을 떼면 제자리로 돌아가는 스냅백 */
+        transition: transform 220ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    /*
+     * 들어오는 애니메이션은 **한 번만** 재생되어야 한다.
+     *
+     * `[open]` 에 걸면 안 된다. 아래 `.is-dragging` 이 `animation: none` 으로 애니메이션을
+     * 취소하는데, 손을 뗄 때 그 클래스가 빠지면서 `animation-name` 이 되살아나면
+     * **브라우저가 애니메이션을 새로 만든다.** [open] 은 계속 참이므로 조건이 늘 맞고,
+     * 결국 시트를 한 번 건드릴 때마다 화면 밖에서 다시 올라온다.
+     *
+     * 그래서 여는 순간에만 붙였다가 `animationend` 에서 떼는 일회용 클래스로 건다
+     * (word-stats.js 의 SHEET_OPEN_ANIMATION).
+     */
+    .word-stats-dialog[open].is-opening {
+        animation: word-stats-sheet-in 260ms cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    /*
+     * 내려가며 닫히는 구간. `forwards` 가 없으면 마지막 프레임에서 시트가 제자리로 튀어
+     * 올랐다가 사라진다. 지속 시간은 word-stats.js 의 SHEET_CLOSE_MS 와 같아야 한다.
+     */
+    .word-stats-dialog[open].is-closing {
+        animation: word-stats-sheet-out 220ms cubic-bezier(0.32, 0.72, 0, 1) forwards;
+    }
+
+    /* 손가락을 따라가는 동안에는 애니메이션·트랜지션을 모두 끈다. 남겨 두면 손보다 늦게 따라온다. */
+    .word-stats-dialog[open].is-dragging {
+        animation: none;
+        transition: none;
+    }
+
+    .word-stats-dialog[open].is-opening::backdrop {
+        animation: word-stats-backdrop-in 260ms ease;
+    }
+
+    .word-stats-dialog[open].is-closing::backdrop {
+        animation: word-stats-backdrop-out 220ms ease forwards;
+    }
+
+    /*
+     * 끌어내리는 손잡이.
+     *
+     * `::before` 가 아니라 실제 요소인 이유가 있다. 의사 요소를 누르면 이벤트의 target 이
+     * **다이얼로그 자신**이 되는데, 이 다이얼로그는 바깥 클릭을 `target === dialog` 로
+     * 판정한다(word-stats.js). 그립을 살짝 건드리기만 해도 배경을 누른 것으로 오인해
+     * 시트가 닫혀 버린다.
+     */
+    .word-stats-sheet-grip {
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: center;
+        height: 20px;
+        padding-top: 8px;
+        background-color: var(--color-bg-elevated);
+        /* 여기서 시작한 세로 드래그를 브라우저 스크롤에 빼앗기지 않게 한다 */
+        touch-action: none;
+        cursor: grab;
+    }
+
+    .word-stats-sheet-grip::after {
+        content: "";
+        width: 36px;
+        height: 4px;
+        border-radius: 999px;
+        background-color: var(--color-border);
+    }
+
+    .word-stats-header {
+        /* 그립이 위를 덮으므로 헤더 위쪽 여백을 줄여 시트 머리가 두꺼워지지 않게 한다 */
+        padding-top: 8px;
+    }
+
+    .word-stats-body {
+        /* 목록 끝에서 더 당겼을 때 뒤 페이지가 따라 움직이지 않게 */
+        overscroll-behavior: contain;
+        /* 홈 인디케이터에 마지막 항목이 가리지 않도록 */
+        padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    }
+
+    .word-stats-popover {
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+    }
+}
+
+@keyframes word-stats-sheet-in {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
+/* --sheet-drag 는 JS 가 넣는 '손을 뗀 지점'이다. 끌어내린 자리에서 이어서 내려간다. */
+@keyframes word-stats-sheet-out {
+    from { transform: translateY(var(--sheet-drag, 0px)); }
+    to { transform: translateY(100%); }
+}
+
+@keyframes word-stats-backdrop-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes word-stats-backdrop-out {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/*
+ * 모션 최소화를 켠 사용자에게는 시트 레이아웃만 남기고 미끄러짐을 없앤다.
+ * word-stats.js 도 같은 조건에서 닫기 애니메이션을 건너뛰고 바로 close() 한다.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .word-stats-dialog[open].is-opening,
+    .word-stats-dialog[open].is-closing,
+    .word-stats-dialog[open].is-opening::backdrop,
+    .word-stats-dialog[open].is-closing::backdrop {
+        animation: none;
+    }
+
+    .word-stats-dialog {
+        transition: none;
+    }
+}
