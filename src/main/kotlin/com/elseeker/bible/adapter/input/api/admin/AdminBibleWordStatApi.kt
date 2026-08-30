@@ -278,7 +278,8 @@ class AdminBibleWordStatApi(
 
     /**
      * @param registeredWord 어휘에 없던 키워드라 표제어로 새로 등록했는지
-     * @param replacedRowCount 같은 표제어의 옛 행 수. 새 값으로 바뀌었다
+     * @param replacedRowCount 새 값으로 바뀐 옛 행 수(`AUTO`·`KEYWORD`)
+     * @param manualKeptCount 손으로 고친 값이라 그대로 둔 행 수(`MANUAL`)
      */
     data class KeywordSaveResponse(
         val count: KeywordCountResponse,
@@ -286,6 +287,7 @@ class AdminBibleWordStatApi(
         val source: BibleWordStatSource,
         val savedRowCount: Int,
         val replacedRowCount: Int,
+        val manualKeptCount: Int,
         /** 값이 들어간 책 수 */
         val bookCount: Int,
     ) {
@@ -296,6 +298,7 @@ class AdminBibleWordStatApi(
                 source = result.source,
                 savedRowCount = result.savedRowCount,
                 replacedRowCount = result.replacedRowCount,
+                manualKeptCount = result.manualKeptCount,
                 bookCount = result.bookCount,
             )
         }

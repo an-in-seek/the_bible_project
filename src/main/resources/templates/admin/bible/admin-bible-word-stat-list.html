@@ -638,6 +638,8 @@
             if (bookOrder === null) notes.push(`책 ${r.bookCount}권`);
             if (r.registeredWord) notes.push("표제어 신규 등록");
             if (r.replacedRowCount > 0) notes.push(`옛 행 ${r.replacedRowCount}개 교체`);
+            // 손으로 고친 값은 덮지 않는다. 그런 행이 있었다면 말해 줘야 숫자가 왜 다른지 안다.
+            if (r.manualKeptCount > 0) notes.push(`손으로 고친 행 ${r.manualKeptCount}개 유지`);
 
             // 저장한 뒤에 잡힌 절을 보여 준다. 확인이 저장보다 뒤로 왔으므로 되돌릴 길을
             // 결과 바로 옆에 둔다.

@@ -68,6 +68,7 @@ interface AdminBibleWordStatApiDocument {
         summary = "키워드 집계 저장",
         description = "다시 세어 `bible_word_stat` 에 반영합니다. 어휘에 없는 키워드는 표제어로 등록합니다. " +
             "같은 표제어의 행은 요청 범위(책 또는 번역본 전체) 안에서 새 값으로 교체됩니다. " +
+            "다만 관리자가 손으로 고친 행(`MANUAL`)은 그대로 두고, 책 합계에도 그 값을 씁니다. " +
             "저장 출처는 `KEYWORD` 라 이후 재계산이 이 행을 건드리지 않습니다."
     )
     @ApiResponses(

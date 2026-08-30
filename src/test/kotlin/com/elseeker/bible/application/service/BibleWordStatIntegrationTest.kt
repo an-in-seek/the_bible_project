@@ -292,6 +292,32 @@ class BibleWordStatIntegrationTest @Autowired constructor(
     }
 
     @Test
+    @DisplayName("키워드로 다시 저장해도 손으로 고친 값은 그대로고 책 합계가 그 값을 쓴다")
+    fun keywordSaveKeepsManualRows() {
+        // given — 저장한 뒤 장 행을 손으로 99 로 고친다(MANUAL 로 바뀐다)
+        adminBibleWordStatService.saveKeywordStat(translationId, BOOK_ORDER, "하나님")
+        val chapterRow = statRepository.findAll()
+            .first { it.bibleWordId == godWord.id && it.chapterNumber == 1 }
+        adminBibleWordStatService.updateCount(chapterRow.id!!, 99)
+
+        // when — 같은 키워드를 다시 저장한다
+        val result = adminBibleWordStatService.saveKeywordStat(translationId, BOOK_ORDER, "하나님")
+
+        // then — 손으로 고친 값이 살아남고, 책 합계도 그 값을 쓴다
+        result.manualKeptCount shouldBe 1
+        val rows = statRepository.findAll().filter { it.bibleWordId == godWord.id }
+        rows shouldHaveSize 2
+
+        val chapter = rows.first { it.chapterNumber == 1 }
+        chapter.wordCount shouldBe 99
+        chapter.source shouldBe BibleWordStatSource.MANUAL
+
+        val book = rows.first { it.chapterNumber == BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER }
+        book.wordCount shouldBe 99
+        book.source shouldBe BibleWordStatSource.KEYWORD
+    }
+
+    @Test
     @DisplayName("되돌리면 그 범위의 KEYWORD 행만 사라진다")
     fun keywordUndoRemovesOnlyKeywordRows() {
         // given — 저장한 뒤 장 행 하나를 손으로 고쳐 MANUAL 로 바꾼다

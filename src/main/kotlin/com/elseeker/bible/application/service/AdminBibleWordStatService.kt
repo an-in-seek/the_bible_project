@@ -181,12 +181,18 @@ class AdminBibleWordStatService(
 
         // 범위 밖의 행은 건드리지 않는다. 책 하나를 다시 셌는데 다른 책 값까지 지우면
         // 관리자는 무엇이 사라졌는지 알 길이 없다.
-        val replaced = if (bookOrder != null) {
+        val existing = if (bookOrder != null) {
             bibleWordStatRepository
                 .findByTranslationIdAndBookOrderAndBibleWordId(translationId, bookOrder, wordId)
         } else {
             bibleWordStatRepository.findByTranslationIdAndBibleWordId(translationId, wordId)
         }
+        // **손으로 고친 값은 남긴다.** 재계산과 같은 규칙이다 — 규칙이 둘이 되면 나중에 어느
+        // 쪽이 맞는지 아무도 기억하지 못한다. 번역본 전체를 한 번 저장하면 66권에 걸친 수정이
+        // 통째로 사라지던 자리이기도 하다.
+        val manualRows = existing.filter { it.source == BibleWordStatSource.MANUAL }
+        val manualCountByKey = manualRows.associate { (it.bookOrder to it.chapterNumber) to it.wordCount }
+        val replaced = existing - manualRows.toSet()
         if (replaced.isNotEmpty()) {
             bibleWordStatRepository.deleteAll(replaced)
             // 지우기 전에 INSERT 가 나가면 `uk_bible_word_stat` 에 걸린다. Hibernate 의 기본
@@ -199,20 +205,19 @@ class AdminBibleWordStatService(
         val rows = ArrayList<BibleWordStat>()
         computed.countsByBook.forEach { (book, chapterCounts) ->
             chapterCounts.forEach { (chapterNumber, wordCount) ->
+                if ((book to chapterNumber) in manualCountByKey) return@forEach
                 rows += BibleWordStat.keyword(wordId, translationId, book, chapterNumber, wordCount)
             }
-            // 책 행은 그 책의 장 합계다. 재계산을 기다리지 않고 여기서 함께 만든다.
-            rows += BibleWordStat.keyword(
-                wordId, translationId, book,
-                BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER, chapterCounts.values.sum(),
-            )
+            bookRowOf(wordId, translationId, book, chapterCounts, manualRows, manualCountByKey)
+                ?.let { rows += it }
         }
         bibleWordStatRepository.saveAll(rows)
 
         logger.info {
             "키워드 집계 저장: translationId=$translationId, bookOrder=${bookOrder ?: "전체"}, " +
                 "키워드=${computed.term}, 총=${computed.totalCount}, 책=${computed.countsByBook.size}, " +
-                "행=${rows.size}, 교체=${replaced.size}, 표제어 신규=${computed.word == null}"
+                "행=${rows.size}, 교체=${replaced.size}, 수동 보존=${manualRows.size}, " +
+                "표제어 신규=${computed.word == null}"
         }
 
         return KeywordSaveResult(
@@ -221,6 +226,7 @@ class AdminBibleWordStatService(
             source = BibleWordStatSource.KEYWORD,
             savedRowCount = rows.size,
             replacedRowCount = replaced.size,
+            manualKeptCount = manualRows.size,
             bookCount = computed.countsByBook.size,
         )
     }
@@ -373,6 +379,38 @@ class AdminBibleWordStatService(
             countsByBook = countsByBook,
             // 저장은 표제어 단위다. 매처가 그 표제어를 셀 수 있는지를 본다.
             matcherCountable = bibleWordMatcher.isCountableTerm(word?.term ?: term, languageCode),
+        )
+    }
+
+    /**
+     * 책 행(`chapterNumber = 0`)은 그 책 장 행의 **최종값** 합이다. 손으로 고친 장이 있으면
+     * 그 값을 쓴다 — 자동 집계 결과만 더하면 장별 값과 책 합계가 어긋난다.
+     * 재계산의 `buildBookRows` 와 같은 규칙이다.
+     *
+     * 책 행 자체가 `MANUAL` 이면 null 을 돌려준다. 그 자리는 관리자가 정한 값이다.
+     */
+    private fun bookRowOf(
+        bibleWordId: Long,
+        translationId: Long,
+        bookOrder: Int,
+        chapterCounts: Map<Int, Int>,
+        manualRows: List<BibleWordStat>,
+        manualCountByKey: Map<Pair<Int, Int>, Int>,
+    ): BibleWordStat? {
+        val bookScope = BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER
+        if ((bookOrder to bookScope) in manualCountByKey) return null
+
+        val countedTotal = chapterCounts.entries.sumOf { (chapterNumber, wordCount) ->
+            manualCountByKey[bookOrder to chapterNumber] ?: wordCount
+        }
+        // 이번 집계에는 잡히지 않았는데 관리자가 손으로만 넣어 둔 장도 합계에 든다.
+        val manualOnlyTotal = manualRows.asSequence()
+            .filter { it.bookOrder == bookOrder && !it.isBookScope() }
+            .filter { chapterCounts[it.chapterNumber] == null }
+            .sumOf { it.wordCount }
+
+        return BibleWordStat.keyword(
+            bibleWordId, translationId, bookOrder, bookScope, countedTotal + manualOnlyTotal
         )
     }
 
@@ -580,7 +618,10 @@ class AdminBibleWordStatService(
         val registeredWord: Boolean,
         val source: BibleWordStatSource,
         val savedRowCount: Int,
+        /** 새 값으로 바뀐 옛 행 수 (`AUTO`·`KEYWORD`) */
         val replacedRowCount: Int,
+        /** 손으로 고친 값이라 그대로 둔 행 수 (`MANUAL`) */
+        val manualKeptCount: Int,
         /** 값이 들어간 책 수 */
         val bookCount: Int,
     )
