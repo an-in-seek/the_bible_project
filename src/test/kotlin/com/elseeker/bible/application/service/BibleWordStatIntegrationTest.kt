@@ -257,6 +257,41 @@ class BibleWordStatIntegrationTest @Autowired constructor(
     }
 
     @Test
+    @DisplayName("책을 고르지 않으면 번역본 전체를 세고 책마다 행을 만든다")
+    fun keywordSaveCoversWholeTranslation() {
+        // given — 두 번째 책을 더한다
+        val exodus = bookRepository.save(
+            BibleBook(
+                translationId = translationId,
+                bookKey = BibleBookKey.EXO,
+                bookOrder = 2,
+                name = "출애굽기",
+                abbreviation = "출",
+                testamentType = BibleTestamentType.OLD,
+            )
+        )
+        val chapter = chapterRepository.save(BibleChapter.of(bookId = exodus.id!!, chapterNumber = 1))
+        verseRepository.save(
+            BibleVerse(chapterId = chapter.id!!, verseNumber = 1, text = "하나님이 모세에게 말씀하시니라")
+        )
+
+        // when — bookOrder 를 주지 않는다
+        val result = adminBibleWordStatService.saveKeywordStat(translationId, null, "하나님")
+
+        // then — 창세기 3 회 + 출애굽기 1 회
+        result.bookCount shouldBe 2
+        result.count.totalCount shouldBe 4
+
+        // 책마다 장 행 하나와 책 행 하나
+        val rows = statRepository.findAll().filter { it.bibleWordId == godWord.id }
+        rows shouldHaveSize 4
+        rows.first { it.bookOrder == 2 && it.chapterNumber == BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER }
+            .wordCount shouldBe 1
+        rows.first { it.bookOrder == 1 && it.chapterNumber == BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER }
+            .wordCount shouldBe 3
+    }
+
+    @Test
     @DisplayName("본문에 없는 키워드는 저장하지 않는다 — 오타가 어휘에 남지 않도록")
     fun keywordSaveRejectsZeroCount() {
         // when

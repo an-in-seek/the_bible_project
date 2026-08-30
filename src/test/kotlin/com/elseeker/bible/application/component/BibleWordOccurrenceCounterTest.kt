@@ -145,5 +145,14 @@ class BibleWordOccurrenceCounterTest {
     }
 
     private fun verse(chapterNumber: Int, verseNumber: Int, text: String) =
-        BookVerseText(chapterNumber = chapterNumber, verseNumber = verseNumber, text = text)
+        BookVerseText(
+            bookOrder = BOOK_ORDER,
+            chapterNumber = chapterNumber,
+            verseNumber = verseNumber,
+            text = text,
+        )
+
+    companion object {
+        private const val BOOK_ORDER = 1
+    }
 }

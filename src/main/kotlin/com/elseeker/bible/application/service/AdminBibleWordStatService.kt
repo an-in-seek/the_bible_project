@@ -156,7 +156,7 @@ class AdminBibleWordStatService(
      * 함께 실제로 잡힌 절을 돌려주고, 저장은 관리자가 그것을 보고 [saveKeywordStat] 로 따로
      * 지시한다(설계 문서 3.2).
      */
-    fun countKeyword(translationId: Long, bookOrder: Int, keyword: String): KeywordCountResult =
+    fun countKeyword(translationId: Long, bookOrder: Int?, keyword: String): KeywordCountResult =
         computeKeyword(translationId, bookOrder, keyword).toResult()
 
     /**
@@ -167,11 +167,11 @@ class AdminBibleWordStatService(
      * 무관해진다.
      */
     @Transactional
-    fun saveKeywordStat(translationId: Long, bookOrder: Int, keyword: String): KeywordSaveResult {
+    fun saveKeywordStat(translationId: Long, bookOrder: Int?, keyword: String): KeywordSaveResult {
         val computed = computeKeyword(translationId, bookOrder, keyword)
         // 0 회인 키워드로는 표제어를 만들지 않는다. 여기서 먼저 끊지 않으면 오타 하나가
         // 어휘에 영구히 남는다.
-        if (computed.count.totalCount == 0) {
+        if (computed.totalCount == 0) {
             throwError(ErrorType.INVALID_PARAMETER, "본문에 한 번도 나오지 않아 저장할 것이 없습니다")
         }
 
@@ -179,8 +179,14 @@ class AdminBibleWordStatService(
             ?: bibleWordRepository.save(BibleWord.keywordOf(translationId, computed.term))
         val wordId = word.id ?: throwError(ErrorType.BIBLE_WORD_NOT_FOUND, computed.term)
 
-        val replaced = bibleWordStatRepository
-            .findByTranslationIdAndBookOrderAndBibleWordId(translationId, bookOrder, wordId)
+        // 범위 밖의 행은 건드리지 않는다. 책 하나를 다시 셌는데 다른 책 값까지 지우면
+        // 관리자는 무엇이 사라졌는지 알 길이 없다.
+        val replaced = if (bookOrder != null) {
+            bibleWordStatRepository
+                .findByTranslationIdAndBookOrderAndBibleWordId(translationId, bookOrder, wordId)
+        } else {
+            bibleWordStatRepository.findByTranslationIdAndBibleWordId(translationId, wordId)
+        }
         if (replaced.isNotEmpty()) {
             bibleWordStatRepository.deleteAll(replaced)
             // 지우기 전에 INSERT 가 나가면 `uk_bible_word_stat` 에 걸린다. Hibernate 의 기본
@@ -190,21 +196,22 @@ class AdminBibleWordStatService(
 
         // 출처는 언제나 KEYWORD 다. 재계산과 계산 방식이 다르므로, 매처가 셀 수 있는 단어라도
         // 재계산이 덮으면 관리자가 확인하고 저장한 값이 조용히 다른 수로 바뀐다.
-        val rows = computed.count.chapterCounts.entries
-            .sortedBy { it.key }
-            .map { (chapterNumber, wordCount) ->
-                BibleWordStat.keyword(wordId, translationId, bookOrder, chapterNumber, wordCount)
+        val rows = ArrayList<BibleWordStat>()
+        computed.countsByBook.forEach { (book, chapterCounts) ->
+            chapterCounts.forEach { (chapterNumber, wordCount) ->
+                rows += BibleWordStat.keyword(wordId, translationId, book, chapterNumber, wordCount)
             }
-            .toMutableList()
-        rows += BibleWordStat.keyword(
-            wordId, translationId, bookOrder,
-            BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER, computed.count.totalCount,
-        )
+            // 책 행은 그 책의 장 합계다. 재계산을 기다리지 않고 여기서 함께 만든다.
+            rows += BibleWordStat.keyword(
+                wordId, translationId, book,
+                BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER, chapterCounts.values.sum(),
+            )
+        }
         bibleWordStatRepository.saveAll(rows)
 
         logger.info {
-            "키워드 집계 저장: translationId=$translationId, bookOrder=$bookOrder, " +
-                "키워드=${computed.term}, 총=${computed.count.totalCount}, " +
+            "키워드 집계 저장: translationId=$translationId, bookOrder=${bookOrder ?: "전체"}, " +
+                "키워드=${computed.term}, 총=${computed.totalCount}, 책=${computed.countsByBook.size}, " +
                 "행=${rows.size}, 교체=${replaced.size}, 표제어 신규=${computed.word == null}"
         }
 
@@ -214,6 +221,7 @@ class AdminBibleWordStatService(
             source = BibleWordStatSource.KEYWORD,
             savedRowCount = rows.size,
             replacedRowCount = replaced.size,
+            bookCount = computed.countsByBook.size,
         )
     }
 
@@ -278,15 +286,14 @@ class AdminBibleWordStatService(
      * 미리보기와 저장이 같은 계산을 쓴다. 두 곳에 따로 두면 화면에 보여 준 값과 저장한 값이
      * 조용히 달라진다.
      */
-    private fun computeKeyword(translationId: Long, bookOrder: Int, keyword: String): KeywordComputation {
+    private fun computeKeyword(translationId: Long, bookOrder: Int?, keyword: String): KeywordComputation {
         val term = keyword.trim()
         if (term.isBlank()) throwError(ErrorType.INVALID_PARAMETER, "키워드를 입력해 주세요")
         // 저장하면 표제어가 되므로 `bible_word.term` 의 길이를 넘으면 여기서 끊는다.
         if (term.length > MAX_KEYWORD_LENGTH) throwError(ErrorType.INVALID_PARAMETER, "키워드가 너무 깁니다")
 
         val languageCode = getTranslationLanguage(translationId)
-        bibleBookRepository.findByTranslationAndBook(translationId, bookOrder)
-            ?: throwError(ErrorType.BOOK_NOT_FOUND, "translationId=$translationId, bookOrder=$bookOrder")
+        val bookOrders = resolveBookOrders(translationId, bookOrder)
 
         // 별칭을 입력했으면 부모 표제어로 되돌린다. 그냥 두면 `하느님` 이 `하나님` 의 별칭인데도
         // 새 표제어로 등록되어, 같은 낱말의 통계가 둘로 갈라진다.
@@ -305,17 +312,49 @@ class AdminBibleWordStatService(
         // 어휘에 있는 낱말이면 표제어 표기로 센다. 입력한 별칭은 aliases 에 들어 있다.
         val keywords = word?.let { listOf(it.term) + aliases } ?: listOf(term)
 
-        val verses = bibleVerseRepository.findVerseTextsByBook(translationId, bookOrder)
-        if (verses.isEmpty()) throwError(ErrorType.CHAPTER_NOT_FOUND, "bookOrder=$bookOrder")
+        // 책 단위 재계산과 달리 여기서는 서버가 책을 순회한다. 재계산은 어휘 수천 개를 모든
+        // 어절에 맞춰 보고 15만 행을 쓰지만, 이쪽은 키워드 하나를 문자열로 훑고 많아야
+        // 천여 행을 쓴다. 미매칭 후보 리포트가 이미 같은 방식으로 번역본 전체를 훑는다.
+        val countsByBook = LinkedHashMap<Int, Map<Int, Int>>()
+        val samples = ArrayList<BibleWordOccurrenceCounter.Sample>()
+        bookOrders.forEach { order ->
+            val verses = bibleVerseRepository.findVerseTextsByBook(translationId, order)
+            if (verses.isEmpty()) {
+                // 책을 콕 집었는데 본문이 없으면 알려 준다. 번역본 전체라면 그냥 넘어간다
+                // — 66권을 다 갖추지 않은 번역본이 있다.
+                if (bookOrder != null) throwError(ErrorType.CHAPTER_NOT_FOUND, "bookOrder=$order")
+                return@forEach
+            }
+            val counted = bibleWordOccurrenceCounter.countBook(verses, keywords, languageCode)
+            if (counted.totalCount == 0) return@forEach
+            countsByBook[order] = counted.chapterCounts.toSortedMap()
+            if (samples.size < BibleWordOccurrenceCounter.DEFAULT_SAMPLE_LIMIT) {
+                samples += counted.samples.take(BibleWordOccurrenceCounter.DEFAULT_SAMPLE_LIMIT - samples.size)
+            }
+        }
 
         return KeywordComputation(
             term = term,
             word = word,
             aliases = aliases,
-            count = bibleWordOccurrenceCounter.countBook(verses, keywords, languageCode),
+            bookOrder = bookOrder,
+            countsByBook = countsByBook,
+            samples = samples,
             // 저장은 표제어 단위다. 매처가 그 표제어를 셀 수 있는지를 본다.
             matcherCountable = bibleWordMatcher.isCountableTerm(word?.term ?: term, languageCode),
         )
+    }
+
+    /** `bookOrder` 가 null 이면 번역본이 가진 책 전부. 없는 책 번호는 여기서 끊는다. */
+    private fun resolveBookOrders(translationId: Long, bookOrder: Int?): List<Int> {
+        if (bookOrder != null) {
+            bibleBookRepository.findByTranslationAndBook(translationId, bookOrder)
+                ?: throwError(ErrorType.BOOK_NOT_FOUND, "translationId=$translationId, bookOrder=$bookOrder")
+            return listOf(bookOrder)
+        }
+        val orders = bibleBookRepository.findByTranslationId(translationId).map { it.bookOrder }.sorted()
+        if (orders.isEmpty()) throwError(ErrorType.BOOK_NOT_FOUND, "translationId=$translationId")
+        return orders
     }
 
     private fun buildIndex(translationId: Long, languageCode: LanguageCode): BibleWordMatcher.WordIndex {
@@ -431,14 +470,24 @@ class AdminBibleWordStatService(
         val count: Int,
     )
 
-    /** 미리보기와 저장이 공유하는 계산 결과. 서비스 밖으로 나가지 않는다. */
+    /**
+     * 미리보기와 저장이 공유하는 계산 결과. 서비스 밖으로 나가지 않는다.
+     *
+     * @param bookOrder null 이면 번역본 전체를 센 것이다.
+     * @param countsByBook 책 번호 -> (장 -> 횟수). 0 회인 책은 담지 않는다.
+     */
     private data class KeywordComputation(
         val term: String,
         val word: BibleWord?,
         val aliases: List<String>,
-        val count: BibleWordOccurrenceCounter.KeywordCount,
+        val bookOrder: Int?,
+        val countsByBook: Map<Int, Map<Int, Int>>,
+        val samples: List<BibleWordOccurrenceCounter.Sample>,
         val matcherCountable: Boolean,
     ) {
+        val totalCount: Int
+            get() = countsByBook.values.sumOf { chapters -> chapters.values.sum() }
+
         fun toResult(bibleWordId: Long? = word?.id) = KeywordCountResult(
             keyword = term,
             resolvedTerm = word?.term?.takeIf { it != term },
@@ -446,11 +495,20 @@ class AdminBibleWordStatService(
             wordStatus = word?.status,
             aliases = aliases,
             matcherCountable = matcherCountable,
-            totalCount = count.totalCount,
-            chapterCounts = count.chapterCounts.entries
-                .sortedBy { it.key }
-                .map { ChapterCount(chapterNumber = it.key, wordCount = it.value) },
-            samples = count.samples,
+            bookOrder = bookOrder,
+            totalCount = totalCount,
+            // 번역본 전체는 장이 1,000개를 넘는다. 화면에 늘어놓을 수 없으므로 책별 합계만 준다.
+            chapterCounts = bookOrder?.let { order ->
+                countsByBook[order].orEmpty().entries
+                    .sortedBy { it.key }
+                    .map { ChapterCount(chapterNumber = it.key, wordCount = it.value) }
+            }.orEmpty(),
+            bookCounts = if (bookOrder != null) emptyList() else {
+                countsByBook.entries
+                    .map { BookCount(bookOrder = it.key, wordCount = it.value.values.sum()) }
+                    .sortedWith(compareByDescending<BookCount> { it.wordCount }.thenBy { it.bookOrder })
+            },
+            samples = samples,
         )
     }
 
@@ -461,6 +519,9 @@ class AdminBibleWordStatService(
      * @param matcherCountable 책 단위 재계산이 이 단어를 셀 수 있는지. 저장 값은 어느 쪽이든
      *   `KEYWORD` 로 남아 재계산이 건드리지 않지만, true 면 행을 지웠을 때 다음 재계산이
      *   매처 기준 값으로 다시 채운다는 뜻이라 화면 안내가 달라진다.
+     * @param bookOrder null 이면 번역본 전체를 센 결과다.
+     * @param chapterCounts 책을 고른 경우에만 채운다.
+     * @param bookCounts 번역본 전체인 경우에만 채운다. 횟수 내림차순.
      */
     data class KeywordCountResult(
         val keyword: String,
@@ -469,13 +530,20 @@ class AdminBibleWordStatService(
         val wordStatus: BibleWordStatus?,
         val aliases: List<String>,
         val matcherCountable: Boolean,
+        val bookOrder: Int?,
         val totalCount: Int,
         val chapterCounts: List<ChapterCount>,
+        val bookCounts: List<BookCount>,
         val samples: List<BibleWordOccurrenceCounter.Sample>,
     )
 
     data class ChapterCount(
         val chapterNumber: Int,
+        val wordCount: Int,
+    )
+
+    data class BookCount(
+        val bookOrder: Int,
         val wordCount: Int,
     )
 
@@ -485,6 +553,8 @@ class AdminBibleWordStatService(
         val source: BibleWordStatSource,
         val savedRowCount: Int,
         val replacedRowCount: Int,
+        /** 값이 들어간 책 수 */
+        val bookCount: Int,
     )
 
     companion object {

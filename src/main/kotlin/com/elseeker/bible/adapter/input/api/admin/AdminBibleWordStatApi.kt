@@ -56,7 +56,7 @@ class AdminBibleWordStatApi(
     @GetMapping("/keyword")
     override fun countKeyword(
         @RequestParam translationId: Long,
-        @RequestParam bookOrder: Int,
+        @RequestParam(required = false) bookOrder: Int?,
         @RequestParam keyword: String,
     ): ResponseEntity<KeywordCountResponse> {
         val result = adminBibleWordStatService.countKeyword(translationId, bookOrder, keyword)
@@ -222,8 +222,13 @@ class AdminBibleWordStatApi(
         val wordStatus: BibleWordStatus?,
         val aliases: List<String>,
         val matcherCountable: Boolean,
+        /** null 이면 번역본 전체를 센 결과 */
+        val bookOrder: Int?,
         val totalCount: Int,
+        /** 책을 고른 경우에만 채워진다 */
         val chapterCounts: List<ChapterCountItem>,
+        /** 번역본 전체인 경우에만 채워진다. 횟수 내림차순 */
+        val bookCounts: List<BookCountItem>,
         val samples: List<SampleItem>,
     ) {
         companion object {
@@ -234,12 +239,16 @@ class AdminBibleWordStatApi(
                 wordStatus = result.wordStatus,
                 aliases = result.aliases,
                 matcherCountable = result.matcherCountable,
+                bookOrder = result.bookOrder,
                 totalCount = result.totalCount,
                 chapterCounts = result.chapterCounts.map {
                     ChapterCountItem(it.chapterNumber, it.wordCount)
                 },
+                bookCounts = result.bookCounts.map {
+                    BookCountItem(it.bookOrder, it.wordCount)
+                },
                 samples = result.samples.map {
-                    SampleItem(it.chapterNumber, it.verseNumber, it.text)
+                    SampleItem(it.bookOrder, it.chapterNumber, it.verseNumber, it.text)
                 },
             )
         }
@@ -250,7 +259,13 @@ class AdminBibleWordStatApi(
         val wordCount: Int,
     )
 
+    data class BookCountItem(
+        val bookOrder: Int,
+        val wordCount: Int,
+    )
+
     data class SampleItem(
+        val bookOrder: Int,
         val chapterNumber: Int,
         val verseNumber: Int,
         val text: String,
@@ -266,6 +281,8 @@ class AdminBibleWordStatApi(
         val source: BibleWordStatSource,
         val savedRowCount: Int,
         val replacedRowCount: Int,
+        /** 값이 들어간 책 수 */
+        val bookCount: Int,
     ) {
         companion object {
             fun from(result: AdminBibleWordStatService.KeywordSaveResult) = KeywordSaveResponse(
@@ -274,6 +291,7 @@ class AdminBibleWordStatApi(
                 source = result.source,
                 savedRowCount = result.savedRowCount,
                 replacedRowCount = result.replacedRowCount,
+                bookCount = result.bookCount,
             )
         }
     }

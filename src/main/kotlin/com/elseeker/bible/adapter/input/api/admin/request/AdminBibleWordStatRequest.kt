@@ -19,6 +19,7 @@ data class AdminBibleWordStatUpdateRequest(
  */
 data class AdminBibleWordStatKeywordRequest(
     val translationId: Long,
-    val bookOrder: Int,
+    /** 비우면 번역본 전체 */
+    val bookOrder: Int? = null,
     val keyword: String,
 )

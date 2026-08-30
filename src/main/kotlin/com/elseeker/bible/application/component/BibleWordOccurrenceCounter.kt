@@ -51,7 +51,7 @@ class BibleWordOccurrenceCounter {
         val samples = matched
             .sortedWith(compareBy({ it.chapterNumber }, { it.verseNumber }))
             .take(sampleLimit)
-            .map { Sample(it.chapterNumber, it.verseNumber, it.text) }
+            .map { Sample(it.bookOrder, it.chapterNumber, it.verseNumber, it.text) }
 
         return KeywordCount(chapterCounts = chapterCounts, samples = samples)
     }
@@ -95,6 +95,7 @@ class BibleWordOccurrenceCounter {
     }
 
     data class Sample(
+        val bookOrder: Int,
         val chapterNumber: Int,
         val verseNumber: Int,
         val text: String,

@@ -49,7 +49,8 @@ interface AdminBibleWordStatApiDocument {
 
     @Operation(
         summary = "키워드 집계 미리보기",
-        description = "본문에 그 문자열이 나온 횟수를 책 전체와 장별로 셉니다. **저장하지 않습니다.** " +
+        description = "본문에 그 문자열이 나온 횟수를 셉니다. **저장하지 않습니다.** " +
+            "bookOrder 를 주면 그 책의 장별 값을, 생략하면 번역본 전체를 책별로 돌려줍니다. " +
             "어절 매칭이 아니라 문자열 비교라 `말` 이 `말씀` 을 함께 셉니다. " +
             "잡힌 절을 함께 돌려주므로 저장 전에 확인해 주세요."
     )
@@ -60,14 +61,14 @@ interface AdminBibleWordStatApiDocument {
     )
     fun countKeyword(
         translationId: Long,
-        bookOrder: Int,
+        @Parameter(description = "생략하면 번역본 전체") bookOrder: Int?,
         @Parameter(description = "관리자가 직접 입력한 문자열") keyword: String,
     ): ResponseEntity<AdminBibleWordStatApi.KeywordCountResponse>
 
     @Operation(
         summary = "키워드 집계 저장",
         description = "다시 세어 `bible_word_stat` 에 반영합니다. 어휘에 없는 키워드는 표제어로 등록합니다. " +
-            "같은 표제어의 그 책 행은 새 값으로 교체됩니다. " +
+            "같은 표제어의 행은 요청 범위(책 또는 번역본 전체) 안에서 새 값으로 교체됩니다. " +
             "저장 출처는 `KEYWORD` 라 이후 재계산이 이 행을 건드리지 않습니다."
     )
     @ApiResponses(

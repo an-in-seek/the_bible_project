@@ -139,13 +139,13 @@ interface BibleVerseRepository : JpaRepository<BibleVerse, Long> {
     ): List<ChapterVerseText>
 
     /**
-     * 키워드 문자열 집계용 본문 조회. [findChapterTextsByBook] 과 달리 **절 번호를 함께** 뽑는다.
+     * 키워드 문자열 집계용 본문 조회. [findChapterTextsByBook] 과 달리 **책·절 번호를 함께** 뽑는다.
      * 집계 결과와 함께 "실제로 잡힌 절" 을 보여 줘야 관리자가 오검출을 알아볼 수 있다.
      */
     @Query(
         """
         SELECT new com.elseeker.bible.adapter.output.jpa.BookVerseText(
-            c.chapterNumber, v.verseNumber, v.text
+            b.bookOrder, c.chapterNumber, v.verseNumber, v.text
         )
         FROM BibleVerse v
         JOIN BibleChapter c ON v.chapterId = c.id
@@ -187,9 +187,10 @@ data class ChapterVerseText(
 )
 
 /**
- * 장·절 번호 + 절 본문. JPQL 생성자 프로젝션 대상이라 파라미터 순서를 바꾸면 깨진다.
+ * 책·장·절 번호 + 절 본문. JPQL 생성자 프로젝션 대상이라 파라미터 순서를 바꾸면 깨진다.
  */
 data class BookVerseText(
+    val bookOrder: Int,
     val chapterNumber: Int,
     val verseNumber: Int,
     val text: String,

@@ -127,6 +127,12 @@ interface BibleWordStatRepository : JpaRepository<BibleWordStat, Long> {
         bibleWordId: Long,
     ): List<BibleWordStat>
 
+    /** 위와 같되 번역본 전체 범위. 책을 고르지 않고 집계했을 때 쓴다. */
+    fun findByTranslationIdAndBibleWordId(
+        translationId: Long,
+        bibleWordId: Long,
+    ): List<BibleWordStat>
+
     /**
      * 관리자가 행을 직접 추가할 때의 중복 확인. `uk_bible_word_stat` 과 같은 조합이다.
      *

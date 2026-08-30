@@ -79,9 +79,19 @@
         <!-- 키워드를 직접 세어 통계에 반영한다. 어절을 표제어에 매칭하는 재계산과 달리 본문에
              그 문자열이 나온 횟수를 세므로, 공백이 든 표제어와 중국어도 값이 나온다. 대신
              형태소 경계를 보지 못해 오검출을 사람이 확인해야 한다 — 그래서 계산과 저장이
-             두 단계다(docs/bible/word-stat-keyword-count-design.md). -->
-        <section class="mt-3" th:if="${translationId != null and bookOrder != null}">
-            <h3 class="h6">키워드로 집계</h3>
+             두 단계다(docs/bible/word-stat-keyword-count-design.md).
+
+             재계산과 달리 책을 고르지 않아도 된다. 위 조회 폼의 책을 비우면 번역본 전체를
+             센다 — 키워드 하나를 문자열로 훑을 뿐이라 어휘 전체를 맞춰 보는 재계산과 무게가
+             다르다. -->
+        <section class="mt-3" th:if="${translationId != null}">
+            <h3 class="h6">
+                키워드로 집계
+                <!-- 범위는 위 조회 폼이 정한다. 여기 적어 두지 않으면 방금 무엇을 기준으로
+                     센 값인지 결과만 보고는 알 수 없다. -->
+                <span class="text-muted small"
+                      th:text="${bookOrder == null ? '· 번역본 전체' : '· ' + (bookNames[bookOrder] ?: ('책 ' + bookOrder))}"></span>
+            </h3>
             <div class="admin-form">
                 <div class="form-group">
                     <label for="keywordTerm">키워드</label>
@@ -102,6 +112,7 @@
                 본문에 그 <strong>문자열</strong>이 나온 횟수를 셉니다. 어절 매칭이 아니라서
                 <strong>말</strong> 로 세면 <strong>말씀</strong>·<strong>말미암아</strong> 까지 함께 잡힙니다.
                 저장 전에 잡힌 절을 확인해 주세요.
+                위에서 <strong>책을 비우면 번역본 전체</strong>를 셉니다(몇 초 걸립니다).
             </p>
         </section>
 
@@ -306,6 +317,8 @@
 <script th:inline="javascript">
     const translationId = /*[[${translationId}]]*/ null;
     const bookOrder = /*[[${bookOrder}]]*/ null;
+    // 책별 결과와 예시 절을 번호가 아니라 이름으로 보여 준다. 서버가 이미 만들어 둔 표다.
+    const bookNames = /*[[${bookNames}]]*/ {};
 </script>
 <script type="module">
     import {fetchAdmin, initAdminSidebarToggle, initAdminSidebarGroups} from "/js/admin/admin-common.js";
@@ -523,6 +536,9 @@
     // 결과와 다른 단어가 저장된다.
     let countedKeyword = null;
 
+    // 번역본에서 빠진 책이면 이름을 못 찾는다. 재계산 이력과 같은 규칙으로 숫자로 되돌아간다.
+    const bookNameOf = (order) => bookNames[order] ?? `책 ${order}`;
+
     const el = (tag, className, text) => {
         const node = document.createElement(tag);
         if (className) node.className = className;
@@ -533,7 +549,10 @@
     // 키워드도 본문도 사람이 넣은 문자열이라 innerHTML 로 붙이지 않는다.
     const renderKeywordResult = (r) => {
         keywordResult.replaceChildren();
-        keywordResult.append(el("div", "keyword-total", `총 ${r.totalCount}회 · 장 ${r.chapterCounts.length}개`));
+        const scopeSummary = r.bookOrder === null
+            ? `책 ${r.bookCounts.length}권`
+            : `장 ${r.chapterCounts.length}개`;
+        keywordResult.append(el("div", "keyword-total", `총 ${r.totalCount}회 · ${scopeSummary}`));
 
         if (r.bibleWordId === null) {
             keywordResult.append(el("p", "keyword-note", "어휘에 없는 키워드입니다. 저장하면 표제어로 등록됩니다."));
@@ -559,15 +578,25 @@
             return;
         }
 
-        const chapters = el("div", "keyword-chapters");
-        r.chapterCounts.forEach((c) => chapters.append(el("span", "keyword-chapter", `${c.chapterNumber}장 ${c.wordCount}`)));
-        keywordResult.append(chapters);
+        // 번역본 전체는 장이 1,000개를 넘는다. 그때는 서버도 책별 합계만 준다.
+        const chips = el("div", "keyword-chapters");
+        if (r.bookOrder === null) {
+            r.bookCounts.forEach((b) => chips.append(
+                el("span", "keyword-chapter", `${bookNameOf(b.bookOrder)} ${b.wordCount}`)));
+        } else {
+            r.chapterCounts.forEach((c) => chips.append(
+                el("span", "keyword-chapter", `${c.chapterNumber}장 ${c.wordCount}`)));
+        }
+        keywordResult.append(chips);
 
         // 오검출은 코드가 걸러 줄 수 없다. 관리자가 눈으로 보는 자리가 여기다.
         const samples = el("ul", "keyword-samples");
         r.samples.forEach((sample) => {
             const item = el("li");
-            item.append(el("span", "keyword-sample-ref", `${sample.chapterNumber}:${sample.verseNumber}`));
+            const ref = r.bookOrder === null
+                ? `${bookNameOf(sample.bookOrder)} ${sample.chapterNumber}:${sample.verseNumber}`
+                : `${sample.chapterNumber}:${sample.verseNumber}`;
+            item.append(el("span", "keyword-sample-ref", ref));
             item.append(document.createTextNode(sample.text));
             samples.append(item);
         });
@@ -583,10 +612,13 @@
         keywordCountBtn.disabled = true;
         keywordSaveBtn.disabled = true;
         countedKeyword = null;
-        keywordResult.replaceChildren(el("div", "text-muted small", "집계 중…"));
+        keywordResult.replaceChildren(el("div", "text-muted small",
+            bookOrder === null ? "번역본 전체 집계 중… 몇 초 걸립니다" : "집계 중…"));
         try {
-            const r = await fetchAdmin(`/api/v1/admin/bible/word-stats/keyword?translationId=${translationId}`
-                + `&bookOrder=${bookOrder}&keyword=${encodeURIComponent(term)}`);
+            const params = new URLSearchParams({translationId, keyword: term});
+            // 책을 고르지 않았으면 파라미터를 빼야 서버가 번역본 전체로 읽는다.
+            if (bookOrder !== null) params.set("bookOrder", bookOrder);
+            const r = await fetchAdmin(`/api/v1/admin/bible/word-stats/keyword?${params}`);
             renderKeywordResult(r);
             // 0 회는 서버도 거절한다. 버튼을 열어 두면 눌러 본 뒤에야 알게 된다.
             if (r.totalCount > 0) {
@@ -611,6 +643,7 @@
                 body: JSON.stringify({translationId, bookOrder, keyword: countedKeyword}),
             });
             const notes = [`${r.savedRowCount}행 저장 (재계산 제외)`];
+            if (bookOrder === null) notes.push(`책 ${r.bookCount}권`);
             if (r.registeredWord) notes.push("표제어 신규 등록");
             if (r.replacedRowCount > 0) notes.push(`옛 행 ${r.replacedRowCount}개 교체`);
             keywordResult.replaceChildren(el("div", "keyword-total", `저장했습니다 — ${notes.join(" · ")}`));
