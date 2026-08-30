@@ -1,0 +1,185 @@
+/* 단어 통계 관리 화면
+ * 이 파일은 admin-bible-word-stat-list.html 에서만 사용한다.
+ * admin 화면은 theme.css 를 로드하지 않으므로 라이트 컬러를 하드코딩한다. */
+
+/* ---------------------------------------------------------------- 접이식 입력 패널
+ *
+ * 수동 행 추가 패널이 쓴다. 키워드 집계 패널은 늘 펼쳐 두므로 이 클래스를 쓰지 않는다.
+ *
+ * 데스크톱에서는 **접었다 펴는 인라인 패널**이다. 모달로 만들지 않은 이유는 이 폼을 쓰는
+ * 동안 아래 통계 표를 봐야 하기 때문이다 — 어떤 표제어·장에 이미 행이 있는지 확인하면서
+ * 넣고, 보통 한 장에 여러 단어를 연달아 넣는다. 모달은 그 표를 가리고 행마다 열고 닫게 한다.
+ *
+ * 대신 늘 펼쳐 두지도 않는다. 자주 쓰는 폼이 아닌데 표 위 세로 공간을 매번 차지한다.
+ *
+ * 768px 이하에서는 바텀 시트로 바뀐다. 폭이 좁으면 인라인 패널이 표를 화면 밖으로 밀어내
+ * 결국 같은 문제가 된다. 기준 폭은 admin.css 가 표/카드를 바꾸는 768px 에 맞춘다.
+ */
+
+.admin-sheet {
+    display: none;
+}
+
+.admin-sheet.is-open {
+    display: block;
+}
+
+.admin-sheet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.admin-sheet-backdrop {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .admin-sheet {
+        /* 시트는 늘 DOM 에 있고 화면 밖에 서 있다. display 로 껐다 켜면 올라오는 동작이
+           재생될 프레임이 없다. visibility 를 같이 쓰는 것은 닫힌 시트가 포커스와 스크린
+           리더에 잡히지 않게 하기 위해서다. */
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 1050;
+        /* 인라인 패널일 때 붙여 둔 mt-3 은 시트에서는 자리를 잡는 값이 아니다. */
+        margin: 0;
+        max-height: 85vh;
+        max-height: 85dvh;
+        overflow-y: auto;
+        padding: 0.75rem 1rem calc(1rem + env(safe-area-inset-bottom));
+        background: #fff;
+        border-radius: 16px 16px 0 0;
+        box-shadow: 0 -8px 28px rgba(15, 23, 42, 0.18);
+        transform: translateY(100%);
+        visibility: hidden;
+        transition: transform 220ms cubic-bezier(0.32, 0.72, 0, 1), visibility 220ms;
+    }
+
+    .admin-sheet.is-open {
+        transform: translateY(0);
+        visibility: visible;
+    }
+
+    /* 시트 안에서는 폼이 곧 시트다. 테두리와 안쪽 여백을 한 번 더 그리면 액자 속 액자가 된다. */
+    .admin-sheet .admin-form {
+        padding: 0;
+        border: 0;
+        background: transparent;
+    }
+
+    /* 제목과 닫기 버튼은 스크롤해도 남아 있어야 한다. 시트를 닫을 방법이 스크롤 밖으로
+       사라지면 백드롭을 찾아 누르는 수밖에 없다. */
+    .admin-sheet-header {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        padding: 0.25rem 0 0.5rem;
+        background: #fff;
+    }
+
+    .admin-sheet-backdrop.is-open {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 1040;
+        background: rgba(0, 0, 0, 0.4);
+    }
+
+    /* 시트 뒤의 본문이 같이 스크롤되면 시트를 닫았을 때 엉뚱한 위치에 와 있다. */
+    body.admin-sheet-open {
+        overflow: hidden;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-sheet {
+        transition: none;
+    }
+}
+
+/* ---------------------------------------------------------------- 키워드 입력 줄
+ *
+ * 입력칸 · `통계` · `저장` 이 한 줄이다. flex 의 기본 정렬(stretch)이 버튼 높이를 입력칸에
+ * 맞춰 주므로 높이는 손대지 않는다. 두 글자짜리 버튼이 쪼그라들지 않게 너비만 잡는다.
+ */
+
+.keyword-input-row .btn {
+    min-width: 76px;
+}
+
+@media (min-width: 769px) {
+    /* 두세 글자짜리 키워드를 넣는 칸이다. 카드 폭을 다 쓰면 입력칸만 1,000px 가 되어
+       버튼이 화면 끝으로 밀려난다. 조회 필터 한 칸(340px)보다 넉넉한 선에서 끊는다. */
+    .keyword-input-row {
+        max-width: 640px;
+    }
+}
+
+/* ---------------------------------------------------------------- 키워드 집계 결과
+ *
+ * 문자열 기준 집계라 `말` 이 `말씀` 을 함께 센다. 코드가 걸러 줄 수 없으므로 **잡힌 절을
+ * 보여 주고 사람이 저장을 결정한다**(설계 문서 3.2). 그래서 결과 영역이 곧 확인 화면이다.
+ */
+
+.keyword-result {
+    margin-top: 0.5rem;
+}
+
+.keyword-total {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.keyword-note {
+    margin: 0.25rem 0 0;
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.keyword-note.is-warning {
+    color: #b45309;
+}
+
+/* 50장짜리 책이면 칩이 50개다. 표로 만들면 화면을 한 판 다 먹는다. */
+.keyword-chapters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+
+.keyword-chapter {
+    padding: 0.1rem 0.45rem;
+    border: 1px solid #dee2e6;
+    border-radius: 999px;
+    background: #f8f9fa;
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+.keyword-samples {
+    margin: 0.6rem 0 0;
+    padding: 0.5rem 0.75rem;
+    list-style: none;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 6px;
+    font-size: 0.85rem;
+}
+
+.keyword-samples li + li {
+    margin-top: 0.35rem;
+}
+
+.keyword-sample-ref {
+    margin-right: 0.35rem;
+    font-weight: 700;
+    color: #2563eb;
+    white-space: nowrap;
+}

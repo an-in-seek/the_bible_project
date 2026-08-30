@@ -18,6 +18,9 @@ interface BibleWordAliasRepository : JpaRepository<BibleWordAlias, Long> {
 
     fun existsByTranslationIdAndAlias(translationId: Long, alias: String): Boolean
 
+    /** 관리자가 표제어 대신 별칭을 입력했을 때 부모 표제어로 되돌리는 데 쓴다. */
+    fun findByTranslationIdAndAlias(translationId: Long, alias: String): BibleWordAlias?
+
     @Modifying(flushAutomatically = true)
     @Query("DELETE FROM BibleWordAlias a WHERE a.bibleWordId = :bibleWordId")
     fun deleteByBibleWordId(@Param("bibleWordId") bibleWordId: Long): Int

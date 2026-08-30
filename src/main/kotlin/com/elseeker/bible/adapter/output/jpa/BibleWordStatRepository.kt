@@ -97,11 +97,11 @@ interface BibleWordStatRepository : JpaRepository<BibleWordStat, Long> {
         @Param("source") source: BibleWordStatSource,
     ): Int
 
-    /** 재계산 시 보존해야 할 MANUAL 행 */
-    fun findByTranslationIdAndBookOrderAndSource(
+    /** 재계산 시 보존해야 할 행. `BibleWordStatSource.PRESERVED_ON_RECALCULATION` 을 넘긴다. */
+    fun findByTranslationIdAndBookOrderAndSourceIn(
         translationId: Long,
         bookOrder: Int,
-        source: BibleWordStatSource,
+        sources: Collection<BibleWordStatSource>,
     ): List<BibleWordStat>
 
     /** 어휘를 차단·삭제할 때 통계 행을 즉시 정리한다(FK 가 없으므로 애플리케이션이 직접 지운다). */
@@ -109,7 +109,23 @@ interface BibleWordStatRepository : JpaRepository<BibleWordStat, Long> {
     @Query("DELETE FROM BibleWordStat s WHERE s.bibleWordId = :bibleWordId")
     fun deleteByBibleWordId(@Param("bibleWordId") bibleWordId: Long): Int
 
-    fun countByBibleWordIdAndSource(bibleWordId: Long, source: BibleWordStatSource): Long
+    fun countByBibleWordIdAndSourceIn(
+        bibleWordId: Long,
+        sources: Collection<BibleWordStatSource>,
+    ): Long
+
+    /**
+     * 키워드 집계가 한 표제어의 값을 다시 쓸 때 먼저 걷어 낼 행들.
+     *
+     * 여기서는 source 를 가리지 않는다. 관리자가 그 표제어를 콕 집어 다시 세라고 지시한
+     * 상황이라, 옛 값을 남기면 같은 단어의 장 행과 책 행이 서로 다른 계산에서 나온 값으로
+     * 섞인다. 책 단위 재계산이 `MANUAL` 을 보존하는 것과는 다른 상황이다.
+     */
+    fun findByTranslationIdAndBookOrderAndBibleWordId(
+        translationId: Long,
+        bookOrder: Int,
+        bibleWordId: Long,
+    ): List<BibleWordStat>
 
     /**
      * 관리자가 행을 직접 추가할 때의 중복 확인. `uk_bible_word_stat` 과 같은 조합이다.

@@ -1,0 +1,51 @@
+/* 관리자 조회 필터 한 줄
+ * 여러 관리자 목록 화면이 함께 쓴다. `.admin-form.admin-form-grid` 에 이 클래스를 더한다.
+ *
+ * 공용 규칙은 `.admin-form-grid .admin-form-actions` 를 `grid-column: 1 / -1` 로 깔아
+ * `조회` 버튼만 다음 줄로 떨어뜨린다. 칸이 서넛뿐인 필터에서는 시선이 한 번 더 아래로
+ * 내려갔다 와야 한다.
+ *
+ * 그리드 대신 flex 로 바꾸는 이유는 **칸 수가 화면마다 다르기 때문**이다. 그리드로 한 줄을
+ * 만들려면 `repeat(N, ...) auto` 처럼 칸 수를 박아야 해서 화면마다 다른 값이 필요하다.
+ * flex 는 칸이 셋이든 넷이든 알아서 나눠 갖고, 버튼만 제 너비를 지킨다.
+ *
+ * 폭이 좁아지면 공용 규칙(세로 쌓기)에 그대로 맡긴다. 한 줄을 고집하면 셀렉트가 글자를
+ * 담지 못한다.
+ */
+
+@media (min-width: 769px) {
+    .admin-filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 0 1rem;
+    }
+
+    .admin-filter-row .form-group {
+        /* 최소 140px 을 지키면서 남는 폭을 고르게 나눈다 */
+        flex: 1 1 140px;
+        min-width: 140px;
+    }
+
+    .admin-filter-row .admin-form-actions {
+        flex: 0 0 auto;
+        /* 라벨이 없는 칸이다. 위 여백을 지우고 아래 여백을 form-group 과 맞춰야
+           버튼 밑선이 셀렉트 밑선과 나란해진다. */
+        margin-top: 0;
+        margin-bottom: 1rem;
+    }
+
+    .admin-filter-row .admin-form-actions .btn {
+        /* 두 글자짜리 버튼이 셀렉트 옆에서 단추처럼 작아 보이지 않을 최소 너비 */
+        min-width: 96px;
+    }
+}
+
+/* 밑선만 맞추면 어긋나 보인다. `.btn-sm` 은 셀렉트보다 5px 남짓 낮아서, 아래를 맞춘 만큼
+   윗선이 내려앉는다. 값은 admin.css 의 `.admin-form input/select` 와 같게 둔다 — 폭이 좁을
+   때도 같은 높이여야 손가락이 닿는 넓이가 나온다. */
+.admin-filter-row .admin-form-actions .btn {
+    padding: 0.4rem 1.25rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}

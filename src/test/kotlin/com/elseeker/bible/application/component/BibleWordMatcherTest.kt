@@ -166,6 +166,36 @@ class BibleWordMatcherTest {
         counted.chapterCounts[1]!![1L] shouldBe 2
     }
 
+    @Test
+    @DisplayName("공백이 든 표제어는 매처가 셀 수 없다고 답한다")
+    fun multiWordTermIsNotCountable() {
+        // when
+        val countable = sut.isCountableTerm("하나님 나라", LanguageCode.ko)
+
+        // then
+        countable shouldBe false
+    }
+
+    @Test
+    @DisplayName("어절 하나짜리 표제어는 매처가 셀 수 있다고 답한다")
+    fun singleWordTermIsCountable() {
+        // when
+        val countable = sut.isCountableTerm("하나님", LanguageCode.ko)
+
+        // then
+        countable shouldBe true
+    }
+
+    @Test
+    @DisplayName("한자는 어절이 하나도 나오지 않으므로 셀 수 없다고 답한다")
+    fun chineseTermIsNotCountable() {
+        // when
+        val countable = sut.isCountableTerm("神", LanguageCode.zh)
+
+        // then
+        countable shouldBe false
+    }
+
     // ------------ Private Methods ------------
 
     private fun word(

@@ -189,6 +189,86 @@ class BibleWordStatIntegrationTest @Autowired constructor(
         error.errorType shouldBe ErrorType.BIBLE_WORD_STAT_DUPLICATED
     }
 
+    @Test
+    @DisplayName("키워드를 저장하면 어휘에 없던 단어가 표제어로 등록되고 장·책 행이 생긴다")
+    fun keywordSaveRegistersWordAndRows() {
+        // given — 본문에는 있으나 어휘에는 없는 단어
+        wordRepository.findByTranslationIdAndTerm(translationId, "천지") shouldBe null
+
+        // when
+        val result = adminBibleWordStatService.saveKeywordStat(translationId, BOOK_ORDER, "천지")
+
+        // then
+        result.registeredWord shouldBe true
+        result.count.totalCount shouldBe 1
+        result.source shouldBe BibleWordStatSource.KEYWORD
+
+        val word = wordRepository.findByTranslationIdAndTerm(translationId, "천지").shouldNotBeNull()
+        val rows = statRepository.findAll().filter { it.bibleWordId == word.id }
+        rows shouldHaveSize 2
+        rows.first { it.chapterNumber == BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER }.wordCount shouldBe 1
+    }
+
+    @Test
+    @DisplayName("같은 키워드를 다시 저장해도 행이 중복되지 않는다")
+    fun keywordSaveReplacesOwnRows() {
+        // given
+        adminBibleWordStatService.saveKeywordStat(translationId, BOOK_ORDER, "하나님")
+
+        // when — 지우기 전에 INSERT 가 나가면 uk_bible_word_stat 에 걸려 여기서 깨진다
+        val again = adminBibleWordStatService.saveKeywordStat(translationId, BOOK_ORDER, "하나님")
+
+        // then
+        again.replacedRowCount shouldBe 2
+        statRepository.findAll().filter { it.bibleWordId == godWord.id } shouldHaveSize 2
+    }
+
+    @Test
+    @DisplayName("공백이 든 키워드도 재계산 뒤에 값이 남는다")
+    fun multiWordKeywordSurvivesRecalculation() {
+        // given — 어절 하나씩 조회하는 매처는 이 표제어를 영영 세지 못한다
+        val saved = adminBibleWordStatService.saveKeywordStat(translationId, BOOK_ORDER, "태초에 하나님이")
+        saved.source shouldBe BibleWordStatSource.KEYWORD
+        val word = wordRepository.findByTranslationIdAndTerm(translationId, "태초에 하나님이").shouldNotBeNull()
+
+        // when
+        adminBibleWordStatService.recalculateBook(translationId, BOOK_ORDER)
+
+        // then — 재계산이 지우기만 하고 다시 채우지 못하면 행이 통째로 사라진다
+        val rows = statRepository.findAll().filter { it.bibleWordId == word.id }
+        rows shouldHaveSize 2
+        rows.first { it.chapterNumber == 1 }.wordCount shouldBe 1
+    }
+
+    @Test
+    @DisplayName("매처가 셀 수 있는 단어라도 키워드로 저장한 행은 재계산이 건드리지 않는다")
+    fun keywordRowIsExcludedFromRecalculation() {
+        // given — 재계산도 셀 수 있는 평범한 한 어절 표제어다
+        adminBibleWordStatService.saveKeywordStat(translationId, BOOK_ORDER, "하나님")
+
+        // when
+        adminBibleWordStatService.recalculateBook(translationId, BOOK_ORDER)
+
+        // then — 재계산이 지우고 다시 넣었다면 출처가 AUTO 로 바뀌고 행 수도 흔들린다
+        val rows = statRepository.findAll().filter { it.bibleWordId == godWord.id }
+        rows shouldHaveSize 2
+        rows.map { it.source }.toSet() shouldBe setOf(BibleWordStatSource.KEYWORD)
+        rows.first { it.chapterNumber == 1 }.wordCount shouldBe 3
+    }
+
+    @Test
+    @DisplayName("본문에 없는 키워드는 저장하지 않는다 — 오타가 어휘에 남지 않도록")
+    fun keywordSaveRejectsZeroCount() {
+        // when
+        val error = shouldThrow<ServiceError> {
+            adminBibleWordStatService.saveKeywordStat(translationId, BOOK_ORDER, "유니콘")
+        }
+
+        // then
+        error.errorType shouldBe ErrorType.INVALID_PARAMETER
+        wordRepository.findByTranslationIdAndTerm(translationId, "유니콘") shouldBe null
+    }
+
     // ------------ Private Methods ------------
 
     private fun chapterCountOf(bibleWordId: Long): Int =
