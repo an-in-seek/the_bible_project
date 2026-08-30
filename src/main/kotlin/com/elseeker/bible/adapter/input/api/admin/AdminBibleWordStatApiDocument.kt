@@ -51,8 +51,7 @@ interface AdminBibleWordStatApiDocument {
         summary = "키워드 집계 미리보기",
         description = "본문에 그 문자열이 나온 횟수를 셉니다. **저장하지 않습니다.** " +
             "bookOrder 를 주면 그 책의 장별 값을, 생략하면 번역본 전체를 책별로 돌려줍니다. " +
-            "어절 매칭이 아니라 문자열 비교라 `말` 이 `말씀` 을 함께 셉니다. " +
-            "잡힌 절을 함께 돌려주므로 저장 전에 확인해 주세요."
+            "어절 매칭이 아니라 문자열 비교라 `말` 이 `말씀` 을 함께 셉니다."
     )
     @ApiResponses(
         ApiResponse(responseCode = "200", description = "집계 성공"),

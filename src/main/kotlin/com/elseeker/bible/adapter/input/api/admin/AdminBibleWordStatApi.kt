@@ -239,7 +239,6 @@ class AdminBibleWordStatApi(
         val chapterCounts: List<ChapterCountItem>,
         /** 번역본 전체인 경우에만 채워진다. 횟수 내림차순 */
         val bookCounts: List<BookCountItem>,
-        val samples: List<SampleItem>,
     ) {
         companion object {
             fun from(result: AdminBibleWordStatService.KeywordCountResult) = KeywordCountResponse(
@@ -256,9 +255,6 @@ class AdminBibleWordStatApi(
                 },
                 bookCounts = result.bookCounts.map {
                     BookCountItem(it.bookOrder, it.wordCount)
-                },
-                samples = result.samples.map {
-                    SampleItem(it.bookOrder, it.chapterNumber, it.verseNumber, it.text)
                 },
             )
         }
@@ -279,12 +275,6 @@ class AdminBibleWordStatApi(
         val wordCount: Int,
     )
 
-    data class SampleItem(
-        val bookOrder: Int,
-        val chapterNumber: Int,
-        val verseNumber: Int,
-        val text: String,
-    )
 
     /**
      * @param registeredWord 어휘에 없던 키워드라 표제어로 새로 등록했는지

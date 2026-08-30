@@ -138,11 +138,7 @@
     }
 }
 
-/* ---------------------------------------------------------------- 키워드 집계 결과
- *
- * 문자열 기준 집계라 `말` 이 `말씀` 을 함께 센다. 코드가 걸러 줄 수 없으므로 **잡힌 절을
- * 보여 주고 사람이 저장을 결정한다**(설계 문서 3.2). 그래서 결과 영역이 곧 확인 화면이다.
- */
+/* ---------------------------------------------------------------- 키워드 집계 결과 */
 
 .keyword-result {
     margin-top: 0.5rem;
@@ -188,23 +184,3 @@
     margin-top: 0.75rem;
 }
 
-.keyword-samples {
-    margin: 0.6rem 0 0;
-    padding: 0.5rem 0.75rem;
-    list-style: none;
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 6px;
-    font-size: 0.85rem;
-}
-
-.keyword-samples li + li {
-    margin-top: 0.35rem;
-}
-
-.keyword-sample-ref {
-    margin-right: 0.35rem;
-    font-weight: 700;
-    color: #2563eb;
-    white-space: nowrap;
-}

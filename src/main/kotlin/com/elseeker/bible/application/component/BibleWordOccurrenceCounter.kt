@@ -1,6 +1,6 @@
 package com.elseeker.bible.application.component
 
-import com.elseeker.bible.adapter.output.jpa.BookVerseText
+import com.elseeker.bible.adapter.output.jpa.ChapterVerseText
 import com.neovisionaries.i18n.LanguageCode
 import org.springframework.stereotype.Component
 
@@ -10,10 +10,7 @@ import org.springframework.stereotype.Component
  * [BibleWordMatcher] 와 세는 단위가 다르다. 매처는 어절을 정규화해 표제어에 매칭하므로 형태소
  * 경계를 지키는 대신, 공백이 든 표제어(`하나님 나라`)와 띄어쓰기가 없는 언어(중국어)를 영영
  * 세지 못한다. 이 클래스는 정반대다 — 무엇이든 세는 대신 경계를 보지 못해서 `말` 이
- * `말씀`·`말미암아` 까지 함께 센다.
- *
- * **그래서 이 결과는 사람이 확인한 뒤에 저장된다**(설계 문서 §3.2). 오검출을 코드가 걸러 줄
- * 방법이 없으므로 [samples] 로 실제 잡힌 절을 함께 돌려준다.
+ * `말씀`·`말미암아` 까지 함께 센다(설계 문서 §3.2).
  */
 @Component
 class BibleWordOccurrenceCounter {
@@ -22,10 +19,9 @@ class BibleWordOccurrenceCounter {
      * @param keywords 표제어와 별칭. 매처가 별칭을 표제어 id 로 접어서 세므로 여기서도 합산한다.
      */
     fun countBook(
-        verses: List<BookVerseText>,
+        verses: List<ChapterVerseText>,
         keywords: List<String>,
         languageCode: LanguageCode,
-        sampleLimit: Int = DEFAULT_SAMPLE_LIMIT,
     ): KeywordCount {
         val needles = keywords.asSequence()
             .map { it.normalizeFor(languageCode) }
@@ -35,25 +31,16 @@ class BibleWordOccurrenceCounter {
             // 맞히면 한 자리를 두 번 세거나 긴 쪽이 영영 잡히지 않는다.
             .sortedByDescending { it.length }
             .toList()
-        if (needles.isEmpty()) return KeywordCount(emptyMap(), emptyList())
+        if (needles.isEmpty()) return KeywordCount(emptyMap())
 
         val chapterCounts = HashMap<Int, Int>()
-        val matched = ArrayList<BookVerseText>()
-
         verses.forEach { verse ->
             val hits = countIn(verse.text.normalizeFor(languageCode), needles)
             if (hits == 0) return@forEach
             chapterCounts.merge(verse.chapterNumber, hits, Int::plus)
-            matched += verse
         }
 
-        // 조회 쿼리에 ORDER BY 가 없다. 여기서 정렬해야 관리자가 보는 예시가 매번 달라지지 않는다.
-        val samples = matched
-            .sortedWith(compareBy({ it.chapterNumber }, { it.verseNumber }))
-            .take(sampleLimit)
-            .map { Sample(it.bookOrder, it.chapterNumber, it.verseNumber, it.text) }
-
-        return KeywordCount(chapterCounts = chapterCounts, samples = samples)
+        return KeywordCount(chapterCounts = chapterCounts)
     }
 
     /**
@@ -84,24 +71,11 @@ class BibleWordOccurrenceCounter {
 
     /**
      * @param chapterCounts 장 번호 -> 횟수. 0 회인 장은 담지 않는다.
-     * @param samples 실제로 잡힌 절. 오검출 확인용이다.
      */
     data class KeywordCount(
         val chapterCounts: Map<Int, Int>,
-        val samples: List<Sample>,
     ) {
         val totalCount: Int
             get() = chapterCounts.values.sum()
-    }
-
-    data class Sample(
-        val bookOrder: Int,
-        val chapterNumber: Int,
-        val verseNumber: Int,
-        val text: String,
-    )
-
-    companion object {
-        const val DEFAULT_SAMPLE_LIMIT = 5
     }
 }

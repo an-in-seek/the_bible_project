@@ -96,8 +96,8 @@
                 <div class="form-group">
                     <label for="keywordTerm">키워드</label>
                     <!-- 입력칸과 두 버튼이 한 줄이다. flex 라 버튼 높이는 입력칸을 따라간다.
-                         `집계 후 저장` 하나로 끝난다. 확인은 저장한 뒤 결과에서 하고, 아니면
-                         그 자리의 `되돌리기` 로 같은 범위를 통째로 걷어 낸다.
+                         `집계 후 저장` 하나로 끝난다. 값이 이상하면 그 자리의 `되돌리기` 로
+                         같은 범위를 통째로 걷어 낸다.
                          `미리보기` 는 쓰기 전에 확인하고 싶을 때만 쓰는 예비 수단이다. -->
                     <div class="d-flex gap-2 keyword-input-row">
                         <input type="text" id="keywordTerm" placeholder="예: 하나님, 하나님 나라"
@@ -113,8 +113,7 @@
             <p class="text-muted small mt-2">
                 본문에 그 <strong>문자열</strong>이 나온 횟수를 셉니다. 어절 매칭이 아니라서
                 <strong>말</strong> 로 세면 <strong>말씀</strong>·<strong>말미암아</strong> 까지 함께 잡힙니다.
-                저장하면 결과에 <strong>잡힌 절</strong>이 함께 나옵니다. 아니다 싶으면 그 자리의
-                <strong>되돌리기</strong>로 방금 넣은 값을 걷어 낼 수 있습니다.
+                값이 이상하면 그 자리의 <strong>되돌리기</strong>로 방금 넣은 값을 걷어 낼 수 있습니다.
                 위에서 <strong>책을 비우면 번역본 전체</strong>를 셉니다(몇 초 걸립니다).
             </p>
         </section>
@@ -595,19 +594,6 @@
                 el("span", "keyword-chapter", `${c.chapterNumber}장 ${c.wordCount}`)));
         }
         keywordResult.append(chips);
-
-        // 오검출은 코드가 걸러 줄 수 없다. 관리자가 눈으로 보는 자리가 여기다.
-        const samples = el("ul", "keyword-samples");
-        r.samples.forEach((sample) => {
-            const item = el("li");
-            const ref = r.bookOrder === null
-                ? `${bookNameOf(sample.bookOrder)} ${sample.chapterNumber}:${sample.verseNumber}`
-                : `${sample.chapterNumber}:${sample.verseNumber}`;
-            item.append(el("span", "keyword-sample-ref", ref));
-            item.append(document.createTextNode(sample.text));
-            samples.append(item);
-        });
-        keywordResult.append(samples);
     };
 
     const busy = (on, message) => {

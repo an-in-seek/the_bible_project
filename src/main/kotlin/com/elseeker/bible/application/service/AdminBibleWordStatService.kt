@@ -352,9 +352,8 @@ class AdminBibleWordStatService(
         // 어절에 맞춰 보고 15만 행을 쓰지만, 이쪽은 키워드 하나를 문자열로 훑고 많아야
         // 천여 행을 쓴다. 미매칭 후보 리포트가 이미 같은 방식으로 번역본 전체를 훑는다.
         val countsByBook = LinkedHashMap<Int, Map<Int, Int>>()
-        val samples = ArrayList<BibleWordOccurrenceCounter.Sample>()
         bookOrders.forEach { order ->
-            val verses = bibleVerseRepository.findVerseTextsByBook(translationId, order)
+            val verses = bibleVerseRepository.findChapterTextsByBook(translationId, order)
             if (verses.isEmpty()) {
                 // 책을 콕 집었는데 본문이 없으면 알려 준다. 번역본 전체라면 그냥 넘어간다
                 // — 66권을 다 갖추지 않은 번역본이 있다.
@@ -364,9 +363,6 @@ class AdminBibleWordStatService(
             val counted = bibleWordOccurrenceCounter.countBook(verses, keywords, languageCode)
             if (counted.totalCount == 0) return@forEach
             countsByBook[order] = counted.chapterCounts.toSortedMap()
-            if (samples.size < BibleWordOccurrenceCounter.DEFAULT_SAMPLE_LIMIT) {
-                samples += counted.samples.take(BibleWordOccurrenceCounter.DEFAULT_SAMPLE_LIMIT - samples.size)
-            }
         }
 
         return KeywordComputation(
@@ -375,7 +371,6 @@ class AdminBibleWordStatService(
             aliases = aliases,
             bookOrder = bookOrder,
             countsByBook = countsByBook,
-            samples = samples,
             // 저장은 표제어 단위다. 매처가 그 표제어를 셀 수 있는지를 본다.
             matcherCountable = bibleWordMatcher.isCountableTerm(word?.term ?: term, languageCode),
         )
@@ -518,7 +513,6 @@ class AdminBibleWordStatService(
         val aliases: List<String>,
         val bookOrder: Int?,
         val countsByBook: Map<Int, Map<Int, Int>>,
-        val samples: List<BibleWordOccurrenceCounter.Sample>,
         val matcherCountable: Boolean,
     ) {
         val totalCount: Int
@@ -544,7 +538,6 @@ class AdminBibleWordStatService(
                     .map { BookCount(bookOrder = it.key, wordCount = it.value.values.sum()) }
                     .sortedWith(compareByDescending<BookCount> { it.wordCount }.thenBy { it.bookOrder })
             },
-            samples = samples,
         )
     }
 
@@ -570,7 +563,6 @@ class AdminBibleWordStatService(
         val totalCount: Int,
         val chapterCounts: List<ChapterCount>,
         val bookCounts: List<BookCount>,
-        val samples: List<BibleWordOccurrenceCounter.Sample>,
     )
 
     data class ChapterCount(
