@@ -225,6 +225,42 @@ class AdminBibleWordStatService(
         )
     }
 
+    /**
+     * 키워드 집계로 넣은 행을 범위 단위로 되돌린다.
+     *
+     * 계산과 저장을 한 번에 하므로(§3.2) 관리자는 결과를 **저장된 뒤에** 본다. 오검출이었다면
+     * 수백 행을 하나씩 지울 수는 없으니 같은 범위를 한 번에 걷어 내는 길이 있어야 한다.
+     *
+     * 지우는 것은 `KEYWORD` 행뿐이다. 저장 뒤에 관리자가 손으로 고친 행(`MANUAL`)까지 지우면
+     * 되돌리기가 아니라 또 다른 사고가 된다. 자동 등록된 표제어는 남는다 — 어휘를 지우는 것은
+     * 어휘 관리 화면의 일이다.
+     */
+    @Transactional
+    fun deleteKeywordStat(translationId: Long, bookOrder: Int?, keyword: String): Int {
+        val term = keyword.trim()
+        if (term.isBlank()) throwError(ErrorType.INVALID_PARAMETER, "키워드를 입력해 주세요")
+
+        val word = bibleWordRepository.findByTranslationIdAndTerm(translationId, term)
+            ?: bibleWordAliasRepository.findByTranslationIdAndAlias(translationId, term)
+                ?.let { bibleWordRepository.findByIdOrNull(it.bibleWordId) }
+            ?: throwError(ErrorType.BIBLE_WORD_NOT_FOUND, term)
+        val wordId = word.id ?: throwError(ErrorType.BIBLE_WORD_NOT_FOUND, term)
+
+        val rows = if (bookOrder != null) {
+            bibleWordStatRepository
+                .findByTranslationIdAndBookOrderAndBibleWordId(translationId, bookOrder, wordId)
+        } else {
+            bibleWordStatRepository.findByTranslationIdAndBibleWordId(translationId, wordId)
+        }.filter { it.source == BibleWordStatSource.KEYWORD }
+
+        bibleWordStatRepository.deleteAll(rows)
+        logger.info {
+            "키워드 집계 되돌리기: translationId=$translationId, bookOrder=${bookOrder ?: "전체"}, " +
+                "키워드=$term, 삭제=${rows.size}"
+        }
+        return rows.size
+    }
+
     @Transactional
     fun updateCount(statId: Long, wordCount: Int): BibleWordStat {
         if (wordCount < 0) throwError(ErrorType.INVALID_PARAMETER, "wordCount=$wordCount")

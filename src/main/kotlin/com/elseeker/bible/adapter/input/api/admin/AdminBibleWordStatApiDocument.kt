@@ -78,6 +78,21 @@ interface AdminBibleWordStatApiDocument {
     )
     fun saveKeyword(request: AdminBibleWordStatKeywordRequest): ResponseEntity<AdminBibleWordStatApi.KeywordSaveResponse>
 
+    @Operation(
+        summary = "키워드 집계 되돌리기",
+        description = "그 범위에서 키워드로 저장한 `KEYWORD` 행을 지웁니다. " +
+            "관리자가 저장 뒤에 손으로 고친 행(`MANUAL`)과 자동 등록된 표제어는 남습니다."
+    )
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "삭제 성공"),
+        ApiResponse(responseCode = "404", description = "어휘에 없는 키워드"),
+    )
+    fun deleteKeyword(
+        translationId: Long,
+        @Parameter(description = "생략하면 번역본 전체") bookOrder: Int?,
+        keyword: String,
+    ): ResponseEntity<AdminBibleWordStatApi.KeywordDeleteResponse>
+
     @Operation(summary = "카운트 직접 추가", description = "source = MANUAL 로 저장되어 재계산이 건드리지 않습니다.")
     fun create(request: AdminBibleWordStatCreateRequest): ResponseEntity<AdminBibleWordStatApi.StatItem>
 

@@ -292,6 +292,26 @@ class BibleWordStatIntegrationTest @Autowired constructor(
     }
 
     @Test
+    @DisplayName("되돌리면 그 범위의 KEYWORD 행만 사라진다")
+    fun keywordUndoRemovesOnlyKeywordRows() {
+        // given — 저장한 뒤 장 행 하나를 손으로 고쳐 MANUAL 로 바꾼다
+        adminBibleWordStatService.saveKeywordStat(translationId, BOOK_ORDER, "하나님")
+        val chapterRow = statRepository.findAll()
+            .first { it.bibleWordId == godWord.id && it.chapterNumber == 1 }
+        adminBibleWordStatService.updateCount(chapterRow.id!!, 99)
+
+        // when
+        val deleted = adminBibleWordStatService.deleteKeywordStat(translationId, BOOK_ORDER, "하나님")
+
+        // then — 되돌리기가 관리자의 손자국까지 지우면 그것은 또 다른 사고다
+        deleted shouldBe 1
+        val rows = statRepository.findAll().filter { it.bibleWordId == godWord.id }
+        rows shouldHaveSize 1
+        rows.first().source shouldBe BibleWordStatSource.MANUAL
+        rows.first().wordCount shouldBe 99
+    }
+
+    @Test
     @DisplayName("본문에 없는 키워드는 저장하지 않는다 — 오타가 어휘에 남지 않도록")
     fun keywordSaveRejectsZeroCount() {
         // when

@@ -73,6 +73,16 @@ class AdminBibleWordStatApi(
         return ResponseEntity.ok(KeywordSaveResponse.from(result))
     }
 
+    @DeleteMapping("/keyword")
+    override fun deleteKeyword(
+        @RequestParam translationId: Long,
+        @RequestParam(required = false) bookOrder: Int?,
+        @RequestParam keyword: String,
+    ): ResponseEntity<KeywordDeleteResponse> {
+        val deleted = adminBibleWordStatService.deleteKeywordStat(translationId, bookOrder, keyword)
+        return ResponseEntity.ok(KeywordDeleteResponse(deleted))
+    }
+
     @GetMapping("/candidates")
     override fun candidates(
         @RequestParam translationId: Long,
@@ -253,6 +263,11 @@ class AdminBibleWordStatApi(
             )
         }
     }
+
+    /** @param deletedRowCount 지운 `KEYWORD` 행 수 */
+    data class KeywordDeleteResponse(
+        val deletedRowCount: Int,
+    )
 
     data class ChapterCountItem(
         val chapterNumber: Int,

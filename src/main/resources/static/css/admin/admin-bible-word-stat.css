@@ -110,7 +110,24 @@
  */
 
 .keyword-input-row .btn {
+    /* 입력칸과 같은 크기로 세운다. 한 줄일 때는 flex 가 높이를 맞춰 주지만, 좁은 화면에서
+       버튼만 아래 줄로 내려가면 `.btn-sm` 본래의 31px 로 돌아가 손가락이 닿는 넓이가 준다. */
     min-width: 76px;
+    padding: 0.4rem 1rem;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+@media (max-width: 768px) {
+    /* 버튼 둘과 폭을 나눠 가지면 입력칸이 120px 남짓이 되어 자리표시자도 다 못 보여 준다.
+       입력칸에 한 줄을 통째로 주고 버튼은 아래로 내린다. */
+    .keyword-input-row {
+        flex-wrap: wrap;
+    }
+
+    .keyword-input-row input {
+        flex: 1 0 100%;
+    }
 }
 
 @media (min-width: 769px) {
@@ -161,6 +178,14 @@
     background: #f8f9fa;
     font-size: 0.8rem;
     white-space: nowrap;
+}
+
+/* 저장 결과 옆의 되돌리기·새로고침. 좁은 화면에서 버튼이 삐져나가지 않게 감싼다. */
+.keyword-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
 }
 
 .keyword-samples {
