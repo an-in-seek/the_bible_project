@@ -88,6 +88,18 @@ class BibleWord(
             status = BibleWordStatus.CANDIDATE,
         )
 
+        /**
+         * 관리자가 통계 화면에서 직접 입력한 키워드. 사람이 그 자리에서 결과를 확인하고
+         * 저장하므로 승인 상태로 둔다 — `CANDIDATE` 로 넣으면 방금 계산한 값이 사용자
+         * 화면에 나오지 않아 왜 안 보이는지 알 수 없다. 분류는 알 수 없으므로 ETC 다.
+         */
+        fun keywordOf(translationId: Long, term: String) = BibleWord(
+            translationId = translationId,
+            term = term,
+            category = BibleWordCategory.ETC,
+            status = BibleWordStatus.APPROVED,
+        )
+
         /** 성경 사전에서 가져온 어휘. 사람이 이미 검수한 용어라 바로 승인 상태로 둔다. */
         fun approvedOf(
             translationId: Long,

@@ -6,6 +6,8 @@
     <title>단어 통계 관리 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/admin/admin.css?v=5.2" rel="stylesheet">
+    <link href="/css/admin/admin-filter-row.css?v=1.0" rel="stylesheet">
+    <link href="/css/admin/admin-bible-word-stat.css?v=1.0" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
@@ -25,7 +27,8 @@
             이후 재계산이 건드리지 않습니다.
         </p>
 
-        <form class="admin-form admin-form-grid" method="get" action="/web/admin/bible/word-stats">
+        <form class="admin-form admin-form-grid admin-filter-row" method="get"
+              action="/web/admin/bible/word-stats">
             <div class="form-group">
                 <label for="translationId">번역본</label>
                 <select id="translationId" name="translationId" onchange="this.form.submit()">
@@ -59,6 +62,8 @@
         <div class="admin-toolbar" th:if="${translationId != null and bookOrder != null}">
             <div class="admin-toolbar-group">
                 <button class="btn btn-outline-primary btn-sm" id="recalcBtn">이 책 재계산</button>
+                <button class="btn btn-outline-secondary btn-sm" type="button" id="manualToggleBtn"
+                        aria-expanded="false" aria-controls="manualPanel">수동 행 추가</button>
                 <a th:href="@{/web/admin/bible/word-candidates(translationId=${translationId},bookOrder=${bookOrder})}"
                    class="btn btn-outline-secondary btn-sm">미매칭 후보 보기</a>
             </div>
@@ -66,53 +71,106 @@
 
         <div id="recalcResult" class="text-muted small"></div>
 
+        <!-- 아래 수동 행 추가 패널이 시트로 뜰 때만 보인다(admin-bible-word-stat.css).
+             데스크톱에서 패널은 화면을 덮지 않으므로 뒤를 가릴 것도, 눌러서 닫을 것도 없다. -->
+        <div class="admin-sheet-backdrop" id="sheetBackdrop"
+             th:if="${translationId != null and bookOrder != null}"></div>
+
+        <!-- 키워드를 직접 세어 통계에 반영한다. 어절을 표제어에 매칭하는 재계산과 달리 본문에
+             그 문자열이 나온 횟수를 세므로, 공백이 든 표제어와 중국어도 값이 나온다. 대신
+             형태소 경계를 보지 못해 오검출을 사람이 확인해야 한다 — 그래서 계산과 저장이
+             두 단계다(docs/bible/word-stat-keyword-count-design.md).
+
+             재계산과 달리 책을 고르지 않아도 된다. 위 조회 폼의 책을 비우면 번역본 전체를
+             센다 — 키워드 하나를 문자열로 훑을 뿐이라 어휘 전체를 맞춰 보는 재계산과 무게가
+             다르다. -->
+        <section class="mt-3" th:if="${translationId != null}">
+            <h3 class="h6">
+                키워드로 집계
+                <!-- 범위는 위 조회 폼이 정한다. 여기 적어 두지 않으면 방금 무엇을 기준으로
+                     센 값인지 결과만 보고는 알 수 없다. -->
+                <span class="text-muted small"
+                      th:text="${bookOrder == null ? '· 번역본 전체' : '· ' + (bookNames[bookOrder] ?: ('책 ' + bookOrder))}"></span>
+            </h3>
+            <div class="admin-form">
+                <div class="form-group">
+                    <label for="keywordTerm">키워드</label>
+                    <!-- 입력칸과 두 버튼이 한 줄이다. flex 라 버튼 높이는 입력칸을 따라간다.
+                         `집계 후 저장` 하나로 끝난다. 값이 이상하면 그 자리의 `되돌리기` 로
+                         같은 범위를 통째로 걷어 낸다.
+                         `미리보기` 는 쓰기 전에 확인하고 싶을 때만 쓰는 예비 수단이다. -->
+                    <div class="d-flex gap-2 keyword-input-row">
+                        <input type="text" id="keywordTerm" placeholder="예: 하나님, 하나님 나라"
+                               autocomplete="off" enterkeyhint="send">
+                        <button type="button" class="btn btn-outline-secondary btn-sm flex-shrink-0"
+                                id="keywordCountBtn">미리보기</button>
+                        <button type="button" class="btn btn-primary btn-sm flex-shrink-0"
+                                id="keywordSaveBtn">집계 후 저장</button>
+                    </div>
+                </div>
+                <div id="keywordResult" class="keyword-result"></div>
+            </div>
+            <p class="text-muted small mt-2">
+                본문에 그 <strong>문자열</strong>이 나온 횟수를 셉니다. 어절 매칭이 아니라서
+                <strong>말</strong> 로 세면 <strong>말씀</strong>·<strong>말미암아</strong> 까지 함께 잡힙니다.
+                값이 이상하면 그 자리의 <strong>되돌리기</strong>로 방금 넣은 값을 걷어 낼 수 있습니다.
+                위에서 <strong>책을 비우면 번역본 전체</strong>를 셉니다(몇 초 걸립니다).
+            </p>
+        </section>
+
         <!-- 자동 매칭이 잡지 못한 표제어를 넣는 유일한 입구다. 재계산은 AUTO 행만 지우고 다시
              넣으므로 여기서 만든 수동 행은 다음 재계산에서도 살아남는다.
              표제어는 글자가 아니라 id 로 넣는다 — 같은 글자의 표제어가 번역본마다 따로 있다. -->
-        <section class="mt-3" th:if="${translationId != null and bookOrder != null}">
-            <h3 class="h6">수동 행 추가</h3>
-            <!-- 칸 순서가 곧 손이 움직이는 순서다: 검색어 → 표제어 → 장 → 횟수 → 추가.
-                 검색 버튼은 검색칸 옆에 둔다. 아래 버튼 줄에 두면 검색할 때마다 칸 네 개를
-                 건너뛰었다가 되돌아와야 한다. -->
-            <div class="admin-form admin-form-grid">
-                <div class="form-group">
-                    <label for="manualTerm">표제어 검색</label>
-                    <div class="d-flex gap-2">
-                        <input type="text" id="manualTerm" placeholder="일부만 입력해도 됩니다"
-                               autocomplete="off" enterkeyhint="search">
-                        <button type="button" class="btn btn-outline-secondary btn-sm flex-shrink-0"
-                                id="manualSearchBtn">검색</button>
+        <section th:if="${translationId != null and bookOrder != null}">
+            <div class="admin-sheet mt-3" id="manualPanel" role="group"
+                 aria-labelledby="manualPanelTitle">
+                <div class="admin-sheet-header">
+                    <h3 class="h6 mb-0" id="manualPanelTitle">수동 행 추가</h3>
+                    <button type="button" class="btn-close" id="manualCloseBtn" aria-label="닫기"></button>
+                </div>
+                <!-- 칸 순서가 곧 손이 움직이는 순서다: 검색어 → 표제어 → 장 → 횟수 → 추가.
+                     검색 버튼은 검색칸 옆에 둔다. 아래 버튼 줄에 두면 검색할 때마다 칸 네 개를
+                     건너뛰었다가 되돌아와야 한다. -->
+                <div class="admin-form admin-form-grid">
+                    <div class="form-group">
+                        <label for="manualTerm">표제어 검색</label>
+                        <div class="d-flex gap-2">
+                            <input type="text" id="manualTerm" placeholder="일부만 입력해도 됩니다"
+                                   autocomplete="off" enterkeyhint="search">
+                            <button type="button" class="btn btn-outline-secondary btn-sm flex-shrink-0"
+                                    id="manualSearchBtn">검색</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualWordId">표제어</label>
+                        <!-- 검색 전에는 잠가 둔다. 고를 것이 없는 셀렉트를 열어 두면 "추가" 를
+                             눌러 본 뒤에야 순서를 알게 된다. -->
+                        <select id="manualWordId" disabled>
+                            <option value="">검색을 먼저 실행하세요</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="manualChapter">장 (0 = 책 전체)</label>
+                        <input type="number" id="manualChapter" min="0"
+                               th:value="${chapterNumber != null} ? ${chapterNumber} : 1">
+                    </div>
+                    <div class="form-group">
+                        <label for="manualCount">횟수</label>
+                        <input type="number" id="manualCount" min="0" value="1">
+                    </div>
+                    <!-- 칸 안에 두면 검색 결과가 뜰 때 그 칸만 높아져, align-items:end 인 그리드에서
+                         표제어 셀렉트만 위로 튄다. 전체 폭 한 줄로 빼서 네 칸의 높이를 붙들어 둔다. -->
+                    <div id="manualResult" class="text-muted small" style="grid-column: 1 / -1"></div>
+                    <div class="admin-form-actions">
+                        <button type="button" class="btn btn-primary btn-sm" id="manualAddBtn">추가</button>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="manualWordId">표제어</label>
-                    <!-- 검색 전에는 잠가 둔다. 고를 것이 없는 셀렉트를 열어 두면 "추가" 를
-                         눌러 본 뒤에야 순서를 알게 된다. -->
-                    <select id="manualWordId" disabled>
-                        <option value="">검색을 먼저 실행하세요</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="manualChapter">장 (0 = 책 전체)</label>
-                    <input type="number" id="manualChapter" min="0"
-                           th:value="${chapterNumber != null} ? ${chapterNumber} : 1">
-                </div>
-                <div class="form-group">
-                    <label for="manualCount">횟수</label>
-                    <input type="number" id="manualCount" min="0" value="1">
-                </div>
-                <!-- 칸 안에 두면 검색 결과가 뜰 때 그 칸만 높아져, align-items:end 인 그리드에서
-                     표제어 셀렉트만 위로 튄다. 전체 폭 한 줄로 빼서 네 칸의 높이를 붙들어 둔다. -->
-                <div id="manualResult" class="text-muted small" style="grid-column: 1 / -1"></div>
-                <div class="admin-form-actions">
-                    <button type="button" class="btn btn-primary btn-sm" id="manualAddBtn">추가</button>
-                </div>
+                <p class="text-muted small mt-2 mb-0">
+                    넣은 행은 <strong>수동</strong>이라 이후 재계산이 건드리지 않습니다.
+                    장 행을 넣어도 <strong>책 전체</strong> 합계는 재계산해야 반영됩니다.
+                    <strong>차단</strong> 상태의 표제어는 넣어도 사용자 화면에는 나오지 않습니다.
+                </p>
             </div>
-            <p class="text-muted small mt-2">
-                넣은 행은 <strong>수동</strong>이라 이후 재계산이 건드리지 않습니다.
-                장 행을 넣어도 <strong>책 전체</strong> 합계는 재계산해야 반영됩니다.
-                <strong>차단</strong> 상태의 표제어는 넣어도 사용자 화면에는 나오지 않습니다.
-            </p>
         </section>
 
         <div class="admin-table-wrapper" th:if="${statPage != null}">
@@ -138,13 +196,13 @@
                     </td>
                     <td>
                         <span th:text="${r.source.displayName}"></span>
-                        <span th:if="${r.source.name() == 'MANUAL'}" class="badge bg-warning text-dark">수동</span>
+                        <span th:if="${r.source.name() != 'AUTO'}" class="badge bg-warning text-dark">재계산 제외</span>
                     </td>
                     <td class="admin-actions">
                         <button class="btn btn-outline-primary btn-sm" th:data-id="${r.id}"
                                 onclick="saveCount(this)">저장</button>
                         <button class="btn btn-outline-secondary btn-sm" th:data-id="${r.id}"
-                                th:if="${r.source.name() == 'MANUAL'}"
+                                th:if="${r.source.name() != 'AUTO'}"
                                 onclick="restoreAuto(this)">자동값으로</button>
                     </td>
                 </tr>
@@ -168,7 +226,7 @@
                     <span class="admin-card-label">출처</span>
                     <span class="admin-card-value">
                         <span th:text="${r.source.displayName}"></span>
-                        <span th:if="${r.source.name() == 'MANUAL'}" class="badge bg-warning text-dark">수동</span>
+                        <span th:if="${r.source.name() != 'AUTO'}" class="badge bg-warning text-dark">재계산 제외</span>
                     </span>
                 </div>
                 <div class="admin-card-row">
@@ -182,7 +240,7 @@
                     <button class="btn btn-outline-primary btn-sm" th:data-id="${r.id}"
                             onclick="saveCount(this)">저장</button>
                     <button class="btn btn-outline-secondary btn-sm" th:data-id="${r.id}"
-                            th:if="${r.source.name() == 'MANUAL'}"
+                            th:if="${r.source.name() != 'AUTO'}"
                             onclick="restoreAuto(this)">자동값으로</button>
                 </div>
             </div>
@@ -216,7 +274,7 @@
                         <th>마지막 재계산</th>
                         <th>장 수</th>
                         <th>행 수</th>
-                        <th>보존한 수동 행</th>
+                        <th>보존한 행</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -250,7 +308,7 @@
                         <span class="admin-card-value" th:text="${run.statRowCount}"></span>
                     </div>
                     <div class="admin-card-row">
-                        <span class="admin-card-label">수동 보존</span>
+                        <span class="admin-card-label">보존</span>
                         <span class="admin-card-value" th:text="${run.manualKept}"></span>
                     </div>
                 </div>
@@ -261,6 +319,8 @@
 <script th:inline="javascript">
     const translationId = /*[[${translationId}]]*/ null;
     const bookOrder = /*[[${bookOrder}]]*/ null;
+    // 책별 결과와 예시 절을 번호가 아니라 이름으로 보여 준다. 서버가 이미 만들어 둔 표다.
+    const bookNames = /*[[${bookNames}]]*/ {};
 </script>
 <script type="module">
     import {fetchAdmin, initAdminSidebarToggle, initAdminSidebarGroups} from "/js/admin/admin-common.js";
@@ -309,6 +369,49 @@
     const manualResult = document.getElementById("manualResult");
     const manualSearchBtn = document.getElementById("manualSearchBtn");
     const manualAddBtn = document.getElementById("manualAddBtn");
+    const manualToggleBtn = document.getElementById("manualToggleBtn");
+    const manualPanel = document.getElementById("manualPanel");
+    const manualCloseBtn = document.getElementById("manualCloseBtn");
+
+    const sheetBackdrop = document.getElementById("sheetBackdrop");
+    const FINE_POINTER = window.matchMedia("(hover: hover) and (pointer: fine)");
+    const sheets = [];
+
+    // 데스크톱에서는 접힌 패널을 펴고, 768px 이하에서는 같은 요소가 바텀 시트로 올라온다.
+    // 상태는 클래스 하나뿐이라 화면 폭이 바뀌어도 열린 채로 형태만 바뀐다.
+    const createSheet = ({toggle, panel, close, focusTarget}) => {
+        const sheet = {
+            isOpen: () => panel.classList.contains("is-open"),
+            setOpen: (open) => {
+                // 시트일 때 둘이 함께 열리면 화면 아래에서 겹친다. 한 번에 하나만 연다.
+                if (open) sheets.forEach((other) => { if (other !== sheet && other.isOpen()) other.setOpen(false); });
+                panel.classList.toggle("is-open", open);
+                toggle.setAttribute("aria-expanded", String(open));
+                const anyOpen = sheets.some((s) => s.isOpen());
+                sheetBackdrop.classList.toggle("is-open", anyOpen);
+                // 시트일 때만 배경 스크롤을 잠근다. 잠금 자체가 미디어 쿼리 안에 있다.
+                document.body.classList.toggle("admin-sheet-open", anyOpen);
+                // 열면서 첫 칸을 잡아 주는 것은 마우스 화면에서만이다. 휴대폰에서 시트가
+                // 올라오자마자 키보드를 띄우면 화면 아래에 붙은 시트를 그 키보드가 덮는다.
+                if (open && FINE_POINTER.matches) focusTarget.focus();
+                // 닫을 때 포커스를 버튼으로 되돌리지 않으면 사라진 패널 안에 남는다.
+                if (!open) toggle.focus();
+            },
+        };
+        toggle.addEventListener("click", () => sheet.setOpen(!sheet.isOpen()));
+        close.addEventListener("click", () => sheet.setOpen(false));
+        sheets.push(sheet);
+        return sheet;
+    };
+
+    const closeOpenSheets = () => sheets.forEach((sheet) => { if (sheet.isOpen()) sheet.setOpen(false); });
+
+    if (sheetBackdrop) {
+        sheetBackdrop.addEventListener("click", closeOpenSheets);
+        document.addEventListener("keydown", (event) => {
+            if (event.key === "Escape") closeOpenSheets();
+        });
+    }
 
     const searchWords = async () => {
         manualSearchBtn.disabled = true;
@@ -390,7 +493,16 @@
         handler();
     });
 
+    let manualSheet = null;
+
     if (manualSearchBtn) {
+        manualSheet = createSheet({
+            toggle: manualToggleBtn,
+            panel: manualPanel,
+            close: manualCloseBtn,
+            focusTarget: manualTerm,
+        });
+
         manualSearchBtn.addEventListener("click", searchWords);
         manualAddBtn.addEventListener("click", addManualRow);
         onEnter(manualTerm, searchWords);
@@ -408,9 +520,182 @@
                 const {term, chapterNumber} = JSON.parse(stashed);
                 manualTerm.value = term ?? "";
                 manualChapter.value = chapterNumber;
+                // 방금 한 행을 넣고 돌아온 참이다. 패널이 닫힌 채로 두면 이어서 넣으려던
+                // 관리자가 매번 다시 열어야 한다.
+                manualSheet.setOpen(true);
                 searchWords();
             }
         } catch { /* ignore */ }
+    }
+
+    // ── 키워드로 집계 ──
+
+    const keywordTerm = document.getElementById("keywordTerm");
+    const keywordResult = document.getElementById("keywordResult");
+    const keywordCountBtn = document.getElementById("keywordCountBtn");
+    const keywordSaveBtn = document.getElementById("keywordSaveBtn");
+
+    // 번역본에서 빠진 책이면 이름을 못 찾는다. 재계산 이력과 같은 규칙으로 숫자로 되돌아간다.
+    const bookNameOf = (order) => bookNames[order] ?? `책 ${order}`;
+
+    // 책을 고르지 않았으면 파라미터를 빼야 서버가 번역본 전체로 읽는다.
+    const scopedParams = (term) => {
+        const params = new URLSearchParams({translationId, keyword: term});
+        if (bookOrder !== null) params.set("bookOrder", bookOrder);
+        return params;
+    };
+
+    const el = (tag, className, text) => {
+        const node = document.createElement(tag);
+        if (className) node.className = className;
+        if (text !== undefined) node.textContent = text;
+        return node;
+    };
+
+    // 키워드도 본문도 사람이 넣은 문자열이라 innerHTML 로 붙이지 않는다.
+    const renderKeywordResult = (r) => {
+        keywordResult.replaceChildren();
+        const scopeSummary = r.bookOrder === null
+            ? `책 ${r.bookCounts.length}권`
+            : `장 ${r.chapterCounts.length}개`;
+        keywordResult.append(el("div", "keyword-total", `총 ${r.totalCount}회 · ${scopeSummary}`));
+
+        if (r.bibleWordId === null) {
+            keywordResult.append(el("p", "keyword-note", "어휘에 없는 키워드입니다. 저장하면 표제어로 등록됩니다."));
+        }
+        if (r.resolvedTerm) {
+            keywordResult.append(el("p", "keyword-note",
+                `표제어 "${r.resolvedTerm}" 의 별칭입니다. 값은 그 표제어 행에 저장됩니다.`));
+        }
+        if (r.aliases.length > 0) {
+            keywordResult.append(el("p", "keyword-note", `별칭 ${r.aliases.length}개를 합산했습니다: ${r.aliases.join(", ")}`));
+        }
+        // 저장한 행은 출처가 KEYWORD 라 '이 책 재계산' 이 지우지도 덮지도 않는다.
+        keywordResult.append(el("p", "keyword-note",
+            r.matcherCountable
+                ? "저장한 행은 '이 책 재계산' 이 건드리지 않습니다. 자동 집계 값으로 돌리려면 아래 목록에서 '자동값으로' 를 누르세요."
+                : "저장한 행은 '이 책 재계산' 이 건드리지 않습니다. 재계산은 이 단어를 세지 못하므로 여기서 넣은 값이 유일한 값입니다."));
+        if (r.wordStatus === "CANDIDATE") {
+            keywordResult.append(el("p", "keyword-note is-warning",
+                "표제어가 후보 상태라 사용자 화면에는 나오지 않을 수 있습니다."));
+        }
+        if (r.totalCount === 0) {
+            keywordResult.append(el("p", "keyword-note is-warning", "한 번도 나오지 않아 저장할 것이 없습니다."));
+            return;
+        }
+
+        // 번역본 전체는 장이 1,000개를 넘는다. 그때는 서버도 책별 합계만 준다.
+        const chips = el("div", "keyword-chapters");
+        if (r.bookOrder === null) {
+            r.bookCounts.forEach((b) => chips.append(
+                el("span", "keyword-chapter", `${bookNameOf(b.bookOrder)} ${b.wordCount}`)));
+        } else {
+            r.chapterCounts.forEach((c) => chips.append(
+                el("span", "keyword-chapter", `${c.chapterNumber}장 ${c.wordCount}`)));
+        }
+        keywordResult.append(chips);
+    };
+
+    const busy = (on, message) => {
+        keywordCountBtn.disabled = on;
+        keywordSaveBtn.disabled = on;
+        if (on) keywordResult.replaceChildren(el("div", "text-muted small", message));
+    };
+
+    // 세어 보기만 한다. 쓰기 전에 확인하고 싶을 때 쓰는 예비 수단이다.
+    const countKeyword = async () => {
+        const term = keywordTerm.value.trim();
+        if (!term) {
+            keywordTerm.focus();
+            return;
+        }
+        busy(true, bookOrder === null ? "번역본 전체 집계 중… 몇 초 걸립니다" : "집계 중…");
+        try {
+            const r = await fetchAdmin(`/api/v1/admin/bible/word-stats/keyword?${scopedParams(term)}`);
+            renderKeywordResult(r);
+        } catch (e) {
+            keywordResult.replaceChildren();
+            alert(e.message);
+        } finally {
+            busy(false);
+        }
+    };
+
+    // 한 번의 클릭으로 세고 저장한다. 값은 보내지 않는다 — 서버가 다시 세서 저장한다.
+    const saveKeyword = async () => {
+        const term = keywordTerm.value.trim();
+        if (!term) {
+            keywordTerm.focus();
+            return;
+        }
+        busy(true, bookOrder === null ? "번역본 전체 집계 후 저장 중… 몇 초 걸립니다" : "집계 후 저장 중…");
+        try {
+            const r = await fetchAdmin("/api/v1/admin/bible/word-stats/keyword", {
+                method: "POST",
+                body: JSON.stringify({translationId, bookOrder, keyword: term}),
+            });
+            const notes = [`${r.savedRowCount}행 저장 (재계산 제외)`];
+            if (bookOrder === null) notes.push(`책 ${r.bookCount}권`);
+            if (r.registeredWord) notes.push("표제어 신규 등록");
+            if (r.replacedRowCount > 0) notes.push(`옛 행 ${r.replacedRowCount}개 교체`);
+            // 손으로 고친 값은 덮지 않는다. 그런 행이 있었다면 말해 줘야 숫자가 왜 다른지 안다.
+            if (r.manualKeptCount > 0) notes.push(`손으로 고친 행 ${r.manualKeptCount}개 유지`);
+
+            // 저장한 뒤에 잡힌 절을 보여 준다. 확인이 저장보다 뒤로 왔으므로 되돌릴 길을
+            // 결과 바로 옆에 둔다.
+            renderKeywordResult(r.count);
+            keywordResult.prepend(el("div", "keyword-total", `저장했습니다 — ${notes.join(" · ")}`));
+            keywordResult.append(savedActions(r.count.keyword));
+        } catch (e) {
+            keywordResult.replaceChildren();
+            alert(e.message);
+        } finally {
+            busy(false);
+        }
+    };
+
+    // 아래 표는 저장 전 화면 그대로다. 자동으로 새로고침하면 되돌리기 버튼이 함께 사라지므로
+    // 새로고침도 관리자가 누르게 둔다.
+    const refreshButton = () => {
+        const refresh = el("button", "btn btn-outline-secondary btn-sm", "목록 새로고침");
+        refresh.type = "button";
+        refresh.addEventListener("click", () => location.reload());
+        return refresh;
+    };
+
+    const savedActions = (term) => {
+        const undo = el("button", "btn btn-outline-danger btn-sm", "되돌리기");
+        undo.type = "button";
+        undo.addEventListener("click", () => undoKeyword(term, undo));
+
+        const row = el("div", "keyword-actions");
+        row.append(undo, refreshButton());
+        return row;
+    };
+
+    const undoKeyword = async (term, btn) => {
+        btn.disabled = true;
+        try {
+            const r = await fetchAdmin(`/api/v1/admin/bible/word-stats/keyword?${scopedParams(term)}`,
+                {method: "DELETE"});
+            keywordResult.replaceChildren(
+                el("div", "keyword-total", `되돌렸습니다 — ${r.deletedRowCount}행 삭제`),
+                el("p", "keyword-note", "자동으로 등록된 표제어는 남습니다. 어휘 관리에서 정리할 수 있습니다."),
+            );
+            const row = el("div", "keyword-actions");
+            row.append(refreshButton());
+            keywordResult.append(row);
+        } catch (e) {
+            alert(e.message);
+            btn.disabled = false;
+        }
+    };
+
+    if (keywordCountBtn) {
+        keywordCountBtn.addEventListener("click", countKeyword);
+        keywordSaveBtn.addEventListener("click", saveKeyword);
+        // 엔터는 주 동작인 저장이다. 미리보기는 눌러서 쓴다.
+        onEnter(keywordTerm, saveKeyword);
     }
 
     document.getElementById("recalcBtn")?.addEventListener("click", async (event) => {
@@ -424,7 +709,7 @@
                 {method: "POST"});
             const unmatched = r.topUnmatched.map(u => `${u.term}(${u.count})`).join("  ");
             result.textContent =
-                `완료 — 장 ${r.chapterCount}개 / 삽입 ${r.insertedRowCount}행 / 수동 보존 ${r.manualKeptCount}행`
+                `완료 — 장 ${r.chapterCount}개 / 삽입 ${r.insertedRowCount}행 / 보존 ${r.manualKeptCount}행`
                 + (unmatched ? `\n미매칭 상위: ${unmatched}` : "");
             setTimeout(() => location.reload(), 1500);
         } catch (e) {

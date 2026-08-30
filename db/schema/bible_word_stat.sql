@@ -30,4 +30,4 @@ CREATE INDEX IF NOT EXISTS idx_bible_word_stat_word
 COMMENT ON TABLE  bible_word_stat                IS '성경 책/장 단위 단어 언급 횟수';
 COMMENT ON COLUMN bible_word_stat.chapter_number IS '장 번호. 0 이면 책 전체 집계 (상위 300개만 저장)';
 COMMENT ON COLUMN bible_word_stat.word_count     IS '언급 횟수. 0 인 행은 저장하지 않는다';
-COMMENT ON COLUMN bible_word_stat.source         IS 'AUTO=자동 계산(재계산 시 삭제 후 재삽입), MANUAL=관리자 입력(재계산 시 보존)';
+COMMENT ON COLUMN bible_word_stat.source         IS 'AUTO=자동 계산(재계산 시 삭제 후 재삽입), MANUAL=관리자 입력, KEYWORD=키워드 문자열 집계. AUTO 가 아닌 행은 재계산이 건드리지 않는다';

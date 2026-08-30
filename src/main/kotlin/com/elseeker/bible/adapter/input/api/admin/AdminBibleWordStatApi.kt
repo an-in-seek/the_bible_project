@@ -1,11 +1,13 @@
 package com.elseeker.bible.adapter.input.api.admin
 
 import com.elseeker.bible.adapter.input.api.admin.request.AdminBibleWordStatCreateRequest
+import com.elseeker.bible.adapter.input.api.admin.request.AdminBibleWordStatKeywordRequest
 import com.elseeker.bible.adapter.input.api.admin.request.AdminBibleWordStatUpdateRequest
 import com.elseeker.bible.adapter.output.jpa.BibleWordStatRow
 import com.elseeker.bible.application.service.AdminBibleWordStatService
 import com.elseeker.bible.domain.model.BibleWordStat
 import com.elseeker.bible.domain.vo.BibleWordStatSource
+import com.elseeker.bible.domain.vo.BibleWordStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -49,6 +51,36 @@ class AdminBibleWordStatApi(
     ): ResponseEntity<RecalculateResponse> {
         val result = adminBibleWordStatService.recalculateBook(translationId, bookOrder)
         return ResponseEntity.ok(RecalculateResponse.from(result))
+    }
+
+    @GetMapping("/keyword")
+    override fun countKeyword(
+        @RequestParam translationId: Long,
+        @RequestParam(required = false) bookOrder: Int?,
+        @RequestParam keyword: String,
+    ): ResponseEntity<KeywordCountResponse> {
+        val result = adminBibleWordStatService.countKeyword(translationId, bookOrder, keyword)
+        return ResponseEntity.ok(KeywordCountResponse.from(result))
+    }
+
+    @PostMapping("/keyword")
+    override fun saveKeyword(
+        @RequestBody request: AdminBibleWordStatKeywordRequest,
+    ): ResponseEntity<KeywordSaveResponse> {
+        val result = adminBibleWordStatService.saveKeywordStat(
+            request.translationId, request.bookOrder, request.keyword
+        )
+        return ResponseEntity.ok(KeywordSaveResponse.from(result))
+    }
+
+    @DeleteMapping("/keyword")
+    override fun deleteKeyword(
+        @RequestParam translationId: Long,
+        @RequestParam(required = false) bookOrder: Int?,
+        @RequestParam keyword: String,
+    ): ResponseEntity<KeywordDeleteResponse> {
+        val deleted = adminBibleWordStatService.deleteKeywordStat(translationId, bookOrder, keyword)
+        return ResponseEntity.ok(KeywordDeleteResponse(deleted))
     }
 
     @GetMapping("/candidates")
@@ -185,4 +217,90 @@ class AdminBibleWordStatApi(
         val term: String,
         val count: Int,
     )
+
+    /**
+     * @param matcherCountable 책 단위 재계산이 이 단어를 셀 수 있는지. 저장 값은 어느 쪽이든
+     *   `KEYWORD` 로 남아 재계산이 건드리지 않는다. 행을 지웠을 때 다음 재계산이 다시
+     *   채워 주는지가 갈리므로 화면 안내가 달라진다.
+     * @param samples 실제로 잡힌 절. 문자열 기준이라 오검출을 사람이 봐야 한다.
+     */
+    data class KeywordCountResponse(
+        val keyword: String,
+        /** 입력한 키워드가 별칭이면 해석된 표제어 표기. 같으면 null */
+        val resolvedTerm: String?,
+        val bibleWordId: Long?,
+        val wordStatus: BibleWordStatus?,
+        val aliases: List<String>,
+        val matcherCountable: Boolean,
+        /** null 이면 번역본 전체를 센 결과 */
+        val bookOrder: Int?,
+        val totalCount: Int,
+        /** 책을 고른 경우에만 채워진다 */
+        val chapterCounts: List<ChapterCountItem>,
+        /** 번역본 전체인 경우에만 채워진다. 횟수 내림차순 */
+        val bookCounts: List<BookCountItem>,
+    ) {
+        companion object {
+            fun from(result: AdminBibleWordStatService.KeywordCountResult) = KeywordCountResponse(
+                keyword = result.keyword,
+                resolvedTerm = result.resolvedTerm,
+                bibleWordId = result.bibleWordId,
+                wordStatus = result.wordStatus,
+                aliases = result.aliases,
+                matcherCountable = result.matcherCountable,
+                bookOrder = result.bookOrder,
+                totalCount = result.totalCount,
+                chapterCounts = result.chapterCounts.map {
+                    ChapterCountItem(it.chapterNumber, it.wordCount)
+                },
+                bookCounts = result.bookCounts.map {
+                    BookCountItem(it.bookOrder, it.wordCount)
+                },
+            )
+        }
+    }
+
+    /** @param deletedRowCount 지운 `KEYWORD` 행 수 */
+    data class KeywordDeleteResponse(
+        val deletedRowCount: Int,
+    )
+
+    data class ChapterCountItem(
+        val chapterNumber: Int,
+        val wordCount: Int,
+    )
+
+    data class BookCountItem(
+        val bookOrder: Int,
+        val wordCount: Int,
+    )
+
+
+    /**
+     * @param registeredWord 어휘에 없던 키워드라 표제어로 새로 등록했는지
+     * @param replacedRowCount 새 값으로 바뀐 옛 행 수(`AUTO`·`KEYWORD`)
+     * @param manualKeptCount 손으로 고친 값이라 그대로 둔 행 수(`MANUAL`)
+     */
+    data class KeywordSaveResponse(
+        val count: KeywordCountResponse,
+        val registeredWord: Boolean,
+        val source: BibleWordStatSource,
+        val savedRowCount: Int,
+        val replacedRowCount: Int,
+        val manualKeptCount: Int,
+        /** 값이 들어간 책 수 */
+        val bookCount: Int,
+    ) {
+        companion object {
+            fun from(result: AdminBibleWordStatService.KeywordSaveResult) = KeywordSaveResponse(
+                count = KeywordCountResponse.from(result.count),
+                registeredWord = result.registeredWord,
+                source = result.source,
+                savedRowCount = result.savedRowCount,
+                replacedRowCount = result.replacedRowCount,
+                manualKeptCount = result.manualKeptCount,
+                bookCount = result.bookCount,
+            )
+        }
+    }
 }

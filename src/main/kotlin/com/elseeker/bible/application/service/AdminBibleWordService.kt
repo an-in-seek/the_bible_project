@@ -64,9 +64,14 @@ class AdminBibleWordService(
     fun findAliases(bibleWordId: Long): List<BibleWordAlias> =
         bibleWordAliasRepository.findByBibleWordId(bibleWordId)
 
-    /** 삭제 경고에 쓴다. 관리자가 손으로 넣은 값이 함께 사라지는지 알려 줘야 한다. */
+    /**
+     * 삭제 경고에 쓴다. **재계산이 되살리지 못하는 행**이 함께 사라지는지 알려 줘야 한다.
+     * AUTO 행은 다음 재계산이 다시 채우므로 세지 않는다.
+     */
     fun countManualStats(bibleWordId: Long): Long =
-        bibleWordStatRepository.countByBibleWordIdAndSource(bibleWordId, BibleWordStatSource.MANUAL)
+        bibleWordStatRepository.countByBibleWordIdAndSourceIn(
+            bibleWordId, BibleWordStatSource.PRESERVED_ON_RECALCULATION
+        )
 
     @Transactional
     fun create(

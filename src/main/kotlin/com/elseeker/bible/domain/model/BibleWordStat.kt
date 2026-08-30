@@ -91,6 +91,22 @@ class BibleWordStat(
             source = BibleWordStatSource.AUTO,
         )
 
+        /** 키워드 문자열 집계 결과. 재계산이 건드리지 않는다. */
+        fun keyword(
+            bibleWordId: Long,
+            translationId: Long,
+            bookOrder: Int,
+            chapterNumber: Int,
+            wordCount: Int,
+        ) = BibleWordStat(
+            bibleWordId = bibleWordId,
+            translationId = translationId,
+            bookOrder = bookOrder,
+            chapterNumber = chapterNumber,
+            wordCount = wordCount,
+            source = BibleWordStatSource.KEYWORD,
+        )
+
         fun manual(
             bibleWordId: Long,
             translationId: Long,

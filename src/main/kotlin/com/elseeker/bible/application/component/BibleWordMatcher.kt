@@ -117,6 +117,23 @@ class BibleWordMatcher(
     }
 
     /**
+     * 이 표제어를 **매처가 셀 수 있는지**.
+     *
+     * 셀 수 없으면 책 단위 재계산은 그 단어를 영영 채우지 못한다. 키워드 집계가 넣은 값을
+     * `AUTO` 로 두면 다음 재계산이 지우고 다시 채우지 않아 행이 사라지므로, 이 판단이
+     * 저장 source 를 가른다(설계 문서 §6).
+     *
+     * 언어 목록을 하드코딩하지 않고 토크나이저에 직접 물어본다. `하나님 나라` 는 어절 둘로
+     * 갈라져 어느 해시 키와도 맞지 않고, 중국어는 어절이 하나도 나오지 않는다
+     * (`NON_ALPHA` 가 한자를 지운다). 토크나이저가 바뀌면 이 판단도 따라 바뀐다.
+     */
+    fun isCountableTerm(term: String, languageCode: LanguageCode): Boolean {
+        val words = tokenizer.splitWords(term, languageCode)
+        if (words.size != 1) return false
+        return tokenizer.matchKey(words.first(), languageCode) == tokenizer.matchKey(term, languageCode)
+    }
+
+    /**
      * 어휘 조회 인덱스. 표제어와 별칭이 같은 맵에 들어간다.
      */
     data class WordIndex(

@@ -9,9 +9,12 @@ import com.elseeker.bible.adapter.output.jpa.BibleWordStatRepository
 import com.elseeker.bible.adapter.output.jpa.BibleWordStatRow
 import com.elseeker.bible.adapter.output.jpa.BibleWordStatRunRepository
 import com.elseeker.bible.application.component.BibleWordMatcher
+import com.elseeker.bible.application.component.BibleWordOccurrenceCounter
+import com.elseeker.bible.domain.model.BibleWord
 import com.elseeker.bible.domain.model.BibleWordStat
 import com.elseeker.bible.domain.model.BibleWordStatRun
 import com.elseeker.bible.domain.vo.BibleWordStatSource
+import com.elseeker.bible.domain.vo.BibleWordStatus
 import com.elseeker.common.domain.ErrorType
 import com.elseeker.common.domain.throwError
 import com.neovisionaries.i18n.LanguageCode
@@ -40,6 +43,7 @@ class AdminBibleWordStatService(
     private val bibleBookRepository: BibleBookRepository,
     private val bibleTranslationRepository: BibleTranslationRepository,
     private val bibleWordMatcher: BibleWordMatcher,
+    private val bibleWordOccurrenceCounter: BibleWordOccurrenceCounter,
 ) {
 
     private val logger = KotlinLogging.logger {}
@@ -66,7 +70,10 @@ class AdminBibleWordStatService(
      *
      * AUTO 행은 **지우고 다시 넣는다.** UPSERT 만 하면 더 이상 매칭되지 않는 단어의 낡은 행을
      * 지울 방법이 없다 — 어휘를 차단하거나 별칭을 고쳐 매칭이 달라진 경우가 정확히 그렇다.
-     * MANUAL 행은 DELETE 조건에서 빠지므로 그대로 살아남는다.
+     *
+     * `AUTO` 가 아닌 행([BibleWordStatSource.PRESERVED_ON_RECALCULATION])은 DELETE 조건에서
+     * 빠지므로 그대로 살아남고, 그 (장, 표제어) 자리에는 새 AUTO 행을 넣지 않는다. 관리자가
+     * 손으로 고친 값(`MANUAL`)과 키워드로 세어 저장한 값(`KEYWORD`)이 여기 해당한다.
      */
     @Transactional
     fun recalculateBook(translationId: Long, bookOrder: Int): RecalculateResult {
@@ -80,39 +87,40 @@ class AdminBibleWordStatService(
 
         val counted = bibleWordMatcher.countBook(texts, index)
 
-        val manualRows = bibleWordStatRepository
-            .findByTranslationIdAndBookOrderAndSource(translationId, bookOrder, BibleWordStatSource.MANUAL)
-        val manualKeys = manualRows.map { it.chapterNumber to it.bibleWordId }.toHashSet()
+        val preservedRows = bibleWordStatRepository.findByTranslationIdAndBookOrderAndSourceIn(
+            translationId, bookOrder, BibleWordStatSource.PRESERVED_ON_RECALCULATION
+        )
+        val preservedKeys = preservedRows.map { it.chapterNumber to it.bibleWordId }.toHashSet()
 
         bibleWordStatRepository.deleteByBookAndSource(translationId, bookOrder, BibleWordStatSource.AUTO)
 
         val toInsert = ArrayList<BibleWordStat>()
         counted.chapterCounts.forEach { (chapterNumber, wordCounts) ->
             wordCounts.forEach { (bibleWordId, count) ->
-                if ((chapterNumber to bibleWordId) in manualKeys) return@forEach
+                if ((chapterNumber to bibleWordId) in preservedKeys) return@forEach
                 toInsert += BibleWordStat.auto(bibleWordId, translationId, bookOrder, chapterNumber, count)
             }
         }
-        toInsert += buildBookRows(translationId, bookOrder, counted, manualRows, manualKeys)
+        toInsert += buildBookRows(translationId, bookOrder, counted, preservedRows, preservedKeys)
 
         bibleWordStatRepository.saveAll(toInsert)
         recordRun(
             translationId = translationId,
             bookOrder = bookOrder,
             chapterCount = counted.chapterCounts.size,
-            statRowCount = toInsert.size + manualRows.size,
-            manualKept = manualRows.size,
+            statRowCount = toInsert.size + preservedRows.size,
+            manualKept = preservedRows.size,
         )
 
         logger.info {
             "재계산 완료: translationId=$translationId, bookOrder=$bookOrder, " +
-                "장=${counted.chapterCounts.size}, 삽입=${toInsert.size}, MANUAL 보존=${manualRows.size}"
+                "장=${counted.chapterCounts.size}, 삽입=${toInsert.size}, 보존=${preservedRows.size}"
         }
 
         return RecalculateResult(
             chapterCount = counted.chapterCounts.size,
             insertedRowCount = toInsert.size,
-            manualKeptCount = manualRows.size,
+            manualKeptCount = preservedRows.size,
             topUnmatched = counted.unmatched.toCandidates(UNMATCHED_PREVIEW_LIMIT),
         )
     }
@@ -139,6 +147,124 @@ class AdminBibleWordStatService(
             }
         }
         return merged.toCandidates(limit)
+    }
+
+    /**
+     * 키워드가 본문에 몇 번 나오는지 세어 본다. **저장하지 않는다.**
+     *
+     * 문자열 기준이라 `말` 이 `말씀` 을 함께 세는 오검출을 코드가 걸러 줄 수 없다. 그래서 값과
+     * 함께 실제로 잡힌 절을 돌려주고, 저장은 관리자가 그것을 보고 [saveKeywordStat] 로 따로
+     * 지시한다(설계 문서 3.2).
+     */
+    fun countKeyword(translationId: Long, bookOrder: Int?, keyword: String): KeywordCountResult =
+        computeKeyword(translationId, bookOrder, keyword).toResult()
+
+    /**
+     * 계산 결과를 `bible_word_stat` 에 반영한다. 어휘에 없는 키워드는 표제어로 먼저 등록한다.
+     *
+     * 값은 **클라이언트가 보낸 것을 믿지 않고 다시 센다.** 미리보기와 저장 사이에 본문이나
+     * 별칭이 바뀔 수 있고, 관리자 화면이라도 값을 그대로 받아 쓰면 저장된 통계가 본문과
+     * 무관해진다.
+     */
+    @Transactional
+    fun saveKeywordStat(translationId: Long, bookOrder: Int?, keyword: String): KeywordSaveResult {
+        val computed = computeKeyword(translationId, bookOrder, keyword)
+        // 0 회인 키워드로는 표제어를 만들지 않는다. 여기서 먼저 끊지 않으면 오타 하나가
+        // 어휘에 영구히 남는다.
+        if (computed.totalCount == 0) {
+            throwError(ErrorType.INVALID_PARAMETER, "본문에 한 번도 나오지 않아 저장할 것이 없습니다")
+        }
+
+        val word = computed.word
+            ?: bibleWordRepository.save(BibleWord.keywordOf(translationId, computed.term))
+        val wordId = word.id ?: throwError(ErrorType.BIBLE_WORD_NOT_FOUND, computed.term)
+
+        // 범위 밖의 행은 건드리지 않는다. 책 하나를 다시 셌는데 다른 책 값까지 지우면
+        // 관리자는 무엇이 사라졌는지 알 길이 없다.
+        val existing = if (bookOrder != null) {
+            bibleWordStatRepository
+                .findByTranslationIdAndBookOrderAndBibleWordId(translationId, bookOrder, wordId)
+        } else {
+            bibleWordStatRepository.findByTranslationIdAndBibleWordId(translationId, wordId)
+        }
+        // **손으로 고친 값은 남긴다.** 재계산과 같은 규칙이다 — 규칙이 둘이 되면 나중에 어느
+        // 쪽이 맞는지 아무도 기억하지 못한다. 번역본 전체를 한 번 저장하면 66권에 걸친 수정이
+        // 통째로 사라지던 자리이기도 하다.
+        val manualRows = existing.filter { it.source == BibleWordStatSource.MANUAL }
+        val manualCountByKey = manualRows.associate { (it.bookOrder to it.chapterNumber) to it.wordCount }
+        val replaced = existing - manualRows.toSet()
+        if (replaced.isNotEmpty()) {
+            bibleWordStatRepository.deleteAll(replaced)
+            // 지우기 전에 INSERT 가 나가면 `uk_bible_word_stat` 에 걸린다. Hibernate 의 기본
+            // 플러시 순서는 INSERT 가 DELETE 보다 앞이므로 여기서 직접 끊어 준다.
+            bibleWordStatRepository.flush()
+        }
+
+        // 출처는 언제나 KEYWORD 다. 재계산과 계산 방식이 다르므로, 매처가 셀 수 있는 단어라도
+        // 재계산이 덮으면 관리자가 확인하고 저장한 값이 조용히 다른 수로 바뀐다.
+        val rows = ArrayList<BibleWordStat>()
+        computed.countsByBook.forEach { (book, chapterCounts) ->
+            chapterCounts.forEach { (chapterNumber, wordCount) ->
+                if ((book to chapterNumber) in manualCountByKey) return@forEach
+                rows += BibleWordStat.keyword(wordId, translationId, book, chapterNumber, wordCount)
+            }
+            bookRowOf(wordId, translationId, book, chapterCounts, manualRows, manualCountByKey)
+                ?.let { rows += it }
+        }
+        bibleWordStatRepository.saveAll(rows)
+
+        logger.info {
+            "키워드 집계 저장: translationId=$translationId, bookOrder=${bookOrder ?: "전체"}, " +
+                "키워드=${computed.term}, 총=${computed.totalCount}, 책=${computed.countsByBook.size}, " +
+                "행=${rows.size}, 교체=${replaced.size}, 수동 보존=${manualRows.size}, " +
+                "표제어 신규=${computed.word == null}"
+        }
+
+        return KeywordSaveResult(
+            count = computed.toResult(wordId),
+            registeredWord = computed.word == null,
+            source = BibleWordStatSource.KEYWORD,
+            savedRowCount = rows.size,
+            replacedRowCount = replaced.size,
+            manualKeptCount = manualRows.size,
+            bookCount = computed.countsByBook.size,
+        )
+    }
+
+    /**
+     * 키워드 집계로 넣은 행을 범위 단위로 되돌린다.
+     *
+     * 계산과 저장을 한 번에 하므로(§3.2) 관리자는 결과를 **저장된 뒤에** 본다. 오검출이었다면
+     * 수백 행을 하나씩 지울 수는 없으니 같은 범위를 한 번에 걷어 내는 길이 있어야 한다.
+     *
+     * 지우는 것은 `KEYWORD` 행뿐이다. 저장 뒤에 관리자가 손으로 고친 행(`MANUAL`)까지 지우면
+     * 되돌리기가 아니라 또 다른 사고가 된다. 자동 등록된 표제어는 남는다 — 어휘를 지우는 것은
+     * 어휘 관리 화면의 일이다.
+     */
+    @Transactional
+    fun deleteKeywordStat(translationId: Long, bookOrder: Int?, keyword: String): Int {
+        val term = keyword.trim()
+        if (term.isBlank()) throwError(ErrorType.INVALID_PARAMETER, "키워드를 입력해 주세요")
+
+        val word = bibleWordRepository.findByTranslationIdAndTerm(translationId, term)
+            ?: bibleWordAliasRepository.findByTranslationIdAndAlias(translationId, term)
+                ?.let { bibleWordRepository.findByIdOrNull(it.bibleWordId) }
+            ?: throwError(ErrorType.BIBLE_WORD_NOT_FOUND, term)
+        val wordId = word.id ?: throwError(ErrorType.BIBLE_WORD_NOT_FOUND, term)
+
+        val rows = if (bookOrder != null) {
+            bibleWordStatRepository
+                .findByTranslationIdAndBookOrderAndBibleWordId(translationId, bookOrder, wordId)
+        } else {
+            bibleWordStatRepository.findByTranslationIdAndBibleWordId(translationId, wordId)
+        }.filter { it.source == BibleWordStatSource.KEYWORD }
+
+        bibleWordStatRepository.deleteAll(rows)
+        logger.info {
+            "키워드 집계 되돌리기: translationId=$translationId, bookOrder=${bookOrder ?: "전체"}, " +
+                "키워드=$term, 삭제=${rows.size}"
+        }
+        return rows.size
     }
 
     @Transactional
@@ -198,6 +324,108 @@ class AdminBibleWordStatService(
 
     // ------------ Private Methods ------------
 
+    /**
+     * 미리보기와 저장이 같은 계산을 쓴다. 두 곳에 따로 두면 화면에 보여 준 값과 저장한 값이
+     * 조용히 달라진다.
+     */
+    private fun computeKeyword(translationId: Long, bookOrder: Int?, keyword: String): KeywordComputation {
+        val term = keyword.trim()
+        if (term.isBlank()) throwError(ErrorType.INVALID_PARAMETER, "키워드를 입력해 주세요")
+        // 저장하면 표제어가 되므로 `bible_word.term` 의 길이를 넘으면 여기서 끊는다.
+        if (term.length > MAX_KEYWORD_LENGTH) throwError(ErrorType.INVALID_PARAMETER, "키워드가 너무 깁니다")
+
+        val languageCode = getTranslationLanguage(translationId)
+        val bookOrders = resolveBookOrders(translationId, bookOrder)
+
+        // 별칭을 입력했으면 부모 표제어로 되돌린다. 그냥 두면 `하느님` 이 `하나님` 의 별칭인데도
+        // 새 표제어로 등록되어, 같은 낱말의 통계가 둘로 갈라진다.
+        val word = bibleWordRepository.findByTranslationIdAndTerm(translationId, term)
+            ?: bibleWordAliasRepository.findByTranslationIdAndAlias(translationId, term)
+                ?.let { bibleWordRepository.findByIdOrNull(it.bibleWordId) }
+        // 차단은 관리자가 "이 낱말은 세지 않는다" 고 내린 판단이다. 키워드 집계가 그것을
+        // 조용히 되돌리면 재계산 값과 어긋난다.
+        if (word?.status == BibleWordStatus.BLOCKED) throwError(ErrorType.BIBLE_WORD_BLOCKED, term)
+
+        // 매처는 별칭을 표제어 id 로 접어서 센다. 여기서 빼면 같은 표제어 행에 재계산보다
+        // 작은 값이 들어간다.
+        val aliases = word?.id
+            ?.let { wordId -> bibleWordAliasRepository.findByBibleWordId(wordId).map { it.alias } }
+            .orEmpty()
+        // 어휘에 있는 낱말이면 표제어 표기로 센다. 입력한 별칭은 aliases 에 들어 있다.
+        val keywords = word?.let { listOf(it.term) + aliases } ?: listOf(term)
+
+        // 책 단위 재계산과 달리 여기서는 서버가 책을 순회한다. 재계산은 어휘 수천 개를 모든
+        // 어절에 맞춰 보고 15만 행을 쓰지만, 이쪽은 키워드 하나를 문자열로 훑고 많아야
+        // 천여 행을 쓴다. 미매칭 후보 리포트가 이미 같은 방식으로 번역본 전체를 훑는다.
+        val countsByBook = LinkedHashMap<Int, Map<Int, Int>>()
+        bookOrders.forEach { order ->
+            val verses = bibleVerseRepository.findChapterTextsByBook(translationId, order)
+            if (verses.isEmpty()) {
+                // 책을 콕 집었는데 본문이 없으면 알려 준다. 번역본 전체라면 그냥 넘어간다
+                // — 66권을 다 갖추지 않은 번역본이 있다.
+                if (bookOrder != null) throwError(ErrorType.CHAPTER_NOT_FOUND, "bookOrder=$order")
+                return@forEach
+            }
+            val counted = bibleWordOccurrenceCounter.countBook(verses, keywords, languageCode)
+            if (counted.totalCount == 0) return@forEach
+            countsByBook[order] = counted.chapterCounts.toSortedMap()
+        }
+
+        return KeywordComputation(
+            term = term,
+            word = word,
+            aliases = aliases,
+            bookOrder = bookOrder,
+            countsByBook = countsByBook,
+            // 저장은 표제어 단위다. 매처가 그 표제어를 셀 수 있는지를 본다.
+            matcherCountable = bibleWordMatcher.isCountableTerm(word?.term ?: term, languageCode),
+        )
+    }
+
+    /**
+     * 책 행(`chapterNumber = 0`)은 그 책 장 행의 **최종값** 합이다. 손으로 고친 장이 있으면
+     * 그 값을 쓴다 — 자동 집계 결과만 더하면 장별 값과 책 합계가 어긋난다.
+     * 재계산의 `buildBookRows` 와 같은 규칙이다.
+     *
+     * 책 행 자체가 `MANUAL` 이면 null 을 돌려준다. 그 자리는 관리자가 정한 값이다.
+     */
+    private fun bookRowOf(
+        bibleWordId: Long,
+        translationId: Long,
+        bookOrder: Int,
+        chapterCounts: Map<Int, Int>,
+        manualRows: List<BibleWordStat>,
+        manualCountByKey: Map<Pair<Int, Int>, Int>,
+    ): BibleWordStat? {
+        val bookScope = BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER
+        if ((bookOrder to bookScope) in manualCountByKey) return null
+
+        val countedTotal = chapterCounts.entries.sumOf { (chapterNumber, wordCount) ->
+            manualCountByKey[bookOrder to chapterNumber] ?: wordCount
+        }
+        // 이번 집계에는 잡히지 않았는데 관리자가 손으로만 넣어 둔 장도 합계에 든다.
+        val manualOnlyTotal = manualRows.asSequence()
+            .filter { it.bookOrder == bookOrder && !it.isBookScope() }
+            .filter { chapterCounts[it.chapterNumber] == null }
+            .sumOf { it.wordCount }
+
+        return BibleWordStat.keyword(
+            bibleWordId, translationId, bookOrder, bookScope, countedTotal + manualOnlyTotal
+        )
+    }
+
+    /** `bookOrder` 가 null 이면 번역본이 가진 책 전부. 없는 책 번호는 여기서 끊는다. */
+    private fun resolveBookOrders(translationId: Long, bookOrder: Int?): List<Int> {
+        if (bookOrder != null) {
+            bibleBookRepository.findByTranslationAndBook(translationId, bookOrder)
+                ?: throwError(ErrorType.BOOK_NOT_FOUND, "translationId=$translationId, bookOrder=$bookOrder")
+            return listOf(bookOrder)
+        }
+        val orders = bibleBookRepository.findByTranslationId(translationId).map { it.bookOrder }.sorted()
+        if (orders.isEmpty()) throwError(ErrorType.BOOK_NOT_FOUND, "translationId=$translationId")
+        return orders
+    }
+
     private fun buildIndex(translationId: Long, languageCode: LanguageCode): BibleWordMatcher.WordIndex {
         val words = bibleWordRepository.findByTranslationId(translationId)
         val aliases = bibleWordAliasRepository.findByTranslationId(translationId)
@@ -205,8 +433,9 @@ class AdminBibleWordStatService(
     }
 
     /**
-     * 책 행(`chapterNumber = 0`)은 장 행의 **최종값**(MANUAL 포함) 합으로 만든다.
-     * 자동 계산 결과만 더하면 관리자가 손으로 고친 장이 책 합계에 반영되지 않아 앞뒤가 맞지 않는다.
+     * 책 행(`chapterNumber = 0`)은 장 행의 **최종값**(보존된 행 포함) 합으로 만든다.
+     * 자동 계산 결과만 더하면 관리자가 손으로 고쳤거나 키워드로 세어 넣은 장이 책 합계에
+     * 반영되지 않아 앞뒤가 맞지 않는다.
      *
      * 조회 API 의 limit 상한이 300 이라 그보다 하위 순위는 어떤 화면에도 나올 수 없으므로 자른다.
      */
@@ -214,20 +443,20 @@ class AdminBibleWordStatService(
         translationId: Long,
         bookOrder: Int,
         counted: BibleWordMatcher.BookWordCount,
-        manualRows: List<BibleWordStat>,
-        manualKeys: Set<Pair<Int, Long>>,
+        preservedRows: List<BibleWordStat>,
+        preservedKeys: Set<Pair<Int, Long>>,
     ): List<BibleWordStat> {
-        val manualCountByKey = manualRows.associate { (it.chapterNumber to it.bibleWordId) to it.wordCount }
+        val preservedCountByKey = preservedRows.associate { (it.chapterNumber to it.bibleWordId) to it.wordCount }
         val bookTotals = HashMap<Long, Int>()
 
         counted.chapterCounts.forEach { (chapterNumber, wordCounts) ->
             wordCounts.forEach { (bibleWordId, autoCount) ->
-                val finalCount = manualCountByKey[chapterNumber to bibleWordId] ?: autoCount
+                val finalCount = preservedCountByKey[chapterNumber to bibleWordId] ?: autoCount
                 bookTotals.merge(bibleWordId, finalCount, Int::plus)
             }
         }
-        // 자동 집계에는 없고 관리자가 손으로만 넣은 장 행도 합계에 포함한다
-        manualRows.asSequence()
+        // 자동 집계에는 없고 사람이 넣은 장 행(수동·키워드)도 합계에 포함한다
+        preservedRows.asSequence()
             .filter { !it.isBookScope() }
             .filter { counted.chapterCounts[it.chapterNumber]?.containsKey(it.bibleWordId) != true }
             .forEach { bookTotals.merge(it.bibleWordId, it.wordCount, Int::plus) }
@@ -235,7 +464,7 @@ class AdminBibleWordStatService(
         return bookTotals.entries
             .sortedWith(compareByDescending<Map.Entry<Long, Int>> { it.value }.thenBy { it.key })
             .take(BibleWordStatService.BOOK_SCOPE_STORED_LIMIT)
-            .filterNot { (BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER to it.key) in manualKeys }
+            .filterNot { (BibleWordStat.BOOK_SCOPE_CHAPTER_NUMBER to it.key) in preservedKeys }
             .map {
                 BibleWordStat.auto(
                     bibleWordId = it.key,
@@ -310,8 +539,98 @@ class AdminBibleWordStatService(
         val count: Int,
     )
 
+    /**
+     * 미리보기와 저장이 공유하는 계산 결과. 서비스 밖으로 나가지 않는다.
+     *
+     * @param bookOrder null 이면 번역본 전체를 센 것이다.
+     * @param countsByBook 책 번호 -> (장 -> 횟수). 0 회인 책은 담지 않는다.
+     */
+    private data class KeywordComputation(
+        val term: String,
+        val word: BibleWord?,
+        val aliases: List<String>,
+        val bookOrder: Int?,
+        val countsByBook: Map<Int, Map<Int, Int>>,
+        val matcherCountable: Boolean,
+    ) {
+        val totalCount: Int
+            get() = countsByBook.values.sumOf { chapters -> chapters.values.sum() }
+
+        fun toResult(bibleWordId: Long? = word?.id) = KeywordCountResult(
+            keyword = term,
+            resolvedTerm = word?.term?.takeIf { it != term },
+            bibleWordId = bibleWordId,
+            wordStatus = word?.status,
+            aliases = aliases,
+            matcherCountable = matcherCountable,
+            bookOrder = bookOrder,
+            totalCount = totalCount,
+            // 번역본 전체는 장이 1,000개를 넘는다. 화면에 늘어놓을 수 없으므로 책별 합계만 준다.
+            chapterCounts = bookOrder?.let { order ->
+                countsByBook[order].orEmpty().entries
+                    .sortedBy { it.key }
+                    .map { ChapterCount(chapterNumber = it.key, wordCount = it.value) }
+            }.orEmpty(),
+            bookCounts = if (bookOrder != null) emptyList() else {
+                countsByBook.entries
+                    .map { BookCount(bookOrder = it.key, wordCount = it.value.values.sum()) }
+                    .sortedWith(compareByDescending<BookCount> { it.wordCount }.thenBy { it.bookOrder })
+            },
+        )
+    }
+
+    /**
+     * @param resolvedTerm 입력한 키워드가 별칭이라 다른 표제어로 해석됐을 때의 표제어 표기.
+     *   같으면 null. 값은 이 표제어의 행에 저장된다.
+     * @param bibleWordId 아직 어휘에 없으면 null. 저장할 때 표제어로 등록된다.
+     * @param matcherCountable 책 단위 재계산이 이 단어를 셀 수 있는지. 저장 값은 어느 쪽이든
+     *   `KEYWORD` 로 남아 재계산이 건드리지 않지만, true 면 행을 지웠을 때 다음 재계산이
+     *   매처 기준 값으로 다시 채운다는 뜻이라 화면 안내가 달라진다.
+     * @param bookOrder null 이면 번역본 전체를 센 결과다.
+     * @param chapterCounts 책을 고른 경우에만 채운다.
+     * @param bookCounts 번역본 전체인 경우에만 채운다. 횟수 내림차순.
+     */
+    data class KeywordCountResult(
+        val keyword: String,
+        val resolvedTerm: String?,
+        val bibleWordId: Long?,
+        val wordStatus: BibleWordStatus?,
+        val aliases: List<String>,
+        val matcherCountable: Boolean,
+        val bookOrder: Int?,
+        val totalCount: Int,
+        val chapterCounts: List<ChapterCount>,
+        val bookCounts: List<BookCount>,
+    )
+
+    data class ChapterCount(
+        val chapterNumber: Int,
+        val wordCount: Int,
+    )
+
+    data class BookCount(
+        val bookOrder: Int,
+        val wordCount: Int,
+    )
+
+    data class KeywordSaveResult(
+        val count: KeywordCountResult,
+        val registeredWord: Boolean,
+        val source: BibleWordStatSource,
+        val savedRowCount: Int,
+        /** 새 값으로 바뀐 옛 행 수 (`AUTO`·`KEYWORD`) */
+        val replacedRowCount: Int,
+        /** 손으로 고친 값이라 그대로 둔 행 수 (`MANUAL`) */
+        val manualKeptCount: Int,
+        /** 값이 들어간 책 수 */
+        val bookCount: Int,
+    )
+
     companion object {
         private const val UNMATCHED_PREVIEW_LIMIT = 30
         const val MAX_CANDIDATE_LIMIT = 10_000
+
+        /** `bible_word.term` 컬럼 길이. 저장하면 표제어가 되므로 같은 값으로 끊는다. */
+        private const val MAX_KEYWORD_LENGTH = 50
     }
 }
