@@ -6,6 +6,7 @@
     <title>단어 어휘 관리 | ElSeeker</title>
     <link href="/webjars/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/css/admin/admin.css?v=5.2" rel="stylesheet">
+    <link href="/css/admin/admin-filter-row.css?v=1.0" rel="stylesheet">
 </head>
 <body>
 <div class="admin-layout">
@@ -25,7 +26,8 @@
             후보 리포트로 표기 차이만 메우는 것이 빠릅니다.
         </p>
 
-        <form class="admin-form admin-form-grid" method="get" action="/web/admin/bible/words">
+        <form class="admin-form admin-form-grid admin-filter-row" method="get"
+              action="/web/admin/bible/words">
             <div class="form-group">
                 <label for="translationId">번역본</label>
                 <select id="translationId" name="translationId" onchange="this.form.submit()">
@@ -92,8 +94,14 @@
                     <td class="admin-actions">
                         <a th:href="@{/web/admin/bible/words/{id}/edit(id=${w.id})}"
                            class="btn btn-outline-primary btn-sm">수정</a>
+                        <!-- 이미 그 상태인 행에는 버튼을 두지 않는다. 눌러도 바뀌는 것이 없는데
+                             화면은 새로고침되어 방금 무슨 일이 일어났는지 알 수 없다. -->
+                        <button class="btn btn-outline-success btn-sm" th:data-id="${w.id}"
+                                th:data-name="${w.term}" th:if="${w.status.name() != 'APPROVED'}"
+                                onclick="approveWord(this)">승인</button>
                         <button class="btn btn-outline-warning btn-sm" th:data-id="${w.id}"
-                                th:data-name="${w.term}" onclick="blockWord(this)">차단</button>
+                                th:data-name="${w.term}" th:if="${w.status.name() != 'BLOCKED'}"
+                                onclick="blockWord(this)">차단</button>
                     </td>
                 </tr>
                 <tr th:if="${#lists.isEmpty(page.content)}">
@@ -126,8 +134,12 @@
                 <div class="admin-card-actions">
                     <a th:href="@{/web/admin/bible/words/{id}/edit(id=${w.id})}"
                        class="btn btn-outline-primary btn-sm">수정</a>
+                    <button class="btn btn-outline-success btn-sm" th:data-id="${w.id}"
+                            th:data-name="${w.term}" th:if="${w.status.name() != 'APPROVED'}"
+                            onclick="approveWord(this)">승인</button>
                     <button class="btn btn-outline-warning btn-sm" th:data-id="${w.id}"
-                            th:data-name="${w.term}" onclick="blockWord(this)">차단</button>
+                            th:data-name="${w.term}" th:if="${w.status.name() != 'BLOCKED'}"
+                            onclick="blockWord(this)">차단</button>
                 </div>
             </div>
             <div class="admin-card text-center text-muted"
@@ -159,6 +171,23 @@
 
     initAdminSidebarToggle();
     initAdminSidebarGroups();
+
+    // 승인하면 사용자 화면에 나가기 시작한다. 통계 행은 여기서 만들지 않는다 —
+    // 다음 재계산이 채우므로, 지금 바로 숫자가 보이지 않는 것은 정상이다.
+    window.approveWord = async (btn) => {
+        const id = btn.dataset.id;
+        const ok = await showConfirm(
+            `"${btn.dataset.name}" 을(를) 승인하시겠습니까?\n통계는 다음 재계산에서 채워집니다.`,
+            {title: "승인", confirmText: "승인"});
+        if (!ok) return;
+        try {
+            await fetchAdmin(`/api/v1/admin/bible/words/${id}/status`,
+                {method: "PATCH", body: JSON.stringify({status: "APPROVED"})});
+            location.reload();
+        } catch (e) {
+            alert(e.message);
+        }
+    };
 
     // 차단은 통계 행까지 즉시 지운다. 재계산을 기다리면 그때까지 화면에 계속 보인다.
     window.blockWord = async (btn) => {
