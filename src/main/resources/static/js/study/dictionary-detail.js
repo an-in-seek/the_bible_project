@@ -23,8 +23,13 @@ const DomHelper = {
 
 const App = {
     elements: null,
+    // 표제어는 구절 화면으로 넘길 강조 대상이다. 화면에 보이는 <h1> 을 되읽지 않고
+    // 서버가 body 에 실어 준 값을 쓴다 — 제목 마크업이 바뀌어도 조용히 비지 않는다.
+    // 설계 문서: docs/bible/bible-verse-word-focus-design.md §3.4
+    term: "",
     init: () => {
         App.elements = DomHelper.getElements();
+        App.term = (document.body.dataset.dictionaryTerm ?? "").trim();
         App.initNav();
         App.loadReferences();
     },
@@ -72,8 +77,17 @@ const App = {
 
     buildVerseUrl: (ref) => {
         const translationId = TranslationStore.getCurrentTranslationId();
-        if (!translationId) return ROUTES.TRANSLATION_LIST;
-        return `${ROUTES.VERSE}?translationId=${translationId}&bookOrder=${ref.bookOrder}&chapterNumber=${ref.chapterNumber}&verseNumber=${ref.verseNumber}&from=dictionary`;
+        // word 는 verseNumber 에 종속된 파라미터다 (설계 문서 §3)
+        const focusWord = App.term ? `&word=${encodeURIComponent(App.term)}` : "";
+        const verseUrl = `${ROUTES.VERSE}?translationId=${translationId ?? ""}&bookOrder=${ref.bookOrder}`
+            + `&chapterNumber=${ref.chapterNumber}&verseNumber=${ref.verseNumber}${focusWord}&from=dictionary`;
+        if (!translationId) {
+            // 번역본을 고르고 나면 이 절로 돌아온다. 절 정보를 버리면 사전부터 다시 눌러야 한다.
+            // translation-list.js 가 고른 id 로 translationId 를 덮어쓰므로 여기서는 비워 둔다.
+            TranslationStore.saveTranslationReturnPath(verseUrl);
+            return ROUTES.TRANSLATION_LIST;
+        }
+        return verseUrl;
     },
 
     renderReferences: (refs) => {
