@@ -37,10 +37,18 @@ const state = {
     translationId: null,
     translationType: null,
     translationName: null,
+    compareTranslationId: null,
+    compareTranslationType: null,
+    compareTranslationName: null,
     bookOrder: null,
     bookName: null,
     chapterNumber: null,
     verseNumber: null,
+    // 사전에서 넘어온 표제어 강조. verseNumber 와 달리 첫 렌더 뒤에도 살아 있어야 한다 —
+    // 대역을 켜고 끄면 같은 장을 다시 그리므로 그때 다시 칠해야 한다.
+    // 설계 문서: docs/bible/bible-verse-word-focus-design.md §6.2
+    focusWord: null,
+    focusVerseNumber: null,
     fromSearch: false,
     fromMypage: false,
     fromMyMemo: false
@@ -80,7 +88,8 @@ const chapterState = {
     dirtyHighlights: new Set(),
     readDirty: false,
     status: "idle",
-    stateLoadPromise: null
+    stateLoadPromise: null,
+    restoreVerseNumber: null // 대역 토글로 같은 장을 다시 그릴 때 읽던 자리를 지킨다
 };
 
 const VERSE_FONT_SIZES = {
@@ -93,10 +102,53 @@ const VERSE_FONT_SIZES = {
 const FONT_STEP_LABELS = {1: "가장 작게", 2: "작게", 3: "기본", 4: "크게", 5: "가장 크게"};
 const DEFAULT_FONT_STEP = 3;
 
+/** `bible_word.term` 의 컬럼 길이. 실제 표제어 최대는 9자라 손으로 만든 URL 만 걸린다. */
+const FOCUS_WORD_MAX_LENGTH = 50;
+const HANGUL_SYLLABLE = /[가-힣]/;
+
 const fontState = {
     step: DEFAULT_FONT_STEP,
     expanded: false
 };
+
+// 대역 비교 (설계 문서: docs/bible/bible-compare-design.md)
+const compareState = {
+    verses: [],      // 현재 장의 대역 절 목록
+    error: null,     // 문자열이면 로딩 실패 — 대역 칸에 그대로 보여 준다
+    expanded: false  // 번역본 선택 패널 열림 여부
+};
+
+const COMPARE_TRANSLATION_KEY = "bibleCompareTranslationId";
+
+/**
+ * 대역 번역본 선택은 storage-util.js 가 아니라 이 화면에 둔다.
+ * 그 모듈은 15개 파일이 `?v=2.7` 로 import 하고 있어, export 를 늘리면 여기서만 `?v=` 를
+ * 올릴 수 없다 — 올리면 URL 이 달라져 모듈 인스턴스가 둘로 갈라지고, 안 올리면 캐시된
+ * 옛 사본에 새 export 가 없어 import 가 깨진다.
+ */
+const CompareStore = {
+    get() {
+        try {
+            const parsed = parseInt(localStorage.getItem(COMPARE_TRANSLATION_KEY), 10);
+            return Number.isInteger(parsed) ? parsed : null;
+        } catch (e) {
+            return null; // storage 차단 환경
+        }
+    },
+    save(translationId) {
+        try {
+            if (translationId) {
+                localStorage.setItem(COMPARE_TRANSLATION_KEY, String(translationId));
+            } else {
+                localStorage.removeItem(COMPARE_TRANSLATION_KEY);
+            }
+        } catch (e) {
+            // 영속화에 실패해도 이번 세션 동안은 동작한다
+        }
+    }
+};
+
+const HTML_ESCAPES = {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"};
 
 let elements = null;
 
@@ -137,13 +189,32 @@ function getElements() {
         fontStepper: document.querySelector("#verseFontPanel .verse-font-stepper"),
         fontReset: get("verseFontReset"),
         fontClose: get("verseFontClose"),
-        fontLiveRegion: get("verseFontLiveRegion")
+        fontLiveRegion: get("verseFontLiveRegion"),
+        compareControl: get("verseCompareControl"),
+        compareToggle: get("verseCompareToggle"),
+        compareToggleLabel: get("verseCompareToggleLabel"),
+        comparePanel: get("verseComparePanel"),
+        compareNotice: get("verseCompareNotice"),
+        compareNoticeText: get("verseCompareNoticeText"),
+        compareRetryBtn: get("verseCompareRetryBtn")
     };
 }
 
 function parseIntParam(params, key) {
     const value = parseInt(params.get(key), 10);
     return Number.isNaN(value) ? null : value;
+}
+
+/**
+ * `?word=` 를 읽는다. URL 에서 온 값이므로 길이만 자르고 그대로 문자열로 쓴다.
+ * 정규식으로 만들지 않으므로 이스케이프할 것이 없다(설계 문서 §6.1).
+ */
+function parseFocusWord(params) {
+    const raw = (params.get("word") ?? "").trim();
+    if (!raw || raw.length > FOCUS_WORD_MAX_LENGTH) {
+        return null;
+    }
+    return raw;
 }
 
 function resolveInitialState() {
@@ -173,6 +244,13 @@ function resolveInitialState() {
 
     state.chapterNumber = chapterNumber;
     state.verseNumber = parsedVerseNumber;
+
+    // 강조할 표제어. 가리킬 절이 없으면 칠할 대상도 없으므로 verseNumber 와 함께만 산다.
+    state.focusWord = parseFocusWord(params);
+    state.focusVerseNumber = state.focusWord ? parsedVerseNumber : null;
+
+    // 공유받은 링크가 보낸 사람과 같은 화면을 열어야 하므로 URL 이 우선이다.
+    state.compareTranslationId = parseIntParam(params, "compareTranslationId") ?? CompareStore.get();
 
     const fromValue = params.get("from");
     state.fromSearch = fromValue === "search";
@@ -212,6 +290,7 @@ async function init() {
     }
 
     initNav();
+    resolveCompareTranslation();
     updateLabels();
     updateVerseUrl();
     saveLastRead();
@@ -290,6 +369,7 @@ function bindEvents() {
     }
     document.addEventListener("click", handleGlobalOutsideClick);
     document.addEventListener("keydown", handleFabEscapeKey);
+    bindCompareControlEvents();
     bindNavSelectLabelFit(elements.chapterSelectLinkLabel);
 }
 
@@ -389,6 +469,13 @@ function buildVerseUrl() {
     targetUrl.searchParams.set("chapterNumber", state.chapterNumber);
     if (state.verseNumber) {
         targetUrl.searchParams.set("verseNumber", state.verseNumber);
+        // word 는 verseNumber 없이는 가리킬 절이 없다. 항상 함께 붙이거나 함께 뺀다.
+        if (state.focusWord) {
+            targetUrl.searchParams.set("word", state.focusWord);
+        }
+    }
+    if (state.compareTranslationId) {
+        targetUrl.searchParams.set("compareTranslationId", state.compareTranslationId);
     }
     return `${targetUrl.pathname}${targetUrl.search}`;
 }
@@ -425,13 +512,25 @@ async function loadChapter(direction) {
         readState.loadingChapterKey = null;
         if (direction !== "CURRENT") {
             state.verseNumber = null;
+            // 다른 장의 절을 가리키던 값이다. 강조도 함께 버린다.
+            state.focusWord = null;
+            state.focusVerseNumber = null;
         }
         const url = buildChapterUrl(direction);
+        // CURRENT 는 목적지 장을 이미 알고 있으므로 대역을 함께 띄운다.
+        // PREV/NEXT 는 /navigate 응답이 목적지를 정해 주므로(책 경계 판단이 서버에 있다) 순차다.
+        const eagerCompare = (direction === "CURRENT" && isCompareOn())
+            ? fetchCompareChapter(state.bookOrder, state.chapterNumber)
+            : null;
         const response = await fetch(url, {credentials: "omit"});
         if (!response.ok) {
             throw new Error("데이터 로딩 실패");
         }
         const data = await response.json();
+        // 늦게 도착한 응답이 state.bookOrder/chapterNumber 를 되돌려 놓지 않도록 먼저 끊는다
+        if (loadToken !== chapterState.loadToken) {
+            return;
+        }
         updateStateFromChapter(data);
         updateVerseUrl();
         memoState.cache = new Map();
@@ -439,7 +538,16 @@ async function loadChapter(direction) {
         chapterMemoState.content = null;
         chapterMemoState.loaded = false;
         updateChapterMemoButton();
-        renderChapter(data, []);
+
+        const compare = isCompareOn()
+            ? await (eagerCompare ?? fetchCompareChapter(state.bookOrder, state.chapterNumber))
+            : null;
+        // 장을 연달아 넘기면 먼저 보낸 대역 응답이 나중에 도착할 수 있다.
+        // 토큰을 보지 않으면 다른 장의 본문이 대역 칸에 붙는다 — 오류도 빈칸도 아닌 오답이다.
+        if (loadToken !== chapterState.loadToken) {
+            return;
+        }
+        renderChapter(data, [], compare);
         readState.isRead = false;
         updateReadButton();
 
@@ -475,12 +583,16 @@ function updateStateFromChapter(data) {
     saveLastRead();
 }
 
-function renderChapter(data, highlights) {
+function renderChapter(data, highlights, compare) {
     const chapter = data.book.chapter;
     updateLabels();
+    compareState.verses = compare?.verses ?? [];
+    compareState.error = compare?.error ?? null;
+    const rows = mergeChapterVerses(chapter.verses ?? [], compareState.verses);
     if (elements.verseTable) {
-        elements.verseTable.innerHTML = chapter.verses.map(renderVerseRow).join("");
+        elements.verseTable.innerHTML = rows.map(renderVerseRow).join("");
     }
+    renderCompareNotice(rows);
     if (elements.prevBtn) {
         elements.prevBtn.disabled = data.isFirst;
     }
@@ -488,17 +600,50 @@ function renderChapter(data, highlights) {
         elements.nextBtn.disabled = data.isLast;
     }
     const verseNumber = state.verseNumber ?? VerseStore.consumeVerseNumber();
+    const restoreVerseNumber = chapterState.restoreVerseNumber;
+    chapterState.restoreVerseNumber = null;
     if (verseNumber) {
         if (state.verseNumber) {
             state.verseNumber = null;
             VerseStore.consumeVerseNumber();
         }
         highlightVerse(verseNumber);
+    } else if (restoreVerseNumber) {
+        // 대역을 켜고 끌 때는 같은 장을 다시 그리는 것뿐이라 읽던 자리를 지킨다.
+        restoreVerseIntoView(restoreVerseNumber);
     } else {
         window.scrollTo(0, 0);
     }
+    if (verseNumber && state.focusWord) {
+        state.focusVerseNumber = verseNumber;
+    }
+    // 스포트라이트가 아니라 여기서 칠한다. 대역 토글은 highlightVerse 를 타지 않고
+    // 같은 장을 다시 그리므로, 렌더 경로에 붙여야 강조가 살아남는다.
+    applyFocusWord();
     applyHighlights(highlights);
     resetSelectionState();
+}
+
+/**
+ * 두 번역본의 절을 절 번호로 맞춘다.
+ *
+ * 한쪽을 기준으로 삼고 다른 쪽을 붙이면 "대역에만 있는 절"(ASV 기준 막 9:44·9:46 등)이
+ * 화면에서 조용히 사라진다. 그래서 **양쪽 절 번호의 합집합**을 오름차순으로 놓는다.
+ *
+ * 절 번호가 같아도 같은 내용이라는 보장은 없다(RVR1909 욥기는 3~5절씩 밀려 있다).
+ * 그 사실은 renderCompareNotice 가 화면에 적는다.
+ * 설계 문서: docs/bible/bible-compare-design.md §2
+ */
+function mergeChapterVerses(primaryVerses, compareVerses) {
+    const primaryMap = new Map(primaryVerses.map(verse => [verse.verseNumber, verse.text]));
+    const compareMap = new Map(compareVerses.map(verse => [verse.verseNumber, verse.text]));
+    return [...new Set([...primaryMap.keys(), ...compareMap.keys()])]
+        .sort((a, b) => a - b)
+        .map(verseNumber => ({
+            verseNumber,
+            text: primaryMap.get(verseNumber) ?? null,
+            compareText: compareMap.get(verseNumber) ?? null
+        }));
 }
 
 function highlightVerse(verseNumber) {
@@ -555,16 +700,113 @@ function highlightVerse(verseNumber) {
     }, 100);
 }
 
-function renderVerseRow(verse) {
-    const v = verse.verseNumber;
+/**
+ * 사전에서 넘어온 표제어를 그 절 안에서 찾아 칠한다.
+ *
+ * 대역 칸(`.verse-compare-text`)은 건드리지 않는다. 대역은 읽기 전용이고
+ * (bible-compare-design.md §6), 표제어는 주 번역본 기준으로 고른 말이다.
+ *
+ * **renderChapter 가 표를 다시 그린 직후에만 부른다.** 같은 DOM 에 두 번 부르면
+ * 이미 칠한 `<mark>` 안의 글자를 다시 칠해 마크가 중첩된다.
+ * 설계 문서: docs/bible/bible-verse-word-focus-design.md §6
+ */
+function applyFocusWord() {
+    if (!state.focusWord || !state.focusVerseNumber) {
+        return;
+    }
+    const verseEl = document.querySelector(`.verse-text[data-verse="${state.focusVerseNumber}"]`);
+    if (!verseEl) {
+        // 주 번역본에 없는 절(대역에만 있는 절)이면 `.verse-text` 자체가 없다. 조용히 넘어간다.
+        return;
+    }
+    paintFocusWord(verseEl, state.focusWord);
+}
+
+/**
+ * `.verse-text` 안의 텍스트 노드를 찾아 표제어 자리를 `<mark>` 로 감싼다.
+ *
+ * 메모 컨테이너는 `.verse-text` 의 형제라 순회 범위 밖이다(renderVerseRow).
+ */
+function paintFocusWord(verseEl, word) {
+    const walker = document.createTreeWalker(verseEl, NodeFilter.SHOW_TEXT);
+    const targets = [];
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        targets.push(node); // 먼저 모은다 — 순회 중에 노드를 바꾸면 walker 가 흔들린다
+    }
+    targets.forEach(node => paintTextNode(node, word));
+}
+
+/**
+ * 표제어가 시작되는 자리를 찾는다.
+ *
+ * **정규식을 만들지 않는다.** `word` 는 URL 에서 온 값이라 `new RegExp` 에 넣으면 `(` 하나로
+ * SyntaxError 가 나고 `(a+)+b` 같은 값이 탭을 멈춰 세운다.
+ *
+ * 앞 글자가 한글이면 버린다. 한국어는 접미가 붙는 언어라 어간이 어절 앞에 온다 —
+ * `사랑하시니라` 의 `사랑` 은 살리고 `적그리스도` 안의 `그리스도` 는 버린다.
+ */
+function findFocusStarts(text, word) {
+    const starts = [];
+    for (let i = text.indexOf(word); i !== -1; i = text.indexOf(word, i + word.length)) {
+        if (i > 0 && HANGUL_SYLLABLE.test(text[i - 1])) {
+            continue;
+        }
+        starts.push(i);
+    }
+    return starts;
+}
+
+/**
+ * 노드를 조각내지 않고 조각을 모아 통째로 바꾼다. splitText 를 반복하면 자를 때마다 뒤쪽
+ * 오프셋이 밀려, 매치가 둘 이상인 절에서 엉뚱한 자리를 감싼다.
+ *
+ * `<mark>` 안에 들어가는 것은 본문에서 잘라 낸 조각이고 `word` 자체가 아니다. textContent 로
+ * 넣으므로 이스케이프할 것도 없다.
+ */
+function paintTextNode(node, word) {
+    const text = node.nodeValue;
+    const starts = findFocusStarts(text, word);
+    if (starts.length === 0) {
+        return;
+    }
+    const fragment = document.createDocumentFragment();
+    let cursor = 0;
+    starts.forEach(start => {
+        if (start > cursor) {
+            fragment.append(text.slice(cursor, start));
+        }
+        const mark = document.createElement("mark");
+        mark.className = "verse-word-focus";
+        mark.textContent = text.slice(start, start + word.length);
+        fragment.append(mark);
+        cursor = start + word.length;
+    });
+    if (cursor < text.length) {
+        fragment.append(text.slice(cursor));
+    }
+    node.parentNode.replaceChild(fragment, node);
+}
+
+/**
+ * 대역 본문은 `.verse-text` / `data-verse` / `verse-text-{n}` 을 절대 쓰지 않는다.
+ *
+ * 이 파일은 절 요소를 문서 전역에서 찾는다(`querySelectorAll(".verse-text")`,
+ * `querySelector('.verse-text[data-verse="N"]')`). 대역이 같은 이름을 쓰면 형광펜이 대역에
+ * 칠해지고, 복사·공유가 다른 번역본 본문을 집어 간다. 오류는 나지 않고 값만 틀린다.
+ * 설계 문서: docs/bible/bible-compare-design.md §4.2
+ */
+function renderVerseRow(row) {
+    const v = row.verseNumber;
     const memo = memoState.cache.get(String(v));
     const hasMemo = memo && memo.content;
     const verseClass = hasMemo ? "verse-text text-body verse-has-memo" : "verse-text text-body";
-    return `
-            <tr>
-              <td>${v}</td>
-              <td>
-                <div class="${verseClass}" id="verse-text-${v}" data-verse="${v}">${verse.text}</div>
+    const compareOnly = row.text === null;
+    // 주 번역본에 없는 절은 .verse-text 자체를 만들지 않는다.
+    // 선택·메모·형광펜이 붙을 자리가 없어야 읽기 전용이 마크업으로 강제된다.
+    const primaryCell = compareOnly
+        ? `<div class="verse-compare-only-note">대역에만 있는 절</div>`
+        : `<div class="${verseClass}" id="verse-text-${v}" data-verse="${v}">${row.text}</div>`;
+    const memoCell = compareOnly ? "" : `
                 <div class="memo-container d-none mt-3" id="memo-${v}">
                   <div class="form-group">
                     <textarea class="form-control mb-2" rows="3" placeholder="메모를 입력하세요..." id="memo-input-${v}"></textarea>
@@ -573,10 +815,38 @@ function renderVerseRow(verse) {
                       <button class="btn btn-sm btn-primary memo-save-btn" data-verse="${v}">💾 저장</button>
                     </div>
                   </div>
-                </div>
+                </div>`;
+    return `
+            <tr${compareOnly ? ' class="verse-row-compare-only"' : ""}>
+              <td>${v}</td>
+              <td>
+                <div class="verse-body${isCompareRendered() ? " has-compare" : ""}">
+                  ${primaryCell}
+                  ${renderCompareCell(row)}
+                </div>${memoCell}
               </td>
             </tr>
           `;
+}
+
+function renderCompareCell(row) {
+    if (!isCompareRendered()) {
+        return "";
+    }
+    const tag = `<span class="verse-compare-tag" aria-hidden="true">${escapeHtml(compareTagLabel())}</span>`;
+    if (row.compareText === null) {
+        // 빈칸으로 두면 "이 번역본에는 이 절이 없다"가 아니라 무언가 덜 그려진 것처럼 보인다
+        return `<div class="verse-compare-text is-empty" data-compare-verse="${row.verseNumber}">
+                  ${tag}<span class="verse-compare-body">—</span>
+                </div>`;
+    }
+    return `<div class="verse-compare-text" data-compare-verse="${row.verseNumber}">
+              ${tag}<span class="verse-compare-body">${row.compareText}</span>
+            </div>`;
+}
+
+function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"]/g, ch => HTML_ESCAPES[ch]);
 }
 
 async function handleVerseClick(event) {
@@ -999,6 +1269,10 @@ function handleGlobalOutsideClick(event) {
     if (fontState.expanded && !event.target.closest("#verseFontControl")) {
         toggleFontPanel(false, {returnFocus: false});
     }
+    // 대역 선택 패널 외부 클릭 — 폰트 패널과 같은 규칙
+    if (compareState.expanded && !event.target.closest("#verseCompareControl")) {
+        toggleComparePanel(false, {returnFocus: false});
+    }
 }
 
 function handleFabEscapeKey(event) {
@@ -1012,6 +1286,11 @@ function handleFabEscapeKey(event) {
     // 2. 폰트 패널 — Esc 는 명시적 닫기이므로 토글로 포커스 복귀
     if (fontState.expanded) {
         toggleFontPanel(false, {returnFocus: true});
+        return;
+    }
+    // 2-1. 대역 선택 패널 — 같은 규칙
+    if (compareState.expanded) {
+        toggleComparePanel(false, {returnFocus: true});
         return;
     }
     // 3. FAB
@@ -1447,14 +1726,32 @@ function getSelectedVerseNumbers() {
         .map(String);
 }
 
+/**
+ * 선택한 절을 복사·공유 문자열로 만든다.
+ *
+ * 조회는 표 안으로 범위를 좁힌다. 문서 전역에서 `.verse-text[data-verse]` 를 찾으면 나중에
+ * 같은 속성을 쓰는 요소가 생겼을 때 다른 본문을 집어 간다.
+ */
 function buildSelectedText() {
-    const verseNumbers = getSelectedVerseNumbers();
+    const scope = elements.verseTable ?? document;
     const translationLabel = state.translationType || state.translationName || "";
+    const compareLabel = compareTagLabel();
     const header = `${translationLabel} ${state.bookName} ${state.chapterNumber}장`.trim();
-    const lines = verseNumbers.map(verseNum => {
-        const verseEl = document.querySelector(`.verse-text[data-verse="${verseNum}"]`);
-        const text = verseEl ? verseEl.textContent.trim() : "";
-        return `${verseNum} ${text}`.trim();
+    const lines = [];
+    getSelectedVerseNumbers().forEach(verseNum => {
+        const verseEl = scope.querySelector(`.verse-text[data-verse="${verseNum}"]`);
+        if (!verseEl) {
+            return;
+        }
+        lines.push(`${verseNum} ${verseEl.textContent.trim()}`.trim());
+        if (!isCompareOn()) {
+            return;
+        }
+        const compareEl = verseEl.closest("tr")?.querySelector(".verse-compare-text:not(.is-empty) .verse-compare-body");
+        const compareText = compareEl ? compareEl.textContent.trim() : "";
+        if (compareText) {
+            lines.push(`  [${compareLabel}] ${compareText}`);
+        }
     });
     return [header, ...lines].filter(Boolean).join("\n");
 }
@@ -1770,6 +2067,227 @@ function toggleFontPanel(expand, {returnFocus = true} = {}) {
         // (.verse-text 는 div 라 non-focusable 이므로 이 분기가 실제 발동된다.)
         activeBeforeCollapse?.blur();
     }
+}
+
+// ------------ 대역 비교 (docs/bible/bible-compare-design.md) ------------
+
+function isCompareOn() {
+    return Boolean(state.compareTranslationId);
+}
+
+/**
+ * 대역을 못 불러왔으면 대역 칸을 아예 그리지 않는다.
+ * 절마다 "대역을 불러오지 못했습니다" 를 176번 적어 두면 그것이 곧 본문을 덮는다.
+ * 실패는 목록 아래 안내 한 줄과 `다시 시도` 버튼이 맡는다.
+ */
+function isCompareRendered() {
+    return isCompareOn() && !compareState.error;
+}
+
+function compareTagLabel() {
+    return state.compareTranslationType || state.compareTranslationName || "";
+}
+
+function findCompareOption(translationId) {
+    return elements.comparePanel?.querySelector(`[data-compare-id="${translationId}"]`) ?? null;
+}
+
+/**
+ * 고른 대역 번역본이 실제로 쓸 수 있는지 확인하고 메타데이터를 채운다.
+ *
+ * 목록에 없는 id(숨김 번역본, 없는 번역본)는 **조용히 끈다.** 오류를 띄우면 링크를 잘못 받은
+ * 사람이 성경을 못 읽는다.
+ */
+function resolveCompareTranslation() {
+    state.compareTranslationType = null;
+    state.compareTranslationName = null;
+    if (state.compareTranslationId === state.translationId) {
+        state.compareTranslationId = null; // 자기 자신과의 대역은 없다
+    }
+    if (state.compareTranslationId) {
+        const option = findCompareOption(state.compareTranslationId);
+        if (option) {
+            state.compareTranslationType = option.dataset.compareType || null;
+            state.compareTranslationName = option.dataset.compareName || null;
+        } else {
+            state.compareTranslationId = null;
+        }
+    }
+    CompareStore.save(state.compareTranslationId);
+    updateCompareToggleLabel();
+    syncCompareOptions();
+}
+
+function updateCompareToggleLabel() {
+    const {compareToggle, compareToggleLabel} = elements;
+    if (!compareToggle || !compareToggleLabel) {
+        return;
+    }
+    const on = isCompareOn();
+    // 상단바는 늘 붙어 있으므로, 여기 라벨이 "지금 무엇과 무엇을 보고 있는지" 의 상시 표시다.
+    compareToggleLabel.textContent = on ? compareTagLabel() : "＋";
+    compareToggle.classList.toggle("is-active", on);
+    const description = on ? `대역 비교: ${compareTagLabel()}` : "대역 비교 켜기";
+    compareToggle.setAttribute("aria-label", description);
+    compareToggle.setAttribute("title", description);
+}
+
+function syncCompareOptions() {
+    const options = elements.comparePanel?.querySelectorAll("[data-compare-id]");
+    if (!options) {
+        return;
+    }
+    options.forEach(option => {
+        const raw = option.dataset.compareId;
+        const optionId = raw ? parseInt(raw, 10) : null;
+        // 지금 읽고 있는 번역본은 대역 후보가 아니다
+        const isCurrentTranslation = optionId === state.translationId;
+        option.classList.toggle(UI_CLASSES.HIDDEN, isCurrentTranslation);
+        const selected = optionId === state.compareTranslationId
+            || (!optionId && !isCompareOn());
+        option.setAttribute("aria-checked", String(selected));
+        option.classList.toggle("is-active", selected);
+    });
+}
+
+function bindCompareControlEvents() {
+    if (!elements.compareControl) {
+        return;
+    }
+    elements.compareToggle?.addEventListener("click", () => toggleComparePanel(!compareState.expanded));
+    elements.comparePanel?.addEventListener("click", handleCompareOptionClick);
+    // 재시도는 장을 다시 여는 것으로 충분하다. 본문 응답은 하루짜리 캐시라 사실상 대역만 다시 받는다.
+    elements.compareRetryBtn?.addEventListener("click", () => loadChapter("CURRENT"));
+}
+
+function handleCompareOptionClick(event) {
+    const option = event.target.closest("[data-compare-id]");
+    if (!option) {
+        return;
+    }
+    const raw = option.dataset.compareId;
+    const parsed = raw ? parseInt(raw, 10) : null;
+    toggleComparePanel(false);
+    applyCompareTranslation(Number.isInteger(parsed) ? parsed : null);
+}
+
+function applyCompareTranslation(translationId) {
+    const nextId = translationId === state.translationId ? null : translationId;
+    if (nextId === state.compareTranslationId) {
+        return;
+    }
+    chapterState.restoreVerseNumber = getTopVisibleVerseNumber();
+    state.compareTranslationId = nextId;
+    resolveCompareTranslation();
+    updateVerseUrl();
+    loadChapter("CURRENT");
+}
+
+function toggleComparePanel(expand, {returnFocus = true} = {}) {
+    const willCollapse = !expand && compareState.expanded;
+    let activeBeforeCollapse = null;
+    let focusInsidePanel = false;
+    if (willCollapse) {
+        activeBeforeCollapse = document.activeElement;
+        focusInsidePanel = !!(activeBeforeCollapse && elements.comparePanel?.contains(activeBeforeCollapse));
+    }
+
+    compareState.expanded = Boolean(expand);
+    elements.comparePanel?.classList.toggle(UI_CLASSES.HIDDEN, !compareState.expanded);
+    elements.comparePanel?.setAttribute("aria-hidden", String(!compareState.expanded));
+    elements.compareToggle?.setAttribute("aria-expanded", String(compareState.expanded));
+    elements.compareControl?.setAttribute("data-expanded", String(compareState.expanded));
+
+    if (compareState.expanded) {
+        // 상단바에 패널 둘이 동시에 열리면 좁은 화면에서 서로를 덮는다
+        if (fontState.expanded) {
+            toggleFontPanel(false, {returnFocus: false});
+        }
+        const active = elements.comparePanel?.querySelector('[aria-checked="true"]:not(.d-none)')
+            ?? elements.comparePanel?.querySelector("[data-compare-id]");
+        active?.focus();
+    } else if (returnFocus) {
+        elements.compareToggle?.focus();
+    } else if (focusInsidePanel) {
+        activeBeforeCollapse?.blur();
+    }
+}
+
+/**
+ * 대역 본문을 가져온다. **절대 reject 하지 않는다** — 대역 실패가 읽기를 막아서는 안 된다.
+ */
+async function fetchCompareChapter(bookOrder, chapterNumber) {
+    const url = `${API_CONFIG.TRANSLATIONS}/${state.compareTranslationId}`
+        + `/books/${bookOrder}/chapters/${chapterNumber}/verses`;
+    try {
+        // 본문과 같은 조건. 쿠키를 실어 보내면 공유 캐시가 응답을 사용자별로 취급한다.
+        const response = await fetch(url, {credentials: "omit"});
+        if (response.status === 404) {
+            return {verses: [], error: "이 번역본에는 이 장이 없습니다."};
+        }
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+        }
+        const data = await response.json();
+        return {verses: data?.book?.chapter?.verses ?? [], error: null};
+    } catch (error) {
+        console.warn("대역 본문을 불러오지 못했습니다.", error);
+        return {verses: [], error: "대역을 불러오지 못했습니다."};
+    }
+}
+
+/**
+ * 절 수가 다를 때만 안내하고 싶은 유혹이 있지만, 절 수가 같은데도 밀려 있는 경우가 있다
+ * (RVR1909 욥기 39장 — 양쪽 30절, 내용은 3절씩 어긋남). 조건을 달면 가장 크게 어긋난
+ * 화면에서 안내가 사라진다. 그래서 대역을 켜면 늘 띄운다.
+ */
+function renderCompareNotice(rows) {
+    const {compareNotice, compareNoticeText, compareRetryBtn} = elements;
+    if (!compareNotice || !compareNoticeText) {
+        return;
+    }
+    if (!isCompareOn()) {
+        compareNotice.classList.add(UI_CLASSES.HIDDEN);
+        compareNoticeText.textContent = "";
+        compareRetryBtn?.classList.add(UI_CLASSES.HIDDEN);
+        return;
+    }
+    compareNotice.classList.remove(UI_CLASSES.HIDDEN);
+    if (compareState.error) {
+        compareNoticeText.textContent = compareState.error;
+        compareRetryBtn?.classList.remove(UI_CLASSES.HIDDEN);
+        return;
+    }
+    compareRetryBtn?.classList.add(UI_CLASSES.HIDDEN);
+    const missing = rows.filter(row => row.text !== null && row.compareText === null).length;
+    const extra = rows.filter(row => row.text === null).length;
+    const parts = ["번역본마다 절을 나누는 기준이 달라, 같은 번호가 같은 내용이 아닐 수 있습니다."];
+    if (missing > 0) {
+        parts.push(`대역에 없는 절 ${missing}개`);
+    }
+    if (extra > 0) {
+        parts.push(`대역에만 있는 절 ${extra}개`);
+    }
+    compareNoticeText.textContent = parts.join(" · ");
+}
+
+function getTopVisibleVerseNumber() {
+    const verses = elements.verseTable?.querySelectorAll(".verse-text[data-verse]");
+    if (!verses) {
+        return null;
+    }
+    const navOffset = 80; // 고정 상단바에 가려진 만큼은 "보이는" 것으로 치지 않는다
+    for (const verseEl of verses) {
+        if (verseEl.getBoundingClientRect().bottom > navOffset) {
+            return verseEl.getAttribute("data-verse");
+        }
+    }
+    return null;
+}
+
+function restoreVerseIntoView(verseNumber) {
+    const verseEl = elements.verseTable?.querySelector(`.verse-text[data-verse="${verseNumber}"]`);
+    verseEl?.scrollIntoView({block: "start", behavior: "auto"});
 }
 
 document.addEventListener("DOMContentLoaded", init);
