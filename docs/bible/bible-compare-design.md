@@ -171,11 +171,38 @@ function mergeChapterVerses(primaryVerses, compareVerses) {
 | 상황 | 순서 |
 |---|---|
 | 첫 진입 (`CURRENT`) | `bookOrder` / `chapterNumber` 를 이미 알고 있으므로 **병렬** |
-| 이전/다음 장 (`PREV`/`NEXT`) | `/navigate` 응답이 목적지 장을 정해 주므로 **순차** |
+| 이전/다음 장 (`PREV`/`NEXT`) | 목적지를 클라이언트가 계산하므로 **병렬** |
+| 목적지 계산 실패 | `/navigate` 에 물어야 하므로 **순차** |
 
-`/navigate` 는 책 경계를 넘는 판단을 서버가 한다(`BibleReader.getAdjacentChapterVerses`). 그
-로직을 클라이언트에 복제하지 않는다. 응답에서 확정된 `book.bookOrder` /
-`book.chapter.chapterNumber` 로 대역을 부른다.
+처음에는 `/navigate` 로 서버에 목적지를 물었고 그래서 `PREV`/`NEXT` 가 순차였다. 책 경계를 넘는
+판단(`BibleReader.getAdjacentChapterVerses`)을 클라이언트에 복제하지 않으려는 선택이었는데,
+대가가 둘 드러나 뒤집었다(2026-09-01).
+
+**하나. `/navigate` 는 URL 과 내용이 어긋나 캐시를 무력화한다.**
+`/chapters/3/navigate?direction=NEXT` 가 **4장** 본문을 돌려준다. 그래서 같은 요한복음 4장이
+캐시 키 세 개에 흩어진다.
+
+| 어떻게 도달했나 | 캐시 키 |
+|---|---|
+| 직접 진입 | `/chapters/4/verses` |
+| 3장에서 "다음" | `/chapters/3/navigate?direction=NEXT` |
+| 5장에서 "이전" | `/chapters/5/navigate?direction=PREV` |
+
+본문 응답에 `Cache-Control: public, max-age` 를 걸어 놨는데도 **장을 넘겨 가며 읽는 경로에서는
+거의 적중하지 않았다.** 그게 이 화면의 기본 사용 패턴이다.
+
+**둘. 대역을 순차로 만든다.** 목적지를 모르면 본문 응답을 기다렸다가 대역을 부르므로, 장 넘기기
+한 번에 왕복 2회가 직렬로 쌓인다. 대역을 켜면 장 넘기기가 느려지는 원인이 이것이었다.
+
+목적지 계산에 필요한 `chapterCount` 는 `/books` 응답에 이미 들어 있고 그 목록은 `BookStore` 에
+캐시된다. 서버가 `totalChapterCount` 에 쓰는 값은 `MAX(chapter_number)` 라 `chapterCount`(= 장
+행의 개수)와 어긋날 수 있는데, **프로덕션 726권 전부에서 두 값이 일치**했다(2026-09-01). 계산
+결과도 경계 254건(각 책의 첫 장·마지막 장 × 양방향)을 실제 `/navigate` 응답과 대조해 **불일치
+0건**이었다.
+
+그래도 어긋나는 책이 생기면 없는 장을 부르게 되므로 **404 는 `/navigate` 로 되돌린다.** 되돌아갈
+때 미리 띄운 대역 응답은 다른 장 것이므로 버리고 다시 받는다. 책 목록을 받지 못한 경우
+(`state.books` 가 비었을 때)도 같은 경로다.
 
 **대역 요청은 `chapterState.loadToken` 을 지킨다.** 이미 장 상태(메모/형광펜/읽음) 로딩이 쓰는
 장치다. 다음 장 버튼을 연달아 누르면 먼저 보낸 대역 응답이 나중에 도착할 수 있고, 토큰을 보지
@@ -213,8 +240,23 @@ if (token !== chapterState.loadToken) return;   // 이미 다른 장으로 넘�
 | KOUGO | 20,937 (최대) |
 | CUVT · CUVS | 각 11,256 (최소) |
 
-대역을 켜면 가장 무거운 조합에서도 21 KB 남짓이 더해진다. 응답은 하루짜리 공개 캐시라 같은
-장을 다시 열면 네트워크를 타지 않는다. 서버 쿼리도 기존 장 조회와 동일하다.
+대역을 켜면 가장 무거운 조합에서도 21 KB 남짓이 더해진다. 응답은 공개 캐시라 같은 장을 다시
+열면 네트워크를 타지 않는다. 서버 쿼리도 기존 장 조회와 동일하다 — 시편 119편 기준 DB 시간은
+2.2 ms 로, 응답 시간의 2% 도 되지 않는다.
+
+**그 21 KB 는 그대로 나가고 있었다.** `server.compression.enabled` 의 Spring Boot 기본값은
+꺼짐이고 이 저장소는 그 값을 설정한 적이 없었다. Cloud Run 도 대신 압축해 주지 않는다 —
+`Accept-Encoding: gzip, deflate, br` 를 보내도 응답에 `content-encoding` 이 없는 것을 실측으로
+확인했다(2026-09-01).
+
+| 시편 119편 | 무압축 | gzip |
+|---|---|---|
+| KRV 단독 | 24,500 B | 6,017 B (-75%) |
+| KRV + KJV(대역) | 45,523 B | 약 11 KB |
+
+`application.yml` 에 압축을 켰다. `min-response-size` 는 기본값 2 KB 대신 1 KB 를 쓴다 —
+전체 12,339개 장의 응답 크기를 계산하면 844개(6.3%)가 1~2 KB 구간이라 기본값으로는 이만큼이
+압축을 비켜간다.
 
 ## 4. 화면
 
@@ -442,8 +484,9 @@ private fun visibleTranslations(): List<BibleViewResponse.Translation> =
 |---|---|
 | `bible/adapter/input/web/client/BibleWebController.kt` | `showVerses` 에 `compareTranslations` 모델 속성, 숨김 규칙을 `getVisibleTranslations()` 로 추출 (§7) |
 | `templates/fragments/header.html` | 상단 네비 대역 토글 + 번역본 선택 패널 (`useVerseFontBoot` 조건) |
-| `templates/bible/verse-list.html` | 안내 문구 자리(`#verseCompareNotice`), CSS `?v=7.0→7.1` · JS `?v=5.6→5.7` |
-| `static/js/bible/verse-list.js` | 병합(§2.3)·요청(§3)·렌더(§4.2)·상태(§5), `buildSelectedText` 범위 좁히기 |
+| `templates/bible/verse-list.html` | 안내 문구 자리(`#verseCompareNotice`), CSS `?v=7.3` · JS `?v=6.0` |
+| `static/js/bible/verse-list.js` | 병합(§2.3)·요청(§3)·렌더(§4.2)·상태(§5), `buildSelectedText` 범위 좁히기, `resolveTargetChapter`(§3.2) |
+| `application.yml` | 응답 압축(§3.4). 대역 때문에 켠 것은 아니고 전역 설정이지만, 페이로드가 두 배인 이 화면에서 효과가 가장 크다 |
 | `static/css/bible/verse-list.css` | `.verse-body` / `.verse-compare-text` / 상단바 패널, 2열 그리드, 다크·인쇄·모션 규칙 |
 | `test/.../BibleWebControllerTest.kt` · `VerseCompareHeaderTest.kt` | §9 |
 

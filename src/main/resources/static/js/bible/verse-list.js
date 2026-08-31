@@ -42,6 +42,9 @@ const state = {
     compareTranslationName: null,
     bookOrder: null,
     bookName: null,
+    // 이 번역본의 책 목록. `/books` 응답 그대로이고 책마다 chapterCount 를 들고 있다.
+    // 다음/이전 장의 목적지를 서버에 묻지 않고 여기서 계산한다 — [resolveTargetChapter]
+    books: null,
     chapterNumber: null,
     verseNumber: null,
     // 사전에서 넘어온 표제어 강조. verseNumber 와 달리 첫 렌더 뒤에도 살아 있어야 한다 —
@@ -283,6 +286,7 @@ async function init() {
     }
 
     const books = await ensureBookList();
+    state.books = books;
     state.bookName = resolveBookName(books);
     if (!state.bookName) {
         redirectToBookList();
@@ -516,13 +520,27 @@ async function loadChapter(direction) {
             state.focusWord = null;
             state.focusVerseNumber = null;
         }
-        const url = buildChapterUrl(direction);
-        // CURRENT 는 목적지 장을 이미 알고 있으므로 대역을 함께 띄운다.
-        // PREV/NEXT 는 /navigate 응답이 목적지를 정해 주므로(책 경계 판단이 서버에 있다) 순차다.
-        const eagerCompare = (direction === "CURRENT" && isCompareOn())
-            ? fetchCompareChapter(state.bookOrder, state.chapterNumber)
+        // 목적지 장을 먼저 정한다. CURRENT 는 이미 알고 있고, PREV/NEXT 는 책 목록으로 계산한다.
+        // 계산이 안 되면(책 목록을 못 받았거나 그 안에 현재 책이 없으면) 예전처럼 서버에 묻는다.
+        const target = direction === "CURRENT"
+            ? {bookOrder: state.bookOrder, chapterNumber: state.chapterNumber}
+            : resolveTargetChapter(direction);
+        // 목적지를 알면 대역을 본문과 나란히 띄운다. 모르면 본문 응답이 와야 목적지가 정해지므로 순차다.
+        const eagerCompare = (target && isCompareOn())
+            ? fetchCompareChapter(target.bookOrder, target.chapterNumber)
             : null;
-        const response = await fetch(url, {credentials: "omit"});
+        let response = await fetch(
+            target
+                ? buildVersesUrl(state.translationId, target.bookOrder, target.chapterNumber)
+                : buildNavigateUrl(direction),
+            {credentials: "omit"}
+        );
+        // 계산한 장이 서버에 없다 = 그 책의 chapterCount 와 MAX(chapter_number) 가 어긋났다.
+        // 사용자에게 오류를 띄우는 대신 예전 경로로 목적지를 다시 묻는다.
+        const fellBack = Boolean(target) && direction !== "CURRENT" && response.status === 404;
+        if (fellBack) {
+            response = await fetch(buildNavigateUrl(direction), {credentials: "omit"});
+        }
         if (!response.ok) {
             throw new Error("데이터 로딩 실패");
         }
@@ -539,8 +557,10 @@ async function loadChapter(direction) {
         chapterMemoState.loaded = false;
         updateChapterMemoButton();
 
+        // 되돌아갔다면 미리 띄운 대역은 다른 장 것이다. 버리고 목적지가 확정된 뒤 다시 받는다.
+        const usableEagerCompare = fellBack ? null : eagerCompare;
         const compare = isCompareOn()
-            ? await (eagerCompare ?? fetchCompareChapter(state.bookOrder, state.chapterNumber))
+            ? await (usableEagerCompare ?? fetchCompareChapter(state.bookOrder, state.chapterNumber))
             : null;
         // 장을 연달아 넘기면 먼저 보낸 대역 응답이 나중에 도착할 수 있다.
         // 토큰을 보지 않으면 다른 장의 본문이 대역 칸에 붙는다 — 오류도 빈칸도 아닌 오답이다.
@@ -559,12 +579,67 @@ async function loadChapter(direction) {
     }
 }
 
-function buildChapterUrl(direction) {
-    const base = `${API_CONFIG.TRANSLATIONS}/${state.translationId}/books/${state.bookOrder}/chapters/${state.chapterNumber}`;
-    if (direction === "CURRENT") {
-        return `${base}/verses`;
+function buildVersesUrl(translationId, bookOrder, chapterNumber) {
+    return `${API_CONFIG.TRANSLATIONS}/${translationId}/books/${bookOrder}/chapters/${chapterNumber}/verses`;
+}
+
+/**
+ * 목적지를 계산하지 못했을 때만 쓰는 예전 경로. [resolveTargetChapter] 의 주석을 보라.
+ */
+function buildNavigateUrl(direction) {
+    return `${API_CONFIG.TRANSLATIONS}/${state.translationId}/books/${state.bookOrder}`
+        + `/chapters/${state.chapterNumber}/navigate?direction=${direction}`;
+}
+
+/**
+ * 다음/이전 장의 목적지를 클라이언트가 직접 계산한다. 계산할 수 없으면 `null`.
+ *
+ * 예전에는 `/navigate?direction=` 로 서버에 물었다. 그 응답에는 함정이 있다 —
+ * `/chapters/3/navigate?direction=NEXT` 가 **4장** 본문을 돌려준다. URL 과 내용이 어긋나므로
+ * 같은 요한복음 4장이 캐시 키 세 개에 흩어진다.
+ *
+ *   /chapters/4/verses                  — 직접 들어온 경우
+ *   /chapters/3/navigate?direction=NEXT — 3장에서 "다음"
+ *   /chapters/5/navigate?direction=PREV — 5장에서 "이전"
+ *
+ * 본문 응답에 `Cache-Control: public, max-age` 를 걸어 놨는데도 **장을 넘겨 가며 읽는
+ * 경로에서는 거의 적중하지 않았다.** 그게 이 화면의 기본 사용 패턴이다.
+ *
+ * 목적지를 먼저 알면 두 가지가 같이 풀린다.
+ *
+ * 1. 언제나 `/chapters/{n}/verses` 하나만 부르므로 캐시 키가 한곳으로 모인다.
+ * 2. 대역 본문을 본문과 **병렬로** 띄울 수 있다. 예전에는 목적지를 몰라 순차였고,
+ *    그래서 대역을 켜면 장 넘기기가 눈에 띄게 느렸다.
+ *
+ * 책 경계 판단에 쓰는 `chapterCount` 는 `/books` 응답에 이미 들어 있다(= 장 행의 개수).
+ * 서버가 `totalChapterCount` 에 쓰는 값은 `MAX(chapter_number)` 라 둘이 다를 수 있는데,
+ * 프로덕션의 726권 전부에서 두 값이 일치하는 것을 확인했다(2026-09-01). 그래도 어긋나는
+ * 책이 생기면 없는 장을 부르게 되므로, 404 는 [loadChapter] 가 `/navigate` 로 되돌린다.
+ */
+function resolveTargetChapter(direction) {
+    const books = state.books;
+    if (!books || books.length === 0) {
+        return null;
     }
-    return `${base}/navigate?direction=${direction}`;
+    const index = books.findIndex(book => book.bookOrder === state.bookOrder);
+    const currentBook = books[index];
+    if (!currentBook?.chapterCount) {
+        return null;
+    }
+    if (direction === "NEXT") {
+        if (state.chapterNumber < currentBook.chapterCount) {
+            return {bookOrder: state.bookOrder, chapterNumber: state.chapterNumber + 1};
+        }
+        const nextBook = books[index + 1];
+        return nextBook ? {bookOrder: nextBook.bookOrder, chapterNumber: 1} : null;
+    }
+    if (state.chapterNumber > 1) {
+        return {bookOrder: state.bookOrder, chapterNumber: state.chapterNumber - 1};
+    }
+    const prevBook = books[index - 1];
+    return prevBook?.chapterCount
+        ? {bookOrder: prevBook.bookOrder, chapterNumber: prevBook.chapterCount}
+        : null;
 }
 
 function buildChapterStateUrl() {
@@ -2242,8 +2317,7 @@ function toggleComparePanel(expand, {returnFocus = true} = {}) {
  * 대역 본문을 가져온다. **절대 reject 하지 않는다** — 대역 실패가 읽기를 막아서는 안 된다.
  */
 async function fetchCompareChapter(bookOrder, chapterNumber) {
-    const url = `${API_CONFIG.TRANSLATIONS}/${state.compareTranslationId}`
-        + `/books/${bookOrder}/chapters/${chapterNumber}/verses`;
+    const url = buildVersesUrl(state.compareTranslationId, bookOrder, chapterNumber);
     try {
         // 본문과 같은 조건. 쿠키를 실어 보내면 공유 캐시가 응답을 사용자별로 취급한다.
         const response = await fetch(url, {credentials: "omit"});

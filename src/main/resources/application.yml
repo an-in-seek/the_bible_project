@@ -1,6 +1,29 @@
 # $schema: https://json.schemastore.org/spring-boot-application-properties.json
 server:
   port: 8080
+  # 응답 압축. Spring Boot 기본값은 꺼짐이라 명시하지 않으면 본문이 그대로 나간다.
+  #
+  # Cloud Run 은 응답을 대신 압축해 주지 않는다. 실측으로 확인했다 —
+  # `Accept-Encoding: gzip, deflate, br` 를 보내도 응답에 `content-encoding` 이 없었다.
+  # 압축 여부는 전적으로 이 설정에 달려 있다.
+  #
+  # 성경 본문 응답이 가장 크게 줄어든다. 시편 119편(176절, 성경에서 가장 긴 장) 기준
+  # 24,500 B -> 6,017 B (75% 감소). 대역 비교를 켜면 한 장에 두 번역본을 받으므로
+  # 절감량도 두 배다(45,523 B -> 약 11 KB).
+  #
+  # 번들러가 없어 JS/CSS 도 원본 그대로 나간다(verse-list.js 82 KB, verse-list.css 33 KB).
+  # 이쪽도 같은 설정에 함께 걸린다.
+  #
+  # mime-types 는 건드리지 않는다. Boot 4 기본 목록에 application/json, text/css,
+  # text/javascript, application/javascript 가 이미 들어 있다. 손으로 다시 적으면 목록을
+  # 좁히기만 하고(우리 목록에는 XML 이 빠진다), 타입을 더할 일이 생기면 기본값을 덮어쓰는 대신
+  # additional-mime-types 를 쓰면 된다.
+  compression:
+    enabled: true
+    # 기본값 2 KB 를 1 KB 로 낮춘다. 전체 12,339개 장의 응답 크기를 계산해 보면
+    # 844개(6.3%)가 1~2 KB 구간에 있다 — 기본값이면 이만큼이 압축 없이 나간다.
+    # 1 KB 미만은 117개(0.9%)뿐이라 더 낮출 이유가 없다.
+    min-response-size: 1KB
 
 spring:
   application:
