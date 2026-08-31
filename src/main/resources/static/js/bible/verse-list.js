@@ -689,6 +689,9 @@ function highlightVerse(verseNumber) {
             if (targetRow) {
                 targetRow.classList.remove("verse-spotlight-target-row");
             }
+            // 단어 강조는 스포트라이트와 수명을 함께한다. 둘 다 "이 절의 이 단어를 보라" 는
+            // 한 번의 안내이므로, 하나만 남으면 지울 방법이 없는 표식이 된다.
+            clearFocusWord();
             overlay.addEventListener("transitionend", () => overlay.remove(), {once: true});
         };
 
@@ -720,6 +723,28 @@ function applyFocusWord() {
         return;
     }
     paintFocusWord(verseEl, state.focusWord);
+}
+
+/**
+ * 칠해 둔 표제어를 걷어 내고 다시 칠하지 않게 상태까지 비운다.
+ *
+ * **상태를 비우는 것이 핵심이다.** 마크만 지우면 대역을 켜고 끌 때 `renderChapter` 가
+ * 다시 칠해, 해제한 강조가 되살아난다.
+ *
+ * 감쌌던 글자는 텍스트 노드로 되돌리고 `normalize()` 로 이웃 노드와 다시 합친다. 합치지
+ * 않으면 절 하나가 텍스트 노드 여러 개로 쪼개진 채 남는다.
+ */
+function clearFocusWord() {
+    state.focusWord = null;
+    state.focusVerseNumber = null;
+    document.querySelectorAll("mark.verse-word-focus").forEach(mark => {
+        const parent = mark.parentNode;
+        if (!parent) {
+            return;
+        }
+        parent.replaceChild(document.createTextNode(mark.textContent), mark);
+        parent.normalize();
+    });
 }
 
 /**
