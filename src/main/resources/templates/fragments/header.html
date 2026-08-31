@@ -26,6 +26,54 @@
                        title="번역본 선택 페이지로 이동">
                         <span id="translationTypeLabel"></span>
                     </a>
+
+                    <!-- 대역 비교 — verse-list 페이지에서만 노출 (useVerseFontBoot 플래그).
+                         목록은 서버가 내려준다(BibleWebController.showVerses). 숨김 번역본을
+                         걸러 주지 않는 /api/v1/bibles/translations 를 쓰면 안 된다.
+                         설계 문서: docs/bible/bible-compare-design.md -->
+                    <div id="verseCompareControl"
+                         class="verse-compare-control top-nav-compare"
+                         data-expanded="false"
+                         th:if="${useVerseFontBoot}">
+                        <button id="verseCompareToggle"
+                                type="button"
+                                class="verse-compare-toggle top-nav-btn btn btn-outline-secondary"
+                                aria-expanded="false"
+                                aria-controls="verseComparePanel"
+                                aria-label="대역 비교 켜기"
+                                title="대역 비교 켜기">
+                            <span id="verseCompareToggleLabel" aria-hidden="true">＋</span>
+                        </button>
+                        <div id="verseComparePanel"
+                             class="verse-compare-panel d-none"
+                             aria-hidden="true"
+                             role="group"
+                             aria-label="대역 번역본 선택">
+                            <p class="verse-compare-panel-title">나란히 볼 번역본</p>
+                            <div class="verse-compare-options">
+                                <button type="button"
+                                        class="verse-compare-option verse-compare-option-off"
+                                        data-compare-id=""
+                                        role="radio"
+                                        aria-checked="true">
+                                    <span class="verse-compare-option-type">✕</span>
+                                    <span class="verse-compare-option-name">대역 끄기</span>
+                                </button>
+                                <button type="button"
+                                        class="verse-compare-option"
+                                        role="radio"
+                                        aria-checked="false"
+                                        th:each="t : ${compareTranslations}"
+                                        th:data-compare-id="${t.translationId}"
+                                        th:data-compare-type="${t.translationType}"
+                                        th:data-compare-name="${t.translationName}"
+                                        th:data-compare-language="${t.translationLanguage}">
+                                    <span class="verse-compare-option-type" th:text="${t.translationType}"></span>
+                                    <span class="verse-compare-option-name" th:text="${t.translationName}"></span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="top-nav-right">

@@ -5,7 +5,8 @@
       th:with="pageDescription='성경 단어의 정의, 원어(히브리어/헬라어), 관련 성경 구절을 상세히 살펴볼 수 있습니다.',
                pageKeywords='성경 단어,성경 뜻풀이,히브리어 원어,헬라어 원어,성경 용어 해설'"></head>
 
-<body class="has-fixed-nav has-dual-bottom-nav" th:attr="data-back-link=${backLink},data-dictionary-id=${dictionary.id}">
+<body class="has-fixed-nav has-dual-bottom-nav"
+      th:attr="data-back-link=${backLink},data-dictionary-id=${dictionary.id},data-dictionary-term=${dictionary.term}">
 
 <header th:replace="~{fragments/header :: header}"></header>
 
@@ -46,7 +47,7 @@
     </div>
   </div>
 </main>
-<script type="module" src="/js/study/dictionary-detail.js?v=2.7"></script>
+<script type="module" src="/js/study/dictionary-detail.js?v=2.8"></script>
 </body>
 
 </html>

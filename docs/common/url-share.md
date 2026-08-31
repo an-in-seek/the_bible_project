@@ -1,6 +1,6 @@
 # 화면 URL 공유 (상단 네비게이션 공유 버튼)
 
-## 구현 상태: ✅ 완료 (학습·커뮤니티 섹션 적용, `creation`·글쓰기 제외)
+## 구현 상태: ✅ 완료 (학습·커뮤니티 섹션 + 홈·게임 목록 적용, `creation`·글쓰기 제외)
 
 현재 보고 있는 화면의 URL 을 공유할 수 있는 공통 버튼입니다. 상단 네비게이션 오른쪽,
 계정 버튼 왼쪽에 위치합니다.
@@ -41,15 +41,23 @@
 | `static/css/common.css` | `.share-toast` 기본 스타일 |
 | `static/css/section-nav.css` | `.share-toast` 하단 탭바 공존 보정 |
 
-## 노출 대상은 경로 접두사로 결정한다
+## 노출 대상은 요청 경로로 결정한다
 
 화면 19개의 템플릿을 각각 고치는 대신, 기존 `useVerseFontBoot` 와 같은 방식으로
-`@ControllerAdvice` 에서 요청 경로를 보고 판단한다. 학습 화면이 추가돼도 자동으로 붙는다.
+`@ControllerAdvice` 에서 요청 경로를 보고 판단한다. 판단 기준은 두 가지다.
+
+| 기준 | 대상 | 뜻 |
+|---|---|---|
+| 접두사 (`SHARE_ENABLED_PATH_PREFIXES`) | `/web/study`, `/web/community` | 섹션 전체. 학습 화면이 추가돼도 자동으로 붙는다 |
+| 정확히 일치 (`SHARE_ENABLED_PATHS`) | `/`, `/web/game` | 섹션이 아니라 화면 하나 |
 
 ```kotlin
 @ModelAttribute("showShareButton")
 fun showShareButton(request: HttpServletRequest): Boolean {
     val requestUri = request.requestURI
+    if (requestUri in SHARE_ENABLED_PATHS) {
+        return true
+    }
     return SHARE_ENABLED_PATH_PREFIXES.any { requestUri.startsWith(it) } &&
         requestUri !in SHARE_EXCLUDED_PATHS
 }
@@ -57,12 +65,25 @@ fun showShareButton(request: HttpServletRequest): Boolean {
 companion object {
     private val SHARE_ENABLED_PATH_PREFIXES = listOf("/web/study", "/web/community")
 
+    private val SHARE_ENABLED_PATHS = setOf("/", "/web/game")
+
     private val SHARE_EXCLUDED_PATHS = setOf("/web/study/creation", "/web/community/write")
 }
 ```
 
-다른 섹션으로 넓힐 때는 접두사 목록에 추가하면 된다. 관리자 화면(`/web/admin`)은 접두사가
-달라 영향을 받지 않는다. 판정은 `GlobalModelAttributeTest` 가 고정한다.
+다른 섹션으로 넓힐 때는 접두사 목록에, 화면 하나만 열 때는 정확 일치 목록에 추가하면 된다.
+관리자 화면(`/web/admin`)은 접두사가 달라 영향을 받지 않는다. 판정은
+`GlobalModelAttributeTest` 가 고정한다.
+
+### 홈과 게임은 왜 접두사가 아닌가
+
+**홈(`/`)** 은 접두사로 쓰면 사이트 전체가 대상이 되므로 정확 일치여야만 한다.
+
+**게임(`/web/game`)** 은 목록 화면만 붙인다. 개별 게임 화면(`/web/game/bible-quiz/map`,
+`/web/game/bible-word-puzzle/play` 등)은 진행 상태·스테이지·문항이 URL 에 없어서, 링크를 받은
+사람은 공유한 사람이 보던 화면이 아니라 게임 시작 화면을 보게 된다. 딥링크가 성립하지 않는
+화면에 공유 버튼을 두면 "공유했는데 다른 게 열린다"가 되므로 목록만 연다.
+게임 화면이 상태를 쿼리에 담게 되면 그때 접두사로 바꾸면 된다.
 
 ### 예외 경로
 

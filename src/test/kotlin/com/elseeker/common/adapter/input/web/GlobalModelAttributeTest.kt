@@ -37,6 +37,20 @@ class GlobalModelAttributeTest {
     }
 
     @Test
+    @DisplayName("홈과 게임 목록은 공유 버튼을 노출한다")
+    fun showShareButton_homeAndGameList() {
+        sut.showShareButton(request("/")) shouldBe true
+        sut.showShareButton(request("/web/game")) shouldBe true
+    }
+
+    @Test
+    @DisplayName("개별 게임 화면은 진행 상태가 URL 에 없어 제외한다")
+    fun showShareButton_gameDetail() {
+        sut.showShareButton(request("/web/game/bible-quiz/map")) shouldBe false
+        sut.showShareButton(request("/web/game/ranking")) shouldBe false
+    }
+
+    @Test
     @DisplayName("관리자 화면은 접두사가 달라 노출되지 않는다")
     fun showShareButton_admin() {
         sut.showShareButton(request("/web/admin/community/posts")) shouldBe false
